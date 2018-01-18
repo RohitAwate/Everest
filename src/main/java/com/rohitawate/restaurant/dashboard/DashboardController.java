@@ -15,24 +15,20 @@
  */
 package com.rohitawate.restaurant.dashboard;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.restaurant.requests.RequestManager;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 
 /**
  * FXML Controller class
@@ -40,7 +36,8 @@ import javafx.scene.control.TextField;
  * @author Rohit Awate
  */
 public class DashboardController implements Initializable {
-
+	@FXML
+    private BorderPane dashboard;
 	@FXML
 	private TextField addressField;
 	@FXML
@@ -48,17 +45,43 @@ public class DashboardController implements Initializable {
 	@FXML
 	private TextArea responseArea;
 
+	private JFXSnackbar snackBar;
 	private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
-
+	private RequestManager requestManager;
+	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		httpMethodBox.getItems().addAll(httpMethods);
 		httpMethodBox.setValue("GET");
 		responseArea.wrapTextProperty().set(true);
+		
+		requestManager = new RequestManager();
+		snackBar = new JFXSnackbar(dashboard);
 	}
 
 	@FXML
 	private void sendAction() {
+		try {
+			String address = addressField.getText();
+			if (address.equals("")) {
+				snackBar.show("Please enter a valid address", 7000);
+				return;
+			}
+			String response = "";
+			URL url = new URL(address);
+			switch (httpMethodBox.getValue()) {
+				case "GET":
+					response = requestManager.get(url);
+					break;
+			}
+			responseArea.setText(response);
+		} catch (MalformedURLException ex) {
+			Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, null, ex);
+			snackBar.show("Server did not respond", 7000);
+		} catch (IOException ex) {
+			Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, null, ex);
+			snackBar.show("Server did not respond", 7000);
+		}
 		
 	}
 }

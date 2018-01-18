@@ -5,3 +5,12 @@
 #responseArea {
 	-fx-font-family: 'Liberation Mono';
 }
+
+.jfx-snackbar-content {
+    -fx-background-color: darkslategray;
+}
+
+.jfx-snackbar-toast {
+    -fx-text-fill: lightgray;
+    -fx-alignment: center;
+}

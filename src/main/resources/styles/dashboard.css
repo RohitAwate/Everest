@@ -1,0 +1,7 @@
+#sendButton {
+	-fx-background-color: lightslategray;
+}
+
+#responseArea {
+	-fx-font-family: 'Liberation Mono';
+}

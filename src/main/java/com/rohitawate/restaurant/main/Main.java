@@ -15,12 +15,27 @@
  */
 package com.rohitawate.restaurant.main;
 
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
 /**
  *
  * @author Rohit Awate
  */
-public class Main {
+public class Main extends Application {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+		Parent dashboard = FXMLLoader.load(getClass().getResource("/fxml/Dashboard.fxml"));
+		Stage dashboardStage = new Stage();
+		dashboardStage.setScene(new Scene(dashboard));
+		dashboardStage.setTitle("RESTaurant");
+		dashboardStage.show();
+	}
+    
     public static void main(String args[]) {
-        
+        launch(args);
     }
 }

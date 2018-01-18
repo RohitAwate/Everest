@@ -15,33 +15,32 @@
  */
 package com.rohitawate.restaurant.requests;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 /**
  *
  * @author Rohit Awate
  */
 public class RequestManager {
-	public String get(URL target) throws MalformedURLException, IOException {
-		String response = "";
-		
-		HttpURLConnection conn = (HttpURLConnection) target.openConnection();
-		conn.setRequestMethod("GET");
+	private final Client client;
+
+	public RequestManager() {
+		client = ClientBuilder.newClient();
+	}
 	
-		InputStream responseStream = conn.getInputStream();
-		BufferedReader responseReader =
-				new BufferedReader(new InputStreamReader(responseStream));
+	public String get(URL url) throws MalformedURLException, IOException {
+		String responseBody;
+		WebTarget target = client.target(url.toString());
 		
-		String line;
-		while ((line = responseReader.readLine()) != null)
-			response += line + "\n";
+		Response response = target.request().get();
+		responseBody = response.readEntity(String.class);
 		
-		return response;
+		return responseBody;
 	}
 }

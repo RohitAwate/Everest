@@ -1,0 +1,54 @@
+#dashboard {
+	-fx-background-color: #505050;
+}
+
+#addressField {
+	-fx-background-color: #6e6e6e;
+	-fx-text-fill: white;
+}
+
+#httpMethodBox {
+	-fx-background-color: #494949;
+}
+
+#httpMethodBox .list-cell {
+	-fx-background-color: #494949;
+	-fx-pref-height: 39px;
+	-fx-font-size: 20px;
+	-fx-text-fill: #acacac;
+}
+
+#httpMethodBox .list-view {
+	-fx-border-style: none;
+}
+
+#httpMethodBox .list-cell:hover {
+	-fx-background-color: orangered;
+	-fx-text-fill: white;
+}
+
+#sendButton {
+	-fx-background-color: #c45015;
+}
+
+#responseArea .content {
+	-fx-font-family: 'Liberation Mono';
+	-fx-background-color: #ababab;
+}
+
+#responseArea {
+	-fx-border-width: 0px;
+}
+
+#footer {
+	-fx-background-color: #8b8b8b;
+}
+
+.jfx-snackbar-content {
+    -fx-background-color: darkslategray;
+}
+
+.jfx-snackbar-toast {
+    -fx-text-fill: lightgray;
+    -fx-alignment: center;
+}

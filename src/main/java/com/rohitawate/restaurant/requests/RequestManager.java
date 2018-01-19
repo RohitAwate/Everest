@@ -15,6 +15,9 @@
  */
 package com.rohitawate.restaurant.requests;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,19 +31,35 @@ import javax.ws.rs.core.Response;
  * @author Rohit Awate
  */
 public class RequestManager {
+
 	private final Client client;
 
 	public RequestManager() {
 		client = ClientBuilder.newClient();
 	}
-	
+
 	public String get(URL url) throws MalformedURLException, IOException {
 		String responseBody;
 		WebTarget target = client.target(url.toString());
-		
+
 		Response response = target.request().get();
+		String type = (String) response.getHeaders().getFirst("Content-type");
+		System.out.println(type);
 		responseBody = response.readEntity(String.class);
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 		
+		switch (type) {
+			case "application/json":
+				JsonNode node = mapper.readTree(responseBody);
+				responseBody = mapper.writeValueAsString(node);
+				break;
+			case "application/xml":
+				responseBody = mapper.writeValueAsString(responseBody);
+				break;
+		}
+
 		return responseBody;
 	}
 }

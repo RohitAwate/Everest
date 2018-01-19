@@ -76,10 +76,8 @@ public class DashboardController implements Initializable {
 			}
 			responseArea.setText(response);
 		} catch (MalformedURLException ex) {
-			Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, null, ex);
-			snackBar.show("Server did not respond", 7000);
+			snackBar.show("Invalid URL. Please verify and try again.", 7000);
 		} catch (IOException ex) {
-			Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, null, ex);
 			snackBar.show("Server did not respond", 7000);
 		}
 		

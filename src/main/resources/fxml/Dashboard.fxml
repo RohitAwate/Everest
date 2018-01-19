@@ -5,34 +5,54 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="dashboard" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../styles/dashboard.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.dashboard.DashboardController">
+<BorderPane fx:id="dashboard" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../styles/Default.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.dashboard.DashboardController">
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
          <children>
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                <children>
-                  <TextField fx:id="addressField" maxWidth="500.0" promptText="URL" HBox.hgrow="ALWAYS">
+                  <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../assets/LogoWithName.png" />
+                     </image>
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </ImageView>
+                  <TextField fx:id="addressField" maxWidth="800.0" promptText="URL" HBox.hgrow="ALWAYS">
                      <HBox.margin>
                         <Insets right="20.0" />
                      </HBox.margin>
+                     <font>
+                        <Font size="18.0" />
+                     </font>
                   </TextField>
-                  <ComboBox fx:id="httpMethodBox" prefWidth="150.0">
+                  <ComboBox fx:id="httpMethodBox" prefHeight="39.0" prefWidth="150.0">
                      <HBox.margin>
                         <Insets right="20.0" />
                      </HBox.margin>
                   </ComboBox>
-                  <JFXButton fx:id="sendButton" buttonType="RAISED" defaultButton="true" onAction="#sendAction" prefWidth="100.0" text="SEND" textFill="WHITE">
+                  <JFXButton fx:id="sendButton" buttonType="RAISED" defaultButton="true" onAction="#sendAction" prefHeight="39.0" prefWidth="80.0" text="SEND" textFill="WHITE" HBox.hgrow="ALWAYS">
                      <padding>
-                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                        <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
                      </padding>
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
                   </JFXButton>
                </children>
                <padding>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                  <Insets bottom="20.0" top="20.0" />
                </padding>
             </HBox>
             <TextArea fx:id="responseArea" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />

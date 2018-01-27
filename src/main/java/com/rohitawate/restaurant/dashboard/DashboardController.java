@@ -59,7 +59,6 @@ public class DashboardController implements Initializable {
         responseBox.getChildren().remove(0);
         httpMethodBox.getItems().addAll(httpMethods);
 		httpMethodBox.setValue("GET");
-		responseArea.wrapTextProperty().set(true);
 		
 		requestManager = new RequestManager();
 		snackBar = new JFXSnackbar(dashboard);

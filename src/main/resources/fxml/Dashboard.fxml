@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
-
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <BorderPane fx:id="dashboard" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../styles/Default.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.dashboard.DashboardController">
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
@@ -95,7 +89,7 @@
                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                          </padding>
                      </HBox>
-                     <TextArea fx:id="responseArea" wrapText="true" VBox.vgrow="ALWAYS"/>
+                     <TextArea fx:id="responseArea" editable="false" wrapText="true" VBox.vgrow="ALWAYS"/>
                  </children>
              </VBox>
          </children>

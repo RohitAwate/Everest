@@ -53,13 +53,17 @@ public class RequestManager {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
-        switch (type) {
+        switch (type.toLowerCase()) {
             case "application/json":
                 JsonNode node = mapper.readTree(responseBody);
                 response.setBody(mapper.writeValueAsString(node));
                 break;
             case "application/xml":
                 response.setBody(mapper.writeValueAsString(responseBody));
+                break;
+            case "text/html":
+            case "text/html; charset=utf-8":
+                response.setBody(responseBody);
                 break;
         }
 

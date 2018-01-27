@@ -45,10 +45,24 @@ public class RequestManager {
 
         if (serverResponse == null)
             throw new IOException();
+        else if (serverResponse.getStatus() == 301) {
+            response.setStatusCode(301);
+            String newLocation = serverResponse.getHeaderString("location");
+            String responseHelpText;
 
-        System.out.println(serverResponse);
+            if (newLocation == null)
+                responseHelpText = "The resource has been permanently moved to another location.\n\n" +
+                        "Here's what you can do:\n" +
+                        "- Find the new URL from the API documentation.\n" +
+                        "- Try using https instead of http if you're not already.";
+            else
+                responseHelpText = "The resource has been permanently moved to: " + newLocation;
+
+            response.setBody(responseHelpText);
+            return response;
+        }
+
         String type = (String) serverResponse.getHeaders().getFirst("Content-type");
-        System.out.println(type);
         String responseBody = serverResponse.readEntity(String.class);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -60,6 +74,7 @@ public class RequestManager {
                 JsonNode node = mapper.readTree(responseBody);
                 response.setBody(mapper.writeValueAsString(node));
                 break;
+            case "application/xml; charset=utf-8":
             case "application/xml":
                 response.setBody(mapper.writeValueAsString(responseBody));
                 break;

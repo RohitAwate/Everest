@@ -18,48 +18,55 @@ package com.rohitawate.restaurant.requests;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.rohitawate.restaurant.models.RestaurantResponse;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URL;
 
-/**
- *
- * @author Rohit Awate
- */
 public class RequestManager {
 
-	private final Client client;
+    private final Client client;
 
-	public RequestManager() {
-		client = ClientBuilder.newClient();
-	}
+    public RequestManager() {
+        client = ClientBuilder.newClient();
+    }
 
-	public String get(URL url) throws MalformedURLException, IOException {
-		String responseBody;
-		WebTarget target = client.target(url.toString());
+    public RestaurantResponse get(URL url) throws IOException {
+        RestaurantResponse response = new RestaurantResponse();
+        WebTarget target = client.target(url.toString());
 
-		Response response = target.request().get();
-		String type = (String) response.getHeaders().getFirst("Content-type");
-		System.out.println(type);
-		responseBody = response.readEntity(String.class);
+        long initialTime = System.currentTimeMillis();
+        Response serverResponse = target.request().get();
+        response.setTime(initialTime, System.currentTimeMillis());
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-		
-		switch (type) {
-			case "application/json":
-				JsonNode node = mapper.readTree(responseBody);
-				responseBody = mapper.writeValueAsString(node);
-				break;
-			case "application/xml":
-				responseBody = mapper.writeValueAsString(responseBody);
-				break;
-		}
+        if (serverResponse == null)
+            throw new IOException();
 
-		return responseBody;
-	}
+        String type = (String) serverResponse.getHeaders().getFirst("Content-type");
+        System.out.println(type);
+        String responseBody = serverResponse.readEntity(String.class);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+
+        switch (type) {
+            case "application/json":
+                JsonNode node = mapper.readTree(responseBody);
+                response.setBody(mapper.writeValueAsString(node));
+                break;
+            case "application/xml":
+                response.setBody(mapper.writeValueAsString(responseBody));
+                break;
+        }
+
+        response.setMediaType(serverResponse.getMediaType());
+        response.setStatusCode(serverResponse.getStatus());
+        response.setSize(responseBody.length());
+
+        return response;
+    }
 }

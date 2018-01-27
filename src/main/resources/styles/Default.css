@@ -31,6 +31,10 @@
 	-fx-background-color: #c45015;
 }
 
+#responseDetails {
+    -fx-background-color: #1b1b1b;
+}
+
 #responseArea {
 	-fx-font-family: 'Liberation Mono';
 }

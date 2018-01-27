@@ -16,25 +16,24 @@
 package com.rohitawate.restaurant.dashboard;
 
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.restaurant.models.RestaurantResponse;
 import com.rohitawate.restaurant.requests.RequestManager;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
 
-/**
- * FXML Controller class
- *
- * @author Rohit Awate
- */
 public class DashboardController implements Initializable {
 	@FXML
     private BorderPane dashboard;
@@ -43,7 +42,13 @@ public class DashboardController implements Initializable {
 	@FXML
 	private ComboBox<String> httpMethodBox;
 	@FXML
-	private TextArea responseArea;
+    private VBox responseBox;
+    @FXML
+    private HBox responseDetails;
+    @FXML
+    private TextArea responseArea;
+    @FXML
+    private Label statusCode, statusCodeDescription, responseTime, responseSize;
 
 	private JFXSnackbar snackBar;
 	private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
@@ -51,7 +56,8 @@ public class DashboardController implements Initializable {
 	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		httpMethodBox.getItems().addAll(httpMethods);
+        responseBox.getChildren().remove(0);
+        httpMethodBox.getItems().addAll(httpMethods);
 		httpMethodBox.setValue("GET");
 		responseArea.wrapTextProperty().set(true);
 		
@@ -67,14 +73,22 @@ public class DashboardController implements Initializable {
 				snackBar.show("Please enter a valid address", 7000);
 				return;
 			}
-			String response = "";
+            RestaurantResponse response;
 			URL url = new URL(address);
 			switch (httpMethodBox.getValue()) {
 				case "GET":
 					response = requestManager.get(url);
 					break;
+                default:
+                    response = new RestaurantResponse();
 			}
-			responseArea.setText(response);
+            responseArea.setText(response.getBody());
+            if (responseBox.getChildren().size() != 2)
+                responseBox.getChildren().add(0, responseDetails);
+            statusCode.setText(Integer.toString(response.getStatusCode()));
+            statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
+            responseTime.setText(Long.toString(response.getTime()) + " ms");
+            responseSize.setText(Integer.toString(response.getSize()) + " B");
 		} catch (MalformedURLException ex) {
 			snackBar.show("Invalid URL. Please verify and try again.", 7000);
 		} catch (IOException ex) {

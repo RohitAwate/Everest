@@ -3,6 +3,7 @@
 <?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
@@ -55,7 +56,48 @@
                   <Insets bottom="20.0" top="20.0" />
                </padding>
             </HBox>
-            <TextArea fx:id="responseArea" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+             <VBox fx:id="responseBox" VBox.vgrow="ALWAYS">
+                 <children>
+                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0" minHeight="50.0">
+                         <children>
+                             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                 <children>
+                                     <Label fx:id="statusCode" text="404" textFill="WHITE">
+                                         <font>
+                                             <Font name="System Bold" size="35.0"/>
+                                         </font>
+                                         <HBox.margin>
+                                             <Insets right="10.0"/>
+                                         </HBox.margin>
+                                     </Label>
+                                     <Label fx:id="statusCodeDescription" text="Not Found" textFill="WHITE">
+                                         <font>
+                                             <Font size="30.0"/>
+                                         </font>
+                                     </Label>
+                                 </children>
+                             </HBox>
+                             <Label fx:id="responseTime" text="151 ms" textFill="WHITE">
+                                 <HBox.margin>
+                                     <Insets right="30.0"/>
+                                 </HBox.margin>
+                                 <font>
+                                     <Font name="Liberation Mono" size="20.0"/>
+                                 </font>
+                             </Label>
+                             <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0" text="1998 B" textFill="WHITE">
+                                 <font>
+                                     <Font name="Liberation Mono" size="20.0"/>
+                                 </font>
+                             </Label>
+                         </children>
+                         <padding>
+                             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                         </padding>
+                     </HBox>
+                     <TextArea fx:id="responseArea" wrapText="true" VBox.vgrow="ALWAYS"/>
+                 </children>
+             </VBox>
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

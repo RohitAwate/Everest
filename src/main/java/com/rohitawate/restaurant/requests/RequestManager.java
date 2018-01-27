@@ -18,6 +18,7 @@ package com.rohitawate.restaurant.requests;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.rohitawate.restaurant.models.GETRequest;
 import com.rohitawate.restaurant.models.RestaurantResponse;
 
 import javax.ws.rs.client.Client;
@@ -25,7 +26,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.URL;
 
 public class RequestManager {
 
@@ -35,9 +35,9 @@ public class RequestManager {
         client = ClientBuilder.newClient();
     }
 
-    public RestaurantResponse get(URL url) throws IOException {
+    public RestaurantResponse get(GETRequest GETRequest) throws IOException {
         RestaurantResponse response = new RestaurantResponse();
-        WebTarget target = client.target(url.toString());
+        WebTarget target = client.target(GETRequest.getTarget().toString());
 
         long initialTime = System.currentTimeMillis();
         Response serverResponse = target.request().get();
@@ -46,6 +46,7 @@ public class RequestManager {
         if (serverResponse == null)
             throw new IOException();
 
+        System.out.println(serverResponse);
         String type = (String) serverResponse.getHeaders().getFirst("Content-type");
         System.out.println(type);
         String responseBody = serverResponse.readEntity(String.class);
@@ -54,6 +55,7 @@ public class RequestManager {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
         switch (type.toLowerCase()) {
+            case "application/json; charset=utf-8":
             case "application/json":
                 JsonNode node = mapper.readTree(responseBody);
                 response.setBody(mapper.writeValueAsString(node));

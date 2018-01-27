@@ -1,2 +1,6 @@
-nb-configuration.xml
 /target/
+/RESTaurant.iml
+.idea/
+RESTaurant.iml
+classes/
+src/main/java/META-INF/

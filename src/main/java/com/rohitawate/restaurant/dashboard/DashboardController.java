@@ -16,6 +16,7 @@
 package com.rohitawate.restaurant.dashboard;
 
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.restaurant.models.GETRequest;
 import com.rohitawate.restaurant.models.RestaurantResponse;
 import com.rohitawate.restaurant.requests.RequestManager;
 import javafx.fxml.FXML;
@@ -73,10 +74,10 @@ public class DashboardController implements Initializable {
 				return;
 			}
             RestaurantResponse response;
-			URL url = new URL(address);
 			switch (httpMethodBox.getValue()) {
 				case "GET":
-					response = requestManager.get(url);
+                    GETRequest GETRequest = new GETRequest(addressField.getText());
+                    response = requestManager.get(GETRequest);
 					break;
                 default:
                     response = new RestaurantResponse();

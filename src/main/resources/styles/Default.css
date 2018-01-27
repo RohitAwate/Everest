@@ -52,7 +52,7 @@
 }
 
 .jfx-snackbar-content {
-    -fx-background-color: darkslategray;
+    -fx-background-color: #282828;
 }
 
 .jfx-snackbar-toast {

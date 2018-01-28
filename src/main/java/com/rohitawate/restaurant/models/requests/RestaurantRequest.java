@@ -20,7 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-abstract class RestaurantRequest {
+public abstract class RestaurantRequest {
     private URL target;
     private HashMap<String, String> headers;
 

@@ -74,13 +74,15 @@ public class DashboardController implements Initializable {
         try {
             String address = addressField.getText();
             if (address.equals("")) {
-                snackBar.show("Please enter a valid address", 7000);
+                snackBar.show("Please enter a valid address.", 7000);
                 return;
             }
             switch (httpMethodBox.getValue()) {
                 case "GET":
+                    if (requestManager == null)
+                        requestManager = new GETRequestManager();
                     GETRequest getRequest = new GETRequest(addressField.getText());
-                    requestManager = new GETRequestManager(getRequest);
+                    requestManager.setRequest(getRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
                         responseArea.clear();
@@ -89,13 +91,14 @@ public class DashboardController implements Initializable {
                     requestManager.setOnSucceeded(e -> {
                         updateDashboard(requestManager.getValue());
                         loadingLayer.setVisible(false);
+                        requestManager.reset();
                     });
                     requestManager.setOnCancelled(e -> {
                         loadingLayer.setVisible(false);
-                        snackBar.show("Request canceled", 5000);
+                        snackBar.show("Request canceled.", 5000);
+                        requestManager.reset();
                     });
-                    Thread taskThread = new Thread(requestManager);
-                    taskThread.start();
+                    requestManager.start();
                     break;
                 default:
                     loadingLayer.setVisible(false);

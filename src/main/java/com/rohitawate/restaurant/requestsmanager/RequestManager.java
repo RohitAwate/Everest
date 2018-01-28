@@ -15,18 +15,22 @@
  */
 package com.rohitawate.restaurant.requestsmanager;
 
+import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
-import javafx.concurrent.Task;
+import javafx.concurrent.Service;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
-public abstract class RequestManager extends Task<RestaurantResponse> {
+public abstract class RequestManager extends Service<RestaurantResponse> {
     final Client client;
+    RestaurantRequest request;
 
     RequestManager() {
         client = ClientBuilder.newClient();
     }
 
-
+    public void setRequest(RestaurantRequest request) {
+        this.request = request;
+    }
 }

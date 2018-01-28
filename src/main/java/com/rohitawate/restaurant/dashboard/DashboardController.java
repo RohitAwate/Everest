@@ -16,9 +16,9 @@
 package com.rohitawate.restaurant.dashboard;
 
 import com.jfoenix.controls.JFXSnackbar;
-import com.rohitawate.restaurant.models.GETRequest;
-import com.rohitawate.restaurant.models.RestaurantResponse;
-import com.rohitawate.restaurant.requests.RequestManager;
+import com.rohitawate.restaurant.models.requests.GETRequest;
+import com.rohitawate.restaurant.models.responses.RestaurantResponse;
+import com.rohitawate.restaurant.requestsmanager.RequestManager;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
@@ -36,13 +36,13 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
-	@FXML
+    @FXML
     private BorderPane dashboard;
-	@FXML
-	private TextField addressField;
-	@FXML
-	private ComboBox<String> httpMethodBox;
-	@FXML
+    @FXML
+    private TextField addressField;
+    @FXML
+    private ComboBox<String> httpMethodBox;
+    @FXML
     private VBox responseBox;
     @FXML
     private HBox responseDetails;
@@ -51,37 +51,37 @@ public class DashboardController implements Initializable {
     @FXML
     private Label statusCode, statusCodeDescription, responseTime, responseSize;
 
-	private JFXSnackbar snackBar;
-	private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
-	private RequestManager requestManager;
-	
-	@Override
-	public void initialize(URL url, ResourceBundle rb) {
+    private JFXSnackbar snackBar;
+    private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
+    private RequestManager requestManager;
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
         responseBox.getChildren().remove(0);
         httpMethodBox.getItems().addAll(httpMethods);
-		httpMethodBox.setValue("GET");
-		
-		requestManager = new RequestManager();
-		snackBar = new JFXSnackbar(dashboard);
-	}
+        httpMethodBox.setValue("GET");
 
-	@FXML
-	private void sendAction() {
-		try {
-			String address = addressField.getText();
-			if (address.equals("")) {
-				snackBar.show("Please enter a valid address", 7000);
-				return;
-			}
+        requestManager = new RequestManager();
+        snackBar = new JFXSnackbar(dashboard);
+    }
+
+    @FXML
+    private void sendAction() {
+        try {
+            String address = addressField.getText();
+            if (address.equals("")) {
+                snackBar.show("Please enter a valid address", 7000);
+                return;
+            }
             RestaurantResponse response;
-			switch (httpMethodBox.getValue()) {
-				case "GET":
-                    GETRequest GETRequest = new GETRequest(addressField.getText());
-                    response = requestManager.get(GETRequest);
-					break;
+            switch (httpMethodBox.getValue()) {
+                case "GET":
+                    GETRequest request = new GETRequest(addressField.getText());
+                    response = requestManager.get(request);
+                    break;
                 default:
                     response = new RestaurantResponse();
-			}
+            }
             responseArea.setText(response.getBody());
             if (responseBox.getChildren().size() != 2)
                 responseBox.getChildren().add(0, responseDetails);
@@ -89,11 +89,11 @@ public class DashboardController implements Initializable {
             statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
             responseTime.setText(Long.toString(response.getTime()) + " ms");
             responseSize.setText(Integer.toString(response.getSize()) + " B");
-		} catch (MalformedURLException ex) {
-			snackBar.show("Invalid URL. Please verify and try again.", 7000);
-		} catch (IOException ex) {
-			snackBar.show("Server did not respond", 7000);
-		}
-		
-	}
+        } catch (MalformedURLException ex) {
+            snackBar.show("Invalid URL. Please verify and try again.", 7000);
+        } catch (IOException ex) {
+            snackBar.show("Server did not respond", 7000);
+        }
+
+    }
 }

@@ -14,17 +14,33 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.models;
+package com.rohitawate.restaurant.models.requests;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
-public class GETRequest extends RestaurantRequest {
-    public GETRequest(URL target) {
-        super(target);
+abstract class RestaurantRequest {
+    private URL target;
+    private HashMap<String, String> headers;
+
+    RestaurantRequest(String target) throws MalformedURLException {
+        this.target = new URL(target);
     }
 
-    public GETRequest(String target) throws MalformedURLException {
-        super(target);
+    RestaurantRequest(URL target) {
+        this.target = target;
+    }
+
+    public URL getTarget() {
+        return target;
+    }
+
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
+    public HashMap<String, String> getHeaders() {
+        return this.headers;
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.models;
+package com.rohitawate.restaurant.models.responses;
 
 import javax.ws.rs.core.MediaType;
 

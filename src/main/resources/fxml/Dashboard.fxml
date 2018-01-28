@@ -89,7 +89,26 @@
                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                          </padding>
                      </HBox>
-                     <TextArea fx:id="responseArea" editable="false" wrapText="true" VBox.vgrow="ALWAYS"/>
+                     <StackPane VBox.vgrow="ALWAYS">
+                         <children>
+                             <TextArea fx:id="responseArea" editable="false" wrapText="true"/>
+                             <HBox fx:id="loadingLayer" alignment="CENTER" visible="false">
+                                 <children>
+                                     <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true"
+                                                preserveRatio="true">
+                                         <image>
+                                             <Image url="@../assets/LoadingCircle_BlackOnGrey.gif"/>
+                                         </image>
+                                     </ImageView>
+                                     <Label text="LOADING">
+                                         <font>
+                                             <Font size="70.0"/>
+                                         </font>
+                                     </Label>
+                                 </children>
+                             </HBox>
+                         </children>
+                     </StackPane>
                  </children>
              </VBox>
          </children>

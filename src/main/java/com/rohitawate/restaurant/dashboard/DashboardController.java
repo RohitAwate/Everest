@@ -45,7 +45,7 @@ public class DashboardController implements Initializable {
     @FXML
     private VBox responseBox;
     @FXML
-    private HBox responseDetails;
+    private HBox responseDetails, loadingLayer;
     @FXML
     private TextArea responseArea;
     @FXML
@@ -77,7 +77,14 @@ public class DashboardController implements Initializable {
                 case "GET":
                     GETRequest getRequest = new GETRequest(addressField.getText());
                     requestManager = new GETRequestManager(getRequest);
-                    requestManager.setOnSucceeded(e -> updateDashboard(requestManager.getValue()));
+                    requestManager.setOnRunning(e -> {
+                        responseArea.clear();
+                        loadingLayer.setVisible(true);
+                    });
+                    requestManager.setOnSucceeded(e -> {
+                        updateDashboard(requestManager.getValue());
+                        loadingLayer.setVisible(false);
+                    });
                     new Thread(requestManager).start();
                     break;
                 default:

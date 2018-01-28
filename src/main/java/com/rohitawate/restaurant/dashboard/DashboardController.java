@@ -18,6 +18,7 @@ package com.rohitawate.restaurant.dashboard;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.restaurant.models.requests.GETRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
+import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -30,7 +31,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -61,7 +61,6 @@ public class DashboardController implements Initializable {
         httpMethodBox.getItems().addAll(httpMethods);
         httpMethodBox.setValue("GET");
 
-        requestManager = new RequestManager();
         snackBar = new JFXSnackbar(dashboard);
     }
 
@@ -76,24 +75,29 @@ public class DashboardController implements Initializable {
             RestaurantResponse response;
             switch (httpMethodBox.getValue()) {
                 case "GET":
-                    GETRequest request = new GETRequest(addressField.getText());
-                    response = requestManager.get(request);
+                    GETRequest getRequest = new GETRequest(addressField.getText());
+                    requestManager = new GETRequestManager(getRequest);
+                    requestManager.setOnSucceeded(e -> updateDashboard(requestManager.getValue()));
+                    new Thread(requestManager).start();
                     break;
                 default:
                     response = new RestaurantResponse();
+                    updateDashboard(response);
             }
-            responseArea.setText(response.getBody());
-            if (responseBox.getChildren().size() != 2)
-                responseBox.getChildren().add(0, responseDetails);
-            statusCode.setText(Integer.toString(response.getStatusCode()));
-            statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
-            responseTime.setText(Long.toString(response.getTime()) + " ms");
-            responseSize.setText(Integer.toString(response.getSize()) + " B");
         } catch (MalformedURLException ex) {
             snackBar.show("Invalid URL. Please verify and try again.", 7000);
-        } catch (IOException ex) {
-            snackBar.show("Server did not respond", 7000);
         }
+    }
 
+    private void updateDashboard(RestaurantResponse response) {
+        responseArea.setText(response.getBody());
+
+        if (responseBox.getChildren().size() != 2)
+            responseBox.getChildren().add(0, responseDetails);
+
+        statusCode.setText(Integer.toString(response.getStatusCode()));
+        statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
+        responseTime.setText(Long.toString(response.getTime()) + " ms");
+        responseSize.setText(Integer.toString(response.getSize()) + " B");
     }
 }

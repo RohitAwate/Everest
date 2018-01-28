@@ -62,6 +62,7 @@ public class DashboardController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         applySettings();
+        addressField.setText("https://api.chucknorris.io/jokes/random");
         responseBox.getChildren().remove(0);
         httpMethodBox.getItems().addAll(httpMethods);
         httpMethodBox.setValue("GET");
@@ -74,13 +75,22 @@ public class DashboardController implements Initializable {
         try {
             String address = addressField.getText();
             if (address.equals("")) {
-                snackBar.show("Please enter a valid address.", 7000);
+                snackBar.show("Please enter an address.", 3000);
                 return;
             }
             switch (httpMethodBox.getValue()) {
                 case "GET":
-                    if (requestManager == null)
+                    /*
+                        Creates a new instance if its the first request of that session or
+                        the HTTP method type was changed. Also checks if a request is already being processed.
+                     */
+                    if (requestManager == null || requestManager.getClass() != GETRequestManager.class)
                         requestManager = new GETRequestManager();
+                    else if (requestManager.isRunning()) {
+                        snackBar.show("Please wait while the current request is processed.", 3000);
+                        return;
+                    }
+
                     GETRequest getRequest = new GETRequest(addressField.getText());
                     requestManager.setRequest(getRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
@@ -95,7 +105,7 @@ public class DashboardController implements Initializable {
                     });
                     requestManager.setOnCancelled(e -> {
                         loadingLayer.setVisible(false);
-                        snackBar.show("Request canceled.", 5000);
+                        snackBar.show("Request canceled.", 2000);
                         requestManager.reset();
                     });
                     requestManager.start();
@@ -104,7 +114,7 @@ public class DashboardController implements Initializable {
                     loadingLayer.setVisible(false);
             }
         } catch (MalformedURLException ex) {
-            snackBar.show("Invalid URL. Please verify and try again.", 7000);
+            snackBar.show("Invalid address. Please verify and try again.", 3000);
         }
     }
 

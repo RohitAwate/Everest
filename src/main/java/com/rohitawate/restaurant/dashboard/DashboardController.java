@@ -21,6 +21,7 @@ import com.rohitawate.restaurant.models.requests.GETRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
+import com.rohitawate.restaurant.settings.Settings;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
@@ -60,6 +61,7 @@ public class DashboardController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        applySettings();
         responseBox.getChildren().remove(0);
         httpMethodBox.getItems().addAll(httpMethods);
         httpMethodBox.setValue("GET");
@@ -113,5 +115,11 @@ public class DashboardController implements Initializable {
         statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
         responseTime.setText(Long.toString(response.getTime()) + " ms");
         responseSize.setText(Integer.toString(response.getSize()) + " B");
+    }
+
+    private void applySettings() {
+        String responseAreaCSS = "-fx-font-family: " + Settings.responseAreaFont + ";" +
+                "-fx-font-size: " + Settings.responseAreaFontSize;
+        responseArea.setStyle(responseAreaCSS);
     }
 }

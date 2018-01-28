@@ -15,6 +15,7 @@
  */
 package com.rohitawate.restaurant.main;
 
+import com.rohitawate.restaurant.settings.SettingsLoader;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,6 +25,8 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
+        SettingsLoader settingsLoader = new SettingsLoader();
+        settingsLoader.SettingsLoaderThread.join();
 		Parent dashboard = FXMLLoader.load(getClass().getResource("/fxml/Dashboard.fxml"));
 		Stage dashboardStage = new Stage();
 		dashboardStage.setScene(new Scene(dashboard));

@@ -36,7 +36,7 @@
 }
 
 #responseArea {
-	-fx-font-family: 'Liberation Mono';
+    -fx-font-family: "Liberation Mono";
     -fx-text-fill: #a1a1a1;
     -fx-background-radius: 0;
     -fx-background-insets: 0;

@@ -15,6 +15,7 @@
  */
 package com.rohitawate.restaurant.dashboard;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.restaurant.models.requests.GETRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
@@ -43,13 +44,15 @@ public class DashboardController implements Initializable {
     @FXML
     private ComboBox<String> httpMethodBox;
     @FXML
-    private VBox responseBox;
+    private VBox responseBox, loadingLayer;
     @FXML
-    private HBox responseDetails, loadingLayer;
+    private HBox responseDetails;
     @FXML
     private TextArea responseArea;
     @FXML
     private Label statusCode, statusCodeDescription, responseTime, responseSize;
+    @FXML
+    private JFXButton cancelButton;
 
     private JFXSnackbar snackBar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
@@ -72,11 +75,11 @@ public class DashboardController implements Initializable {
                 snackBar.show("Please enter a valid address", 7000);
                 return;
             }
-            RestaurantResponse response;
             switch (httpMethodBox.getValue()) {
                 case "GET":
                     GETRequest getRequest = new GETRequest(addressField.getText());
                     requestManager = new GETRequestManager(getRequest);
+                    cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
                         responseArea.clear();
                         loadingLayer.setVisible(true);
@@ -85,11 +88,15 @@ public class DashboardController implements Initializable {
                         updateDashboard(requestManager.getValue());
                         loadingLayer.setVisible(false);
                     });
-                    new Thread(requestManager).start();
+                    requestManager.setOnCancelled(e -> {
+                        loadingLayer.setVisible(false);
+                        snackBar.show("Request canceled", 5000);
+                    });
+                    Thread taskThread = new Thread(requestManager);
+                    taskThread.start();
                     break;
                 default:
-                    response = new RestaurantResponse();
-                    updateDashboard(response);
+                    loadingLayer.setVisible(false);
             }
         } catch (MalformedURLException ex) {
             snackBar.show("Invalid URL. Please verify and try again.", 7000);

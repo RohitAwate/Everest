@@ -3,11 +3,13 @@
 <?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<BorderPane fx:id="dashboard" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../styles/Default.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.dashboard.DashboardController">
+<BorderPane fx:id="dashboard" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="720.0" prefWidth="1280.0" stylesheets="@../css/Default.css"
+            xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rohitawate.restaurant.dashboard.DashboardController">
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
          <children>
@@ -50,9 +52,10 @@
                   <Insets bottom="20.0" top="20.0" />
                </padding>
             </HBox>
-             <VBox fx:id="responseBox" VBox.vgrow="ALWAYS">
+             <VBox fx:id="responseBox" alignment="CENTER" VBox.vgrow="ALWAYS">
                  <children>
-                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0" minHeight="50.0">
+                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0" minHeight="50.0"
+                           VBox.vgrow="ALWAYS">
                          <children>
                              <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                                  <children>
@@ -92,21 +95,36 @@
                      <StackPane VBox.vgrow="ALWAYS">
                          <children>
                              <TextArea fx:id="responseArea" editable="false" wrapText="true"/>
-                             <HBox fx:id="loadingLayer" alignment="CENTER" visible="false">
+                             <VBox fx:id="loadingLayer" alignment="CENTER" visible="false">
                                  <children>
-                                     <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true"
-                                                preserveRatio="true">
-                                         <image>
-                                             <Image url="@../assets/LoadingCircle_BlackOnGrey.gif"/>
-                                         </image>
-                                     </ImageView>
-                                     <Label text="LOADING">
-                                         <font>
-                                             <Font size="70.0"/>
-                                         </font>
-                                     </Label>
+                                     <HBox alignment="CENTER">
+                                         <children>
+                                             <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true"
+                                                        preserveRatio="true">
+                                                 <image>
+                                                     <Image url="@../assets/LoadingCircle_WhiteOnOrange.gif"/>
+                                                 </image>
+                                             </ImageView>
+                                             <Label text="LOADING" textFill="WHITE">
+                                                 <font>
+                                                     <Font size="70.0"/>
+                                                 </font>
+                                             </Label>
+                                         </children>
+                                     </HBox>
+                                     <JFXButton fx:id="cancelButton" text=" CANCEL" textFill="WHITE"
+                                                VBox.vgrow="ALWAYS">
+                                         <graphic>
+                                             <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true"
+                                                        preserveRatio="true">
+                                                 <image>
+                                                     <Image url="@../assets/CrossMark.png"/>
+                                                 </image>
+                                             </ImageView>
+                                         </graphic>
+                                     </JFXButton>
                                  </children>
-                             </HBox>
+                             </VBox>
                          </children>
                      </StackPane>
                  </children>

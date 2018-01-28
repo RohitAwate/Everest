@@ -37,14 +37,27 @@
 
 #responseArea {
 	-fx-font-family: 'Liberation Mono';
+    -fx-text-fill: #a1a1a1;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent;
 }
 
 #responseArea .content {
-	-fx-background-color: #ababab;
+    -fx-background-radius: 0;
+    -fx-background-color: #2a2a2a;
 }
 
 #responseArea {
 	-fx-border-width: 0px;
+}
+
+#loadingLayer {
+    -fx-background-color: #bf8829;
+}
+
+#cancelButton {
+    -fx-background-color: black;
 }
 
 #footer {
@@ -52,10 +65,10 @@
 }
 
 .jfx-snackbar-content {
-    -fx-background-color: #282828;
+    -fx-background-color: black;
 }
 
 .jfx-snackbar-toast {
-    -fx-text-fill: lightgray;
+    -fx-text-fill: white;
     -fx-alignment: center;
 }

@@ -29,9 +29,10 @@
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
          <children>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+             <HBox alignment="CENTER" maxHeight="100.0" VBox.vgrow="ALWAYS">
                <children>
-                   <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
+                   <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true"
+                              HBox.hgrow="ALWAYS">
                      <image>
                          <Image url="@../../assets/LogoWithoutText.png"/>
                      </image>
@@ -47,7 +48,7 @@
                         <Font size="18.0" />
                      </font>
                   </TextField>
-                  <ComboBox fx:id="httpMethodBox" prefHeight="39.0" prefWidth="150.0">
+                   <ComboBox fx:id="httpMethodBox" prefHeight="39.0" prefWidth="150.0" HBox.hgrow="ALWAYS">
                      <HBox.margin>
                         <Insets right="20.0" />
                      </HBox.margin>
@@ -64,12 +65,9 @@
                      </HBox.margin>
                   </JFXButton>
                </children>
-               <padding>
-                  <Insets bottom="20.0" top="20.0" />
-               </padding>
             </HBox>
-             <TabPane fx:id="requestTabs" maxHeight="200.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0"
-                      VBox.vgrow="ALWAYS">
+             <TabPane fx:id="requestTabs" maxHeight="200.0" minHeight="200.0" tabClosingPolicy="UNAVAILABLE"
+                      tabMinWidth="150.0" VBox.vgrow="ALWAYS">
                  <tabs>
                      <Tab fx:id="authTab" text="AUTHORIZATION"/>
                      <Tab fx:id="headersTab" text="HEADERS"/>

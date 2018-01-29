@@ -61,6 +61,7 @@ public class DashboardController implements Initializable {
     private JFXSnackbar snackBar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
     private RequestManager requestManager;
+    private HeaderTabController headerTabController;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -68,7 +69,10 @@ public class DashboardController implements Initializable {
         Task<Parent> parentLoader = new Task<Parent>() {
             @Override
             protected Parent call() throws Exception {
-                return FXMLLoader.load(getClass().getResource("/fxml/dashboard/HeaderTab.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/HeaderTab.fxml"));
+                Parent parent = loader.load();
+                headerTabController = loader.getController();
+                return parent;
             }
         };
 
@@ -108,6 +112,7 @@ public class DashboardController implements Initializable {
                     }
 
                     GETRequest getRequest = new GETRequest(addressField.getText());
+                    getRequest.addHeaders(headerTabController.getHeaders());
                     requestManager.setRequest(getRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {

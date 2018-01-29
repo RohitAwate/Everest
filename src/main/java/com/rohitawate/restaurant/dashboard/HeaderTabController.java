@@ -24,24 +24,42 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class HeaderTabController implements Initializable {
     @FXML
     private VBox headersBox;
 
+    private List<HeaderFieldController> controllers;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        controllers = new ArrayList<>();
         addHeader();
     }
 
     @FXML
     private void addHeader() {
         try {
-            Parent headerField = FXMLLoader.load(getClass().getResource("/fxml/dashboard/HeaderField.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/HeaderField.fxml"));
+            Parent headerField = loader.load();
+            HeaderFieldController controller = loader.getController();
+            controllers.add(controller);
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public HashMap<String, String> getHeaders() {
+        HashMap<String, String> headers = new HashMap<>();
+        for (HeaderFieldController controller : controllers) {
+            if (controller.isChecked())
+                headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+        }
+        return headers;
     }
 }

@@ -22,12 +22,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import javafx.concurrent.Task;
 
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GETRequestManager extends RequestManager {
-
     @Override
     protected Task<RestaurantResponse> createTask() {
         return new Task<RestaurantResponse>() {
@@ -36,8 +38,18 @@ public class GETRequestManager extends RequestManager {
                 RestaurantResponse response = new RestaurantResponse();
                 WebTarget target = client.target(request.getTarget().toString());
 
+                Builder requestBuilder = target.request();
+
+                HashMap<String, String> headers = request.getHeaders();
+                Map.Entry<String, String> mapEntry;
+
+                for (Map.Entry entry : headers.entrySet()) {
+                    mapEntry = (Map.Entry) entry;
+                    requestBuilder.header(mapEntry.getKey(), mapEntry.getValue());
+                }
+
                 long initialTime = System.currentTimeMillis();
-                Response serverResponse = target.request().get();
+                Response serverResponse = requestBuilder.get();
                 response.setTime(initialTime, System.currentTimeMillis());
 
                 if (serverResponse == null)
@@ -79,6 +91,8 @@ public class GETRequestManager extends RequestManager {
                     case "text/html; charset=utf-8":
                         response.setBody(responseBody);
                         break;
+                    default:
+                        response.setBody(responseBody);
                 }
 
                 response.setMediaType(serverResponse.getMediaType());

@@ -40,6 +40,10 @@ public abstract class RestaurantRequest {
         headers.put(key, value);
     }
 
+    public void addHeaders(HashMap<String, String> headers) {
+        this.headers = headers;
+    }
+
     public HashMap<String, String> getHeaders() {
         return this.headers;
     }

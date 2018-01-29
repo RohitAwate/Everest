@@ -104,8 +104,8 @@
 }
 
 #keyField, #valueField {
-    -fx-prompt-text-fill: #2b2b2b;
-    -fx-background-color: #7a7a7a;
+    -fx-prompt-text-fill: #919191;
+    -fx-background-color: #393939;
     -fx-text-fill: white;
 }
 

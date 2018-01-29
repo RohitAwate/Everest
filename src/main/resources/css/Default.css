@@ -60,6 +60,59 @@
     -fx-background-color: black;
 }
 
+.tab-pane:top .tab-header-area .tab-header-background {
+    -fx-background-color: #1b1b1b;
+}
+
+.tab-pane .tab-content-area,
+#headerTabContent,
+#headerField {
+    -fx-background-color: #282828;
+}
+
+.tab-pane:top .tab-header-area .headers-region .tab:top {
+    -fx-background-color: #6a6a6a;
+    -fx-background-insets: 0 1 0 1;
+    -fx-background-radius: 5 5 0 0;
+}
+
+.tab-pane:top .tab-header-area .headers-region .tab:selected:top {
+    -fx-background-color: #55a15c;
+}
+
+.tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
+    -fx-fill: #b8b8b8;
+}
+
+.tab-pane:top .tab-header-area .headers-region .tab:selected:top .tab-container .tab-label .text {
+    -fx-fill: white;
+}
+
+.tab {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.scroll-pane,
+.scroll-pane .viewport {
+    -fx-background-insets: 0;
+    -fx-background-color: #282828;
+}
+
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: #282828;
+}
+
+#keyField, #valueField {
+    -fx-prompt-text-fill: #2b2b2b;
+    -fx-background-color: #7a7a7a;
+    -fx-text-fill: white;
+}
+
+#addHeaderButton {
+    -fx-background-color: orangered;
+}
+
 #footer {
 	-fx-background-color: #8b8b8b;
 }

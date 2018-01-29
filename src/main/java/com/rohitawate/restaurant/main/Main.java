@@ -20,6 +20,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -27,8 +28,9 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         SettingsLoader settingsLoader = new SettingsLoader();
         settingsLoader.SettingsLoaderThread.join();
-		Parent dashboard = FXMLLoader.load(getClass().getResource("/fxml/Dashboard.fxml"));
+        Parent dashboard = FXMLLoader.load(getClass().getResource("/fxml/dashboard/Dashboard.fxml"));
 		Stage dashboardStage = new Stage();
+        dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/LogoWithoutText.png").toExternalForm()));
 		dashboardStage.setScene(new Scene(dashboard));
 		dashboardStage.setTitle("RESTaurant");
 		dashboardStage.show();

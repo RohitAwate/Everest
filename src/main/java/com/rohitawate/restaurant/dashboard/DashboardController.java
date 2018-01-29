@@ -22,12 +22,13 @@ import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
 import com.rohitawate.restaurant.settings.Settings;
+import javafx.beans.binding.Bindings;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -54,6 +55,8 @@ public class DashboardController implements Initializable {
     private Label statusCode, statusCodeDescription, responseTime, responseSize;
     @FXML
     private JFXButton cancelButton;
+    @FXML
+    private Tab authTab, headersTab, bodyTab;
 
     private JFXSnackbar snackBar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
@@ -62,12 +65,25 @@ public class DashboardController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         applySettings();
+        Task<Parent> parentLoader = new Task<Parent>() {
+            @Override
+            protected Parent call() throws Exception {
+                return FXMLLoader.load(getClass().getResource("/fxml/dashboard/HeaderTab.fxml"));
+            }
+        };
+
+        parentLoader.setOnSucceeded(event -> headersTab.setContent(parentLoader.getValue()));
+        parentLoader.setOnFailed(event -> parentLoader.getException().printStackTrace());
+        new Thread(parentLoader).start();
+
         addressField.setText("https://api.chucknorris.io/jokes/random");
         responseBox.getChildren().remove(0);
         httpMethodBox.getItems().addAll(httpMethods);
         httpMethodBox.setValue("GET");
 
         snackBar = new JFXSnackbar(dashboard);
+        bodyTab.disableProperty().bind(Bindings.and(httpMethodBox.valueProperty().isNotEqualTo("POST"),
+                httpMethodBox.valueProperty().isNotEqualTo("PUT")));
     }
 
     @FXML

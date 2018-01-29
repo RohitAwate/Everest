@@ -93,6 +93,11 @@
     -fx-faint-focus-color: transparent;
 }
 
+.split-pane,
+.split-pane .split-pane-divider {
+    -fx-background-color: #505050;
+}
+
 .scroll-pane,
 .scroll-pane .viewport {
     -fx-background-insets: 0;

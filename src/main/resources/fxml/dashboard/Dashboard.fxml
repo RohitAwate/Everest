@@ -66,94 +66,109 @@
                   </JFXButton>
                </children>
             </HBox>
-             <TabPane fx:id="requestTabs" maxHeight="200.0" minHeight="200.0" tabClosingPolicy="UNAVAILABLE"
-                      tabMinWidth="150.0" VBox.vgrow="ALWAYS">
-                 <tabs>
-                     <Tab fx:id="authTab" text="AUTHORIZATION"/>
-                     <Tab fx:id="headersTab" text="HEADERS"/>
-                     <Tab fx:id="bodyTab" text="BODY"/>
-                 </tabs>
-                 <VBox.margin>
-                     <Insets bottom="10.0"/>
-                 </VBox.margin>
-             </TabPane>
-             <VBox fx:id="responseBox" alignment="CENTER" VBox.vgrow="ALWAYS">
-                 <children>
-                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0" minHeight="50.0"
-                           VBox.vgrow="ALWAYS">
+             <SplitPane dividerPositions="0.5" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+                 <items>
+                     <AnchorPane>
                          <children>
-                             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                                 <children>
-                                     <Label fx:id="statusCode" text="404" textFill="WHITE">
-                                         <font>
-                                             <Font name="System Bold" size="35.0"/>
-                                         </font>
-                                         <HBox.margin>
-                                             <Insets right="10.0"/>
-                                         </HBox.margin>
-                                     </Label>
-                                     <Label fx:id="statusCodeDescription" text="Not Found" textFill="WHITE">
-                                         <font>
-                                             <Font size="30.0"/>
-                                         </font>
-                                     </Label>
-                                 </children>
-                             </HBox>
-                             <Label fx:id="responseTime" text="151 ms" textFill="WHITE">
-                                 <HBox.margin>
-                                     <Insets right="30.0"/>
-                                 </HBox.margin>
-                                 <font>
-                                     <Font name="Liberation Mono" size="20.0"/>
-                                 </font>
-                             </Label>
-                             <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0" text="1998 B" textFill="WHITE">
-                                 <font>
-                                     <Font name="Liberation Mono" size="20.0"/>
-                                 </font>
-                             </Label>
+                             <TabPane fx:id="requestTabs" maxHeight="200.0" minHeight="200.0"
+                                      tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                      AnchorPane.topAnchor="0.0">
+                                 <tabs>
+                                     <Tab fx:id="authTab" text="AUTHORIZATION"/>
+                                     <Tab fx:id="headersTab" text="HEADERS"/>
+                                     <Tab fx:id="bodyTab" text="BODY"/>
+                                 </tabs>
+                             </TabPane>
                          </children>
-                         <padding>
-                             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
-                         </padding>
-                     </HBox>
-                     <StackPane VBox.vgrow="ALWAYS">
+                     </AnchorPane>
+                     <AnchorPane>
                          <children>
-                             <TextArea fx:id="responseArea" editable="false" wrapText="true"/>
-                             <VBox fx:id="loadingLayer" alignment="CENTER" visible="false">
+                             <VBox fx:id="responseBox" alignment="CENTER" AnchorPane.bottomAnchor="0.0"
+                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
-                                     <HBox alignment="CENTER">
+                                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0"
+                                           minHeight="50.0" VBox.vgrow="ALWAYS">
                                          <children>
-                                             <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true"
-                                                        preserveRatio="true">
-                                                 <image>
-                                                     <Image url="@../../assets/LoadingCircle_WhiteOnOrange.gif"/>
-                                                 </image>
-                                             </ImageView>
-                                             <Label text="LOADING" textFill="WHITE">
+                                             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                                 <children>
+                                                     <Label fx:id="statusCode" text="404" textFill="WHITE">
+                                                         <font>
+                                                             <Font name="System Bold" size="35.0"/>
+                                                         </font>
+                                                         <HBox.margin>
+                                                             <Insets right="10.0"/>
+                                                         </HBox.margin>
+                                                     </Label>
+                                                     <Label fx:id="statusCodeDescription" text="Not Found"
+                                                            textFill="WHITE">
+                                                         <font>
+                                                             <Font size="30.0"/>
+                                                         </font>
+                                                     </Label>
+                                                 </children>
+                                             </HBox>
+                                             <Label fx:id="responseTime" text="151 ms" textFill="WHITE">
+                                                 <HBox.margin>
+                                                     <Insets right="30.0"/>
+                                                 </HBox.margin>
                                                  <font>
-                                                     <Font size="70.0"/>
+                                                     <Font name="Liberation Mono" size="20.0"/>
+                                                 </font>
+                                             </Label>
+                                             <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0" text="1998 B"
+                                                    textFill="WHITE">
+                                                 <font>
+                                                     <Font name="Liberation Mono" size="20.0"/>
                                                  </font>
                                              </Label>
                                          </children>
+                                         <padding>
+                                             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                                         </padding>
                                      </HBox>
-                                     <JFXButton fx:id="cancelButton" text=" CANCEL" textFill="WHITE"
-                                                VBox.vgrow="ALWAYS">
-                                         <graphic>
-                                             <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true"
-                                                        preserveRatio="true">
-                                                 <image>
-                                                     <Image url="@../../assets/CrossMark.png"/>
-                                                 </image>
-                                             </ImageView>
-                                         </graphic>
-                                     </JFXButton>
+                                     <StackPane VBox.vgrow="ALWAYS">
+                                         <children>
+                                             <TextArea fx:id="responseArea" editable="false" minHeight="300.0"
+                                                       wrapText="true"/>
+                                             <VBox fx:id="loadingLayer" alignment="CENTER" visible="false">
+                                                 <children>
+                                                     <HBox alignment="CENTER">
+                                                         <children>
+                                                             <ImageView fitHeight="150.0" fitWidth="100.0"
+                                                                        pickOnBounds="true" preserveRatio="true">
+                                                                 <image>
+                                                                     <Image url="@../../assets/LoadingCircle_WhiteOnOrange.gif"/>
+                                                                 </image>
+                                                             </ImageView>
+                                                             <Label text="LOADING" textFill="WHITE">
+                                                                 <font>
+                                                                     <Font size="70.0"/>
+                                                                 </font>
+                                                             </Label>
+                                                         </children>
+                                                     </HBox>
+                                                     <JFXButton fx:id="cancelButton" text=" CANCEL" textFill="WHITE"
+                                                                VBox.vgrow="ALWAYS">
+                                                         <graphic>
+                                                             <ImageView fitHeight="15.0" fitWidth="15.0"
+                                                                        pickOnBounds="true" preserveRatio="true">
+                                                                 <image>
+                                                                     <Image url="@../../assets/CrossMark.png"/>
+                                                                 </image>
+                                                             </ImageView>
+                                                         </graphic>
+                                                     </JFXButton>
+                                                 </children>
+                                             </VBox>
+                                         </children>
+                                     </StackPane>
                                  </children>
                              </VBox>
                          </children>
-                     </StackPane>
-                 </children>
-             </VBox>
+                     </AnchorPane>
+                 </items>
+             </SplitPane>
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

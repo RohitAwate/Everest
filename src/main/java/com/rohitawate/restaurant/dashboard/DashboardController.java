@@ -49,7 +49,7 @@ public class DashboardController implements Initializable {
     @FXML
     private ComboBox<String> httpMethodBox;
     @FXML
-    private VBox responseBox, loadingLayer;
+    private VBox responseBox, loadingLayer, promptLayer;
     @FXML
     private HBox responseDetails;
     @FXML
@@ -91,6 +91,7 @@ public class DashboardController implements Initializable {
 
         addressField.setText("https://api.chucknorris.io/jokes/random");
         responseBox.getChildren().remove(0);
+        promptLayer.setVisible(true);
         httpMethodBox.getItems().addAll(httpMethods);
         httpMethodBox.getSelectionModel().select(1);
 
@@ -101,8 +102,11 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void sendAction() {
-        if (responseBox.getChildren().size() == 2)
+        promptLayer.setVisible(false);
+        if (responseBox.getChildren().size() == 2) {
             responseBox.getChildren().remove(0);
+            responseArea.clear();
+        }
         try {
             String address = addressField.getText();
             if (address.equals("")) {
@@ -192,8 +196,10 @@ public class DashboardController implements Initializable {
                 default:
                     loadingLayer.setVisible(false);
             }
-        } catch (MalformedURLException ex) {
+        } catch (MalformedURLException MURLE) {
             snackBar.show("Invalid address. Please verify and try again.", 3000);
+        } catch (Exception E) {
+            snackBar.show("Something went wrong. Couldn't process request.", 5000);
         }
     }
 
@@ -210,5 +216,12 @@ public class DashboardController implements Initializable {
         String responseAreaCSS = "-fx-font-family: " + Settings.responseAreaFont + ";" +
                 "-fx-font-size: " + Settings.responseAreaFontSize;
         responseArea.setStyle(responseAreaCSS);
+    }
+
+    @FXML
+    private void clearResponseArea() {
+        responseBox.getChildren().remove(0);
+        responseArea.clear();
+        promptLayer.setVisible(true);
     }
 }

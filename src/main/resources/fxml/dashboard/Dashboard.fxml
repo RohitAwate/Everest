@@ -92,7 +92,8 @@
                                          <children>
                                              <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                                                  <children>
-                                                     <Label fx:id="statusCode" text="404" textFill="WHITE">
+                                                     <Label fx:id="statusCode" text="404" textFill="WHITE"
+                                                            HBox.hgrow="ALWAYS">
                                                          <font>
                                                              <Font name="System Bold" size="35.0"/>
                                                          </font>
@@ -101,14 +102,15 @@
                                                          </HBox.margin>
                                                      </Label>
                                                      <Label fx:id="statusCodeDescription" text="Not Found"
-                                                            textFill="WHITE">
+                                                            textFill="WHITE" HBox.hgrow="ALWAYS">
                                                          <font>
                                                              <Font size="30.0"/>
                                                          </font>
                                                      </Label>
                                                  </children>
                                              </HBox>
-                                             <Label fx:id="responseTime" text="151 ms" textFill="WHITE">
+                                             <Label fx:id="responseTime" text="151 ms" textFill="WHITE"
+                                                    HBox.hgrow="ALWAYS">
                                                  <HBox.margin>
                                                      <Insets right="30.0"/>
                                                  </HBox.margin>
@@ -117,11 +119,30 @@
                                                  </font>
                                              </Label>
                                              <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0" text="1998 B"
-                                                    textFill="WHITE">
+                                                    textFill="WHITE" HBox.hgrow="ALWAYS">
                                                  <font>
                                                      <Font name="Liberation Mono" size="20.0"/>
                                                  </font>
+                                                 <HBox.margin>
+                                                     <Insets right="30.0"/>
+                                                 </HBox.margin>
                                              </Label>
+                                             <JFXButton fx:id="clearResponseAreaButton" buttonType="RAISED"
+                                                        onAction="#clearResponseArea" ripplerFill="WHITE" text=" CLEAR"
+                                                        textFill="WHITE" HBox.hgrow="ALWAYS">
+                                                 <graphic>
+                                                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true"
+                                                                preserveRatio="true">
+                                                         <image>
+                                                             <Image url="@../../assets/CrossMark.png"/>
+                                                         </image>
+                                                     </ImageView>
+                                                 </graphic>
+                                                 <tooltip>
+                                                     <Tooltip autoHide="true"
+                                                              text="Clears this bar and the response body below."/>
+                                                 </tooltip>
+                                             </JFXButton>
                                          </children>
                                          <padding>
                                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
@@ -159,6 +180,22 @@
                                                              </ImageView>
                                                          </graphic>
                                                      </JFXButton>
+                                                 </children>
+                                             </VBox>
+                                             <VBox fx:id="promptLayer" alignment="CENTER" prefHeight="200.0"
+                                                   prefWidth="100.0" visible="false">
+                                                 <children>
+                                                     <Label text="Enter an address, select a method and hit send."
+                                                            textFill="WHITE">
+                                                         <font>
+                                                             <Font size="32.0"/>
+                                                         </font>
+                                                     </Label>
+                                                     <Label text="It's not rocket science." textFill="#9e9e9e">
+                                                         <font>
+                                                             <Font name="System Italic" size="27.0"/>
+                                                         </font>
+                                                     </Label>
                                                  </children>
                                              </VBox>
                                          </children>

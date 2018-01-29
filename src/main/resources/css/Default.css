@@ -40,6 +40,10 @@
     -fx-background-color: #1b1b1b;
 }
 
+#clearResponseAreaButton {
+    -fx-background-color: #454545;
+}
+
 .text-area {
     -fx-font-family: "Liberation Mono";
     -fx-text-fill: #a1a1a1;
@@ -56,6 +60,10 @@
 
 #loadingLayer {
     -fx-background-color: #bf8829;
+}
+
+#promptLayer {
+    -fx-background-color: #273154;
 }
 
 #cancelButton {

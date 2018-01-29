@@ -24,6 +24,9 @@ public abstract class RestaurantRequest {
     private URL target;
     private HashMap<String, String> headers;
 
+    RestaurantRequest() {
+    }
+
     RestaurantRequest(String target) throws MalformedURLException {
         this.target = new URL(target);
     }

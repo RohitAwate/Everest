@@ -18,12 +18,13 @@ package com.rohitawate.restaurant.dashboard;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.restaurant.models.requests.GETRequest;
+import com.rohitawate.restaurant.models.requests.POSTRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
+import com.rohitawate.restaurant.requestsmanager.POSTRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
 import com.rohitawate.restaurant.settings.Settings;
 import javafx.beans.binding.Bindings;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -33,7 +34,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -56,34 +59,40 @@ public class DashboardController implements Initializable {
     @FXML
     private JFXButton cancelButton;
     @FXML
+    private TabPane requestOptionsTab;
+    @FXML
     private Tab authTab, headersTab, bodyTab;
 
     private JFXSnackbar snackBar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
     private RequestManager requestManager;
     private HeaderTabController headerTabController;
+    private BodyTabController bodyTabController;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         applySettings();
-        Task<Parent> parentLoader = new Task<Parent>() {
-            @Override
-            protected Parent call() throws Exception {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/HeaderTab.fxml"));
-                Parent parent = loader.load();
-                headerTabController = loader.getController();
-                return parent;
-            }
-        };
 
-        parentLoader.setOnSucceeded(event -> headersTab.setContent(parentLoader.getValue()));
-        parentLoader.setOnFailed(event -> parentLoader.getException().printStackTrace());
-        new Thread(parentLoader).start();
+        try {
+            // Loading the headers tab
+            FXMLLoader headerTabLoader = new FXMLLoader(getClass().getResource("/fxml/dashboard/HeaderTab.fxml"));
+            Parent headerTabContent = headerTabLoader.load();
+            headerTabController = headerTabLoader.getController();
+            headersTab.setContent(headerTabContent);
+
+            // Loading the body tab
+            FXMLLoader bodyTabLoader = new FXMLLoader(getClass().getResource("/fxml/dashboard/BodyTab.fxml"));
+            Parent bodyTabContent = bodyTabLoader.load();
+            bodyTabController = bodyTabLoader.getController();
+            bodyTab.setContent(bodyTabContent);
+        } catch (IOException IOE) {
+            IOE.printStackTrace();
+        }
 
         addressField.setText("https://api.chucknorris.io/jokes/random");
         responseBox.getChildren().remove(0);
         httpMethodBox.getItems().addAll(httpMethods);
-        httpMethodBox.setValue("GET");
+        httpMethodBox.getSelectionModel().select(1);
 
         snackBar = new JFXSnackbar(dashboard);
         bodyTab.disableProperty().bind(Bindings.and(httpMethodBox.valueProperty().isNotEqualTo("POST"),
@@ -116,6 +125,53 @@ public class DashboardController implements Initializable {
                     GETRequest getRequest = new GETRequest(addressField.getText());
                     getRequest.addHeaders(headerTabController.getHeaders());
                     requestManager.setRequest(getRequest);
+                    cancelButton.setOnAction(e -> requestManager.cancel());
+                    requestManager.setOnRunning(e -> {
+                        responseArea.clear();
+                        loadingLayer.setVisible(true);
+                    });
+                    requestManager.setOnSucceeded(e -> {
+                        updateDashboard(requestManager.getValue());
+                        loadingLayer.setVisible(false);
+                        requestManager.reset();
+                    });
+                    requestManager.setOnCancelled(e -> {
+                        loadingLayer.setVisible(false);
+                        snackBar.show("Request canceled.", 2000);
+                        requestManager.reset();
+                    });
+                    requestManager.start();
+                    break;
+                case "POST":
+                    if (requestManager == null || requestManager.getClass() != POSTRequestManager.class)
+                        requestManager = new POSTRequestManager();
+                    else if (requestManager.isRunning()) {
+                        snackBar.show("Please wait while the current request is processed.", 3000);
+                        return;
+                    }
+
+                    String[] requestBody = bodyTabController.getBody();
+                    POSTRequest postRequest = new POSTRequest(addressField.getText());
+                    postRequest.setRequestBody(requestBody[0]);
+
+                    MediaType requestMediaType = MediaType.WILDCARD_TYPE;
+                    switch (requestBody[1]) {
+                        case "PLAIN TEXT":
+                            requestMediaType = MediaType.TEXT_PLAIN_TYPE;
+                            break;
+                        case "JSON":
+                            requestMediaType = MediaType.APPLICATION_JSON_TYPE;
+                            break;
+                        case "XML":
+                            requestMediaType = MediaType.APPLICATION_XML_TYPE;
+                            break;
+                        case "HTML":
+                            requestMediaType = MediaType.TEXT_HTML_TYPE;
+                            break;
+                    }
+                    postRequest.setRequestBodyMediaType(requestMediaType);
+                    postRequest.addHeaders(headerTabController.getHeaders());
+                    requestManager.setRequest(postRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
                         responseArea.clear();

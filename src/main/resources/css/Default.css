@@ -7,11 +7,11 @@
 	-fx-text-fill: white;
 }
 
-#httpMethodBox {
+.combo-box {
     -fx-background-color: #707070;
 }
 
-#httpMethodBox .list-cell {
+.combo-box .list-cell {
     -fx-background-color: #707070;
 	-fx-pref-height: 39px;
     -fx-font-size: 18px;
@@ -19,16 +19,16 @@
     -fx-padding: 0 0 0 10px;
 }
 
-#httpMethodBox .list-cell:hover {
+.combo-box .list-cell:hover {
 	-fx-background-color: orangered;
 	-fx-text-fill: white;
 }
 
-#httpMethodBox .arrow-button .arrow {
+.combo-box .arrow-button .arrow {
     -fx-background-color: white;
 }
 
-#httpMethodBox .list-view {
+.combo-box .list-view {
     -fx-background-color: transparent;
 }
 
@@ -40,21 +40,18 @@
     -fx-background-color: #1b1b1b;
 }
 
-#responseArea {
+.text-area {
     -fx-font-family: "Liberation Mono";
     -fx-text-fill: #a1a1a1;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
     -fx-background-color: transparent;
+    -fx-border-width: 0px;
 }
 
-#responseArea .content {
+.text-area .content {
     -fx-background-radius: 0;
     -fx-background-color: #2a2a2a;
-}
-
-#responseArea {
-	-fx-border-width: 0px;
 }
 
 #loadingLayer {
@@ -70,7 +67,7 @@
 }
 
 .tab-pane:top .tab-header-area .tab-header-background {
-    -fx-background-color: #2f2f2f;
+    -fx-background-color: #6a6a6a;
 }
 
 .tab-pane .tab-content-area,
@@ -83,6 +80,14 @@
     -fx-background-color: #3d3d3d;
 }
 
+/* Tab attributes */
+.tab {
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
 .tab-pane:top .tab-header-area .headers-region .tab:top {
     -fx-background-color: #6a6a6a;
 }
@@ -91,6 +96,7 @@
     -fx-background-color: #55a15c;
 }
 
+/* Tab titles */
 .tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
     -fx-fill: #b8b8b8;
 }
@@ -99,11 +105,14 @@
     -fx-fill: white;
 }
 
-.tab {
-    -fx-background-radius: 0;
-    -fx-background-insets: 0;
-    -fx-focus-color: transparent;
-    -fx-faint-focus-color: transparent;
+/* Tabs in the request 'Body' option */
+#bodyTabPane:top .tab-header-area .tab-header-background,
+#bodyTabPane:top .tab-header-area .headers-region .tab:top {
+    -fx-background-color: #3d3d3d;
+}
+
+#bodyTabPane .tab-header-area .headers-region .tab:selected:top {
+    -fx-background-color: #4e848f;
 }
 
 .scroll-pane .scroll-bar:vertical .thumb {

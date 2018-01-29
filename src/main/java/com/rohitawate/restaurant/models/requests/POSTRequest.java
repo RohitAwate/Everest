@@ -16,18 +16,40 @@
 
 package com.rohitawate.restaurant.models.requests;
 
+import javax.ws.rs.core.MediaType;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class GETRequest extends RestaurantRequest {
-    public GETRequest() {
+public class POSTRequest extends RestaurantRequest {
+    private String requestBody;
+    private MediaType requestBodyMediaType;
+    private File binaryBody;
+
+    public POSTRequest() {
     }
 
-    public GETRequest(URL target) {
+    public POSTRequest(URL target) {
         super(target);
     }
 
-    public GETRequest(String target) throws MalformedURLException {
+    public POSTRequest(String target) throws MalformedURLException {
         super(target);
+    }
+
+    public String getRequestBody() {
+        return requestBody;
+    }
+
+    public void setRequestBody(String requestBody) {
+        this.requestBody = requestBody;
+    }
+
+    public MediaType getRequestBodyMediaType() {
+        return requestBodyMediaType;
+    }
+
+    public void setRequestBodyMediaType(MediaType requestBodyMediaType) {
+        this.requestBodyMediaType = requestBodyMediaType;
     }
 }

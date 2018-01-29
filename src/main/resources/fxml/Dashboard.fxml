@@ -15,12 +15,12 @@
          <children>
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                <children>
-                  <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
+                   <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../assets/LogoWithName.png" />
+                         <Image url="@../assets/LogoWithoutText.png"/>
                      </image>
                      <HBox.margin>
-                        <Insets right="5.0" />
+                         <Insets right="20.0"/>
                      </HBox.margin>
                   </ImageView>
                   <TextField fx:id="addressField" maxWidth="800.0" promptText="URL" HBox.hgrow="ALWAYS">

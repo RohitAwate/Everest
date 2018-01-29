@@ -92,6 +92,8 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void sendAction() {
+        if (responseBox.getChildren().size() == 2)
+            responseBox.getChildren().remove(0);
         try {
             String address = addressField.getText();
             if (address.equals("")) {
@@ -141,10 +143,7 @@ public class DashboardController implements Initializable {
 
     private void updateDashboard(RestaurantResponse response) {
         responseArea.setText(response.getBody());
-
-        if (responseBox.getChildren().size() != 2)
-            responseBox.getChildren().add(0, responseDetails);
-
+        responseBox.getChildren().add(0, responseDetails);
         statusCode.setText(Integer.toString(response.getStatusCode()));
         statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
         responseTime.setText(Long.toString(response.getTime()) + " ms");

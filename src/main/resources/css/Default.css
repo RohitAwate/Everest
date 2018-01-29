@@ -8,23 +8,28 @@
 }
 
 #httpMethodBox {
-	-fx-background-color: #494949;
+    -fx-background-color: #707070;
 }
 
 #httpMethodBox .list-cell {
-	-fx-background-color: #494949;
+    -fx-background-color: #707070;
 	-fx-pref-height: 39px;
-	-fx-font-size: 20px;
-	-fx-text-fill: #acacac;
-}
-
-#httpMethodBox .list-view {
-	-fx-border-style: none;
+    -fx-font-size: 18px;
+    -fx-text-fill: #d4d4d4;
+    -fx-padding: 0 0 0 10px;
 }
 
 #httpMethodBox .list-cell:hover {
 	-fx-background-color: orangered;
 	-fx-text-fill: white;
+}
+
+#httpMethodBox .arrow-button .arrow {
+    -fx-background-color: white;
+}
+
+#httpMethodBox .list-view {
+    -fx-background-color: transparent;
 }
 
 #sendButton {
@@ -60,20 +65,26 @@
     -fx-background-color: black;
 }
 
+.tab-pane:top .tab-header-area {
+    -fx-padding: 0;
+}
+
 .tab-pane:top .tab-header-area .tab-header-background {
-    -fx-background-color: #1b1b1b;
+    -fx-background-color: #2f2f2f;
 }
 
 .tab-pane .tab-content-area,
 #headerTabContent,
-#headerField {
-    -fx-background-color: #282828;
+#headerField,
+#headersBox,
+.scroll-pane,
+.scroll-pane .viewport,
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: #3d3d3d;
 }
 
 .tab-pane:top .tab-header-area .headers-region .tab:top {
     -fx-background-color: #6a6a6a;
-    -fx-background-insets: 0 1 0 1;
-    -fx-background-radius: 5 5 0 0;
 }
 
 .tab-pane:top .tab-header-area .headers-region .tab:selected:top {
@@ -89,8 +100,14 @@
 }
 
 .tab {
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #808080;
 }
 
 .split-pane,
@@ -98,28 +115,14 @@
     -fx-background-color: #505050;
 }
 
-.scroll-pane,
-.scroll-pane .viewport {
-    -fx-background-insets: 0;
-    -fx-background-color: #282828;
-}
-
-.scroll-pane .scroll-bar:vertical {
-    -fx-background-color: #282828;
-}
-
 #keyField, #valueField {
     -fx-prompt-text-fill: #919191;
-    -fx-background-color: #393939;
+    -fx-background-color: #303030;
     -fx-text-fill: white;
 }
 
 #addHeaderButton {
     -fx-background-color: orangered;
-}
-
-#footer {
-	-fx-background-color: #8b8b8b;
 }
 
 .jfx-snackbar-content {

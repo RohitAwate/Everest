@@ -66,9 +66,9 @@
                   </JFXButton>
                </children>
             </HBox>
-             <SplitPane dividerPositions="0.5" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+             <SplitPane dividerPositions="0.1" orientation="VERTICAL" VBox.vgrow="ALWAYS">
                  <items>
-                     <AnchorPane>
+                     <AnchorPane maxHeight="250.0">
                          <children>
                              <TabPane fx:id="requestTabs" maxHeight="200.0" minHeight="200.0"
                                       tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0"

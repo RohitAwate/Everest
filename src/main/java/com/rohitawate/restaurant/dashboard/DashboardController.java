@@ -34,7 +34,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -89,7 +88,7 @@ public class DashboardController implements Initializable {
             IOE.printStackTrace();
         }
 
-        addressField.setText("https://api.chucknorris.io/jokes/random");
+        addressField.setText("https://anapioficeandfire.com/api/characters/583");
         responseBox.getChildren().remove(0);
         promptLayer.setVisible(true);
         httpMethodBox.getItems().addAll(httpMethods);
@@ -141,6 +140,7 @@ public class DashboardController implements Initializable {
                     });
                     requestManager.setOnCancelled(e -> {
                         loadingLayer.setVisible(false);
+                        promptLayer.setVisible(true);
                         snackBar.show("Request canceled.", 2000);
                         requestManager.reset();
                     });
@@ -154,27 +154,10 @@ public class DashboardController implements Initializable {
                         return;
                     }
 
-                    String[] requestBody = bodyTabController.getBody();
-                    POSTRequest postRequest = new POSTRequest(addressField.getText());
-                    postRequest.setRequestBody(requestBody[0]);
-
-                    MediaType requestMediaType = MediaType.WILDCARD_TYPE;
-                    switch (requestBody[1]) {
-                        case "PLAIN TEXT":
-                            requestMediaType = MediaType.TEXT_PLAIN_TYPE;
-                            break;
-                        case "JSON":
-                            requestMediaType = MediaType.APPLICATION_JSON_TYPE;
-                            break;
-                        case "XML":
-                            requestMediaType = MediaType.APPLICATION_XML_TYPE;
-                            break;
-                        case "HTML":
-                            requestMediaType = MediaType.TEXT_HTML_TYPE;
-                            break;
-                    }
-                    postRequest.setRequestBodyMediaType(requestMediaType);
+                    POSTRequest postRequest = bodyTabController.getBasicRequest();
+                    postRequest.setTarget(addressField.getText());
                     postRequest.addHeaders(headerTabController.getHeaders());
+
                     requestManager.setRequest(postRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
@@ -188,6 +171,7 @@ public class DashboardController implements Initializable {
                     });
                     requestManager.setOnCancelled(e -> {
                         loadingLayer.setVisible(false);
+                        promptLayer.setVisible(true);
                         snackBar.show("Request canceled.", 2000);
                         requestManager.reset();
                     });

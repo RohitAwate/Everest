@@ -105,17 +105,19 @@
 }
 
 /* Tab titles */
-.tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
-    -fx-fill: #b8b8b8;
-}
 
-.tab-pane:top .tab-header-area .headers-region .tab:selected:top .tab-container .tab-label .text {
+.tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
     -fx-fill: white;
 }
 
 /* Tabs in the request 'Body' option */
 #bodyTabPane:top .tab-header-area .tab-header-background,
 #bodyTabPane:top .tab-header-area .headers-region .tab:top {
+    -fx-background-color: #545454;
+}
+
+#bodyTabPane .tab-content-area,
+#bodyTabPane .scroll-pane .viewport {
     -fx-background-color: #3d3d3d;
 }
 
@@ -132,7 +134,7 @@
     -fx-background-color: #505050;
 }
 
-#keyField, #valueField {
+#keyField, #valueField, #filePathField {
     -fx-prompt-text-fill: #919191;
     -fx-background-color: #303030;
     -fx-text-fill: white;
@@ -140,6 +142,10 @@
 
 #addHeaderButton {
     -fx-background-color: orangered;
+}
+
+#browseButton {
+    -fx-background-color: #a3c492;
 }
 
 .jfx-snackbar-content {

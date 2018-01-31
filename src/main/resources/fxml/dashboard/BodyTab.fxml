@@ -16,16 +16,17 @@
   ~ limitations under the License.
   -->
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<TabPane fx:id="bodyTabPane" stylesheets="@../../css/Default.css" tabClosingPolicy="UNAVAILABLE" tabMinWidth="100.0"
-         xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.111"
-         fx:controller="com.rohitawate.restaurant.dashboard.BodyTabController">
+<TabPane fx:id="bodyTabPane" prefHeight="100.0" prefWidth="1280.0" stylesheets="@../../css/Default.css"
+         tabClosingPolicy="UNAVAILABLE" tabMinWidth="100.0" xmlns="http://javafx.com/javafx/8.0.111"
+         xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.dashboard.BodyTabController">
     <tabs>
-        <Tab text="RAW">
+        <Tab fx:id="rawTab" text="RAW">
             <content>
-                <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="ALWAYS">
+                <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
                     <content>
                         <VBox alignment="CENTER">
                             <children>
@@ -53,6 +54,17 @@
                 </ScrollPane>
             </content>
         </Tab>
-        <Tab text="BINARY"/>
+        <Tab fx:id="binaryTab" text="BINARY">
+            <content>
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
+                    <children>
+                        <TextField fx:id="filePathField" maxWidth="700.0" promptText="FILE PATH" HBox.hgrow="ALWAYS"/>
+                        <JFXButton fx:id="browseButton" buttonType="RAISED" onAction="#browseFile" ripplerFill="WHITE"
+                                   text="BROWSE" HBox.hgrow="ALWAYS"/>
+                    </children>
+                </HBox>
+            </content>
+        </Tab>
+        <Tab fx:id="urlTab" text="X-WWW-FORM-URLENCODED"/>
     </tabs>
 </TabPane>

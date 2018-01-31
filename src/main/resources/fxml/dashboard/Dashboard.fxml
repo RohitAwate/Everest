@@ -185,7 +185,7 @@
                                              <VBox fx:id="promptLayer" alignment="CENTER" prefHeight="200.0"
                                                    prefWidth="100.0" visible="false">
                                                  <children>
-                                                     <Label text="Enter an address, select a method and hit send."
+                                                     <Label text="Enter an address, select a method and hit send. 🚀"
                                                             textFill="WHITE">
                                                          <font>
                                                              <Font size="32.0"/>

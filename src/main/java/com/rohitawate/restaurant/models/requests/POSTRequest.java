@@ -16,15 +16,14 @@
 
 package com.rohitawate.restaurant.models.requests;
 
-import javax.ws.rs.core.MediaType;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
 public class POSTRequest extends RestaurantRequest {
-    private String requestBody;
-    private MediaType requestBodyMediaType;
-    private File binaryBody;
+    private String body;
+    private String contentType;
+    private HashMap<String, String> URLTextTuples;
 
     public POSTRequest() {
     }
@@ -37,19 +36,31 @@ public class POSTRequest extends RestaurantRequest {
         super(target);
     }
 
-    public String getRequestBody() {
-        return requestBody;
+    public void setTarget(String target) throws MalformedURLException {
+        this.target = new URL(target);
     }
 
-    public void setRequestBody(String requestBody) {
-        this.requestBody = requestBody;
+    public String getBody() {
+        return body;
     }
 
-    public MediaType getRequestBodyMediaType() {
-        return requestBodyMediaType;
+    public void setBody(String body) {
+        this.body = body;
     }
 
-    public void setRequestBodyMediaType(MediaType requestBodyMediaType) {
-        this.requestBodyMediaType = requestBodyMediaType;
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public void setURLTextTuples(HashMap<String, String> URLTextTuples) {
+        this.URLTextTuples = URLTextTuples;
+    }
+
+    public HashMap<String, String> getURLTextTuples() {
+        return URLTextTuples;
     }
 }

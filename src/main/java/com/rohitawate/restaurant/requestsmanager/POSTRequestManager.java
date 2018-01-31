@@ -25,6 +25,7 @@ import javafx.concurrent.Task;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -37,22 +38,32 @@ public class POSTRequestManager extends RequestManager {
         return new Task<RestaurantResponse>() {
             @Override
             protected RestaurantResponse call() throws Exception {
+                POSTRequest postRequest = (POSTRequest) request;
                 RestaurantResponse response = new RestaurantResponse();
                 WebTarget target = client.target(request.getTarget().toString());
-
-                Invocation.Builder requestBuilder = target.request();
-
-                HashMap<String, String> headers = request.getHeaders();
                 Map.Entry<String, String> mapEntry;
 
+                Builder requestBuilder = target.request();
+
+                // Add the headers to the request.
+                HashMap<String, String> headers = request.getHeaders();
                 for (Map.Entry entry : headers.entrySet()) {
                     mapEntry = (Map.Entry) entry;
                     requestBuilder.header(mapEntry.getKey(), mapEntry.getValue());
                 }
 
+                // Adds the request body based on the content type and generates an invocation.
+                Invocation invocation;
+                switch (postRequest.getContentType()) {
+                    default:
+                        // Handles raw data types (JSON, Plain text, XML, HTML)
+                        invocation = requestBuilder
+                                .buildPost(Entity.entity(postRequest.getBody(), postRequest.getContentType()));
+                }
+
+
                 long initialTime = System.currentTimeMillis();
-                Response serverResponse = requestBuilder.post(Entity.entity(((POSTRequest) request).getRequestBody(),
-                        ((POSTRequest) request).getRequestBodyMediaType()));
+                Response serverResponse = invocation.invoke();
                 response.setTime(initialTime, System.currentTimeMillis());
 
                 if (serverResponse == null)

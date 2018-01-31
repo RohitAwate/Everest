@@ -21,7 +21,7 @@ import java.net.URL;
 import java.util.HashMap;
 
 public abstract class RestaurantRequest {
-    private URL target;
+    URL target;
     private HashMap<String, String> headers;
 
     RestaurantRequest() {

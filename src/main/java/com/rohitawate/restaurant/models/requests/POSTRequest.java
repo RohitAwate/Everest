@@ -26,7 +26,6 @@ public class POSTRequest extends RestaurantRequest {
     private HashMap<String, String> stringTuples;
     private HashMap<String, String> fileTuples;
 
-
     public POSTRequest() {
     }
 

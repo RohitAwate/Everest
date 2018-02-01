@@ -59,7 +59,9 @@ public class BodyTabController implements Initializable {
         }
     }
 
-    // Returns a RestaurantRequest with only the body data.
+    /**
+     * Returns a RestaurantRequest object initialized with the request body.
+     */
     public POSTRequest getBasicRequest() {
         POSTRequest request = new POSTRequest();
         if (rawTab.isSelected()) {
@@ -87,6 +89,9 @@ public class BodyTabController implements Initializable {
             request.setFileTuples(urlTabController.getFileTuples());
 
             request.setContentType(MediaType.MULTIPART_FORM_DATA);
+        } else if (binaryTab.isSelected()) {
+            request.setBody(filePathField.getText());
+            request.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         }
         return request;
     }

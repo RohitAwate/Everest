@@ -32,7 +32,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,6 +84,10 @@ public class POSTRequestManager extends RequestManager {
                         formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
 
                         invocation = requestBuilder.buildPost(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+                        break;
+                    case MediaType.APPLICATION_OCTET_STREAM:
+                        InputStream stream = new FileInputStream(postRequest.getBody());
+                        invocation = requestBuilder.buildPost(Entity.entity(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
                         break;
                     default:
                         // Handles raw data types (JSON, Plain text, XML, HTML)

@@ -146,11 +146,11 @@
     -fx-text-fill: white;
 }
 
-#addHeaderButton, #newStringKVButton {
+#addHeaderButton, #newStringKVButton, #newParamButton {
     -fx-background-color: orangered;
 }
 
-#newFileKVButton {
+#newFileKVButton, #appendParamsButton {
     -fx-background-color: #5d53b1;
 }
 

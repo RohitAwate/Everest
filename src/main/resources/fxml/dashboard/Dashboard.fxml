@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
@@ -83,6 +83,64 @@
                                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                                       AnchorPane.topAnchor="0.0">
                                  <tabs>
+                                     <Tab fx:id="paramsTab" text="PARAMS">
+                                         <content>
+                                             <VBox>
+                                                 <children>
+                                                     <HBox alignment="CENTER" maxHeight="0.0" spacing="20.0"
+                                                           VBox.vgrow="ALWAYS">
+                                                         <VBox.margin>
+                                                             <Insets/>
+                                                         </VBox.margin>
+                                                         <children>
+                                                             <JFXButton fx:id="newParamButton" onAction="#addParam"
+                                                                        text=" NEW PARAM" textFill="WHITE"
+                                                                        HBox.hgrow="ALWAYS">
+                                                                 <graphic>
+                                                                     <ImageView fitHeight="15.0" fitWidth="15.0"
+                                                                                pickOnBounds="true"
+                                                                                preserveRatio="true">
+                                                                         <image>
+                                                                             <Image url="@../../assets/Plus.png"/>
+                                                                         </image>
+                                                                     </ImageView>
+                                                                 </graphic>
+                                                                 <HBox.margin>
+                                                                     <Insets/>
+                                                                 </HBox.margin>
+                                                             </JFXButton>
+                                                             <JFXButton fx:id="appendParamsButton"
+                                                                        onAction="#appendParams" ripplerFill="WHITE"
+                                                                        text=" APPEND PARAMS" textFill="WHITE"
+                                                                        HBox.hgrow="ALWAYS">
+                                                                 <graphic>
+                                                                     <ImageView fitHeight="15.0" fitWidth="15.0"
+                                                                                pickOnBounds="true"
+                                                                                preserveRatio="true">
+                                                                         <image>
+                                                                             <Image url="@../../assets/CheckMark.png"/>
+                                                                         </image>
+                                                                     </ImageView>
+                                                                 </graphic>
+                                                                 <HBox.margin>
+                                                                     <Insets/>
+                                                                 </HBox.margin>
+                                                             </JFXButton>
+                                                         </children>
+                                                         <padding>
+                                                             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                                                         </padding>
+                                                     </HBox>
+                                                     <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER"
+                                                                 VBox.vgrow="ALWAYS">
+                                                         <content>
+                                                             <VBox fx:id="paramsBox" alignment="TOP_CENTER"/>
+                                                         </content>
+                                                     </ScrollPane>
+                                                 </children>
+                                             </VBox>
+                                         </content>
+                                     </Tab>
                                      <Tab fx:id="authTab" text="AUTHORIZATION"/>
                                      <Tab fx:id="headersTab" text="HEADERS"/>
                                      <Tab fx:id="bodyTab" text="BODY"/>

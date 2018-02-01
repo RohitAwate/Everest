@@ -38,6 +38,8 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
@@ -48,7 +50,7 @@ public class DashboardController implements Initializable {
     @FXML
     private ComboBox<String> httpMethodBox;
     @FXML
-    private VBox responseBox, loadingLayer, promptLayer;
+    private VBox responseBox, loadingLayer, promptLayer, paramsBox;
     @FXML
     private HBox responseDetails;
     @FXML
@@ -60,10 +62,12 @@ public class DashboardController implements Initializable {
     @FXML
     private TabPane requestOptionsTab;
     @FXML
-    private Tab authTab, headersTab, bodyTab;
+    private Tab paramsTab, authTab, headersTab, bodyTab;
 
     private JFXSnackbar snackBar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
+    private List<StringKeyValueFieldController> paramsControllers;
+    private List<String> appendedParams;
     private RequestManager requestManager;
     private HeaderTabController headerTabController;
     private BodyTabController bodyTabController;
@@ -93,6 +97,10 @@ public class DashboardController implements Initializable {
         promptLayer.setVisible(true);
         httpMethodBox.getItems().addAll(httpMethods);
         httpMethodBox.getSelectionModel().select(1);
+
+        paramsControllers = new ArrayList<>();
+        appendedParams = new ArrayList<>();
+        addParam();
 
         snackBar = new JFXSnackbar(dashboard);
         bodyTab.disableProperty().bind(Bindings.and(httpMethodBox.valueProperty().isNotEqualTo("POST"),
@@ -208,5 +216,34 @@ public class DashboardController implements Initializable {
         responseBox.getChildren().remove(0);
         responseArea.clear();
         promptLayer.setVisible(true);
+    }
+
+    @FXML
+    private void appendParams() {
+        String pair, key, value;
+        for (StringKeyValueFieldController controller : paramsControllers) {
+            if (controller.isChecked()) {
+                key = controller.getHeader().getKey();
+                value = controller.getHeader().getValue();
+                pair = key + value;
+                if (!appendedParams.contains(pair)) {
+                    addressField.appendText("?" + key + "=" + value + "&");
+                    appendedParams.add(pair);
+                }
+            }
+        }
+    }
+
+    @FXML
+    private void addParam() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/StringKeyValueField.fxml"));
+            Parent headerField = loader.load();
+            StringKeyValueFieldController controller = loader.getController();
+            paramsControllers.add(controller);
+            paramsBox.getChildren().add(headerField);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

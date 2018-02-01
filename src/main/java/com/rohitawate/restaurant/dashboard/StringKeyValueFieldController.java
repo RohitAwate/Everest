@@ -32,16 +32,16 @@ public class StringKeyValueFieldController implements Initializable {
     @FXML
     private JFXCheckBox checkBox;
 
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        checkBox.disableProperty().bind(Bindings.or(keyField.textProperty().isEmpty(), valueField.textProperty().isEmpty()));
+    }
+
     public Pair<String, String> getHeader() {
         return new Pair<>(keyField.getText(), valueField.getText());
     }
 
     public boolean isChecked() {
         return checkBox.isSelected();
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        checkBox.disableProperty().bind(Bindings.or(keyField.textProperty().isEmpty(), valueField.textProperty().isEmpty()));
     }
 }

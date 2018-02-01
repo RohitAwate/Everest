@@ -65,6 +65,6 @@
                 </HBox>
             </content>
         </Tab>
-        <Tab fx:id="urlTab" text="X-WWW-FORM-URLENCODED"/>
+        <Tab fx:id="formTab" text="FORM"/>
     </tabs>
 </TabPane>

@@ -88,7 +88,7 @@ public class DashboardController implements Initializable {
             IOE.printStackTrace();
         }
 
-        addressField.setText("https://anapioficeandfire.com/api/characters/583");
+        addressField.setText("http://localhost:8080/api/members/file");
         responseBox.getChildren().remove(0);
         promptLayer.setVisible(true);
         httpMethodBox.getItems().addAll(httpMethods);
@@ -175,6 +175,7 @@ public class DashboardController implements Initializable {
                         snackBar.show("Request canceled.", 2000);
                         requestManager.reset();
                     });
+                    requestManager.setOnFailed(e -> requestManager.getException().printStackTrace());
                     requestManager.start();
                     break;
                 default:

@@ -22,12 +22,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.rohitawate.restaurant.models.requests.POSTRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import javafx.concurrent.Task;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,12 +59,35 @@ public class POSTRequestManager extends RequestManager {
                 // Adds the request body based on the content type and generates an invocation.
                 Invocation invocation;
                 switch (postRequest.getContentType()) {
+                    case MediaType.MULTIPART_FORM_DATA:
+                        FormDataMultiPart formData = new FormDataMultiPart();
+
+                        HashMap<String, String> pairs = postRequest.getStringTuples();
+                        for (Map.Entry entry : pairs.entrySet()) {
+                            mapEntry = (Map.Entry) entry;
+                            formData.field(mapEntry.getKey(), mapEntry.getValue());
+                        }
+
+                        String filePath;
+                        File file;
+                        pairs = postRequest.getFileTuples();
+                        for (Map.Entry entry : pairs.entrySet()) {
+                            mapEntry = (Map.Entry) entry;
+                            filePath = mapEntry.getValue();
+                            file = new File(filePath);
+                            formData.bodyPart(new FileDataBodyPart(mapEntry.getKey(),
+                                    file, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                        }
+
+                        formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+
+                        invocation = requestBuilder.buildPost(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+                        break;
                     default:
                         // Handles raw data types (JSON, Plain text, XML, HTML)
                         invocation = requestBuilder
                                 .buildPost(Entity.entity(postRequest.getBody(), postRequest.getContentType()));
                 }
-
 
                 long initialTime = System.currentTimeMillis();
                 Response serverResponse = invocation.invoke();

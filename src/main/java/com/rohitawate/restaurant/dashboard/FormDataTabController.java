@@ -29,34 +29,60 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class HeaderTabController implements Initializable {
+public class FormDataTabController implements Initializable {
     @FXML
     private VBox headersBox;
 
-    private List<StringKeyValueFieldController> controllers;
+    private List<StringKeyValueFieldController> stringControllers;
+    private List<FileKeyValueFieldController> fileControllers;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        controllers = new ArrayList<>();
-        addHeader();
+        stringControllers = new ArrayList<>();
+        fileControllers = new ArrayList<>();
+
+        addFileField();
+        addStringField();
     }
 
     @FXML
-    private void addHeader() {
+    private void addFileField() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/StringKeyValueField.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/FileKeyValueField.fxml"));
             Parent headerField = loader.load();
-            StringKeyValueFieldController controller = loader.getController();
-            controllers.add(controller);
+            FileKeyValueFieldController controller = loader.getController();
+            fileControllers.add(controller);
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public HashMap<String, String> getHeaders() {
+    @FXML
+    private void addStringField() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/StringKeyValueField.fxml"));
+            Parent headerField = loader.load();
+            StringKeyValueFieldController controller = loader.getController();
+            stringControllers.add(controller);
+            headersBox.getChildren().add(headerField);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public HashMap<String, String> getStringTuples() {
         HashMap<String, String> headers = new HashMap<>();
-        for (StringKeyValueFieldController controller : controllers) {
+        for (StringKeyValueFieldController controller : stringControllers) {
+            if (controller.isChecked())
+                headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+        }
+        return headers;
+    }
+
+    public HashMap<String, String> getFileTuples() {
+        HashMap<String, String> headers = new HashMap<>();
+        for (FileKeyValueFieldController controller : fileControllers) {
             if (controller.isChecked())
                 headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }

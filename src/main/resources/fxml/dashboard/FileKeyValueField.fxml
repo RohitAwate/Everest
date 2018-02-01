@@ -16,18 +16,20 @@
   ~ limitations under the License.
   -->
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXCheckBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <HBox fx:id="headerField" alignment="CENTER" spacing="10.0" stylesheets="@../../css/Default.css"
       xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.rohitawate.restaurant.dashboard.HeaderFieldController">
+      fx:controller="com.rohitawate.restaurant.dashboard.FileKeyValueFieldController">
     <children>
         <JFXCheckBox fx:id="checkBox" checkedColor="ORANGERED" unCheckedColor="#7a7a7a" HBox.hgrow="ALWAYS"/>
-        <TextField fx:id="keyField" prefWidth="400.0" promptText="KEY" HBox.hgrow="ALWAYS"/>
-        <TextField fx:id="valueField" layoutX="10.0" layoutY="10.0" prefWidth="400.0" promptText="VALUE"
+        <TextField fx:id="fileKeyField" prefWidth="400.0" promptText="KEY" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="fileValueField" layoutX="10.0" layoutY="10.0" prefWidth="400.0" promptText="FILE PATH"
                    HBox.hgrow="ALWAYS"/>
+        <JFXButton fx:id="browseButton" onAction="#browseFile" text="BROWSE"/>
     </children>
     <padding>
         <Insets bottom="5.0" left="10.0" right="10.0" top="5.0"/>

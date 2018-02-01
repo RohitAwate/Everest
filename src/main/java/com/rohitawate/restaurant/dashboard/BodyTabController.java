@@ -18,6 +18,7 @@ package com.rohitawate.restaurant.dashboard;
 
 import com.rohitawate.restaurant.models.requests.POSTRequest;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
@@ -27,6 +28,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -36,16 +38,25 @@ public class BodyTabController implements Initializable {
     @FXML
     private TextArea rawInputArea;
     @FXML
-    private Tab rawTab, binaryTab, urlTab;
+    private Tab rawTab, binaryTab, formTab;
     @FXML
     private TextField filePathField;
 
     private HeaderTabController headerTabController;
+    private FormDataTabController urlTabController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         rawInputTypeBox.getItems().addAll("PLAIN TEXT", "JSON", "XML", "HTML");
         rawInputTypeBox.getSelectionModel().select(0);
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/FormDataTab.fxml"));
+            formTab.setContent(loader.load());
+            urlTabController = loader.getController();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Returns a RestaurantRequest with only the body data.
@@ -71,6 +82,11 @@ public class BodyTabController implements Initializable {
             }
             request.setContentType(contentType);
             request.setBody(rawInputArea.getText());
+        } else if (formTab.isSelected()) {
+            request.setStringTuples(urlTabController.getStringTuples());
+            request.setFileTuples(urlTabController.getFileTuples());
+
+            request.setContentType(MediaType.MULTIPART_FORM_DATA);
         }
         return request;
     }

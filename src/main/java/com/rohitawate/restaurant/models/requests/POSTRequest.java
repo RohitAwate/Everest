@@ -23,7 +23,9 @@ import java.util.HashMap;
 public class POSTRequest extends RestaurantRequest {
     private String body;
     private String contentType;
-    private HashMap<String, String> URLTextTuples;
+    private HashMap<String, String> stringTuples;
+    private HashMap<String, String> fileTuples;
+
 
     public POSTRequest() {
     }
@@ -56,11 +58,19 @@ public class POSTRequest extends RestaurantRequest {
         this.contentType = contentType;
     }
 
-    public void setURLTextTuples(HashMap<String, String> URLTextTuples) {
-        this.URLTextTuples = URLTextTuples;
+    public void setStringTuples(HashMap<String, String> stringTuples) {
+        this.stringTuples = stringTuples;
     }
 
-    public HashMap<String, String> getURLTextTuples() {
-        return URLTextTuples;
+    public HashMap<String, String> getStringTuples() {
+        return stringTuples;
+    }
+
+    public HashMap<String, String> getFileTuples() {
+        return fileTuples;
+    }
+
+    public void setFileTuples(HashMap<String, String> fileTuples) {
+        this.fileTuples = fileTuples;
     }
 }

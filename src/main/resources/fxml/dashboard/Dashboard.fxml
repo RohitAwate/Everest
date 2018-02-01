@@ -53,7 +53,8 @@
                         <Insets right="20.0" />
                      </HBox.margin>
                   </ComboBox>
-                  <JFXButton fx:id="sendButton" buttonType="RAISED" defaultButton="true" onAction="#sendAction" prefHeight="39.0" prefWidth="80.0" text="SEND" textFill="WHITE" HBox.hgrow="ALWAYS">
+                   <JFXButton fx:id="sendButton" buttonType="RAISED" defaultButton="true" onAction="#sendAction"
+                              prefHeight="39.0" prefWidth="100.0" text=" SEND" textFill="WHITE" HBox.hgrow="ALWAYS">
                      <padding>
                         <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
                      </padding>
@@ -63,6 +64,13 @@
                      <HBox.margin>
                         <Insets right="10.0" />
                      </HBox.margin>
+                       <graphic>
+                           <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                               <image>
+                                   <Image url="@../../assets/Send.png"/>
+                               </image>
+                           </ImageView>
+                       </graphic>
                   </JFXButton>
                </children>
             </HBox>

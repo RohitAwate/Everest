@@ -18,6 +18,7 @@ package com.rohitawate.restaurant.requestsmanager;
 import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import javafx.concurrent.Service;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -27,7 +28,9 @@ public abstract class RequestManager extends Service<RestaurantResponse> {
     RestaurantRequest request;
 
     RequestManager() {
-        client = ClientBuilder.newClient();
+        client = ClientBuilder.newBuilder()
+                .register(MultiPartFeature.class)
+                .build();
     }
 
     public void setRequest(RestaurantRequest request) {

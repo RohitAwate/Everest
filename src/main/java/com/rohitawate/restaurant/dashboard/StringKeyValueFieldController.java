@@ -26,7 +26,7 @@ import javafx.util.Pair;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class HeaderFieldController implements Initializable {
+public class StringKeyValueFieldController implements Initializable {
     @FXML
     private TextField keyField, valueField;
     @FXML

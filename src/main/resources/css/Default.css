@@ -140,12 +140,22 @@
     -fx-text-fill: white;
 }
 
-#addHeaderButton {
+#fileKeyField, #fileValueField {
+    -fx-prompt-text-fill: #cdcdcd;
+    -fx-background-color: #656565;
+    -fx-text-fill: white;
+}
+
+#addHeaderButton, #newStringKVButton {
     -fx-background-color: orangered;
 }
 
+#newFileKVButton {
+    -fx-background-color: #5d53b1;
+}
+
 #browseButton {
-    -fx-background-color: #a3c492;
+    -fx-background-color: #a2a2a2;
 }
 
 .jfx-snackbar-content {

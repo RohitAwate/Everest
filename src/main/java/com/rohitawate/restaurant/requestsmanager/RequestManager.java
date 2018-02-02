@@ -17,7 +17,9 @@ package com.rohitawate.restaurant.requestsmanager;
 
 import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
+import com.rohitawate.restaurant.settings.Settings;
 import javafx.concurrent.Service;
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.ws.rs.client.Client;
@@ -31,6 +33,11 @@ public abstract class RequestManager extends Service<RestaurantResponse> {
         client = ClientBuilder.newBuilder()
                 .register(MultiPartFeature.class)
                 .build();
+
+        if (Settings.connectionTimeOutEnable)
+            client.property(ClientProperties.CONNECT_TIMEOUT, Settings.connectionTimeOut);
+        if (Settings.connectionReadTimeOutEnable)
+            client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
     }
 
     public void setRequest(RestaurantRequest request) {

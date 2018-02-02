@@ -152,6 +152,12 @@ public class DashboardController implements Initializable {
                         snackBar.show("Request canceled.", 2000);
                         requestManager.reset();
                     });
+                    requestManager.setOnFailed(e -> {
+                        loadingLayer.setVisible(false);
+                        promptLayer.setVisible(true);
+                        snackBar.show("Request timed out. Server is unavailable or didn't respond.", 10000);
+                        requestManager.reset();
+                    });
                     requestManager.start();
                     break;
                 case "POST":

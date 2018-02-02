@@ -23,4 +23,10 @@ package com.rohitawate.restaurant.settings;
 public class Settings {
     public static String responseAreaFont;
     public static int responseAreaFontSize;
+
+    public static boolean connectionTimeOutEnable;
+    public static int connectionTimeOut;
+
+    public static boolean connectionReadTimeOutEnable;
+    public static int connectionReadTimeOut;
 }

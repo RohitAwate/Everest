@@ -50,6 +50,14 @@ public class SettingsLoader implements Runnable {
             JsonNode nodes = mapper.readTree(settingsJSON.toString());
             Settings.responseAreaFont = nodes.get("responseAreaFont").toString();
             Settings.responseAreaFontSize = nodes.get("responseAreaFontSize").asInt();
+
+            Settings.connectionTimeOutEnable = nodes.get("connectionTimeOutEnable").asBoolean();
+            if (Settings.connectionTimeOutEnable)
+                Settings.connectionTimeOut = nodes.get("connectionTimeOut").asInt();
+
+            Settings.connectionReadTimeOutEnable = nodes.get("connectionReadTimeOutEnable").asBoolean();
+            if (Settings.connectionReadTimeOutEnable)
+                Settings.connectionReadTimeOut = nodes.get("connectionReadTimeOut").asInt();
         } catch (IOException e) {
             e.printStackTrace();
         }

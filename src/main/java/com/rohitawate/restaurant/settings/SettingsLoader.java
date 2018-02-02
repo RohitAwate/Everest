@@ -22,8 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 
+/**
+ * Loads up custom values into Settings from settings.json.
+ */
 public class SettingsLoader implements Runnable {
     public Thread SettingsLoaderThread;
 
@@ -36,7 +38,7 @@ public class SettingsLoader implements Runnable {
     public void run() {
         try {
             StringBuilder settingsJSON = new StringBuilder();
-            File settingsFile = new File("settings/settings.json");
+            File settingsFile = new File("settings.json");
             BufferedReader reader = new BufferedReader(new FileReader(settingsFile));
 
             String line;
@@ -48,6 +50,7 @@ public class SettingsLoader implements Runnable {
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode nodes = mapper.readTree(settingsJSON.toString());
+
             Settings.responseAreaFont = nodes.get("responseAreaFont").toString();
             Settings.responseAreaFontSize = nodes.get("responseAreaFontSize").asInt();
 
@@ -58,8 +61,8 @@ public class SettingsLoader implements Runnable {
             Settings.connectionReadTimeOutEnable = nodes.get("connectionReadTimeOutEnable").asBoolean();
             if (Settings.connectionReadTimeOutEnable)
                 Settings.connectionReadTimeOut = nodes.get("connectionReadTimeOut").asInt();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception E) {
+            System.out.println("Settings file not found. Loading default values...");
         }
     }
 }

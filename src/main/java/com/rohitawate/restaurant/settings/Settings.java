@@ -16,17 +16,17 @@
 
 package com.rohitawate.restaurant.settings;
 
-/*
-    Holds settings from settings.json which are
-    loaded by SettingsLoader at startup.
+/**
+ * Holds default settings values which may
+ * get overwritten by SettingsLoader.
  */
 public class Settings {
-    public static String responseAreaFont;
-    public static int responseAreaFontSize;
+    public static String responseAreaFont = "\"Liberation Mono\"";
+    public static int responseAreaFontSize = 18;
 
-    public static boolean connectionTimeOutEnable;
-    public static int connectionTimeOut;
+    public static boolean connectionTimeOutEnable = false;
+    public static int connectionTimeOut = 10000;
 
-    public static boolean connectionReadTimeOutEnable;
-    public static int connectionReadTimeOut;
+    public static boolean connectionReadTimeOutEnable = false;
+    public static int connectionReadTimeOut = 30000;
 }

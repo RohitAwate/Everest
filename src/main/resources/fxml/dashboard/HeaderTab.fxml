@@ -46,10 +46,10 @@
                 </JFXButton>
             </children>
             <padding>
-                <Insets bottom="10.0" left="25.0" right="10.0" top="15.0"/>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
             </padding>
         </HBox>
-        <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+        <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
             <content>
                 <VBox fx:id="headersBox" alignment="TOP_CENTER"/>
             </content>

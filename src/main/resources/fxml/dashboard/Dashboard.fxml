@@ -264,6 +264,28 @@
                                                      </Label>
                                                  </children>
                                              </VBox>
+                                             <VBox fx:id="errorLayer" alignment="CENTER" layoutX="10.0" layoutY="10.0"
+                                                   prefHeight="200.0" prefWidth="100.0" visible="false">
+                                                 <children>
+                                                     <ImageView fitHeight="100.0" fitWidth="100.0" opacity="0.75"
+                                                                pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                             <Image url="@../../assets/Explosion.png"/>
+                                                         </image>
+                                                     </ImageView>
+                                                     <Label fx:id="errorTitle" text="Error title" textFill="WHITE">
+                                                         <font>
+                                                             <Font name="System Bold" size="32.0"/>
+                                                         </font>
+                                                     </Label>
+                                                     <Label fx:id="errorDetails" text="Error details"
+                                                            textAlignment="CENTER" textFill="#c3c3c3">
+                                                         <font>
+                                                             <Font size="22.0"/>
+                                                         </font>
+                                                     </Label>
+                                                 </children>
+                                             </VBox>
                                          </children>
                                      </StackPane>
                                  </children>

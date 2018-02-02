@@ -35,9 +35,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import javax.ws.rs.core.Response;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -50,13 +53,13 @@ public class DashboardController implements Initializable {
     @FXML
     private ComboBox<String> httpMethodBox;
     @FXML
-    private VBox responseBox, loadingLayer, promptLayer, paramsBox;
+    private VBox responseBox, loadingLayer, promptLayer, errorLayer, paramsBox;
     @FXML
     private HBox responseDetails;
     @FXML
     private TextArea responseArea;
     @FXML
-    private Label statusCode, statusCodeDescription, responseTime, responseSize;
+    private Label statusCode, statusCodeDescription, responseTime, responseSize, errorTitle, errorDetails;
     @FXML
     private JFXButton cancelButton;
     @FXML
@@ -92,11 +95,13 @@ public class DashboardController implements Initializable {
             IOE.printStackTrace();
         }
 
-        addressField.setText("http://localhost:8080/api/members/file");
+        addressField.setText("https://anapioficeandfire.com/api/characters/583");
         responseBox.getChildren().remove(0);
         promptLayer.setVisible(true);
         httpMethodBox.getItems().addAll(httpMethods);
-        httpMethodBox.getSelectionModel().select(1);
+
+        // Selects GET by default
+        httpMethodBox.getSelectionModel().select(0);
 
         paramsControllers = new ArrayList<>();
         appendedParams = new ArrayList<>();
@@ -139,10 +144,12 @@ public class DashboardController implements Initializable {
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
                         responseArea.clear();
+                        errorLayer.setVisible(false);
                         loadingLayer.setVisible(true);
                     });
                     requestManager.setOnSucceeded(e -> {
                         updateDashboard(requestManager.getValue());
+                        errorLayer.setVisible(false);
                         loadingLayer.setVisible(false);
                         requestManager.reset();
                     });
@@ -154,8 +161,13 @@ public class DashboardController implements Initializable {
                     });
                     requestManager.setOnFailed(e -> {
                         loadingLayer.setVisible(false);
-                        promptLayer.setVisible(true);
-                        snackBar.show("Request timed out. Server is unavailable or didn't respond.", 10000);
+                        errorLayer.setVisible(true);
+                        Throwable exception = requestManager.getException().getCause();
+
+                        if (exception.getClass() == UnknownHostException.class) {
+                            errorTitle.setText("No Internet Connection");
+                            errorDetails.setText("Could not connect to the server. Please check your connection.");
+                        }
                         requestManager.reset();
                     });
                     requestManager.start();
@@ -176,10 +188,12 @@ public class DashboardController implements Initializable {
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
                         responseArea.clear();
+                        errorLayer.setVisible(false);
                         loadingLayer.setVisible(true);
                     });
                     requestManager.setOnSucceeded(e -> {
                         updateDashboard(requestManager.getValue());
+                        errorLayer.setVisible(false);
                         loadingLayer.setVisible(false);
                         requestManager.reset();
                     });
@@ -189,7 +203,15 @@ public class DashboardController implements Initializable {
                         snackBar.show("Request canceled.", 2000);
                         requestManager.reset();
                     });
-                    requestManager.setOnFailed(e -> requestManager.getException().printStackTrace());
+                    requestManager.setOnFailed(e -> {
+                        loadingLayer.setVisible(false);
+                        promptLayer.setVisible(true);
+                        if (requestManager.getException().getClass() == ConnectException.class)
+                            snackBar.show("Request timed out. Server is unavailable or didn't respond.", 10000);
+                        else if (requestManager.getException().getClass() == FileNotFoundException.class)
+                            snackBar.show("File could not be found.", 5000);
+                        requestManager.reset();
+                    });
                     requestManager.start();
                     break;
                 default:
@@ -198,7 +220,9 @@ public class DashboardController implements Initializable {
         } catch (MalformedURLException MURLE) {
             snackBar.show("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
-            snackBar.show("Something went wrong. Couldn't process request.", 5000);
+            errorLayer.setVisible(true);
+            errorTitle.setText("Oops... That's embarrassing!");
+            errorDetails.setText("Something went wrong. Try to make another request.\nRestart RESTaurant if that doesn't work.");
         }
     }
 

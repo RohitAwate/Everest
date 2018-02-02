@@ -25,7 +25,7 @@
 <VBox stylesheets="@../../css/Default.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.rohitawate.restaurant.dashboard.URLTabController">
     <children>
-        <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER" VBox.vgrow="NEVER">
             <VBox.margin>
                 <Insets/>
             </VBox.margin>

@@ -73,11 +73,17 @@ public class POSTRequestManager extends RequestManager {
 
                         String filePath;
                         File file;
+                        InputStream stream;
                         pairs = postRequest.getFileTuples();
                         for (Map.Entry entry : pairs.entrySet()) {
                             mapEntry = (Map.Entry) entry;
                             filePath = mapEntry.getValue();
                             file = new File(filePath);
+                            /*
+                                Creating a stream only because it throws
+                                FileNotFoundException if file doesn't exist.
+                             */
+                            stream = new FileInputStream(file);
                             formData.bodyPart(new FileDataBodyPart(mapEntry.getKey(),
                                     file, MediaType.APPLICATION_OCTET_STREAM_TYPE));
                         }
@@ -87,7 +93,7 @@ public class POSTRequestManager extends RequestManager {
                         invocation = requestBuilder.buildPost(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
                         break;
                     case MediaType.APPLICATION_OCTET_STREAM:
-                        InputStream stream = new FileInputStream(postRequest.getBody());
+                        stream = new FileInputStream(postRequest.getBody());
                         invocation = requestBuilder.buildPost(Entity.entity(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
                         break;
                     case MediaType.APPLICATION_FORM_URLENCODED:

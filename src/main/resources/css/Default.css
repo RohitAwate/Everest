@@ -66,6 +66,10 @@
     -fx-background-color: #273154;
 }
 
+#errorLayer {
+    -fx-background-color: #822f2f;
+}
+
 #cancelButton {
     -fx-background-color: black;
 }

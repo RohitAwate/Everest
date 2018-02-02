@@ -24,6 +24,8 @@
          tabClosingPolicy="UNAVAILABLE" tabMinWidth="100.0" xmlns="http://javafx.com/javafx/8.0.111"
          xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.dashboard.BodyTabController">
     <tabs>
+        <Tab fx:id="formTab" text="FORM"/>
+        <Tab fx:id="urlTab" text="URL ENCODED"/>
         <Tab fx:id="rawTab" text="RAW">
             <content>
                 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
@@ -65,6 +67,5 @@
                 </HBox>
             </content>
         </Tab>
-        <Tab fx:id="formTab" text="FORM"/>
     </tabs>
 </TabPane>

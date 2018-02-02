@@ -32,18 +32,23 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/*
+    Raw and Binary tabs are embedded in
+    this FXML itself.
+    URL encoded and Form tabs have special FXMLs.
+ */
 public class BodyTabController implements Initializable {
     @FXML
     private ComboBox<String> rawInputTypeBox;
     @FXML
     private TextArea rawInputArea;
     @FXML
-    private Tab rawTab, binaryTab, formTab;
+    private Tab rawTab, binaryTab, formTab, urlTab;
     @FXML
     private TextField filePathField;
 
-    private HeaderTabController headerTabController;
-    private FormDataTabController urlTabController;
+    private FormDataTabController formDataTabController;
+    private URLTabController urlTabController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -53,6 +58,10 @@ public class BodyTabController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/FormDataTab.fxml"));
             formTab.setContent(loader.load());
+            formDataTabController = loader.getController();
+
+            loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/URLTab.fxml"));
+            urlTab.setContent(loader.load());
             urlTabController = loader.getController();
         } catch (IOException e) {
             e.printStackTrace();
@@ -85,13 +94,16 @@ public class BodyTabController implements Initializable {
             request.setContentType(contentType);
             request.setBody(rawInputArea.getText());
         } else if (formTab.isSelected()) {
-            request.setStringTuples(urlTabController.getStringTuples());
-            request.setFileTuples(urlTabController.getFileTuples());
+            request.setStringTuples(formDataTabController.getStringTuples());
+            request.setFileTuples(formDataTabController.getFileTuples());
 
             request.setContentType(MediaType.MULTIPART_FORM_DATA);
         } else if (binaryTab.isSelected()) {
             request.setBody(filePathField.getText());
             request.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        } else if (urlTab.isSelected()) {
+            request.setStringTuples(urlTabController.getStringTuples());
+            request.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         }
         return request;
     }

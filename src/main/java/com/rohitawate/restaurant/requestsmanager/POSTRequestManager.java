@@ -29,6 +29,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -88,6 +89,16 @@ public class POSTRequestManager extends RequestManager {
                     case MediaType.APPLICATION_OCTET_STREAM:
                         InputStream stream = new FileInputStream(postRequest.getBody());
                         invocation = requestBuilder.buildPost(Entity.entity(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                        break;
+                    case MediaType.APPLICATION_FORM_URLENCODED:
+                        Form form = new Form();
+
+                        for (Map.Entry entry : postRequest.getStringTuples().entrySet()) {
+                            mapEntry = (Map.Entry) entry;
+                            form.param(mapEntry.getKey(), mapEntry.getValue());
+                        }
+
+                        invocation = requestBuilder.buildPost(Entity.form(form));
                         break;
                     default:
                         // Handles raw data types (JSON, Plain text, XML, HTML)

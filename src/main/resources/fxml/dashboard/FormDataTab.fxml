@@ -22,7 +22,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<VBox fx:id="headerTabContent" alignment="CENTER" stylesheets="@../../css/Default.css"
+<VBox fx:id="headerTabContent" alignment="CENTER" stylesheets="@../../css/Adreana.css"
       xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.rohitawate.restaurant.dashboard.FormDataTabController">
     <children>

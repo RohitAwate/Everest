@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.settings;
+package com.rohitawate.restaurant.util;
 
 /**
  * Holds default settings values which may
@@ -29,4 +29,6 @@ public class Settings {
 
     public static boolean connectionReadTimeOutEnable = false;
     public static int connectionReadTimeOut = 30000;
+
+    public static String theme;
 }

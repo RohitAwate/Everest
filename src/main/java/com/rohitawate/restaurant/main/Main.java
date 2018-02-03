@@ -15,7 +15,8 @@
  */
 package com.rohitawate.restaurant.main;
 
-import com.rohitawate.restaurant.settings.SettingsLoader;
+import com.rohitawate.restaurant.util.SettingsLoader;
+import com.rohitawate.restaurant.util.ThemeManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -28,8 +29,11 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         SettingsLoader settingsLoader = new SettingsLoader();
         settingsLoader.SettingsLoaderThread.join();
+
         Parent dashboard = FXMLLoader.load(getClass().getResource("/fxml/dashboard/Dashboard.fxml"));
 		Stage dashboardStage = new Stage();
+        ThemeManager.setTheme(dashboard);
+
         dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/LogoWithoutText.png").toExternalForm()));
 		dashboardStage.setScene(new Scene(dashboard));
 		dashboardStage.setTitle("RESTaurant");

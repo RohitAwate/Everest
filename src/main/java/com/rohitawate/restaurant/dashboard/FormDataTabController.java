@@ -16,6 +16,7 @@
 
 package com.rohitawate.restaurant.dashboard;
 
+import com.rohitawate.restaurant.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -50,6 +51,7 @@ public class FormDataTabController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/FileKeyValueField.fxml"));
             Parent headerField = loader.load();
+            ThemeManager.setTheme(headerField);
             FileKeyValueFieldController controller = loader.getController();
             fileControllers.add(controller);
             headersBox.getChildren().add(headerField);

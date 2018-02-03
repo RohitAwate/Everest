@@ -23,7 +23,8 @@ import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
 import com.rohitawate.restaurant.requestsmanager.POSTRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
-import com.rohitawate.restaurant.settings.Settings;
+import com.rohitawate.restaurant.util.Settings;
+import com.rohitawate.restaurant.util.ThemeManager;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -83,12 +84,14 @@ public class DashboardController implements Initializable {
             // Loading the headers tab
             FXMLLoader headerTabLoader = new FXMLLoader(getClass().getResource("/fxml/dashboard/HeaderTab.fxml"));
             Parent headerTabContent = headerTabLoader.load();
+            ThemeManager.setTheme(headerTabContent);
             headerTabController = headerTabLoader.getController();
             headersTab.setContent(headerTabContent);
 
             // Loading the body tab
             FXMLLoader bodyTabLoader = new FXMLLoader(getClass().getResource("/fxml/dashboard/BodyTab.fxml"));
             Parent bodyTabContent = bodyTabLoader.load();
+            ThemeManager.setTheme(bodyTabContent);
             bodyTabController = bodyTabLoader.getController();
             bodyTab.setContent(bodyTabContent);
         } catch (IOException IOE) {

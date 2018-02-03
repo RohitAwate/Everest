@@ -4,5 +4,6 @@
   "connectionTimeOutEnable": "false",
   "connectionTimeOut": "10000",
   "connectionReadTimeOutEnable": "false",
-  "connectionReadTimeOut": "30000"
+  "connectionReadTimeOut": "30000",
+  "theme": null
 }

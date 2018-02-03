@@ -32,10 +32,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -79,13 +76,12 @@ public class POSTRequestManager extends RequestManager {
                             mapEntry = (Map.Entry) entry;
                             filePath = mapEntry.getValue();
                             file = new File(filePath);
-                            /*
-                                Creating a stream only because it throws
-                                FileNotFoundException if file doesn't exist.
-                             */
-                            stream = new FileInputStream(file);
-                            formData.bodyPart(new FileDataBodyPart(mapEntry.getKey(),
-                                    file, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+
+                            if (file.exists())
+                                formData.bodyPart(new FileDataBodyPart(mapEntry.getKey(),
+                                        file, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                            else
+                                throw new FileNotFoundException();
                         }
 
                         formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);

@@ -17,9 +17,11 @@
 package com.rohitawate.restaurant.dashboard;
 
 import com.rohitawate.restaurant.models.requests.POSTRequest;
+import com.rohitawate.restaurant.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
@@ -61,7 +63,9 @@ public class BodyTabController implements Initializable {
             formDataTabController = loader.getController();
 
             loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/URLTab.fxml"));
-            urlTab.setContent(loader.load());
+            Parent formTabContent = loader.load();
+            ThemeManager.setTheme(formTabContent);
+            urlTab.setContent(formTabContent);
             urlTabController = loader.getController();
         } catch (IOException e) {
             e.printStackTrace();

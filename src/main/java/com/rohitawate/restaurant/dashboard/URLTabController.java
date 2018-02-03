@@ -16,6 +16,7 @@
 
 package com.rohitawate.restaurant.dashboard;
 
+import com.rohitawate.restaurant.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -45,10 +46,11 @@ public class URLTabController implements Initializable {
     private void addField() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/StringKeyValueField.fxml"));
-            Parent headerField = loader.load();
+            Parent parent = loader.load();
+            ThemeManager.setTheme(parent);
             StringKeyValueFieldController controller = loader.getController();
             controllers.add(controller);
-            fieldsBox.getChildren().add(headerField);
+            fieldsBox.getChildren().add(parent);
         } catch (IOException e) {
             e.printStackTrace();
         }

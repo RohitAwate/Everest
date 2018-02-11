@@ -32,9 +32,37 @@ public class StringKeyValueFieldController implements Initializable {
     @FXML
     private JFXCheckBox checkBox;
 
+    /*
+        Set to true when user manually un-checks the field
+        to prevent ChangeListeners from checking it again on further edits to the field.
+     */
+    private boolean uncheckedAlready = false;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        checkBox.disableProperty().bind(Bindings.or(keyField.textProperty().isEmpty(), valueField.textProperty().isEmpty()));
+        checkBox.disableProperty()
+                .bind(Bindings.or(keyField.textProperty().isEmpty(), valueField.textProperty().isEmpty()));
+        checkBox.disableProperty()
+                .addListener(observable -> {
+                    if (isChecked() && (keyField.getText().equals("") || valueField.getText().equals(""))) {
+                        checkBox.setSelected(false);
+                        uncheckedAlready = false;
+                    }
+                });
+        checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue == true && newValue == false)
+                uncheckedAlready = true;
+        });
+        valueField.textProperty()
+                .addListener(observable -> {
+                    if (!keyField.getText().equals("") && !valueField.getText().equals("") && !uncheckedAlready)
+                        checkBox.selectedProperty().set(true);
+                });
+        keyField.textProperty()
+                .addListener(observable -> {
+                    if (!keyField.getText().equals("") && !valueField.getText().equals("") && !uncheckedAlready)
+                        checkBox.selectedProperty().set(true);
+                });
     }
 
     public Pair<String, String> getHeader() {

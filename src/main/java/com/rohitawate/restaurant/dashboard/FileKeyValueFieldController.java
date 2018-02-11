@@ -34,17 +34,38 @@ public class FileKeyValueFieldController implements Initializable {
     @FXML
     private JFXCheckBox checkBox;
 
-    public Pair<String, String> getHeader() {
-        return new Pair<>(fileKeyField.getText(), fileValueField.getText());
-    }
+    /*
+        Set to true when user manually un-checks the field
+        to prevent ChangeListeners from checking it again on further edits to the field.
+     */
+    private boolean uncheckedAlready = false;
 
-    public boolean isChecked() {
-        return checkBox.isSelected();
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        checkBox.disableProperty().bind(Bindings.or(fileKeyField.textProperty().isEmpty(), fileValueField.textProperty().isEmpty()));
+        checkBox.disableProperty()
+                .bind(Bindings.or(fileKeyField.textProperty().isEmpty(), fileValueField.textProperty().isEmpty()));
+        checkBox.disableProperty()
+                .addListener(observable -> {
+                    if (isChecked() && (fileKeyField.getText().equals("") || fileValueField.getText().equals(""))) {
+                        checkBox.setSelected(false);
+                        uncheckedAlready = false;
+                    }
+                });
+        checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue == true && newValue == false)
+                uncheckedAlready = true;
+        });
+        fileValueField.textProperty()
+                .addListener(observable -> {
+                    if (!fileKeyField.getText().equals("") && !fileValueField.getText().equals("") && !uncheckedAlready)
+                        checkBox.selectedProperty().set(true);
+                });
+        fileKeyField.textProperty()
+                .addListener(observable -> {
+                    if (!fileKeyField.getText().equals("") && !fileValueField.getText().equals("") && !uncheckedAlready)
+                        checkBox.selectedProperty().set(true);
+                });
     }
 
     @FXML
@@ -59,5 +80,13 @@ public class FileKeyValueFieldController implements Initializable {
             filePath = "";
         }
         fileValueField.setText(filePath);
+    }
+
+    public Pair<String, String> getHeader() {
+        return new Pair<>(fileKeyField.getText(), fileValueField.getText());
+    }
+
+    public boolean isChecked() {
+        return checkBox.isSelected();
     }
 }

@@ -19,6 +19,7 @@ package com.rohitawate.restaurant.requestsmanager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import javafx.concurrent.Task;
@@ -32,7 +33,10 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -132,22 +136,22 @@ public class DataDispatchRequestManager extends RequestManager {
                 response.setTime(initialTime, System.currentTimeMillis());
 
                 if (serverResponse == null)
-                    throw new IOException();
+                    throw new UnreliableResponseException("The server did not respond.",
+                            "Like that crush from high school..");
                 else if (serverResponse.getStatus() == 301) {
-                    response.setStatusCode(301);
                     String newLocation = serverResponse.getHeaderString("location");
-                    String responseHelpText;
 
+                    String responseHelpText;
                     if (newLocation == null)
-                        responseHelpText = "The resource has been permanently moved to another location.\n\n" +
+                        responseHelpText = "The resource has been permanently moved to another location.\n" +
                                 "Here's what you can do:\n" +
                                 "- Find the new URL from the API documentation.\n" +
                                 "- Try using https instead of http if you're not already.";
                     else
-                        responseHelpText = "The resource has been permanently moved to: " + newLocation;
+                        responseHelpText = "The resource has been permanently moved to: " + newLocation +
+                                "\nRESTaurant doesn't automatically redirect your requests.";
 
-                    response.setBody(responseHelpText);
-                    return response;
+                    throw new UnreliableResponseException("301: Resource Moved Permanently", responseHelpText);
                 }
 
                 String type = (String) serverResponse.getHeaders().getFirst("Content-type");
@@ -156,22 +160,26 @@ public class DataDispatchRequestManager extends RequestManager {
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
-                switch (type.toLowerCase()) {
-                    case "application/json; charset=utf-8":
-                    case "application/json":
-                        JsonNode node = mapper.readTree(responseBody);
-                        response.setBody(mapper.writeValueAsString(node));
-                        break;
-                    case "application/xml; charset=utf-8":
-                    case "application/xml":
-                        response.setBody(mapper.writeValueAsString(responseBody));
-                        break;
-                    case "text/html":
-                    case "text/html; charset=utf-8":
-                        response.setBody(responseBody);
-                        break;
-                    default:
-                        response.setBody(responseBody);
+                if (type != null) {
+                    switch (type.toLowerCase()) {
+                        case "application/json; charset=utf-8":
+                        case "application/json":
+                            JsonNode node = mapper.readTree(responseBody);
+                            response.setBody(mapper.writeValueAsString(node));
+                            break;
+                        case "application/xml; charset=utf-8":
+                        case "application/xml":
+                            response.setBody(mapper.writeValueAsString(responseBody));
+                            break;
+                        case "text/html":
+                        case "text/html; charset=utf-8":
+                            response.setBody(responseBody);
+                            break;
+                        default:
+                            response.setBody(responseBody);
+                    }
+                } else {
+                    response.setBody("No body found in the response.");
                 }
 
                 response.setMediaType(serverResponse.getMediaType());

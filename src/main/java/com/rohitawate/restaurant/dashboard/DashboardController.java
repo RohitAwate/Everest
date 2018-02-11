@@ -17,6 +17,7 @@ package com.rohitawate.restaurant.dashboard;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.requests.DELETERequest;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.requests.GETRequest;
@@ -37,13 +38,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -115,6 +115,9 @@ public class DashboardController implements Initializable {
         snackBar = new JFXSnackbar(dashboard);
         bodyTab.disableProperty().bind(Bindings.and(httpMethodBox.valueProperty().isNotEqualTo("POST"),
                 httpMethodBox.valueProperty().isNotEqualTo("PUT")));
+
+        errorTitle.setText("Oops... That's embarrassing!");
+        errorDetails.setText("Something went wrong. Try to make another request.\nRestart RESTaurant if that doesn't work.");
     }
 
     @FXML
@@ -166,13 +169,18 @@ public class DashboardController implements Initializable {
                     });
                     requestManager.setOnFailed(e -> {
                         loadingLayer.setVisible(false);
-                        errorLayer.setVisible(true);
-                        Throwable exception = requestManager.getException().getCause();
+                        promptLayer.setVisible(false);
+                        Throwable exception = requestManager.getException();
 
-                        if (exception.getClass() == UnknownHostException.class) {
-                            errorTitle.setText("No Internet Connection");
-                            errorDetails.setText("Could not connect to the server. Please check your connection.");
+                        if (exception.getClass() == UnreliableResponseException.class) {
+                            UnreliableResponseException URE = (UnreliableResponseException) exception;
+                            errorTitle.setText(URE.getExceptionTitle());
+                            errorDetails.setText(URE.getExceptionDetails());
+                        } else if (exception.getClass() == ProcessingException.class) {
+                            errorTitle.setText("RESTaurant couldn't connect.");
+                            errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
                         }
+                        errorLayer.setVisible(true);
                         requestManager.reset();
                     });
                     requestManager.start();
@@ -213,11 +221,19 @@ public class DashboardController implements Initializable {
                     });
                     requestManager.setOnFailed(e -> {
                         loadingLayer.setVisible(false);
-                        promptLayer.setVisible(true);
-                        if (requestManager.getException().getClass() == ConnectException.class)
-                            snackBar.show("Request timed out. Server is unavailable or didn't respond.", 10000);
-                        else if (requestManager.getException().getClass() == FileNotFoundException.class)
+                        promptLayer.setVisible(false);
+                        Throwable exception = requestManager.getException();
+
+                        if (exception.getClass() == UnreliableResponseException.class) {
+                            UnreliableResponseException URE = (UnreliableResponseException) exception;
+                            errorTitle.setText(URE.getExceptionTitle());
+                            errorDetails.setText(URE.getExceptionDetails());
+                        } else if (exception.getClass() == ProcessingException.class) {
+                            errorTitle.setText("RESTaurant couldn't connect.");
+                            errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
+                        } else if (exception.getClass() == FileNotFoundException.class)
                             snackBar.show("File could not be found.", 5000);
+                        errorLayer.setVisible(true);
                         requestManager.reset();
                     });
                     requestManager.start();
@@ -253,13 +269,18 @@ public class DashboardController implements Initializable {
                     });
                     requestManager.setOnFailed(e -> {
                         loadingLayer.setVisible(false);
-                        errorLayer.setVisible(true);
-                        Throwable exception = requestManager.getException().getCause();
+                        promptLayer.setVisible(false);
+                        Throwable exception = requestManager.getException();
 
-                        if (exception.getClass() == UnknownHostException.class) {
+                        if (exception.getClass() == UnreliableResponseException.class) {
+                            UnreliableResponseException URE = (UnreliableResponseException) exception;
+                            errorTitle.setText(URE.getExceptionTitle());
+                            errorDetails.setText(URE.getExceptionDetails());
+                        } else if (exception.getClass() == ProcessingException.class) {
                             errorTitle.setText("No Internet Connection");
                             errorDetails.setText("Could not connect to the server. Please check your connection.");
                         }
+                        errorLayer.setVisible(true);
                         requestManager.reset();
                     });
                     requestManager.start();

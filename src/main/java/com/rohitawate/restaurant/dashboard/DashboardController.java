@@ -17,9 +17,11 @@ package com.rohitawate.restaurant.dashboard;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.restaurant.models.requests.DELETERequest;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.requests.GETRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
+import com.rohitawate.restaurant.requestsmanager.DELETERequestManager;
 import com.rohitawate.restaurant.requestsmanager.DataDispatchRequestManager;
 import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
@@ -108,7 +110,7 @@ public class DashboardController implements Initializable {
 
         paramsControllers = new ArrayList<>();
         appendedParams = new ArrayList<>();
-        addParam();
+        addParam(); // Adds a blank param field
 
         snackBar = new JFXSnackbar(dashboard);
         bodyTab.disableProperty().bind(Bindings.and(httpMethodBox.valueProperty().isNotEqualTo("POST"),
@@ -216,6 +218,48 @@ public class DashboardController implements Initializable {
                             snackBar.show("Request timed out. Server is unavailable or didn't respond.", 10000);
                         else if (requestManager.getException().getClass() == FileNotFoundException.class)
                             snackBar.show("File could not be found.", 5000);
+                        requestManager.reset();
+                    });
+                    requestManager.start();
+                    break;
+                case "DELETE":
+                    if (requestManager == null || requestManager.getClass() != DELETERequestManager.class)
+                        requestManager = new DELETERequestManager();
+                    else if (requestManager.isRunning()) {
+                        snackBar.show("Please wait while the current request is processed.", 3000);
+                        return;
+                    }
+
+                    DELETERequest deleteRequest = new DELETERequest(addressField.getText());
+                    deleteRequest.addHeaders(headerTabController.getHeaders());
+                    requestManager.setRequest(deleteRequest);
+                    cancelButton.setOnAction(e -> requestManager.cancel());
+                    requestManager.setOnRunning(e -> {
+                        responseArea.clear();
+                        errorLayer.setVisible(false);
+                        loadingLayer.setVisible(true);
+                    });
+                    requestManager.setOnSucceeded(e -> {
+                        updateDashboard(requestManager.getValue());
+                        errorLayer.setVisible(false);
+                        loadingLayer.setVisible(false);
+                        requestManager.reset();
+                    });
+                    requestManager.setOnCancelled(e -> {
+                        loadingLayer.setVisible(false);
+                        promptLayer.setVisible(true);
+                        snackBar.show("Request canceled.", 2000);
+                        requestManager.reset();
+                    });
+                    requestManager.setOnFailed(e -> {
+                        loadingLayer.setVisible(false);
+                        errorLayer.setVisible(true);
+                        Throwable exception = requestManager.getException().getCause();
+
+                        if (exception.getClass() == UnknownHostException.class) {
+                            errorTitle.setText("No Internet Connection");
+                            errorDetails.setText("Could not connect to the server. Please check your connection.");
+                        }
                         requestManager.reset();
                     });
                     requestManager.start();

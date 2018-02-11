@@ -20,21 +20,28 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-public class POSTRequest extends RestaurantRequest {
+/**
+ * Represents HTTP requests which contain data viz. POST and PUT.
+ */
+public class DataDispatchRequest extends RestaurantRequest {
+    private String requestType;
     private String body;
     private String contentType;
     private HashMap<String, String> stringTuples;
     private HashMap<String, String> fileTuples;
 
-    public POSTRequest() {
+    public DataDispatchRequest(String requestType) {
+        this.requestType = requestType;
     }
 
-    public POSTRequest(URL target) {
+    public DataDispatchRequest(URL target, String requestType) {
         super(target);
+        this.requestType = requestType;
     }
 
-    public POSTRequest(String target) throws MalformedURLException {
+    public DataDispatchRequest(String target, String requestType) throws MalformedURLException {
         super(target);
+        this.requestType = requestType;
     }
 
     public void setTarget(String target) throws MalformedURLException {
@@ -71,5 +78,9 @@ public class POSTRequest extends RestaurantRequest {
 
     public void setFileTuples(HashMap<String, String> fileTuples) {
         this.fileTuples = fileTuples;
+    }
+
+    public String getRequestType() {
+        return requestType;
     }
 }

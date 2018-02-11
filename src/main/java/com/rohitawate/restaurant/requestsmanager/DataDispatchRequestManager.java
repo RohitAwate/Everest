@@ -19,7 +19,7 @@ package com.rohitawate.restaurant.requestsmanager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.rohitawate.restaurant.models.requests.POSTRequest;
+import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import javafx.concurrent.Task;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -36,21 +36,27 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class POSTRequestManager extends RequestManager {
+/**
+ * Processes DataDispatchRequest by automatically determining whether it
+ * is a POST or a PUT request.
+ */
+public class DataDispatchRequestManager extends RequestManager {
     @Override
     protected Task<RestaurantResponse> createTask() {
         return new Task<RestaurantResponse>() {
             @Override
             protected RestaurantResponse call() throws Exception {
-                POSTRequest postRequest = (POSTRequest) request;
+                DataDispatchRequest dataDispatchRequest = (DataDispatchRequest) request;
+                String requestType = dataDispatchRequest.getRequestType();
+
                 RestaurantResponse response = new RestaurantResponse();
-                WebTarget target = client.target(request.getTarget().toString());
+                WebTarget target = client.target(dataDispatchRequest.getTarget().toString());
                 Map.Entry<String, String> mapEntry;
 
                 Builder requestBuilder = target.request();
 
                 // Add the headers to the request.
-                HashMap<String, String> headers = request.getHeaders();
+                HashMap<String, String> headers = dataDispatchRequest.getHeaders();
                 for (Map.Entry entry : headers.entrySet()) {
                     mapEntry = (Map.Entry) entry;
                     requestBuilder.header(mapEntry.getKey(), mapEntry.getValue());
@@ -58,11 +64,11 @@ public class POSTRequestManager extends RequestManager {
 
                 // Adds the request body based on the content type and generates an invocation.
                 Invocation invocation;
-                switch (postRequest.getContentType()) {
+                switch (dataDispatchRequest.getContentType()) {
                     case MediaType.MULTIPART_FORM_DATA:
                         FormDataMultiPart formData = new FormDataMultiPart();
 
-                        HashMap<String, String> pairs = postRequest.getStringTuples();
+                        HashMap<String, String> pairs = dataDispatchRequest.getStringTuples();
                         for (Map.Entry entry : pairs.entrySet()) {
                             mapEntry = (Map.Entry) entry;
                             formData.field(mapEntry.getKey(), mapEntry.getValue());
@@ -71,7 +77,7 @@ public class POSTRequestManager extends RequestManager {
                         String filePath;
                         File file;
                         InputStream stream;
-                        pairs = postRequest.getFileTuples();
+                        pairs = dataDispatchRequest.getFileTuples();
                         for (Map.Entry entry : pairs.entrySet()) {
                             mapEntry = (Map.Entry) entry;
                             filePath = mapEntry.getValue();
@@ -86,26 +92,39 @@ public class POSTRequestManager extends RequestManager {
 
                         formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
 
-                        invocation = requestBuilder.buildPost(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+                        if (requestType.equals("POST"))
+                            invocation = requestBuilder.buildPost(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+                        else
+                            invocation = requestBuilder.buildPut(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
                         break;
                     case MediaType.APPLICATION_OCTET_STREAM:
-                        stream = new FileInputStream(postRequest.getBody());
-                        invocation = requestBuilder.buildPost(Entity.entity(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                        stream = new FileInputStream(dataDispatchRequest.getBody());
+                        if (requestType.equals("POST"))
+                            invocation = requestBuilder.buildPost(Entity.entity(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                        else
+                            invocation = requestBuilder.buildPut(Entity.entity(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
                         break;
                     case MediaType.APPLICATION_FORM_URLENCODED:
                         Form form = new Form();
 
-                        for (Map.Entry entry : postRequest.getStringTuples().entrySet()) {
+                        for (Map.Entry entry : dataDispatchRequest.getStringTuples().entrySet()) {
                             mapEntry = (Map.Entry) entry;
                             form.param(mapEntry.getKey(), mapEntry.getValue());
                         }
 
-                        invocation = requestBuilder.buildPost(Entity.form(form));
+                        if (requestType.equals("POST"))
+                            invocation = requestBuilder.buildPost(Entity.form(form));
+                        else
+                            invocation = requestBuilder.buildPut(Entity.form(form));
                         break;
                     default:
                         // Handles raw data types (JSON, Plain text, XML, HTML)
-                        invocation = requestBuilder
-                                .buildPost(Entity.entity(postRequest.getBody(), postRequest.getContentType()));
+                        if (requestType.equals("POST"))
+                            invocation = requestBuilder
+                                    .buildPost(Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
+                        else
+                            invocation = requestBuilder
+                                    .buildPut(Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
                 }
 
                 long initialTime = System.currentTimeMillis();

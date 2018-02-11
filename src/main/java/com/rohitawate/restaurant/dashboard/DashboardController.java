@@ -17,11 +17,11 @@ package com.rohitawate.restaurant.dashboard;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.requests.GETRequest;
-import com.rohitawate.restaurant.models.requests.POSTRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
+import com.rohitawate.restaurant.requestsmanager.DataDispatchRequestManager;
 import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
-import com.rohitawate.restaurant.requestsmanager.POSTRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
 import com.rohitawate.restaurant.util.Settings;
 import com.rohitawate.restaurant.util.ThemeManager;
@@ -175,19 +175,22 @@ public class DashboardController implements Initializable {
                     });
                     requestManager.start();
                     break;
+                // DataDispatchRequestManager will generate appropriate request based on the type.
                 case "POST":
-                    if (requestManager == null || requestManager.getClass() != POSTRequestManager.class)
-                        requestManager = new POSTRequestManager();
+                case "PUT":
+                    if (requestManager == null || requestManager.getClass() != DataDispatchRequestManager.class)
+                        requestManager = new DataDispatchRequestManager();
                     else if (requestManager.isRunning()) {
                         snackBar.show("Please wait while the current request is processed.", 3000);
                         return;
                     }
 
-                    POSTRequest postRequest = bodyTabController.getBasicRequest();
-                    postRequest.setTarget(addressField.getText());
-                    postRequest.addHeaders(headerTabController.getHeaders());
+                    DataDispatchRequest dataDispatchRequest =
+                            (DataDispatchRequest) bodyTabController.getBasicRequest(httpMethodBox.getValue());
+                    dataDispatchRequest.setTarget(addressField.getText());
+                    dataDispatchRequest.addHeaders(headerTabController.getHeaders());
 
-                    requestManager.setRequest(postRequest);
+                    requestManager.setRequest(dataDispatchRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
                         responseArea.clear();
@@ -223,6 +226,7 @@ public class DashboardController implements Initializable {
         } catch (MalformedURLException MURLE) {
             snackBar.show("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
+            E.printStackTrace();
             errorLayer.setVisible(true);
             errorTitle.setText("Oops... That's embarrassing!");
             errorDetails.setText("Something went wrong. Try to make another request.\nRestart RESTaurant if that doesn't work.");

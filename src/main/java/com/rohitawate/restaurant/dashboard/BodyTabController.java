@@ -16,7 +16,8 @@
 
 package com.rohitawate.restaurant.dashboard;
 
-import com.rohitawate.restaurant.models.requests.POSTRequest;
+import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
+import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.util.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -75,8 +76,9 @@ public class BodyTabController implements Initializable {
     /**
      * Returns a RestaurantRequest object initialized with the request body.
      */
-    public POSTRequest getBasicRequest() {
-        POSTRequest request = new POSTRequest();
+    public RestaurantRequest getBasicRequest(String requestType) {
+        DataDispatchRequest request = new DataDispatchRequest(requestType);
+
         if (rawTab.isSelected()) {
             String contentType;
             switch (rawInputTypeBox.getValue()) {

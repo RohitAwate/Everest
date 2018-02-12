@@ -30,5 +30,5 @@ public class Settings {
     public static boolean connectionReadTimeOutEnable = false;
     public static int connectionReadTimeOut = 30000;
 
-    public static String theme;
+    public static String theme = "Adreana";
 }

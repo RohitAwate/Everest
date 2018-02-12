@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.dashboard;
+package com.rohitawate.restaurant.homewindow;
 
 import com.jfoenix.controls.JFXCheckBox;
 import javafx.beans.binding.Bindings;

@@ -30,7 +30,7 @@ public class Main extends Application {
         SettingsLoader settingsLoader = new SettingsLoader();
         settingsLoader.SettingsLoaderThread.join();
 
-        Parent dashboard = FXMLLoader.load(getClass().getResource("/fxml/dashboard/Dashboard.fxml"));
+        Parent dashboard = FXMLLoader.load(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
 		Stage dashboardStage = new Stage();
         ThemeManager.setTheme(dashboard);
 

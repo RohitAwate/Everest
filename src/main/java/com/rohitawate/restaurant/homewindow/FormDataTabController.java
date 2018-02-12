@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.dashboard;
+package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.util.ThemeManager;
 import javafx.fxml.FXML;
@@ -49,7 +49,7 @@ public class FormDataTabController implements Initializable {
     @FXML
     private void addFileField() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/FileKeyValueField.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/FileKeyValueField.fxml"));
             Parent headerField = loader.load();
             ThemeManager.setTheme(headerField);
             FileKeyValueFieldController controller = loader.getController();
@@ -63,7 +63,7 @@ public class FormDataTabController implements Initializable {
     @FXML
     private void addStringField() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/StringKeyValueField.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
             Parent headerField = loader.load();
             StringKeyValueFieldController controller = loader.getController();
             stringControllers.add(controller);

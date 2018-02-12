@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.dashboard;
+package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.util.ThemeManager;
 import javafx.fxml.FXML;
@@ -30,33 +30,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class URLTabController implements Initializable {
+public class HeaderTabController implements Initializable {
     @FXML
-    private VBox fieldsBox;
+    private VBox headersBox;
 
     private List<StringKeyValueFieldController> controllers;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         controllers = new ArrayList<>();
-        addField();
+        addHeader();
     }
 
     @FXML
-    private void addField() {
+    private void addHeader() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/StringKeyValueField.fxml"));
-            Parent parent = loader.load();
-            ThemeManager.setTheme(parent);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
+            Parent headerField = loader.load();
+            ThemeManager.setTheme(headerField);
             StringKeyValueFieldController controller = loader.getController();
             controllers.add(controller);
-            fieldsBox.getChildren().add(parent);
+            headersBox.getChildren().add(headerField);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public HashMap<String, String> getStringTuples() {
+    public HashMap<String, String> getHeaders() {
         HashMap<String, String> headers = new HashMap<>();
         for (StringKeyValueFieldController controller : controllers) {
             if (controller.isChecked())

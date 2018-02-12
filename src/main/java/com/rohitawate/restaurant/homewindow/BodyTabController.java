@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.dashboard;
+package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.requests.RestaurantRequest;
@@ -59,11 +59,11 @@ public class BodyTabController implements Initializable {
         rawInputTypeBox.getSelectionModel().select(0);
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/FormDataTab.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/FormDataTab.fxml"));
             formTab.setContent(loader.load());
             formDataTabController = loader.getController();
 
-            loader = new FXMLLoader(getClass().getResource("/fxml/dashboard/URLTab.fxml"));
+            loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/URLTab.fxml"));
             Parent formTabContent = loader.load();
             ThemeManager.setTheme(formTabContent);
             urlTab.setContent(formTabContent);

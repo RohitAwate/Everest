@@ -74,6 +74,14 @@
     -fx-background-color: black;
 }
 
+#homeWindowTabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
+    -fx-background-color: white;
+}
+
+#homeWindowTabPane:top .tab-header-area .headers-region .tab:selected:top {
+    -fx-background-color: orangered;
+}
+
 .tab-pane:top .tab-header-area {
     -fx-padding: 0;
 }
@@ -104,7 +112,7 @@
     -fx-background-color: #6a6a6a;
 }
 
-.tab-pane:top .tab-header-area .headers-region .tab:selected:top {
+#requestOptionsTab .tab-header-area .headers-region .tab:selected:top {
     -fx-background-color: #55a15c;
 }
 

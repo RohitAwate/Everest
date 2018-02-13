@@ -17,7 +17,7 @@ package com.rohitawate.restaurant.requestsmanager;
 
 import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
-import com.rohitawate.restaurant.util.Settings;
+import com.rohitawate.restaurant.util.settings.Settings;
 import javafx.concurrent.Service;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;

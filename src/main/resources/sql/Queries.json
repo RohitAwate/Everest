@@ -1,0 +1,7 @@
+{
+  "createRequestsTable": "CREATE TABLE IF NOT EXISTS Requests(ID INTEGER PRIMARY KEY, Type TEXT NOT NULL, Target TEXT NOT NULL, Date TEXT NOT NULL)",
+  "createHeadersTable": "CREATE TABLE IF NOT EXISTS Headers(ID INTEGER, Key TEXT NOT NULL, Value TEXT NOT NULL, FOREIGN KEY(ID) REFERENCES Requests(ID))",
+  "selectAllRequests": "SELECT * FROM Requests, Headers",
+  "saveRequest": "INSERT INTO Requests(Type, Target, Date) VALUES(?, ?, ?)",
+  "saveHeader": "INSERT INTO Headers(ID, Key, Value) VALUES(?, ?, ?)"
+}

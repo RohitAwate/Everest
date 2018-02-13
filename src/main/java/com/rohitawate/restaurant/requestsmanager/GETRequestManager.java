@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
+import com.rohitawate.restaurant.util.Services;
 import javafx.concurrent.Task;
 
 import javax.ws.rs.client.Invocation.Builder;
@@ -37,6 +38,8 @@ public class GETRequestManager extends RequestManager {
             protected RestaurantResponse call() throws Exception {
                 RestaurantResponse response = new RestaurantResponse();
                 WebTarget target = client.target(request.getTarget().toString());
+
+                Services.historyManager.saveHistory(request);
 
                 Builder requestBuilder = target.request();
 

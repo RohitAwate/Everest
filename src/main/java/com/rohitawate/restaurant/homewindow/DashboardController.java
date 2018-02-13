@@ -26,8 +26,8 @@ import com.rohitawate.restaurant.requestsmanager.DELETERequestManager;
 import com.rohitawate.restaurant.requestsmanager.DataDispatchRequestManager;
 import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
-import com.rohitawate.restaurant.util.Settings;
-import com.rohitawate.restaurant.util.ThemeManager;
+import com.rohitawate.restaurant.util.settings.Settings;
+import com.rohitawate.restaurant.util.themes.ThemeManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -172,6 +172,7 @@ public class DashboardController implements Initializable {
                         loadingLayer.setVisible(false);
                         promptLayer.setVisible(false);
                         Throwable exception = requestManager.getException();
+                        exception.printStackTrace();
 
                         if (exception.getClass() == UnreliableResponseException.class) {
                             UnreliableResponseException URE = (UnreliableResponseException) exception;
@@ -224,6 +225,7 @@ public class DashboardController implements Initializable {
                         loadingLayer.setVisible(false);
                         promptLayer.setVisible(false);
                         Throwable exception = requestManager.getException();
+                        exception.printStackTrace();
 
                         if (exception.getClass() == UnreliableResponseException.class) {
                             UnreliableResponseException URE = (UnreliableResponseException) exception;
@@ -272,6 +274,7 @@ public class DashboardController implements Initializable {
                         loadingLayer.setVisible(false);
                         promptLayer.setVisible(false);
                         Throwable exception = requestManager.getException();
+                        exception.printStackTrace();
 
                         if (exception.getClass() == UnreliableResponseException.class) {
                             UnreliableResponseException URE = (UnreliableResponseException) exception;

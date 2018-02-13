@@ -16,7 +16,7 @@
 
 package com.rohitawate.restaurant.homewindow;
 
-import com.rohitawate.restaurant.util.ThemeManager;
+import com.rohitawate.restaurant.util.themes.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;

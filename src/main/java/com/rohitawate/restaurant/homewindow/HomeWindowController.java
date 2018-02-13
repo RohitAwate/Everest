@@ -37,7 +37,7 @@ public class HomeWindowController implements Initializable {
     @FXML
     private TabPane homeWindowTabPane;
 
-    private KeyCombination ctrlN = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
+    private KeyCombination newTab = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -45,7 +45,7 @@ public class HomeWindowController implements Initializable {
         Platform.runLater(() -> {
             Scene thisScene = homeWindowTabPane.getScene();
             thisScene.setOnKeyPressed(e -> {
-                if (ctrlN.match(e))
+                if (newTab.match(e))
                     addTab();
             });
         });

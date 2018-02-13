@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
+import com.rohitawate.restaurant.util.Services;
 import javafx.concurrent.Task;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
@@ -52,6 +53,8 @@ public class DataDispatchRequestManager extends RequestManager {
             protected RestaurantResponse call() throws Exception {
                 DataDispatchRequest dataDispatchRequest = (DataDispatchRequest) request;
                 String requestType = dataDispatchRequest.getRequestType();
+
+                Services.historyManager.saveHistory(dataDispatchRequest);
 
                 RestaurantResponse response = new RestaurantResponse();
                 WebTarget target = client.target(dataDispatchRequest.getTarget().toString());

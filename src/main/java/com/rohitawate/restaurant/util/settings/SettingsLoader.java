@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.util;
+package com.rohitawate.restaurant.util.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rohitawate.restaurant.util.json.JSONUtils;
 
 import java.io.File;
 
@@ -51,9 +52,11 @@ public class SettingsLoader implements Runnable {
             if (Settings.connectionReadTimeOutEnable)
                 Settings.connectionReadTimeOut = nodes.get("connectionReadTimeOut").asInt();
 
-            Settings.theme = nodes.get("theme").toString();
+            Settings.theme = JSONUtils.trimString(nodes.get("theme").toString());
         } catch (Exception E) {
             System.out.println("Settings file not found. Loading default values...");
+        } finally {
+            System.out.println("Settings loaded.");
         }
     }
 }

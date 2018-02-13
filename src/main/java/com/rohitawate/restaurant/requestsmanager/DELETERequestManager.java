@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.requests.DELETERequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
+import com.rohitawate.restaurant.util.Services;
 import javafx.concurrent.Task;
 
 import javax.ws.rs.client.Invocation;
@@ -37,6 +38,8 @@ public class DELETERequestManager extends RequestManager {
             @Override
             protected RestaurantResponse call() throws Exception {
                 DELETERequest deleteRequest = (DELETERequest) request;
+
+                Services.historyManager.saveHistory(deleteRequest);
 
                 RestaurantResponse response = new RestaurantResponse();
                 WebTarget target = client.target(deleteRequest.getTarget().toString());

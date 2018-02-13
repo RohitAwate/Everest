@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.util;
+package com.rohitawate.restaurant.util.json;
 
-/**
- * Holds default settings values which may
- * get overwritten by SettingsLoader.
- */
-public class Settings {
-    public static String responseAreaFont = "\"Liberation Mono\"";
-    public static int responseAreaFontSize = 18;
-
-    public static boolean connectionTimeOutEnable = false;
-    public static int connectionTimeOut = 10000;
-
-    public static boolean connectionReadTimeOutEnable = false;
-    public static int connectionReadTimeOut = 30000;
-
-    public static String theme = "Adreana";
+public class JSONUtils {
+    /**
+     * Removes leading and trailing quotation marks from strings.
+     *
+     * @param input String with leading and trailing quotation marks.
+     * @return trimmedString - String with leading and trailing quotation marks removed.
+     */
+    public static String trimString(String input) {
+        return input.replaceAll("\"", "");
+    }
 }

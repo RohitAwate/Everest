@@ -16,13 +16,18 @@
 
 package com.rohitawate.restaurant.homewindow;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 
 import java.io.IOException;
 import java.net.URL;
@@ -32,9 +37,18 @@ public class HomeWindowController implements Initializable {
     @FXML
     private TabPane homeWindowTabPane;
 
+    private KeyCombination ctrlN = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         addTab();
+        Platform.runLater(() -> {
+            Scene thisScene = homeWindowTabPane.getScene();
+            thisScene.setOnKeyPressed(e -> {
+                if (ctrlN.match(e))
+                    addTab();
+            });
+        });
     }
 
     private void addTab() {

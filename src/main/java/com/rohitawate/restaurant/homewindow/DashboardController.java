@@ -130,6 +130,7 @@ public class DashboardController implements Initializable {
         try {
             String address = addressField.getText();
             if (address.equals("")) {
+                promptLayer.setVisible(true);
                 snackBar.show("Please enter an address.", 3000);
                 return;
             }

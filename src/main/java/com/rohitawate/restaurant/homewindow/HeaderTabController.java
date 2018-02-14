@@ -43,17 +43,38 @@ public class HeaderTabController implements Initializable {
     }
 
     @FXML
-    private void addHeader() {
+    public void addHeader(String key, String value) {
+        /*
+            Re-uses previous field if it is empty,
+            else loads a new one.
+         */
+        if (controllers.size() > 0) {
+            StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
+
+            if (previousController.isKeyFieldEmtpy() &&
+                    previousController.isValueFieldEmpty()) {
+                previousController.setKeyField(key);
+                previousController.setValueField(value);
+                return;
+            }
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
             Parent headerField = loader.load();
             ThemeManager.setTheme(headerField);
             StringKeyValueFieldController controller = loader.getController();
+            controller.setKeyField(key);
+            controller.setValueField(value);
             controllers.add(controller);
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addHeader() {
+        addHeader("", "");
     }
 
     public HashMap<String, String> getHeaders() {

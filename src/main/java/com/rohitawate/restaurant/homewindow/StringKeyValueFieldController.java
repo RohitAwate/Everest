@@ -72,4 +72,20 @@ public class StringKeyValueFieldController implements Initializable {
     public boolean isChecked() {
         return checkBox.isSelected();
     }
+
+    public void setKeyField(String key) {
+        keyField.setText(key);
+    }
+
+    public void setValueField(String value) {
+        valueField.setText(value);
+    }
+
+    public boolean isKeyFieldEmtpy() {
+        return keyField.getText().isEmpty();
+    }
+
+    public boolean isValueFieldEmpty() {
+        return valueField.getText().isEmpty();
+    }
 }

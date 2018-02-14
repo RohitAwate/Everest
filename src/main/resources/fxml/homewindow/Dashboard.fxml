@@ -51,7 +51,7 @@
                         <Insets right="20.0" />
                      </HBox.margin>
                   </ComboBox>
-                   <JFXButton fx:id="sendButton" buttonType="RAISED" defaultButton="true" onAction="#sendAction"
+                   <JFXButton fx:id="sendButton" buttonType="RAISED" defaultButton="true" onAction="#sendRequest"
                               prefHeight="39.0" prefWidth="100.0" text=" SEND" textFill="WHITE" HBox.hgrow="ALWAYS">
                      <padding>
                         <Insets bottom="5.0" left="15.0" right="15.0" top="5.0" />
@@ -91,7 +91,7 @@
                                                              <Insets/>
                                                          </VBox.margin>
                                                          <children>
-                                                             <JFXButton fx:id="newParamButton" onAction="#addParam"
+                                                             <JFXButton fx:id="newParamButton" onAction="#addParamField"
                                                                         text=" NEW PARAM" textFill="WHITE"
                                                                         HBox.hgrow="ALWAYS">
                                                                  <graphic>

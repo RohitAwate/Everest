@@ -16,11 +16,12 @@
 
 package com.rohitawate.restaurant.models.requests;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-public abstract class RestaurantRequest {
+public abstract class RestaurantRequest implements Serializable {
     URL target;
     private HashMap<String, String> headers;
 
@@ -43,7 +44,7 @@ public abstract class RestaurantRequest {
         headers.put(key, value);
     }
 
-    public void addHeaders(HashMap<String, String> headers) {
+    public void setHeaders(HashMap<String, String> headers) {
         this.headers = headers;
     }
 

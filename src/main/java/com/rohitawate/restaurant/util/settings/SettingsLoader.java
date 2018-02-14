@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohitawate.restaurant.util.json.JSONUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * Loads up custom values into Settings from settings.json.
@@ -36,7 +37,12 @@ public class SettingsLoader implements Runnable {
     @Override
     public void run() {
         try {
-            File settingsFile = new File("settings.json");
+            File settingsFile = new File("config/settings.json");
+
+            if (settingsFile.exists())
+                System.out.print("Settings file found. Loading settings... ");
+            else
+                throw new FileNotFoundException();
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode nodes = mapper.readTree(settingsFile);
@@ -54,9 +60,9 @@ public class SettingsLoader implements Runnable {
 
             Settings.theme = JSONUtils.trimString(nodes.get("theme").toString());
         } catch (Exception E) {
-            System.out.println("Settings file not found. Loading default values...");
+            System.out.print("Settings file not found. Loading default values... ");
         } finally {
-            System.out.println("Settings loaded.");
+            System.out.println("Successful");
         }
     }
 }

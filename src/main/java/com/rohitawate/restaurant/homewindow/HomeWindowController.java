@@ -16,6 +16,7 @@
 
 package com.rohitawate.restaurant.homewindow;
 
+import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -28,9 +29,12 @@ import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.stage.Stage;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class HomeWindowController implements Initializable {
@@ -38,25 +42,35 @@ public class HomeWindowController implements Initializable {
     private TabPane homeWindowTabPane;
 
     private KeyCombination newTab = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
+    private List<DashboardController> controllers;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        addTab();
+        controllers = new ArrayList<>();
+        recoverState();
         Platform.runLater(() -> {
             Scene thisScene = homeWindowTabPane.getScene();
             thisScene.setOnKeyPressed(e -> {
                 if (newTab.match(e))
                     addTab();
             });
+            Stage thisStage = (Stage) thisScene.getWindow();
+            thisStage.setOnCloseRequest(e -> saveState());
         });
     }
 
     private void addTab() {
+        addTab(null);
+    }
+
+    private void addTab(RestaurantRequest request) {
         try {
             Tab newTab = new Tab();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
             Parent dashboard = loader.load();
             DashboardController controller = loader.getController();
+            if (request != null)
+                controller.setState(request);
             newTab.setContent(dashboard);
             newTab.textProperty().bind(Bindings
                     .when(controller.getAddressProperty().isNotEmpty())
@@ -65,10 +79,61 @@ public class HomeWindowController implements Initializable {
             newTab.setOnCloseRequest(e -> {
                 if (homeWindowTabPane.getTabs().size() == 1)
                     addTab();
+                controllers.remove(controller);
             });
             homeWindowTabPane.getTabs().add(newTab);
+            controllers.add(controller);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void saveState() {
+        List<RestaurantRequest> states = new ArrayList<>();
+
+        // Get the states of all the tabs
+        for (DashboardController controller : controllers)
+            states.add(controller.getState());
+
+        try {
+            File configFolder = new File("config/");
+            if (!configFolder.exists())
+                configFolder.mkdir();
+
+            OutputStream fileStream = new FileOutputStream("config/restaurant.state");
+            ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+            objectStream.writeObject(states);
+            objectStream.close();
+            System.out.println("Application state saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Failed to save the application's state:");
+            e.printStackTrace();
+        }
+    }
+
+    private void recoverState() {
+        try {
+            InputStream fileStream = new FileInputStream("config/restaurant.state");
+            ObjectInputStream objectStream = new ObjectInputStream(fileStream);
+
+            System.out.print("Application state file found. Recovering state... ");
+
+            List<RestaurantRequest> states = (List<RestaurantRequest>) objectStream.readObject();
+
+            if (states.size() > 0) {
+                for (RestaurantRequest request : states)
+                    addTab(request);
+            } else {
+                addTab();
+            }
+        } catch (FileNotFoundException e) {
+            System.out.print("Application state file not found. Loading default state... ");
+            addTab();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.print("Application state file is possibly corrupted. Could not recover the state.\nLoading default state... ");
+            addTab();
+        } finally {
+            System.out.println("Successful");
         }
     }
 }

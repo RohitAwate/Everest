@@ -21,6 +21,7 @@ import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.requests.DELETERequest;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.requests.GETRequest;
+import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import com.rohitawate.restaurant.requestsmanager.DELETERequestManager;
 import com.rohitawate.restaurant.requestsmanager.DataDispatchRequestManager;
@@ -47,6 +48,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
@@ -81,7 +83,7 @@ public class DashboardController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        applySettings();
+        applyDashboardSettings();
 
         try {
             // Loading the headers tab
@@ -110,7 +112,7 @@ public class DashboardController implements Initializable {
 
         paramsControllers = new ArrayList<>();
         appendedParams = new ArrayList<>();
-        addParam(); // Adds a blank param field
+        addParamField(); // Adds a blank param field
 
         snackBar = new JFXSnackbar(dashboard);
         bodyTab.disableProperty().bind(Bindings.and(httpMethodBox.valueProperty().isNotEqualTo("POST"),
@@ -121,7 +123,7 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    private void sendAction() {
+    private void sendRequest() {
         promptLayer.setVisible(false);
         if (responseBox.getChildren().size() == 2) {
             responseBox.getChildren().remove(0);
@@ -148,7 +150,7 @@ public class DashboardController implements Initializable {
                     }
 
                     GETRequest getRequest = new GETRequest(addressField.getText());
-                    getRequest.addHeaders(headerTabController.getHeaders());
+                    getRequest.setHeaders(headerTabController.getHeaders());
                     requestManager.setRequest(getRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
@@ -200,7 +202,7 @@ public class DashboardController implements Initializable {
                     DataDispatchRequest dataDispatchRequest =
                             (DataDispatchRequest) bodyTabController.getBasicRequest(httpMethodBox.getValue());
                     dataDispatchRequest.setTarget(addressField.getText());
-                    dataDispatchRequest.addHeaders(headerTabController.getHeaders());
+                    dataDispatchRequest.setHeaders(headerTabController.getHeaders());
 
                     requestManager.setRequest(dataDispatchRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
@@ -250,7 +252,7 @@ public class DashboardController implements Initializable {
                     }
 
                     DELETERequest deleteRequest = new DELETERequest(addressField.getText());
-                    deleteRequest.addHeaders(headerTabController.getHeaders());
+                    deleteRequest.setHeaders(headerTabController.getHeaders());
                     requestManager.setRequest(deleteRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     requestManager.setOnRunning(e -> {
@@ -312,7 +314,7 @@ public class DashboardController implements Initializable {
         responseSize.setText(Integer.toString(response.getSize()) + " B");
     }
 
-    private void applySettings() {
+    private void applyDashboardSettings() {
         String responseAreaCSS = "-fx-font-family: " + Settings.responseAreaFont + ";" +
                 "-fx-font-size: " + Settings.responseAreaFontSize;
         responseArea.setStyle(responseAreaCSS);
@@ -342,7 +344,7 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    private void addParam() {
+    private void addParamField() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
             Parent headerField = loader.load();
@@ -356,5 +358,36 @@ public class DashboardController implements Initializable {
 
     public StringProperty getAddressProperty() {
         return addressField.textProperty();
+    }
+
+    // Returns the current state of the Dashboard
+    public RestaurantRequest getState() {
+        try {
+            switch (httpMethodBox.getValue()) {
+                case "GET":
+                    GETRequest getRequest = new GETRequest(addressField.getText());
+                    getRequest.setHeaders(headerTabController.getHeaders());
+                    return getRequest;
+                case "POST":
+                case "PUT":
+                    DataDispatchRequest dataDispatchRequest = bodyTabController.getBasicRequest(httpMethodBox.getValue());
+                    dataDispatchRequest.setHeaders(headerTabController.getHeaders());
+                    return dataDispatchRequest;
+                case "DELETE":
+                    DELETERequest deleteRequest = new DELETERequest(addressField.getText());
+                    deleteRequest.setHeaders(headerTabController.getHeaders());
+                    return deleteRequest;
+            }
+        } catch (MalformedURLException MURLE) {
+            System.out.println("Dashboard state was saved with a malformed URL.");
+        }
+        return null;
+    }
+
+    public void setState(RestaurantRequest request) {
+        addressField.setText(request.getTarget().toString());
+
+        for (Map.Entry entry : request.getHeaders().entrySet())
+            headerTabController.addHeader(entry.getKey().toString(), entry.getValue().toString());
     }
 }

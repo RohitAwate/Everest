@@ -24,7 +24,7 @@ import com.rohitawate.restaurant.models.requests.GETRequest;
 import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.util.json.JSONUtils;
 
-import java.io.File;
+import java.io.InputStream;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.Map;
@@ -36,10 +36,10 @@ public class HistoryManager {
 
     public HistoryManager() {
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:requests.sqlite");
+            conn = DriverManager.getConnection("jdbc:sqlite:history.sqlite");
 
             // Read all queries from Queries.json
-            File queriesFile = new File(getClass().getResource("/sql/Queries.json").toURI());
+            InputStream queriesFile = getClass().getResourceAsStream("/sql/Queries.json");
             ObjectMapper mapper = new ObjectMapper();
             queries = mapper.readTree(queriesFile);
 

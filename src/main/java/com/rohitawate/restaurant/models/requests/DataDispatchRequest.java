@@ -16,36 +16,24 @@
 
 package com.rohitawate.restaurant.models.requests;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
  * Represents HTTP requests which contain data viz. POST and PUT.
  */
-public class DataDispatchRequest extends RestaurantRequest {
+public class DataDispatchRequest extends RestaurantRequest implements Serializable {
     private String requestType;
     private String body;
     private String contentType;
     private HashMap<String, String> stringTuples;
     private HashMap<String, String> fileTuples;
 
+    public DataDispatchRequest() {
+    }
+
     public DataDispatchRequest(String requestType) {
         this.requestType = requestType;
-    }
-
-    public DataDispatchRequest(URL target, String requestType) {
-        super(target);
-        this.requestType = requestType;
-    }
-
-    public DataDispatchRequest(String target, String requestType) throws MalformedURLException {
-        super(target);
-        this.requestType = requestType;
-    }
-
-    public void setTarget(String target) throws MalformedURLException {
-        this.target = new URL(target);
     }
 
     public String getBody() {

@@ -48,11 +48,17 @@ public class FormDataTabController implements Initializable {
 
     @FXML
     private void addFileField() {
+        addFileField("", "");
+    }
+
+    public void addFileField(String key, String value) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/FileKeyValueField.fxml"));
             Parent headerField = loader.load();
             ThemeManager.setTheme(headerField);
             FileKeyValueFieldController controller = loader.getController();
+            controller.setFileKeyField(key);
+            controller.setFileValueField(value);
             fileControllers.add(controller);
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
@@ -62,10 +68,16 @@ public class FormDataTabController implements Initializable {
 
     @FXML
     private void addStringField() {
+        addStringField("", "");
+    }
+
+    public void addStringField(String key, String value) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
             Parent headerField = loader.load();
             StringKeyValueFieldController controller = loader.getController();
+            controller.setKeyField(key);
+            controller.setValueField(value);
             stringControllers.add(controller);
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {

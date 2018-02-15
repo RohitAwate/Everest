@@ -16,22 +16,21 @@
 
 package com.rohitawate.restaurant.homewindow;
 
+import com.rohitawate.restaurant.models.DashboardState;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.util.themes.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /*
@@ -40,6 +39,8 @@ import java.util.ResourceBundle;
     URL encoded and Form tabs have special FXMLs.
  */
 public class BodyTabController implements Initializable {
+    @FXML
+    private TabPane bodyTabPane;
     @FXML
     private ComboBox<String> rawInputTypeBox;
     @FXML
@@ -101,7 +102,6 @@ public class BodyTabController implements Initializable {
         } else if (formTab.isSelected()) {
             request.setStringTuples(formDataTabController.getStringTuples());
             request.setFileTuples(formDataTabController.getFileTuples());
-
             request.setContentType(MediaType.MULTIPART_FORM_DATA);
         } else if (binaryTab.isSelected()) {
             request.setBody(filePathField.getText());
@@ -125,5 +125,49 @@ public class BodyTabController implements Initializable {
             filePath = "";
         }
         filePathField.setText(filePath);
+    }
+
+    public void setState(DashboardState dashboardState) {
+        switch (dashboardState.getContentType()) {
+            case MediaType.TEXT_PLAIN:
+                rawInputArea.setText(dashboardState.getBody());
+                rawInputTypeBox.getSelectionModel().select("PLAIN TEXT");
+                bodyTabPane.getSelectionModel().select(rawTab);
+                break;
+            case MediaType.APPLICATION_JSON:
+                rawInputArea.setText(dashboardState.getBody());
+                rawInputTypeBox.getSelectionModel().select("JSON");
+                bodyTabPane.getSelectionModel().select(rawTab);
+                break;
+            case MediaType.APPLICATION_XML:
+                rawInputArea.setText(dashboardState.getBody());
+                rawInputTypeBox.getSelectionModel().select("XML");
+                bodyTabPane.getSelectionModel().select(rawTab);
+                break;
+            case MediaType.TEXT_HTML:
+                rawInputArea.setText(dashboardState.getBody());
+                rawInputTypeBox.getSelectionModel().select("HTML");
+                bodyTabPane.getSelectionModel().select(rawTab);
+                break;
+            case MediaType.MULTIPART_FORM_DATA:
+                // For file tuples
+                for (Map.Entry entry : dashboardState.getFileTuples().entrySet())
+                    formDataTabController.addFileField(entry.getKey().toString(), entry.getValue().toString());
+
+                // For string tuples
+                for (Map.Entry entry : dashboardState.getStringTuples().entrySet())
+                    formDataTabController.addStringField(entry.getKey().toString(), entry.getValue().toString());
+                bodyTabPane.getSelectionModel().select(formTab);
+                break;
+            case MediaType.APPLICATION_OCTET_STREAM:
+                filePathField.setText(dashboardState.getBody());
+                bodyTabPane.getSelectionModel().select(binaryTab);
+                break;
+            case MediaType.APPLICATION_FORM_URLENCODED:
+                for (Map.Entry entry : dashboardState.getStringTuples().entrySet())
+                    urlTabController.addField(entry.getKey().toString(), entry.getValue().toString());
+                bodyTabPane.getSelectionModel().select(urlTab);
+                break;
+        }
     }
 }

@@ -89,4 +89,12 @@ public class FileKeyValueFieldController implements Initializable {
     public boolean isChecked() {
         return checkBox.isSelected();
     }
+
+    public void setFileKeyField(String key) {
+        fileKeyField.setText(key);
+    }
+
+    public void setFileValueField(String value) {
+        fileValueField.setText(value);
+    }
 }

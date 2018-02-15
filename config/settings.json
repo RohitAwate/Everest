@@ -1,9 +1,0 @@
-{
-  "responseAreaFont": "Liberation Mono",
-  "responseAreaFontSize": "18",
-  "connectionTimeOutEnable": "false",
-  "connectionTimeOut": "10000",
-  "connectionReadTimeOutEnable": "false",
-  "connectionReadTimeOut": "30000",
-  "theme": null
-}

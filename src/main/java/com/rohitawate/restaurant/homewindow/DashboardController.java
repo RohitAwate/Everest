@@ -18,10 +18,10 @@ package com.rohitawate.restaurant.homewindow;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
+import com.rohitawate.restaurant.models.DashboardState;
 import com.rohitawate.restaurant.models.requests.DELETERequest;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.requests.GETRequest;
-import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import com.rohitawate.restaurant.requestsmanager.DELETERequestManager;
 import com.rohitawate.restaurant.requestsmanager.DataDispatchRequestManager;
@@ -46,10 +46,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class DashboardController implements Initializable {
     @FXML
@@ -103,12 +100,12 @@ public class DashboardController implements Initializable {
             IOE.printStackTrace();
         }
 
+        // Select GET by default
+        httpMethodBox.getSelectionModel().select("GET");
+
         responseBox.getChildren().remove(0);
         promptLayer.setVisible(true);
         httpMethodBox.getItems().addAll(httpMethods);
-
-        // Selects GET by default
-        httpMethodBox.getSelectionModel().select(0);
 
         paramsControllers = new ArrayList<>();
         appendedParams = new ArrayList<>();
@@ -200,7 +197,7 @@ public class DashboardController implements Initializable {
                     }
 
                     DataDispatchRequest dataDispatchRequest =
-                            (DataDispatchRequest) bodyTabController.getBasicRequest(httpMethodBox.getValue());
+                            bodyTabController.getBasicRequest(httpMethodBox.getValue());
                     dataDispatchRequest.setTarget(addressField.getText());
                     dataDispatchRequest.setHeaders(headerTabController.getHeaders());
 
@@ -343,12 +340,43 @@ public class DashboardController implements Initializable {
         }
     }
 
+    private HashMap<String, String> getParams() {
+        HashMap<String, String> params = new HashMap<>();
+
+        for (StringKeyValueFieldController controller : paramsControllers)
+            params.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+
+        return params;
+    }
+
     @FXML
     private void addParamField() {
+        addParamField("", "");
+    }
+
+    // Adds a new URL-parameter field
+    private void addParamField(String key, String value) {
+        /*
+            Re-uses previous field if it is empty,
+            else loads a new one.
+         */
+        if (paramsControllers.size() > 0) {
+            StringKeyValueFieldController previousController = paramsControllers.get(paramsControllers.size() - 1);
+
+            if (previousController.isKeyFieldEmtpy() &&
+                    previousController.isValueFieldEmpty()) {
+                previousController.setKeyField(key);
+                previousController.setValueField(value);
+                return;
+            }
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
             Parent headerField = loader.load();
             StringKeyValueFieldController controller = loader.getController();
+            controller.setKeyField(key);
+            controller.setValueField(value);
             paramsControllers.add(controller);
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {
@@ -360,34 +388,55 @@ public class DashboardController implements Initializable {
         return addressField.textProperty();
     }
 
-    // Returns the current state of the Dashboard
-    public RestaurantRequest getState() {
+    /**
+     * Returns the current state of the Dashboard
+     *
+     * @return DashboardState - Current state of the Dashboard
+     */
+    public DashboardState getState() {
+        DashboardState dashboardState = null;
         try {
             switch (httpMethodBox.getValue()) {
-                case "GET":
-                    GETRequest getRequest = new GETRequest(addressField.getText());
-                    getRequest.setHeaders(headerTabController.getHeaders());
-                    return getRequest;
                 case "POST":
                 case "PUT":
-                    DataDispatchRequest dataDispatchRequest = bodyTabController.getBasicRequest(httpMethodBox.getValue());
-                    dataDispatchRequest.setHeaders(headerTabController.getHeaders());
-                    return dataDispatchRequest;
-                case "DELETE":
-                    DELETERequest deleteRequest = new DELETERequest(addressField.getText());
-                    deleteRequest.setHeaders(headerTabController.getHeaders());
-                    return deleteRequest;
+                    dashboardState = new DashboardState(bodyTabController.getBasicRequest(httpMethodBox.getValue()));
+                    dashboardState.setHeaders(headerTabController.getHeaders());
+                    break;
+                default:
+                    // For GET, DELETE requests
+                    dashboardState = new DashboardState();
             }
+
+            dashboardState.setTarget(addressField.getText());
+            dashboardState.setHttpMethod(httpMethodBox.getValue());
+            dashboardState.setHeaders(headerTabController.getHeaders());
+            dashboardState.setParams(getParams());
         } catch (MalformedURLException MURLE) {
             System.out.println("Dashboard state was saved with a malformed URL.");
         }
-        return null;
+        return dashboardState;
     }
 
-    public void setState(RestaurantRequest request) {
-        addressField.setText(request.getTarget().toString());
+    /**
+     * Sets the Dashboard to the given application state.
+     *
+     * @param dashboardState - State of the dashboard
+     */
+    public void setState(DashboardState dashboardState) {
+        if (dashboardState.getTarget() != null)
+            addressField.setText(dashboardState.getTarget().toString());
 
-        for (Map.Entry entry : request.getHeaders().entrySet())
-            headerTabController.addHeader(entry.getKey().toString(), entry.getValue().toString());
+        httpMethodBox.getSelectionModel().select(dashboardState.getHttpMethod());
+
+        if (dashboardState.getHeaders() != null)
+            for (Map.Entry entry : dashboardState.getHeaders().entrySet())
+                headerTabController.addHeader(entry.getKey().toString(), entry.getValue().toString());
+
+        if (dashboardState.getParams() != null)
+            for (Map.Entry entry : dashboardState.getParams().entrySet())
+                addParamField(entry.getKey().toString(), entry.getValue().toString());
+
+        if (httpMethodBox.getValue().equals("POST") || httpMethodBox.getValue().equals("PUT"))
+            bodyTabController.setState(dashboardState);
     }
 }

@@ -44,11 +44,17 @@ public class URLTabController implements Initializable {
 
     @FXML
     private void addField() {
+        addField("", "");
+    }
+
+    public void addField(String key, String value) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
             Parent parent = loader.load();
             ThemeManager.setTheme(parent);
             StringKeyValueFieldController controller = loader.getController();
+            controller.setKeyField(key);
+            controller.setValueField(value);
             controllers.add(controller);
             fieldsBox.getChildren().add(parent);
         } catch (IOException e) {

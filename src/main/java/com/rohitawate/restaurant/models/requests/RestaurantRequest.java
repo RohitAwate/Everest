@@ -22,7 +22,7 @@ import java.net.URL;
 import java.util.HashMap;
 
 public abstract class RestaurantRequest implements Serializable {
-    URL target;
+    private URL target;
     private HashMap<String, String> headers;
 
     RestaurantRequest() {
@@ -36,8 +36,12 @@ public abstract class RestaurantRequest implements Serializable {
         this.target = target;
     }
 
+    public void setTarget(String target) throws MalformedURLException {
+        this.target = new URL(target);
+    }
+
     public URL getTarget() {
-        return target;
+        return this.target;
     }
 
     public void addHeader(String key, String value) {

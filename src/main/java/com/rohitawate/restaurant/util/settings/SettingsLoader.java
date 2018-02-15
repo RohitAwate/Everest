@@ -60,9 +60,9 @@ public class SettingsLoader implements Runnable {
 
             Settings.theme = JSONUtils.trimString(nodes.get("theme").toString());
         } catch (Exception E) {
-            System.out.print("Settings file not found. Loading default values... ");
+            System.out.println("Settings file not found. Loading default values... ");
         } finally {
-            System.out.println("Successful");
+            System.out.println("Settings loaded.");
         }
     }
 }

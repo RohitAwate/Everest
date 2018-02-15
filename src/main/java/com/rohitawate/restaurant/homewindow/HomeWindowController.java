@@ -16,7 +16,7 @@
 
 package com.rohitawate.restaurant.homewindow;
 
-import com.rohitawate.restaurant.models.requests.RestaurantRequest;
+import com.rohitawate.restaurant.models.DashboardState;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -63,14 +63,14 @@ public class HomeWindowController implements Initializable {
         addTab(null);
     }
 
-    private void addTab(RestaurantRequest request) {
+    private void addTab(DashboardState dashboardState) {
         try {
             Tab newTab = new Tab();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
             Parent dashboard = loader.load();
             DashboardController controller = loader.getController();
-            if (request != null)
-                controller.setState(request);
+            if (dashboardState != null)
+                controller.setState(dashboardState);
             newTab.setContent(dashboard);
             newTab.textProperty().bind(Bindings
                     .when(controller.getAddressProperty().isNotEmpty())
@@ -89,11 +89,11 @@ public class HomeWindowController implements Initializable {
     }
 
     private void saveState() {
-        List<RestaurantRequest> states = new ArrayList<>();
+        List<DashboardState> dashboardStates = new ArrayList<>();
 
         // Get the states of all the tabs
         for (DashboardController controller : controllers)
-            states.add(controller.getState());
+            dashboardStates.add(controller.getState());
 
         try {
             File configFolder = new File("config/");
@@ -102,8 +102,9 @@ public class HomeWindowController implements Initializable {
 
             OutputStream fileStream = new FileOutputStream("config/restaurant.state");
             ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
-            objectStream.writeObject(states);
+            objectStream.writeObject(dashboardStates);
             objectStream.close();
+            fileStream.close();
             System.out.println("Application state saved successfully.");
         } catch (IOException e) {
             System.out.println("Failed to save the application's state:");
@@ -116,24 +117,26 @@ public class HomeWindowController implements Initializable {
             InputStream fileStream = new FileInputStream("config/restaurant.state");
             ObjectInputStream objectStream = new ObjectInputStream(fileStream);
 
-            System.out.print("Application state file found. Recovering state... ");
+            System.out.println("Application state file found. Recovering state... ");
 
-            List<RestaurantRequest> states = (List<RestaurantRequest>) objectStream.readObject();
+            List<DashboardState> dashboardStates = (List<DashboardState>) objectStream.readObject();
+            objectStream.close();
+            fileStream.close();
 
-            if (states.size() > 0) {
-                for (RestaurantRequest request : states)
-                    addTab(request);
+            if (dashboardStates.size() > 0) {
+                for (DashboardState dashboardState : dashboardStates)
+                    addTab(dashboardState);
             } else {
                 addTab();
             }
         } catch (FileNotFoundException e) {
-            System.out.print("Application state file not found. Loading default state... ");
+            System.out.println("Application state file not found. Loading default state... ");
             addTab();
         } catch (IOException | ClassNotFoundException e) {
-            System.out.print("Application state file is possibly corrupted. Could not recover the state.\nLoading default state... ");
+            System.out.println("Application state file is possibly corrupted. Could not recover the state.\nLoading default state... ");
             addTab();
         } finally {
-            System.out.println("Successful");
+            System.out.println("Application loaded.");
         }
     }
 }

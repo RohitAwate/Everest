@@ -51,7 +51,7 @@ public class HeaderTabController implements Initializable {
         if (controllers.size() > 0) {
             StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
 
-            if (previousController.isKeyFieldEmtpy() &&
+            if (previousController.isKeyFieldEmpty() &&
                     previousController.isValueFieldEmpty()) {
                 previousController.setKeyField(key);
                 previousController.setValueField(value);

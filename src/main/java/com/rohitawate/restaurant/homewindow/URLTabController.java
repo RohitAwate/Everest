@@ -48,6 +48,21 @@ public class URLTabController implements Initializable {
     }
 
     public void addField(String key, String value) {
+        /*
+            Re-uses previous field if it is empty,
+            else loads a new one.
+         */
+        if (controllers.size() > 0) {
+            StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
+
+            if (previousController.isKeyFieldEmpty() &&
+                    previousController.isValueFieldEmpty()) {
+                previousController.setKeyField(key);
+                previousController.setValueField(value);
+                return;
+            }
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
             Parent parent = loader.load();

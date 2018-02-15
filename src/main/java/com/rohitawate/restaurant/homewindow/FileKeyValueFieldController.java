@@ -97,4 +97,12 @@ public class FileKeyValueFieldController implements Initializable {
     public void setFileValueField(String value) {
         fileValueField.setText(value);
     }
+
+    public boolean isFileKeyFieldEmpty() {
+        return fileKeyField.getText().isEmpty();
+    }
+
+    public boolean isFileValueFieldEmpty() {
+        return fileValueField.getText().isEmpty();
+    }
 }

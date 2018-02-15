@@ -363,7 +363,7 @@ public class DashboardController implements Initializable {
         if (paramsControllers.size() > 0) {
             StringKeyValueFieldController previousController = paramsControllers.get(paramsControllers.size() - 1);
 
-            if (previousController.isKeyFieldEmtpy() &&
+            if (previousController.isKeyFieldEmpty() &&
                     previousController.isValueFieldEmpty()) {
                 previousController.setKeyField(key);
                 previousController.setValueField(value);

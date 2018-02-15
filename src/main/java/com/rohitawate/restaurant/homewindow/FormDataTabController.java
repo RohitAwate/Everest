@@ -52,6 +52,21 @@ public class FormDataTabController implements Initializable {
     }
 
     public void addFileField(String key, String value) {
+        /*
+            Re-uses previous field if it is empty,
+            else loads a new one.
+         */
+        if (fileControllers.size() > 0) {
+            FileKeyValueFieldController previousController = fileControllers.get(fileControllers.size() - 1);
+
+            if (previousController.isFileKeyFieldEmpty() &&
+                    previousController.isFileValueFieldEmpty()) {
+                previousController.setFileKeyField(key);
+                previousController.setFileValueField(value);
+                return;
+            }
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/FileKeyValueField.fxml"));
             Parent headerField = loader.load();
@@ -72,6 +87,21 @@ public class FormDataTabController implements Initializable {
     }
 
     public void addStringField(String key, String value) {
+        /*
+            Re-uses previous field if it is empty,
+            else loads a new one.
+         */
+        if (stringControllers.size() > 0) {
+            StringKeyValueFieldController previousController = stringControllers.get(stringControllers.size() - 1);
+
+            if (previousController.isKeyFieldEmpty() &&
+                    previousController.isValueFieldEmpty()) {
+                previousController.setKeyField(key);
+                previousController.setValueField(value);
+                return;
+            }
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
             Parent headerField = loader.load();

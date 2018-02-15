@@ -81,7 +81,7 @@ public class StringKeyValueFieldController implements Initializable {
         valueField.setText(value);
     }
 
-    public boolean isKeyFieldEmtpy() {
+    public boolean isKeyFieldEmpty() {
         return keyField.getText().isEmpty();
     }
 

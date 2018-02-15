@@ -395,25 +395,26 @@ public class DashboardController implements Initializable {
      */
     public DashboardState getState() {
         DashboardState dashboardState = null;
-        try {
-            switch (httpMethodBox.getValue()) {
-                case "POST":
-                case "PUT":
-                    dashboardState = new DashboardState(bodyTabController.getBasicRequest(httpMethodBox.getValue()));
-                    dashboardState.setHeaders(headerTabController.getHeaders());
-                    break;
-                default:
-                    // For GET, DELETE requests
-                    dashboardState = new DashboardState();
-            }
-
-            dashboardState.setTarget(addressField.getText());
-            dashboardState.setHttpMethod(httpMethodBox.getValue());
-            dashboardState.setHeaders(headerTabController.getHeaders());
-            dashboardState.setParams(getParams());
-        } catch (MalformedURLException MURLE) {
-            System.out.println("Dashboard state was saved with a malformed URL.");
+        switch (httpMethodBox.getValue()) {
+            case "POST":
+            case "PUT":
+                dashboardState = new DashboardState(bodyTabController.getBasicRequest(httpMethodBox.getValue()));
+                dashboardState.setHeaders(headerTabController.getHeaders());
+                break;
+            default:
+                // For GET, DELETE requests
+                dashboardState = new DashboardState();
         }
+
+        try {
+            dashboardState.setTarget(addressField.getText());
+        } catch (MalformedURLException e) {
+            System.out.println("Dashboard state was saved with an invalid URL.");
+        }
+        dashboardState.setHttpMethod(httpMethodBox.getValue());
+        dashboardState.setHeaders(headerTabController.getHeaders());
+        dashboardState.setParams(getParams());
+
         return dashboardState;
     }
 

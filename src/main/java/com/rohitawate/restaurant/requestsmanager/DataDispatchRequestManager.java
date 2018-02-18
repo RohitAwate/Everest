@@ -54,8 +54,6 @@ public class DataDispatchRequestManager extends RequestManager {
                 DataDispatchRequest dataDispatchRequest = (DataDispatchRequest) request;
                 String requestType = dataDispatchRequest.getRequestType();
 
-                Services.historyManager.saveHistory(dataDispatchRequest);
-
                 RestaurantResponse response = new RestaurantResponse();
                 WebTarget target = client.target(dataDispatchRequest.getTarget().toString());
                 Map.Entry<String, String> mapEntry;

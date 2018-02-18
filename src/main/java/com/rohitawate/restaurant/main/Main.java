@@ -33,7 +33,9 @@ public class Main extends Application {
 
         new Services();
 
-        Parent dashboard = FXMLLoader.load(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
+        Parent dashboard = loader.load();
+        Services.homeWindowController = loader.getController();
 		Stage dashboardStage = new Stage();
         ThemeManager.setTheme(dashboard);
 

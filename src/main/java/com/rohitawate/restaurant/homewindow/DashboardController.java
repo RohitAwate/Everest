@@ -27,6 +27,7 @@ import com.rohitawate.restaurant.requestsmanager.DELETERequestManager;
 import com.rohitawate.restaurant.requestsmanager.DataDispatchRequestManager;
 import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
 import com.rohitawate.restaurant.requestsmanager.RequestManager;
+import com.rohitawate.restaurant.util.Services;
 import com.rohitawate.restaurant.util.settings.Settings;
 import com.rohitawate.restaurant.util.themes.ThemeManager;
 import javafx.beans.binding.Bindings;
@@ -64,7 +65,7 @@ public class DashboardController implements Initializable {
     @FXML
     private Label statusCode, statusCodeDescription, responseTime, responseSize, errorTitle, errorDetails;
     @FXML
-    private JFXButton cancelButton;
+    private JFXButton sendButton, cancelButton;
     @FXML
     private TabPane requestOptionsTab;
     @FXML
@@ -291,6 +292,7 @@ public class DashboardController implements Initializable {
                 default:
                     loadingLayer.setVisible(false);
             }
+            Services.historyManager.saveHistory(getState());
         } catch (MalformedURLException MURLE) {
             promptLayer.setVisible(true);
             snackBar.show("Invalid address. Please verify and try again.", 3000);
@@ -394,7 +396,7 @@ public class DashboardController implements Initializable {
      * @return DashboardState - Current state of the Dashboard
      */
     public DashboardState getState() {
-        DashboardState dashboardState = null;
+        DashboardState dashboardState;
         switch (httpMethodBox.getValue()) {
             case "POST":
             case "PUT":

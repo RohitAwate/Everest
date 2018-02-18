@@ -16,9 +16,54 @@
   ~ limitations under the License.
   -->
 
-
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TabPane?>
-<TabPane fx:id="homeWindowTabPane" prefHeight="760.0" prefWidth="1280.0" stylesheets="@../../css/Adreana.css"
-         tabClosingPolicy="ALL_TABS" tabMaxHeight="35.0" tabMaxWidth="200.0" tabMinHeight="35.0" tabMinWidth="200.0"
-         xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
-         fx:controller="com.rohitawate.restaurant.homewindow.HomeWindowController"/>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<SplitPane dividerPositions="0.3" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.homewindow.HomeWindowController">
+   <items>
+      <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="500.0" minWidth="500.0" spacing="10.0" SplitPane.resizableWithParent="false">
+         <children>
+            <TextField fx:id="historySearchField" promptText="SEARCH" VBox.vgrow="ALWAYS">
+               <VBox.margin>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </VBox.margin>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding></TextField>
+            <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+               <content>
+                  <StackPane>
+                     <children>
+                        <VBox fx:id="historyTab" alignment="TOP_CENTER" spacing="5.0">
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" />
+                           </padding>
+                        </VBox>
+                        <StackPane fx:id="historyPromptLayer">
+                           <children>
+                              <Label text="YOUR REQUESTS HISTORY WILL APPEAR HERE" textAlignment="CENTER" textFill="#575757" wrapText="true">
+                                 <font>
+                                    <Font size="25.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
+                        </StackPane>
+                     </children>
+                  </StackPane>
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
+      <TabPane fx:id="homeWindowTabPane" prefHeight="760.0" prefWidth="1280.0" tabClosingPolicy="ALL_TABS" tabMaxHeight="30.0" tabMaxWidth="200.0" tabMinHeight="30.0" tabMinWidth="200.0" SplitPane.resizableWithParent="false" />
+   </items>
+</SplitPane>

@@ -31,4 +31,5 @@ public class Settings {
     public static int connectionReadTimeOut = 30000;
 
     public static String theme = "Adreana";
+    public static long showHistoryRange = 7;
 }

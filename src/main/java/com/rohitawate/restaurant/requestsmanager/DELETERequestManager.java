@@ -39,8 +39,6 @@ public class DELETERequestManager extends RequestManager {
             protected RestaurantResponse call() throws Exception {
                 DELETERequest deleteRequest = (DELETERequest) request;
 
-                Services.historyManager.saveHistory(deleteRequest);
-
                 RestaurantResponse response = new RestaurantResponse();
                 WebTarget target = client.target(deleteRequest.getTarget().toString());
                 Map.Entry<String, String> mapEntry;

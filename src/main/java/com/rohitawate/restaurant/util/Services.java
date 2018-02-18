@@ -16,10 +16,12 @@
 
 package com.rohitawate.restaurant.util;
 
+import com.rohitawate.restaurant.homewindow.HomeWindowController;
 import com.rohitawate.restaurant.util.history.HistoryManager;
 
 public class Services {
     public static HistoryManager historyManager;
+    public static HomeWindowController homeWindowController;
 
     static {
         historyManager = new HistoryManager();

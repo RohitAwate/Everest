@@ -17,45 +17,91 @@
 package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.models.DashboardState;
+import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
+import com.rohitawate.restaurant.models.requests.GETRequest;
+import com.rohitawate.restaurant.models.requests.RestaurantRequest;
+import com.rohitawate.restaurant.util.Services;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 
 public class HomeWindowController implements Initializable {
     @FXML
     private TabPane homeWindowTabPane;
+    @FXML
+    private VBox historyTab;
+    @FXML
+    private StackPane historyPromptLayer;
 
     private KeyCombination newTab = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
-    private List<DashboardController> controllers;
+    private List<DashboardController> dashboardControllers;
+    private List<HistoryItemController> historyItemControllers;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        controllers = new ArrayList<>();
+        dashboardControllers = new ArrayList<>();
+        historyItemControllers = new ArrayList<>();
         recoverState();
         Platform.runLater(() -> {
+            // Adds a new tab if the last tab is closed
             Scene thisScene = homeWindowTabPane.getScene();
             thisScene.setOnKeyPressed(e -> {
                 if (newTab.match(e))
                     addTab();
             });
+
+            // Saves the state of the application before closing
             Stage thisStage = (Stage) thisScene.getWindow();
             thisStage.setOnCloseRequest(e -> saveState());
+
+            // Loads the history
+            Task<List<DashboardState>> historyLoader = new Task<List<DashboardState>>() {
+                @Override
+                protected List<DashboardState> call() throws Exception {
+                    return Services.historyManager.getHistory();
+                }
+            };
+
+            // Appends the history items to the HistoryTab
+            historyLoader.setOnSucceeded(e -> {
+                try {
+                    List<DashboardState> history = historyLoader.get();
+                    if (history.size() == 0) {
+                        historyPromptLayer.setVisible(true);
+                        return;
+                    }
+
+                    for (DashboardState state : history)
+                        addHistoryItem(state);
+                } catch (InterruptedException | ExecutionException E) {
+                    E.printStackTrace();
+                }
+            });
+            historyLoader.setOnFailed(e -> historyLoader.getException().printStackTrace());
+            new Thread(historyLoader).start();
         });
     }
 
@@ -79,10 +125,11 @@ public class HomeWindowController implements Initializable {
             newTab.setOnCloseRequest(e -> {
                 if (homeWindowTabPane.getTabs().size() == 1)
                     addTab();
-                controllers.remove(controller);
+                dashboardControllers.remove(controller);
             });
             homeWindowTabPane.getTabs().add(newTab);
-            controllers.add(controller);
+            homeWindowTabPane.getSelectionModel().select(newTab);
+            dashboardControllers.add(controller);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -92,7 +139,7 @@ public class HomeWindowController implements Initializable {
         List<DashboardState> dashboardStates = new ArrayList<>();
 
         // Get the states of all the tabs
-        for (DashboardController controller : controllers)
+        for (DashboardController controller : dashboardControllers)
             dashboardStates.add(controller.getState());
 
         try {
@@ -137,6 +184,29 @@ public class HomeWindowController implements Initializable {
             addTab();
         } finally {
             System.out.println("Application loaded.");
+        }
+    }
+
+    public void addHistoryItem(DashboardState state) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryItem.fxml"));
+            Parent historyItem = loader.load();
+            HistoryItemController controller = loader.getController();
+
+            controller.setRequestType(state.getHttpMethod());
+
+            controller.setAddress(state.getTarget().toString());
+
+            historyTab.getChildren().add(0, historyItem);
+            historyItemControllers.add(controller);
+
+            // Clicking on HistoryItem opens it up in a new tab
+            historyItem.setOnMouseClicked(mouseEvent -> {
+                if (mouseEvent.getButton() == MouseButton.PRIMARY)
+                    addTab(state);
+            });
+        } catch (IOException IOE) {
+            IOE.printStackTrace();
         }
     }
 }

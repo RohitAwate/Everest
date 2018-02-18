@@ -98,6 +98,7 @@
 .scroll-pane .viewport,
 .scroll-pane .scroll-bar:vertical {
     -fx-background-color: #3d3d3d;
+    -fx-background-insets: 0px;
 }
 
 /* Tab attributes */
@@ -141,9 +142,17 @@
     -fx-background-color: #808080;
 }
 
-.split-pane,
+.split-pane {
+    -fx-background-color: #505050;
+    -fx-padding: 0px;
+}
+
 .split-pane .split-pane-divider {
     -fx-background-color: #505050;
+}
+
+.split-pane:horizontal .split-pane-divider {
+    -fx-padding: 0px;
 }
 
 #keyField, #valueField, #filePathField {
@@ -170,6 +179,22 @@
     -fx-background-color: #a2a2a2;
 }
 
+/* History tab */
+#historyPane, #historyTab {
+    -fx-background-color: #404040;
+}
+
+#historySearchField {
+    -fx-background-color: #505050;
+    -fx-text-fill: white;
+}
+
+/* History item */
+#historyItemBox {
+    -fx-background-color: #353535;
+}
+
+/* SnackBar */
 .jfx-snackbar-content {
     -fx-background-color: black;
 }

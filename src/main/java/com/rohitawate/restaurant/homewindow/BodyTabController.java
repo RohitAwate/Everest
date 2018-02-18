@@ -79,6 +79,8 @@ public class BodyTabController implements Initializable {
     public DataDispatchRequest getBasicRequest(String requestType) {
         DataDispatchRequest request = new DataDispatchRequest(requestType);
 
+        // Raw and binary types get saved in Body.
+        // Form and URL encoded types use tuple objects
         if (rawTab.isSelected()) {
             String contentType;
             switch (rawInputTypeBox.getValue()) {

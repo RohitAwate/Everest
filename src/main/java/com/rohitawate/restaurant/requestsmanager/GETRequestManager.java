@@ -39,8 +39,6 @@ public class GETRequestManager extends RequestManager {
                 RestaurantResponse response = new RestaurantResponse();
                 WebTarget target = client.target(request.getTarget().toString());
 
-                Services.historyManager.saveHistory(request);
-
                 Builder requestBuilder = target.request();
 
                 HashMap<String, String> headers = request.getHeaders();

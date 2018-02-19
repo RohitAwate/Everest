@@ -2,10 +2,10 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
-
 <HBox fx:id="historyItemBox" alignment="CENTER_LEFT" maxHeight="40.0" minHeight="40.0" minWidth="300.0" spacing="20.0" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.homewindow.HistoryItemController">
    <children>
       <StackPane maxWidth="80.0" minWidth="80.0" HBox.hgrow="ALWAYS">
@@ -21,6 +21,9 @@
          <font>
             <Font size="15.0" />
          </font>
+          <tooltip>
+              <Tooltip fx:id="tooltip" text="tooltip"/>
+          </tooltip>
       </Label>
    </children>
    <padding>

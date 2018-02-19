@@ -17,9 +17,6 @@
 package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.models.DashboardState;
-import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
-import com.rohitawate.restaurant.models.requests.GETRequest;
-import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.util.Services;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -29,7 +26,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
@@ -41,7 +37,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +75,7 @@ public class HomeWindowController implements Initializable {
             // Loads the history
             Task<List<DashboardState>> historyLoader = new Task<List<DashboardState>>() {
                 @Override
-                protected List<DashboardState> call() throws Exception {
+                protected List<DashboardState> call() {
                     return Services.historyManager.getHistory();
                 }
             };
@@ -188,6 +183,7 @@ public class HomeWindowController implements Initializable {
     }
 
     public void addHistoryItem(DashboardState state) {
+        historyPromptLayer.setVisible(false);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryItem.fxml"));
             Parent historyItem = loader.load();

@@ -17,18 +17,13 @@
   -->
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-
 <SplitPane dividerPositions="0.3" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.homewindow.HomeWindowController">
    <items>
-      <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="500.0" minWidth="500.0" spacing="10.0" SplitPane.resizableWithParent="false">
+       <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="500.0" prefWidth="400.0" spacing="10.0"
+             SplitPane.resizableWithParent="false">
          <children>
             <TextField fx:id="historySearchField" promptText="SEARCH" VBox.vgrow="ALWAYS">
                <VBox.margin>

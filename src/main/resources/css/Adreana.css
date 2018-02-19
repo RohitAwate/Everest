@@ -14,7 +14,7 @@
 .combo-box .list-cell {
     -fx-background-color: #707070;
 	-fx-pref-height: 39px;
-    -fx-font-size: 18px;
+    -fx-font-size: 15px;
     -fx-text-fill: #d4d4d4;
     -fx-padding: 0 0 0 10px;
 }
@@ -74,12 +74,17 @@
     -fx-background-color: black;
 }
 
+/* Home window tab */
 #homeWindowTabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
     -fx-background-color: white;
 }
 
-#homeWindowTabPane:top .tab-header-area .headers-region .tab:selected:top {
+#homeWindowTabPane:top .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: orangered;
+}
+
+#homeWindowTabPane:top .tab-header-area .headers-region .tab:selected:top {
+    -fx-background-color: #505050;
 }
 
 .tab-pane:top .tab-header-area {
@@ -96,7 +101,8 @@
 #headersBox,
 .scroll-pane,
 .scroll-pane .viewport,
-.scroll-pane .scroll-bar:vertical {
+.scroll-pane .scroll-bar:vertical,
+.scroll-pane .scroll-bar:horizontal {
     -fx-background-color: #3d3d3d;
     -fx-background-insets: 0px;
 }
@@ -113,17 +119,21 @@
     -fx-background-color: #6a6a6a;
 }
 
-#requestOptionsTab .tab-header-area .headers-region .tab:selected:top {
-    -fx-background-color: #55a15c;
-}
-
 /* Tab titles */
-
 .tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
     -fx-fill: white;
 }
 
-/* Tabs in the request 'Body' option */
+/* Request options (Headers, Authorization, etc) tab */
+#requestOptionsTab .tab-header-area .headers-region .tab:hover:top {
+    -fx-background-color: #55a15c;
+}
+
+#requestOptionsTab .tab-header-area .headers-region .tab:selected:top {
+    -fx-background-color: #3d3d3d;
+}
+
+/* Body tab pane */
 #bodyTabPane:top .tab-header-area .tab-header-background,
 #bodyTabPane:top .tab-header-area .headers-region .tab:top {
     -fx-background-color: #545454;
@@ -134,11 +144,15 @@
     -fx-background-color: #3d3d3d;
 }
 
-#bodyTabPane .tab-header-area .headers-region .tab:selected:top {
+#bodyTabPane:top .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: #4e848f;
 }
 
-.scroll-pane .scroll-bar:vertical .thumb {
+#bodyTabPane:top .tab-header-area .headers-region .tab:selected:top {
+    -fx-background-color: #3d3d3d;
+}
+
+.scroll-pane .scroll-bar .thumb {
     -fx-background-color: #808080;
 }
 
@@ -192,6 +206,10 @@
 /* History item */
 #historyItemBox {
     -fx-background-color: #353535;
+}
+
+#historyItemBox:hover {
+    -fx-background-color: #282828;
 }
 
 /* SnackBar */

@@ -1,7 +1,7 @@
 # RESTaurant
 RESTaurant is an upcoming native REST client written in JavaFX. It is currently in the initial stages of development.
 
-![restaurant](https://user-images.githubusercontent.com/23148259/36142398-fd032968-10cd-11e8-8eea-840adb28fe21.PNG)
+![restaurant1](https://user-images.githubusercontent.com/23148259/36366992-9570476a-1576-11e8-8405-485c460a553c.png)
 
 # Why RESTaurant?
 - Unlike other REST clients like Postman and Insomnia, RESTaurant is a **native** application written in Java. Thus, it is significantly
@@ -13,7 +13,7 @@ RESTaurant is an upcoming native REST client written in JavaFX. It is currently 
   _I want you to want to use it!_
 - RESTaurant is powered by **Jersey**, the robust and powerful Java library to build and consume RESTful web services.
 
-![restaurant2](https://user-images.githubusercontent.com/23148259/36142456-2cd72658-10ce-11e8-872a-5c2e3eedd398.PNG)
+![restaurant2](https://user-images.githubusercontent.com/23148259/36367048-f6cea2a4-1576-11e8-84a4-9854ec30f992.png)
 
 # Planned features
 - Ability to make requests with the common HTTP methods. _(duh)_
@@ -33,16 +33,17 @@ _That's all the core stuff that I can think of at the moment. Will keep updating
 - Postman has this really cool feature wherein it can create a **mock server**. Maybe do that.
 
 
-![restaurant3](https://user-images.githubusercontent.com/23148259/36142488-3fea727c-10ce-11e8-8df1-2b7fd3d59d98.PNG)
+![restaurant3](https://user-images.githubusercontent.com/23148259/36366994-95df94c6-1576-11e8-8368-c0f325f54a6f.png)
 
 
 # Features currently live
-- Adding request headers and the request body (raw, octet-stream, URL-encoded or form-data)
-- GET, POST, PUT and DELETE requests
+- GET, POST, PUT and DELETE requests.
+- Adding request headers, query parameters and the request body (raw, octet-stream, URL-encoded or form-data)
 - Response details (HTTP status code, response time, response size)
-- Custom themes! Changing themes needs a manual edit to the settings.json file. This will be properly integrated into a Settings menu later.
-- Multi-tab layout. I'm battling with JavaFX to allow me to add a simple '+' button for adding a new tab. So far, not successful. However, you can use the Ctrl+T keyboard shortcut.
-- Requests history gets saved to a database. History tab will be coming up soon.
+- **Custom themes!** Changing themes needs a manual edit to the settings.json file. This will be properly integrated into a Settings menu later.
+- **Multi-tab layout**. I'm battling with JavaFX to allow me to add a simple '+' button for adding a new tab. So far, not successful. However, you can use the Ctrl+T keyboard shortcut.
+- **History tab!** All the requests you ever made are now shown to the left of the app.
+- RESTaurant now maintains its state between sessions so you don't lose your work.
 
 # Releases
 I mean, it's open-source. You can build yourself a 'release' right now!

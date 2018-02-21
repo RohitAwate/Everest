@@ -16,6 +16,7 @@
 
 package com.rohitawate.restaurant.homewindow;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -33,6 +34,8 @@ public class FileKeyValueFieldController implements Initializable {
     private TextField fileKeyField, fileValueField;
     @FXML
     private JFXCheckBox checkBox;
+    @FXML
+    protected JFXButton deleteButton;
 
     /*
         Set to true when user manually un-checks the field

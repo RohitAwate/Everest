@@ -67,6 +67,10 @@ public class HeaderTabController implements Initializable {
             controller.setKeyField(key);
             controller.setValueField(value);
             controllers.add(controller);
+            controller.deleteButton.setOnAction(e -> {
+                headersBox.getChildren().remove(headerField);
+                controllers.remove(controller);
+            });
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
             e.printStackTrace();

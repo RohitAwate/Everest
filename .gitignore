@@ -6,5 +6,4 @@ classes/
 src/main/java/META-INF/
 dependency-reduced-pom.xml
 history.sqlite
-themes/
 /config/restaurant.state

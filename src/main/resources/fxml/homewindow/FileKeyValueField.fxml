@@ -20,9 +20,11 @@
 <?import com.jfoenix.controls.JFXCheckBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <HBox fx:id="headerField" alignment="CENTER" spacing="10.0" stylesheets="@../../css/Adreana.css"
-      xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.rohitawate.restaurant.homewindow.FileKeyValueFieldController">
     <children>
         <JFXCheckBox fx:id="checkBox" checkedColor="ORANGERED" unCheckedColor="#7a7a7a" HBox.hgrow="ALWAYS"/>
@@ -30,6 +32,15 @@
         <TextField fx:id="fileValueField" layoutX="10.0" layoutY="10.0" prefWidth="400.0" promptText="FILE PATH"
                    HBox.hgrow="ALWAYS"/>
         <JFXButton fx:id="browseButton" onAction="#browseFile" text="BROWSE"/>
+        <JFXButton fx:id="deleteButton" ripplerFill="WHITE">
+            <graphic>
+                <ImageView fitHeight="15.0" fitWidth="15.0" opacity="0.25" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../../assets/CrossMark.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+        </JFXButton>
     </children>
     <padding>
         <Insets bottom="5.0" left="10.0" right="10.0" top="5.0"/>

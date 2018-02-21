@@ -32,7 +32,7 @@ import java.util.ResourceBundle;
 
 public class FormDataTabController implements Initializable {
     @FXML
-    private VBox headersBox;
+    private VBox fieldsBox;
 
     private List<StringKeyValueFieldController> stringControllers;
     private List<FileKeyValueFieldController> fileControllers;
@@ -69,13 +69,17 @@ public class FormDataTabController implements Initializable {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/FileKeyValueField.fxml"));
-            Parent headerField = loader.load();
-            ThemeManager.setTheme(headerField);
+            Parent fileField = loader.load();
+            ThemeManager.setTheme(fileField);
             FileKeyValueFieldController controller = loader.getController();
             controller.setFileKeyField(key);
             controller.setFileValueField(value);
+            controller.deleteButton.setOnAction(e -> {
+                fieldsBox.getChildren().remove(fileField);
+                fileControllers.remove(controller);
+            });
             fileControllers.add(controller);
-            headersBox.getChildren().add(headerField);
+            fieldsBox.getChildren().add(fileField);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,12 +108,16 @@ public class FormDataTabController implements Initializable {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
-            Parent headerField = loader.load();
+            Parent stringField = loader.load();
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
             stringControllers.add(controller);
-            headersBox.getChildren().add(headerField);
+            controller.deleteButton.setOnAction(e -> {
+                fieldsBox.getChildren().remove(stringField);
+                stringControllers.remove(controller);
+            });
+            fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {
             e.printStackTrace();
         }

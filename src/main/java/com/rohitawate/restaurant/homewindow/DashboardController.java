@@ -380,6 +380,10 @@ public class DashboardController implements Initializable {
             controller.setKeyField(key);
             controller.setValueField(value);
             paramsControllers.add(controller);
+            controller.deleteButton.setOnAction(e -> {
+                paramsBox.getChildren().remove(headerField);
+                paramsControllers.remove(controller);
+            });
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {
             e.printStackTrace();

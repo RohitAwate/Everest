@@ -65,13 +65,17 @@ public class URLTabController implements Initializable {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
-            Parent parent = loader.load();
-            ThemeManager.setTheme(parent);
+            Parent stringField = loader.load();
+            ThemeManager.setTheme(stringField);
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
+            controller.deleteButton.setOnAction(e -> {
+                fieldsBox.getChildren().remove(stringField);
+                controllers.remove(controller);
+            });
             controllers.add(controller);
-            fieldsBox.getChildren().add(parent);
+            fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -17,6 +17,10 @@
 package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.util.themes.ThemeManager;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -36,27 +40,39 @@ public class FormDataTabController implements Initializable {
 
     private List<StringKeyValueFieldController> stringControllers;
     private List<FileKeyValueFieldController> fileControllers;
+    private IntegerProperty fileControllersCount, stringControllersCount;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         stringControllers = new ArrayList<>();
+        stringControllersCount = new SimpleIntegerProperty(stringControllers.size());
+
         fileControllers = new ArrayList<>();
+        fileControllersCount = new SimpleIntegerProperty(fileControllers.size());
 
         addFileField();
         addStringField();
     }
 
-    @FXML
     private void addFileField() {
-        addFileField("", "");
+        addFileField("", "", null);
+    }
+
+    @FXML
+    private void addFileField(ActionEvent event) {
+        addFileField("", "", event);
     }
 
     public void addFileField(String key, String value) {
+        addFileField(key, value, null);
+    }
+
+    private void addFileField(String key, String value, ActionEvent event) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
          */
-        if (fileControllers.size() > 0) {
+        if (fileControllers.size() > 0 && event == null) {
             FileKeyValueFieldController previousController = fileControllers.get(fileControllers.size() - 1);
 
             if (previousController.isFileKeyFieldEmpty() &&
@@ -74,28 +90,39 @@ public class FormDataTabController implements Initializable {
             FileKeyValueFieldController controller = loader.getController();
             controller.setFileKeyField(key);
             controller.setFileValueField(value);
+            fileControllers.add(controller);
+            fileControllersCount.set(fileControllersCount.get() + 1);
+            controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(fileControllersCount, 1));
             controller.deleteButton.setOnAction(e -> {
                 fieldsBox.getChildren().remove(fileField);
                 fileControllers.remove(controller);
+                fileControllersCount.set(fileControllersCount.get() - 1);
             });
-            fileControllers.add(controller);
             fieldsBox.getChildren().add(fileField);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @FXML
     private void addStringField() {
-        addStringField("", "");
+        addStringField("", "", null);
+    }
+
+    @FXML
+    private void addStringField(ActionEvent event) {
+        addStringField("", "", event);
     }
 
     public void addStringField(String key, String value) {
+        addStringField(key, value, null);
+    }
+
+    private void addStringField(String key, String value, ActionEvent event) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
          */
-        if (stringControllers.size() > 0) {
+        if (stringControllers.size() > 0 && event == null) {
             StringKeyValueFieldController previousController = stringControllers.get(stringControllers.size() - 1);
 
             if (previousController.isKeyFieldEmpty() &&
@@ -113,9 +140,12 @@ public class FormDataTabController implements Initializable {
             controller.setKeyField(key);
             controller.setValueField(value);
             stringControllers.add(controller);
+            stringControllersCount.set(stringControllersCount.get() + 1);
+            controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(stringControllersCount, 1));
             controller.deleteButton.setOnAction(e -> {
                 fieldsBox.getChildren().remove(stringField);
                 stringControllers.remove(controller);
+                stringControllersCount.set(stringControllersCount.get() - 1);
             });
             fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {

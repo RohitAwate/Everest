@@ -17,6 +17,10 @@
 package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.util.themes.ThemeManager;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -35,20 +39,34 @@ public class HeaderTabController implements Initializable {
     private VBox headersBox;
 
     private List<StringKeyValueFieldController> controllers;
+    private IntegerProperty controllersCount;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         controllers = new ArrayList<>();
+        controllersCount = new SimpleIntegerProperty(controllers.size());
         addHeader();
     }
 
-    @FXML
     public void addHeader(String key, String value) {
+        addHeader(key, value, null);
+    }
+
+    private void addHeader() {
+        addHeader("", "", null);
+    }
+
+    @FXML
+    private void addHeader(ActionEvent event) {
+        addHeader("", "", event);
+    }
+
+    private void addHeader(String key, String value, ActionEvent event) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
          */
-        if (controllers.size() > 0) {
+        if (controllers.size() > 0 && event == null) {
             StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
 
             if (previousController.isKeyFieldEmpty() &&
@@ -67,9 +85,12 @@ public class HeaderTabController implements Initializable {
             controller.setKeyField(key);
             controller.setValueField(value);
             controllers.add(controller);
+            controllersCount.set(controllersCount.get() + 1);
+            controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(controllersCount, 1));
             controller.deleteButton.setOnAction(e -> {
                 headersBox.getChildren().remove(headerField);
                 controllers.remove(controller);
+                controllersCount.set(controllersCount.get() - 1);
             });
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
@@ -77,9 +98,6 @@ public class HeaderTabController implements Initializable {
         }
     }
 
-    public void addHeader() {
-        addHeader("", "");
-    }
 
     public HashMap<String, String> getHeaders() {
         HashMap<String, String> headers = new HashMap<>();

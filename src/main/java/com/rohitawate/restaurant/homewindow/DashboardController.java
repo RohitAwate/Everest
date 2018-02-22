@@ -31,7 +31,10 @@ import com.rohitawate.restaurant.util.Services;
 import com.rohitawate.restaurant.util.settings.Settings;
 import com.rohitawate.restaurant.util.themes.ThemeManager;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -78,6 +81,7 @@ public class DashboardController implements Initializable {
     private RequestManager requestManager;
     private HeaderTabController headerTabController;
     private BodyTabController bodyTabController;
+    private IntegerProperty paramsCountProperty;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -109,6 +113,8 @@ public class DashboardController implements Initializable {
         httpMethodBox.getItems().addAll(httpMethods);
 
         paramsControllers = new ArrayList<>();
+        paramsCountProperty = new SimpleIntegerProperty(paramsControllers.size());
+
         appendedParams = new ArrayList<>();
         addParamField(); // Adds a blank param field
 
@@ -351,18 +357,26 @@ public class DashboardController implements Initializable {
         return params;
     }
 
-    @FXML
     private void addParamField() {
-        addParamField("", "");
+        addParamField("", "", null);
+    }
+
+    private void addParamField(String key, String value) {
+        addParamField(key, value, null);
+    }
+
+    @FXML
+    private void addParamField(ActionEvent event) {
+        addParamField("", "", event);
     }
 
     // Adds a new URL-parameter field
-    private void addParamField(String key, String value) {
+    private void addParamField(String key, String value, ActionEvent event) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
          */
-        if (paramsControllers.size() > 0) {
+        if (paramsControllers.size() > 0 && event == null) {
             StringKeyValueFieldController previousController = paramsControllers.get(paramsControllers.size() - 1);
 
             if (previousController.isKeyFieldEmpty() &&
@@ -380,9 +394,12 @@ public class DashboardController implements Initializable {
             controller.setKeyField(key);
             controller.setValueField(value);
             paramsControllers.add(controller);
+            paramsCountProperty.set(paramsCountProperty.get() + 1);
+            controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(paramsCountProperty, 1));
             controller.deleteButton.setOnAction(e -> {
                 paramsBox.getChildren().remove(headerField);
                 paramsControllers.remove(controller);
+                paramsCountProperty.set(paramsCountProperty.get() - 1);
             });
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {

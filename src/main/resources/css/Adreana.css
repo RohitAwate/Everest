@@ -185,12 +185,24 @@
     -fx-background-color: orangered;
 }
 
+#addHeaderButton:hover, #newStringKVButton:hover, #newParamButton:hover {
+    -fx-background-color: #AE2400;
+}
+
 #newFileKVButton, #appendParamsButton {
     -fx-background-color: #5d53b1;
 }
 
+#newFileKVButton:hover, #appendParamsButton:hover {
+    -fx-background-color: #7373EE;
+}
+
 #browseButton {
     -fx-background-color: #a2a2a2;
+}
+
+#browseButton:hover {
+    -fx-background-color: #d4d4d4;
 }
 
 /* History tab */

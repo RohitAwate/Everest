@@ -17,6 +17,10 @@
 package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.util.themes.ThemeManager;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -35,24 +39,34 @@ public class URLTabController implements Initializable {
     private VBox fieldsBox;
 
     private List<StringKeyValueFieldController> controllers;
+    private IntegerProperty controllersCount;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         controllers = new ArrayList<>();
+        controllersCount = new SimpleIntegerProperty(controllers.size());
         addField();
     }
 
-    @FXML
     private void addField() {
-        addField("", "");
+        addField("", "", null);
     }
 
     public void addField(String key, String value) {
+        addField(key, value, null);
+    }
+
+    @FXML
+    private void addField(ActionEvent event) {
+        addField("", "", event);
+    }
+
+    private void addField(String key, String value, ActionEvent event) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
          */
-        if (controllers.size() > 0) {
+        if (controllers.size() > 0 && event == null) {
             StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
 
             if (previousController.isKeyFieldEmpty() &&
@@ -70,11 +84,14 @@ public class URLTabController implements Initializable {
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
+            controllers.add(controller);
+            controllersCount.set(controllersCount.get() + 1);
+            controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(controllersCount, 1));
             controller.deleteButton.setOnAction(e -> {
                 fieldsBox.getChildren().remove(stringField);
                 controllers.remove(controller);
+                controllersCount.set(controllersCount.get() + 1);
             });
-            controllers.add(controller);
             fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {
             e.printStackTrace();

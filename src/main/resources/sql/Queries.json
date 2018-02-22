@@ -6,12 +6,13 @@
   "createTuplesTable": "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, TupleType TEXT NOT NULL, Key TEXT NOT NULL, Value TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
   "saveRequest": "INSERT INTO Requests(Type, Target, Date) VALUES(?, ?, ?)",
   "saveHeader": "INSERT INTO Headers(RequestID, Key, Value) VALUES(?, ?, ?)",
-  "saveRequestContentPair": "INSERT INTO RequestContentMap(ID, ContentType) VALUES(?, ?)",
+  "saveRequestContentPair": "INSERT INTO RequestContentMap(RequestID, ContentType) VALUES(?, ?)",
   "saveBody": "INSERT INTO Bodies(RequestID, Body) VALUES(?, ?)",
   "saveTuple": "INSERT INTO Tuples(RequestID, TupleType, Key, Value) VALUES(?, ?, ?, ?)",
   "selectRecentRequests": "SELECT * FROM Requests WHERE Requests.Date > ?",
   "selectRequestHeaders": "SELECT * FROM Headers WHERE RequestID == ?",
   "selectRequestContentType": "SELECT ContentType FROM RequestContentMap WHERE RequestID == ?",
   "selectRequestBody": "SELECT Body FROM Bodies WHERE RequestID == ?",
-  "selectTuples": "SELECT * FROM Tuples WHERE RequestID == ? AND TupleType == ?"
+  "selectTuples": "SELECT * FROM Tuples WHERE RequestID == ? AND TupleType == ?",
+  "selectMostRecentRequest": "SELECT * FROM Requests ORDER BY ID DESC LIMIT 1"
 }

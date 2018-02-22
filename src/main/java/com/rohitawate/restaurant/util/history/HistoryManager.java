@@ -19,14 +19,9 @@ package com.rohitawate.restaurant.util.history;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohitawate.restaurant.models.DashboardState;
-import com.rohitawate.restaurant.models.requests.DELETERequest;
-import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
-import com.rohitawate.restaurant.models.requests.GETRequest;
-import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.util.Services;
 import com.rohitawate.restaurant.util.json.JSONUtils;
 import com.rohitawate.restaurant.util.settings.Settings;
-import javafx.util.Pair;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -37,7 +32,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 
 public class HistoryManager {
     private Connection conn;
@@ -84,7 +79,15 @@ public class HistoryManager {
     }
 
     // Method is made synchronized to allow only one database transaction at a time.
+
+    /**
+     * Saves the request to the database if it is not identical to one made exactly before it.
+     *
+     * @param state - The state of the Dashboard while making the request.
+     */
     public synchronized void saveHistory(DashboardState state) {
+        if (isDuplicate(state))
+            return;
         new Thread(() -> {
             try {
                 statement =
@@ -107,10 +110,21 @@ public class HistoryManager {
 
                     // Saves request headers
                     statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveHeader").toString()));
-                    for (Map.Entry entry : state.getHeaders().entrySet()) {
+                    for (Entry entry : state.getHeaders().entrySet()) {
                         statement.setInt(1, requestID);
                         statement.setString(2, entry.getKey().toString());
                         statement.setString(3, entry.getValue().toString());
+
+                        statement.executeUpdate();
+                    }
+
+                    // Saves request parameters
+                    statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveTuple").toString()));
+                    for (Entry entry : state.getParams().entrySet()) {
+                        statement.setInt(1, requestID);
+                        statement.setString(2, "Param");
+                        statement.setString(3, entry.getKey().toString());
+                        statement.setString(4, entry.getValue().toString());
 
                         statement.executeUpdate();
                     }
@@ -137,7 +151,7 @@ public class HistoryManager {
                                 statement.executeUpdate();
                                 break;
                             case MediaType.APPLICATION_FORM_URLENCODED:
-                                for (Map.Entry<String, String> entry : state.getStringTuples().entrySet()) {
+                                for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
                                     // Saves the string tuples
                                     statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);
@@ -149,7 +163,7 @@ public class HistoryManager {
                                 }
                                 break;
                             case MediaType.MULTIPART_FORM_DATA:
-                                for (Map.Entry<String, String> entry : state.getStringTuples().entrySet()) {
+                                for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
                                     // Saves the string tuples
                                     statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);
@@ -160,7 +174,7 @@ public class HistoryManager {
                                     statement.executeUpdate();
                                 }
 
-                                for (Map.Entry<String, String> entry : state.getFileTuples().entrySet()) {
+                                for (Entry<String, String> entry : state.getFileTuples().entrySet()) {
                                     // Saves the file tuples
                                     statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);
@@ -177,11 +191,14 @@ public class HistoryManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }).start();
+        }, "History Saver Thread").start();
         // Appends this history item to the HistoryTab
         Services.homeWindowController.addHistoryItem(state);
     }
 
+    /**
+     * Returns a list of all the recent requests.
+     */
     public synchronized List<DashboardState> getHistory() {
         List<DashboardState> history = new ArrayList<>();
         try {
@@ -204,6 +221,7 @@ public class HistoryManager {
 
                 int requestID = resultSet.getInt("ID");
                 state.setHeaders(getRequestHeaders(requestID));
+                state.setParams(getTuples(requestID, "Param"));
                 state.setHttpMethod(resultSet.getString("Type"));
 
                 if (state.getHttpMethod().equals("POST") || state.getHttpMethod().equals("PUT")) {
@@ -232,8 +250,8 @@ public class HistoryManager {
                             RS = statement.executeQuery();
 
                             if (RS.next())
-                                state.setBody(resultSet.getString("Body"));
-                        break;
+                                state.setBody(RS.getString("Body"));
+                            break;
                         case MediaType.APPLICATION_FORM_URLENCODED:
                             state.setStringTuples(getTuples(requestID, "String"));
                             break;
@@ -275,13 +293,12 @@ public class HistoryManager {
     }
 
     /**
-     *
      * @param requestID Database ID of the request whose tuples are needed.
-     * @param type Type of tuples needed ('String' or 'File')
+     * @param type      Type of tuples needed ('String', 'File' or 'Param')
      * @return tuples - Map of tuples of corresponding type
      */
     private HashMap<String, String> getTuples(int requestID, String type) {
-        if (!type.equals("String") || !type.equals("File"))
+        if (!(type.equals("String") || type.equals("File") || type.equals("Param")))
             return null;
 
         HashMap<String, String> tuples = new HashMap<>();
@@ -304,5 +321,99 @@ public class HistoryManager {
             e.printStackTrace();
         }
         return tuples;
+    }
+
+    /**
+     * Performs a comprehensive comparison of the new request with the one added last to the database.
+     *
+     * @param newState The new request.
+     * @return true, if request is same as the last one in the database. false, otherwise.
+     */
+    private boolean isDuplicate(DashboardState newState) {
+        try {
+            statement = conn.prepareStatement(JSONUtils.trimString(queries.get("selectMostRecentRequest").toString()));
+            ResultSet RS = statement.executeQuery();
+
+            int lastRequestID = -1;
+            if (RS.next()) {
+                if (!(newState.getHttpMethod().equals(RS.getString("Type"))) ||
+                        !(newState.getTarget().toString().equals(RS.getString("Target"))) ||
+                        !(LocalDate.now().equals(LocalDate.parse(RS.getString("Date")))))
+                    return false;
+                else
+                    lastRequestID = RS.getInt("ID");
+            }
+
+            HashMap<String, String> map;
+
+            // Checks for new or modified headers
+            map = getRequestHeaders(lastRequestID);
+            if (!areMapsIdentical(map, newState.getHeaders()))
+                return false;
+
+            // Checks for new or modified params
+            map = getTuples(lastRequestID, "Param");
+            if (!areMapsIdentical(map, newState.getParams()))
+                return false;
+
+            if (newState.getHttpMethod().equals("POST") || newState.getHttpMethod().equals("PUT")) {
+                switch (newState.getContentType()) {
+                    case MediaType.TEXT_PLAIN:
+                    case MediaType.APPLICATION_JSON:
+                    case MediaType.APPLICATION_XML:
+                    case MediaType.TEXT_HTML:
+                    case MediaType.APPLICATION_OCTET_STREAM:
+                        statement = conn.prepareStatement(JSONUtils.trimString(queries.get("selectRequestBody").toString()));
+                        statement.setInt(1, lastRequestID);
+
+                        RS = statement.executeQuery();
+
+                        if (RS.next())
+                            if (!RS.getString("Body").equals(newState.getBody()))
+                                return false;
+
+                        break;
+                    case MediaType.APPLICATION_FORM_URLENCODED:
+                        // Checks for new or modified string tuples
+                        map = getTuples(lastRequestID, "String");
+                        return areMapsIdentical(map, newState.getStringTuples());
+                    case MediaType.MULTIPART_FORM_DATA:
+                        // Checks for new or modified string tuples
+                        map = getTuples(lastRequestID, "String");
+                        boolean stringComparison = areMapsIdentical(map, newState.getStringTuples());
+
+                        // Checks for new or modified file tuples
+                        map = getTuples(lastRequestID, "File");
+                        boolean fileComparison = areMapsIdentical(map, newState.getFileTuples());
+
+                        return stringComparison && fileComparison;
+                }
+            }
+        } catch (SQLException SQLE) {
+            SQLE.printStackTrace();
+        } catch (NullPointerException NPE) {
+            /*
+                NPE is thrown by containsKey indicating that the key is not present in the database thereby
+                classifying it as a non-duplicate request.
+             */
+            return false;
+        }
+        return true;
+    }
+
+    private boolean areMapsIdentical(HashMap<String, String> firstMap, HashMap<String, String> secondMap) {
+        if (firstMap == null && secondMap == null)
+            return true;
+
+        if ((firstMap == null && secondMap != null) ||
+                (firstMap != null && secondMap == null))
+            return false;
+
+        for (Entry entry : secondMap.entrySet()) {
+            if (!firstMap.containsKey(entry.getKey().toString()) ||
+                    !firstMap.get(entry.getKey().toString()).equals(entry.getValue().toString()))
+                return false;
+        }
+        return true;
     }
 }

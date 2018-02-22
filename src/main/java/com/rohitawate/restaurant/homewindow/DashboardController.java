@@ -346,8 +346,8 @@ public class DashboardController implements Initializable {
         HashMap<String, String> params = new HashMap<>();
 
         for (StringKeyValueFieldController controller : paramsControllers)
-            params.put(controller.getHeader().getKey(), controller.getHeader().getValue());
-
+            if (controller.isChecked())
+                params.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         return params;
     }
 

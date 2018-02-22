@@ -344,6 +344,10 @@ public class HistoryManager {
                     lastRequestID = RS.getInt("ID");
             }
 
+            // This condition is observed when the database is empty
+            if (lastRequestID == -1)
+                return false;
+
             HashMap<String, String> map;
 
             // Checks for new or modified headers

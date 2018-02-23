@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.util.json;
+package com.rohitawate.restaurant.util;
 
-public class JSONUtils {
+public class StringUtils {
     /**
      * Removes leading and trailing quotation marks from strings.
      *

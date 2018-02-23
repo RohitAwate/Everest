@@ -28,6 +28,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -47,9 +48,11 @@ public class HomeWindowController implements Initializable {
     @FXML
     private TabPane homeWindowTabPane;
     @FXML
-    private VBox historyTab;
+    private TextField historySearchField;
     @FXML
-    private StackPane historyPromptLayer;
+    private VBox historyTab, searchBox;
+    @FXML
+    private StackPane historyPromptLayer, searchLayer, searchPromptLayer;
 
     private KeyCombination newTab = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private List<DashboardController> dashboardControllers;
@@ -60,6 +63,34 @@ public class HomeWindowController implements Initializable {
         dashboardControllers = new ArrayList<>();
         historyItemControllers = new ArrayList<>();
         recoverState();
+
+        searchLayer.visibleProperty().bind(historySearchField.textProperty().isNotEmpty());
+
+        historySearchField.textProperty().addListener(((observable, oldValue, newValue) -> {
+            searchBox.getChildren().remove(0, searchBox.getChildren().size());
+            searchPromptLayer.setVisible(false);
+            List<HistoryItemController> searchResults = getSearchResults(historySearchField.getText());
+
+            searchResults.sort((controller1, controller2) -> {
+                int relativity1 = controller1.getRelativityIndex(historySearchField.getText());
+                int relativity2 = controller2.getRelativityIndex(historySearchField.getText());
+                if (relativity1 < relativity2)
+                    return 1;
+                else if (relativity1 > relativity2)
+                    return -1;
+                else
+                    return 0;
+            });
+
+            if (searchResults.size() != 0) {
+                for (HistoryItemController controller : searchResults) {
+                    addSearchItem(controller.getDashboardState());
+                }
+            } else {
+                searchPromptLayer.setVisible(true);
+            }
+        }));
+
         Platform.runLater(() -> {
             // Adds a new tab if the last tab is closed
             Scene thisScene = homeWindowTabPane.getScene();
@@ -183,18 +214,32 @@ public class HomeWindowController implements Initializable {
     }
 
     public void addHistoryItem(DashboardState state) {
+        HistoryItemController controller = appendToList(state, historyTab, true);
+        historyItemControllers.add(controller);
+    }
+
+    private void addSearchItem(DashboardState state) {
+        appendToList(state, searchBox, false);
+    }
+
+    private HistoryItemController appendToList(DashboardState state, VBox layer, boolean appendToStart) {
         historyPromptLayer.setVisible(false);
+        HistoryItemController controller = null;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryItem.fxml"));
             Parent historyItem = loader.load();
-            HistoryItemController controller = loader.getController();
+
+            controller = loader.getController();
 
             controller.setRequestType(state.getHttpMethod());
 
             controller.setAddress(state.getTarget().toString());
+            controller.setDashboardState(state);
 
-            historyTab.getChildren().add(0, historyItem);
-            historyItemControllers.add(controller);
+            if (appendToStart)
+                layer.getChildren().add(0, historyItem);
+            else
+                layer.getChildren().add(historyItem);
 
             // Clicking on HistoryItem opens it up in a new tab
             historyItem.setOnMouseClicked(mouseEvent -> {
@@ -204,5 +249,17 @@ public class HomeWindowController implements Initializable {
         } catch (IOException IOE) {
             IOE.printStackTrace();
         }
+        return controller;
+    }
+
+    private List<HistoryItemController> getSearchResults(String searchString) {
+        List<HistoryItemController> filteredList = new ArrayList<>();
+
+        for (HistoryItemController controller : historyItemControllers) {
+            if (controller.getRelativityIndex(searchString) != 0)
+                filteredList.add(controller);
+        }
+
+        return filteredList;
     }
 }

@@ -105,6 +105,7 @@
 .scroll-pane .scroll-bar:horizontal {
     -fx-background-color: #3d3d3d;
     -fx-background-insets: 0px;
+    -fx-padding: 0px;
 }
 
 /* Tab attributes */
@@ -208,6 +209,14 @@
 /* History tab */
 #historyPane, #historyTab {
     -fx-background-color: #404040;
+}
+
+#searchBox, #searchLayer {
+    -fx-background-color: #1A6E4D;
+}
+
+#searchPromptLayer {
+    -fx-background-color: #822f2f;
 }
 
 #historySearchField {

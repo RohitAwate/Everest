@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohitawate.restaurant.models.DashboardState;
 import com.rohitawate.restaurant.util.Services;
-import com.rohitawate.restaurant.util.json.JSONUtils;
+import com.rohitawate.restaurant.util.StringUtils;
 import com.rohitawate.restaurant.util.settings.Settings;
 
 import javax.ws.rs.core.MediaType;
@@ -53,23 +53,23 @@ public class HistoryManager {
             queries = mapper.readTree(queriesFile);
 
             statement =
-                    conn.prepareStatement(JSONUtils.trimString(queries.get("createRequestsTable").toString()));
+                    conn.prepareStatement(StringUtils.trimString(queries.get("createRequestsTable").toString()));
             statement.execute();
 
             statement =
-                    conn.prepareStatement(JSONUtils.trimString(queries.get("createHeadersTable").toString()));
+                    conn.prepareStatement(StringUtils.trimString(queries.get("createHeadersTable").toString()));
             statement.execute();
 
             statement =
-                    conn.prepareStatement(JSONUtils.trimString(queries.get("createRequestContentMapTable").toString()));
+                    conn.prepareStatement(StringUtils.trimString(queries.get("createRequestContentMapTable").toString()));
             statement.execute();
 
             statement =
-                    conn.prepareStatement(JSONUtils.trimString(queries.get("createBodiesTable").toString()));
+                    conn.prepareStatement(StringUtils.trimString(queries.get("createBodiesTable").toString()));
             statement.execute();
 
             statement =
-                    conn.prepareStatement(JSONUtils.trimString(queries.get("createTuplesTable").toString()));
+                    conn.prepareStatement(StringUtils.trimString(queries.get("createTuplesTable").toString()));
             statement.execute();
         } catch (Exception E) {
             E.printStackTrace();
@@ -88,10 +88,11 @@ public class HistoryManager {
     public synchronized void saveHistory(DashboardState state) {
         if (isDuplicate(state))
             return;
+
         new Thread(() -> {
             try {
                 statement =
-                        conn.prepareStatement(JSONUtils.trimString(queries.get("saveRequest").toString()));
+                        conn.prepareStatement(StringUtils.trimString(queries.get("saveRequest").toString()));
 
                 statement.setString(1, state.getHttpMethod());
                 statement.setString(2, String.valueOf(state.getTarget()));
@@ -99,17 +100,17 @@ public class HistoryManager {
 
                 statement.executeUpdate();
 
+                // Get latest RequestID to insert into Headers table
+                statement = conn.prepareStatement("SELECT MAX(ID) AS MaxID FROM Requests");
+
+                ResultSet RS = statement.executeQuery();
+                int requestID = -1;
+                if (RS.next())
+                    requestID = RS.getInt("MaxID");
+
                 if (state.getHeaders().size() > 0) {
-                    // Get latest RequestID to insert into Headers table
-                    statement = conn.prepareStatement("SELECT MAX(ID) AS MaxID FROM Requests");
-
-                    ResultSet RS = statement.executeQuery();
-                    int requestID = -1;
-                    if (RS.next())
-                        requestID = RS.getInt("MaxID");
-
                     // Saves request headers
-                    statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveHeader").toString()));
+                    statement = conn.prepareStatement(StringUtils.trimString(queries.get("saveHeader").toString()));
                     for (Entry entry : state.getHeaders().entrySet()) {
                         statement.setInt(1, requestID);
                         statement.setString(2, entry.getKey().toString());
@@ -117,9 +118,11 @@ public class HistoryManager {
 
                         statement.executeUpdate();
                     }
+                }
 
+                if (state.getParams().size() > 0) {
                     // Saves request parameters
-                    statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveTuple").toString()));
+                    statement = conn.prepareStatement(StringUtils.trimString(queries.get("saveTuple").toString()));
                     for (Entry entry : state.getParams().entrySet()) {
                         statement.setInt(1, requestID);
                         statement.setString(2, "Param");
@@ -128,32 +131,34 @@ public class HistoryManager {
 
                         statement.executeUpdate();
                     }
+                }
 
-                    if (state.getHttpMethod().equals("POST") || state.getHttpMethod().equals("PUT")) {
-                        // Maps the request to its ContentType for faster recovery
-                        statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveRequestContentPair").toString()));
-                        statement.setInt(1, requestID);
-                        statement.setString(2, state.getContentType());
+                if (state.getHttpMethod().equals("POST") || state.getHttpMethod().equals("PUT")) {
+                    // Maps the request to its ContentType for faster recovery
+                    statement = conn.prepareStatement(StringUtils.trimString(queries.get("saveRequestContentPair").toString()));
+                    statement.setInt(1, requestID);
+                    statement.setString(2, state.getContentType());
 
-                        statement.executeUpdate();
+                    statement.executeUpdate();
 
-                        // Determines where to fetch the body from, based on the ContentType
-                        switch (state.getContentType()) {
-                            case MediaType.TEXT_PLAIN:
-                            case MediaType.APPLICATION_JSON:
-                            case MediaType.APPLICATION_XML:
-                            case MediaType.TEXT_HTML:
-                            case MediaType.APPLICATION_OCTET_STREAM:
-                                // Saves the body in case of raw content, or the file location in case of binary
-                                statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveBody").toString()));
-                                statement.setInt(1, requestID);
-                                statement.setString(2, state.getBody());
-                                statement.executeUpdate();
-                                break;
-                            case MediaType.APPLICATION_FORM_URLENCODED:
+                    // Determines where to fetch the body from, based on the ContentType
+                    switch (state.getContentType()) {
+                        case MediaType.TEXT_PLAIN:
+                        case MediaType.APPLICATION_JSON:
+                        case MediaType.APPLICATION_XML:
+                        case MediaType.TEXT_HTML:
+                        case MediaType.APPLICATION_OCTET_STREAM:
+                            // Saves the body in case of raw content, or the file location in case of binary
+                            statement = conn.prepareStatement(StringUtils.trimString(queries.get("saveBody").toString()));
+                            statement.setInt(1, requestID);
+                            statement.setString(2, state.getBody());
+                            statement.executeUpdate();
+                            break;
+                        case MediaType.APPLICATION_FORM_URLENCODED:
+                            if (state.getStringTuples().size() > 0) {
                                 for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
                                     // Saves the string tuples
-                                    statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveTuple").toString()));
+                                    statement = conn.prepareStatement(StringUtils.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);
                                     statement.setString(2, "String");
                                     statement.setString(3, entry.getKey());
@@ -161,11 +166,13 @@ public class HistoryManager {
 
                                     statement.executeUpdate();
                                 }
-                                break;
-                            case MediaType.MULTIPART_FORM_DATA:
+                            }
+                            break;
+                        case MediaType.MULTIPART_FORM_DATA:
+                            if (state.getStringTuples().size() > 0) {
                                 for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
                                     // Saves the string tuples
-                                    statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveTuple").toString()));
+                                    statement = conn.prepareStatement(StringUtils.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);
                                     statement.setString(2, "String");
                                     statement.setString(3, entry.getKey());
@@ -173,10 +180,12 @@ public class HistoryManager {
 
                                     statement.executeUpdate();
                                 }
+                            }
 
+                            if (state.getFileTuples().size() > 0) {
                                 for (Entry<String, String> entry : state.getFileTuples().entrySet()) {
                                     // Saves the file tuples
-                                    statement = conn.prepareStatement(JSONUtils.trimString(queries.get("saveTuple").toString()));
+                                    statement = conn.prepareStatement(StringUtils.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);
                                     statement.setString(2, "File");
                                     statement.setString(3, entry.getKey());
@@ -184,14 +193,17 @@ public class HistoryManager {
 
                                     statement.executeUpdate();
                                 }
-                                break;
-                        }
+                            }
+                            break;
                     }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
+            } finally {
+                System.out.println("Saved history item to database.");
             }
         }, "History Saver Thread").start();
+
         // Appends this history item to the HistoryTab
         Services.homeWindowController.addHistoryItem(state);
     }
@@ -203,7 +215,7 @@ public class HistoryManager {
         List<DashboardState> history = new ArrayList<>();
         try {
             // Loads the requests from the last x number of days, x being stored in Settings.showHistoryRange
-            statement = conn.prepareStatement(JSONUtils.trimString(queries.get("selectRecentRequests").toString()));
+            statement = conn.prepareStatement(StringUtils.trimString(queries.get("selectRecentRequests").toString()));
             String historyStartDate = LocalDate.now().minusDays(Settings.showHistoryRange).toString();
             statement.setString(1, historyStartDate);
 
@@ -226,7 +238,7 @@ public class HistoryManager {
 
                 if (state.getHttpMethod().equals("POST") || state.getHttpMethod().equals("PUT")) {
                     // Retrieves request body ContentType for querying corresponding table
-                    statement = conn.prepareStatement(JSONUtils.trimString(queries.get("selectRequestContentType").toString()));
+                    statement = conn.prepareStatement(StringUtils.trimString(queries.get("selectRequestContentType").toString()));
                     statement.setInt(1, requestID);
 
                     ResultSet RS = statement.executeQuery();
@@ -244,7 +256,7 @@ public class HistoryManager {
                         case MediaType.APPLICATION_XML:
                         case MediaType.TEXT_HTML:
                         case MediaType.APPLICATION_OCTET_STREAM:
-                            statement = conn.prepareStatement(JSONUtils.trimString(queries.get("selectRequestBody").toString()));
+                            statement = conn.prepareStatement(StringUtils.trimString(queries.get("selectRequestBody").toString()));
                             statement.setInt(1, requestID);
 
                             RS = statement.executeQuery();
@@ -275,7 +287,7 @@ public class HistoryManager {
 
         try {
             PreparedStatement statement =
-                    conn.prepareStatement(JSONUtils.trimString(queries.get("selectRequestHeaders").toString()));
+                    conn.prepareStatement(StringUtils.trimString(queries.get("selectRequestHeaders").toString()));
             statement.setInt(1, requestID);
 
             ResultSet RS = statement.executeQuery();
@@ -305,7 +317,7 @@ public class HistoryManager {
 
         try {
             PreparedStatement statement =
-                    conn.prepareStatement(JSONUtils.trimString(queries.get("selectTuples").toString()));
+                    conn.prepareStatement(StringUtils.trimString(queries.get("selectTuples").toString()));
             statement.setInt(1, requestID);
             statement.setString(2, type);
 
@@ -331,7 +343,7 @@ public class HistoryManager {
      */
     private boolean isDuplicate(DashboardState newState) {
         try {
-            statement = conn.prepareStatement(JSONUtils.trimString(queries.get("selectMostRecentRequest").toString()));
+            statement = conn.prepareStatement(StringUtils.trimString(queries.get("selectMostRecentRequest").toString()));
             ResultSet RS = statement.executeQuery();
 
             int lastRequestID = -1;
@@ -367,7 +379,7 @@ public class HistoryManager {
                     case MediaType.APPLICATION_XML:
                     case MediaType.TEXT_HTML:
                     case MediaType.APPLICATION_OCTET_STREAM:
-                        statement = conn.prepareStatement(JSONUtils.trimString(queries.get("selectRequestBody").toString()));
+                        statement = conn.prepareStatement(StringUtils.trimString(queries.get("selectRequestBody").toString()));
                         statement.setInt(1, lastRequestID);
 
                         RS = statement.executeQuery();

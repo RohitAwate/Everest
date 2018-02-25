@@ -130,46 +130,50 @@ public class BodyTabController implements Initializable {
     }
 
     public void setState(DashboardState dashboardState) {
-        switch (dashboardState.getContentType()) {
-            case MediaType.TEXT_PLAIN:
-                rawInputArea.setText(dashboardState.getBody());
-                rawInputTypeBox.getSelectionModel().select("PLAIN TEXT");
-                bodyTabPane.getSelectionModel().select(rawTab);
-                break;
-            case MediaType.APPLICATION_JSON:
-                rawInputArea.setText(dashboardState.getBody());
-                rawInputTypeBox.getSelectionModel().select("JSON");
-                bodyTabPane.getSelectionModel().select(rawTab);
-                break;
-            case MediaType.APPLICATION_XML:
-                rawInputArea.setText(dashboardState.getBody());
-                rawInputTypeBox.getSelectionModel().select("XML");
-                bodyTabPane.getSelectionModel().select(rawTab);
-                break;
-            case MediaType.TEXT_HTML:
-                rawInputArea.setText(dashboardState.getBody());
-                rawInputTypeBox.getSelectionModel().select("HTML");
-                bodyTabPane.getSelectionModel().select(rawTab);
-                break;
-            case MediaType.MULTIPART_FORM_DATA:
-                // For file tuples
-                for (Map.Entry entry : dashboardState.getFileTuples().entrySet())
-                    formDataTabController.addFileField(entry.getKey().toString(), entry.getValue().toString());
+        try {
+            switch (dashboardState.getContentType()) {
+                case MediaType.TEXT_PLAIN:
+                    rawInputArea.setText(dashboardState.getBody());
+                    rawInputTypeBox.getSelectionModel().select("PLAIN TEXT");
+                    bodyTabPane.getSelectionModel().select(rawTab);
+                    break;
+                case MediaType.APPLICATION_JSON:
+                    rawInputArea.setText(dashboardState.getBody());
+                    rawInputTypeBox.getSelectionModel().select("JSON");
+                    bodyTabPane.getSelectionModel().select(rawTab);
+                    break;
+                case MediaType.APPLICATION_XML:
+                    rawInputArea.setText(dashboardState.getBody());
+                    rawInputTypeBox.getSelectionModel().select("XML");
+                    bodyTabPane.getSelectionModel().select(rawTab);
+                    break;
+                case MediaType.TEXT_HTML:
+                    rawInputArea.setText(dashboardState.getBody());
+                    rawInputTypeBox.getSelectionModel().select("HTML");
+                    bodyTabPane.getSelectionModel().select(rawTab);
+                    break;
+                case MediaType.MULTIPART_FORM_DATA:
+                    // For file tuples
+                    for (Map.Entry entry : dashboardState.getFileTuples().entrySet())
+                        formDataTabController.addFileField(entry.getKey().toString(), entry.getValue().toString());
 
-                // For string tuples
-                for (Map.Entry entry : dashboardState.getStringTuples().entrySet())
-                    formDataTabController.addStringField(entry.getKey().toString(), entry.getValue().toString());
-                bodyTabPane.getSelectionModel().select(formTab);
-                break;
-            case MediaType.APPLICATION_OCTET_STREAM:
-                filePathField.setText(dashboardState.getBody());
-                bodyTabPane.getSelectionModel().select(binaryTab);
-                break;
-            case MediaType.APPLICATION_FORM_URLENCODED:
-                for (Map.Entry entry : dashboardState.getStringTuples().entrySet())
-                    urlTabController.addField(entry.getKey().toString(), entry.getValue().toString());
-                bodyTabPane.getSelectionModel().select(urlTab);
-                break;
+                    // For string tuples
+                    for (Map.Entry entry : dashboardState.getStringTuples().entrySet())
+                        formDataTabController.addStringField(entry.getKey().toString(), entry.getValue().toString());
+                    bodyTabPane.getSelectionModel().select(formTab);
+                    break;
+                case MediaType.APPLICATION_OCTET_STREAM:
+                    filePathField.setText(dashboardState.getBody());
+                    bodyTabPane.getSelectionModel().select(binaryTab);
+                    break;
+                case MediaType.APPLICATION_FORM_URLENCODED:
+                    for (Map.Entry entry : dashboardState.getStringTuples().entrySet())
+                        urlTabController.addField(entry.getKey().toString(), entry.getValue().toString());
+                    bodyTabPane.getSelectionModel().select(urlTab);
+                    break;
+            }
+        } catch (NullPointerException NPE) {
+            System.out.println("Dashboard loaded with blank request body.");
         }
     }
 }

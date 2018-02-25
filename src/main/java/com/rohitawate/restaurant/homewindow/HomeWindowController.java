@@ -16,6 +16,7 @@
 
 package com.rohitawate.restaurant.homewindow;
 
+import com.jfoenix.controls.JFXButton;
 import com.rohitawate.restaurant.models.DashboardState;
 import com.rohitawate.restaurant.util.Services;
 import javafx.application.Platform;
@@ -48,11 +49,13 @@ public class HomeWindowController implements Initializable {
     @FXML
     private TabPane homeWindowTabPane;
     @FXML
-    private TextField historySearchField;
+    private TextField historyTextField;
     @FXML
     private VBox historyTab, searchBox;
     @FXML
     private StackPane historyPromptLayer, searchLayer, searchPromptLayer;
+    @FXML
+    private JFXButton clearSearchFieldButton;
 
     private KeyCombination newTab = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private List<DashboardController> dashboardControllers;
@@ -64,16 +67,16 @@ public class HomeWindowController implements Initializable {
         historyItemControllers = new ArrayList<>();
         recoverState();
 
-        searchLayer.visibleProperty().bind(historySearchField.textProperty().isNotEmpty());
+        searchLayer.visibleProperty().bind(historyTextField.textProperty().isNotEmpty());
 
-        historySearchField.textProperty().addListener(((observable, oldValue, newValue) -> {
+        historyTextField.textProperty().addListener(((observable, oldValue, newValue) -> {
             searchBox.getChildren().remove(0, searchBox.getChildren().size());
             searchPromptLayer.setVisible(false);
-            List<HistoryItemController> searchResults = getSearchResults(historySearchField.getText());
+            List<HistoryItemController> searchResults = getSearchResults(historyTextField.getText());
 
             searchResults.sort((controller1, controller2) -> {
-                int relativity1 = controller1.getRelativityIndex(historySearchField.getText());
-                int relativity2 = controller2.getRelativityIndex(historySearchField.getText());
+                int relativity1 = controller1.getRelativityIndex(historyTextField.getText());
+                int relativity2 = controller2.getRelativityIndex(historyTextField.getText());
                 if (relativity1 < relativity2)
                     return 1;
                 else if (relativity1 > relativity2)
@@ -91,8 +94,10 @@ public class HomeWindowController implements Initializable {
             }
         }));
 
+        clearSearchFieldButton.setOnAction(e -> historyTextField.clear());
+
         Platform.runLater(() -> {
-            // Adds a new tab if the last tab is closed
+            // Sets the key-bindings
             Scene thisScene = homeWindowTabPane.getScene();
             thisScene.setOnKeyPressed(e -> {
                 if (newTab.match(e))

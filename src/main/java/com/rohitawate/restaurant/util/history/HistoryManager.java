@@ -269,7 +269,7 @@ public class HistoryManager {
                             break;
                         case MediaType.MULTIPART_FORM_DATA:
                             state.setStringTuples(getTuples(requestID, "String"));
-                            state.setFileTuples(getTuples(requestID, "Files"));
+                            state.setFileTuples(getTuples(requestID, "File"));
                             break;
                     }
                 }

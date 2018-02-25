@@ -154,20 +154,20 @@ public class FormDataTabController implements Initializable {
     }
 
     public HashMap<String, String> getStringTuples() {
-        HashMap<String, String> headers = new HashMap<>();
+        HashMap<String, String> tuples = new HashMap<>();
         for (StringKeyValueFieldController controller : stringControllers) {
             if (controller.isChecked())
-                headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+                tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
-        return headers;
+        return tuples;
     }
 
     public HashMap<String, String> getFileTuples() {
-        HashMap<String, String> headers = new HashMap<>();
+        HashMap<String, String> tuples = new HashMap<>();
         for (FileKeyValueFieldController controller : fileControllers) {
             if (controller.isChecked())
-                headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+                tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
-        return headers;
+        return tuples;
     }
 }

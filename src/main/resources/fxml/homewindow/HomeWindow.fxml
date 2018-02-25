@@ -16,6 +16,7 @@
   ~ limitations under the License.
   -->
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
@@ -24,27 +25,36 @@
 <?import javafx.scene.text.Font?>
 <SplitPane dividerPositions="0.3" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.homewindow.HomeWindowController">
    <items>
-      <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="500.0" prefWidth="400.0" spacing="10.0"
+      <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="500.0" prefWidth="400.0"
             SplitPane.resizableWithParent="false">
          <children>
-            <HBox alignment="CENTER" fillHeight="false" spacing="10.0">
+            <HBox fx:id="historySearchFieldBox" alignment="CENTER" fillHeight="false">
                <VBox.margin>
                   <Insets/>
                </VBox.margin>
                <children>
-                  <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../../assets/Search.png"/>
                      </image>
                   </ImageView>
-                  <TextField fx:id="historySearchField" promptText="SEARCH" HBox.hgrow="ALWAYS">
+                  <TextField fx:id="historyTextField" promptText="SEARCH" HBox.hgrow="ALWAYS">
                      <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                      </padding>
                   </TextField>
+                  <JFXButton fx:id="clearSearchFieldButton" ripplerFill="WHITE">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../assets/BackspaceArrow.png"/>
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </JFXButton>
                </children>
                <padding>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
                </padding>
             </HBox>
             <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">

@@ -105,6 +105,9 @@
 .scroll-pane .scroll-bar:horizontal {
     -fx-background-color: #3d3d3d;
     -fx-background-insets: 0px;
+}
+
+.scroll-pane {
     -fx-padding: 0px;
 }
 
@@ -219,8 +222,12 @@
     -fx-background-color: #822f2f;
 }
 
-#historySearchField {
-    -fx-background-color: #505050;
+#historySearchFieldBox {
+    -fx-background-color: #303030;
+}
+
+#historyTextField {
+    -fx-background-color: transparent;
     -fx-text-fill: white;
 }
 

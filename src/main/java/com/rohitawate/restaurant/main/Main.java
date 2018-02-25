@@ -31,16 +31,16 @@ public class Main extends Application {
         SettingsLoader settingsLoader = new SettingsLoader();
         settingsLoader.SettingsLoaderThread.join();
 
-        new Services();
+        Class.forName("com.rohitawate.restaurant.util.Services");
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
-        Parent dashboard = loader.load();
+        Parent homeWindow = loader.load();
         Services.homeWindowController = loader.getController();
 		Stage dashboardStage = new Stage();
-        ThemeManager.setTheme(dashboard);
+        ThemeManager.setTheme(homeWindow);
 
         dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/LogoWithoutText.png").toExternalForm()));
-		dashboardStage.setScene(new Scene(dashboard));
+        dashboardStage.setScene(new Scene(homeWindow));
 		dashboardStage.setTitle("RESTaurant");
 		dashboardStage.show();
 	}

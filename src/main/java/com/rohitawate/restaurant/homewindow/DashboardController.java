@@ -48,8 +48,10 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.*;
 
 public class DashboardController implements Initializable {
@@ -238,8 +240,14 @@ public class DashboardController implements Initializable {
                             errorTitle.setText(URE.getExceptionTitle());
                             errorDetails.setText(URE.getExceptionDetails());
                         } else if (exception.getClass() == ProcessingException.class) {
-                            errorTitle.setText("RESTaurant couldn't connect.");
-                            errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
+                            if (exception.getCause().getClass() == UnknownHostException.class ||
+                                    exception.getCause().getClass() == ConnectException.class) {
+                                errorTitle.setText("RESTaurant couldn't connect.");
+                                errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
+                            } else if (exception.getCause().getClass() == IllegalArgumentException.class) {
+                                errorTitle.setText("Did you forget something?");
+                                errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " request.");
+                            }
                         } else if (exception.getClass() == FileNotFoundException.class)
                             snackBar.show("File could not be found.", 5000);
                         errorLayer.setVisible(true);

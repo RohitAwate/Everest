@@ -57,10 +57,15 @@ public class HistoryItemController implements Initializable {
         if (comparisonString.contains(searchString))
             return 7;
 
-        // Checks if matches with target
-        comparisonString = dashboardState.getTarget().toString().toLowerCase();
+        // Checks if matches with target's hostname
+        comparisonString = dashboardState.getTarget().getHost().toLowerCase();
         if (comparisonString.contains(searchString))
             return 10;
+
+        // Checks if matches with target's path
+        comparisonString = dashboardState.getTarget().getPath().toLowerCase();
+        if (comparisonString.contains(searchString))
+            return 9;
 
         // Checks for a match in the params
         for (Map.Entry param : dashboardState.getParams().entrySet()) {

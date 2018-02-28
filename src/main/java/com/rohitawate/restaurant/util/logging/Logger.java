@@ -38,7 +38,7 @@ class Logger {
      *
      * @param log - The log to be written to file.
      */
-    void log(Log log) {
+    synchronized void log(Log log) {
         if (log.getLevel().greaterThanEqualTo(this.writerLevel)) {
             try {
                 String logFileContents = readFile(logFilePath);
@@ -72,6 +72,8 @@ class Logger {
 
         if (log.getException() != null) {
             StackTraceElement[] stackTrace = log.getException().getStackTrace();
+            builder.append(log.getException().toString());
+            builder.append("<br>\n");
             if (stackTrace.length != 0) {
                 for (StackTraceElement element : log.getException().getStackTrace()) {
                     builder.append(" -- ");
@@ -79,10 +81,9 @@ class Logger {
                     builder.append("<br>\n");
                 }
             } else {
-                builder.append("N/A");
+                builder.append("Stack trace unavailable.");
             }
         } else {
-            logEntry = logEntry.replace("Stack Trace: <br>", "");
             builder.append("");
         }
 

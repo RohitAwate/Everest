@@ -16,6 +16,7 @@
 
 package com.rohitawate.restaurant.homewindow;
 
+import com.rohitawate.restaurant.util.Services;
 import com.rohitawate.restaurant.util.themes.ThemeManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
@@ -29,6 +30,7 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,7 +102,7 @@ public class FormDataTabController implements Initializable {
             });
             fieldsBox.getChildren().add(fileField);
         } catch (IOException e) {
-            e.printStackTrace();
+            Services.loggingService.logSevere("Could not load file field.", e, LocalDateTime.now());
         }
     }
 
@@ -149,7 +151,7 @@ public class FormDataTabController implements Initializable {
             });
             fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {
-            e.printStackTrace();
+            Services.loggingService.logSevere("Could not load string field.", e, LocalDateTime.now());
         }
     }
 

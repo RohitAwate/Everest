@@ -18,20 +18,22 @@ package com.rohitawate.restaurant.util.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rohitawate.restaurant.util.StringUtils;
+import com.rohitawate.restaurant.util.MiscUtils;
+import com.rohitawate.restaurant.util.Services;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.LocalDateTime;
 
 /**
  * Loads up custom values into Settings from settings.json.
  */
 public class SettingsLoader implements Runnable {
-    public Thread SettingsLoaderThread;
+    public Thread settingsLoaderThread;
 
     public SettingsLoader() {
-        SettingsLoaderThread = new Thread(this, "Settings loader thread");
-        SettingsLoaderThread.start();
+        settingsLoaderThread = new Thread(this, "Settings loader thread");
+        settingsLoaderThread.start();
     }
 
     @Override
@@ -58,11 +60,11 @@ public class SettingsLoader implements Runnable {
             if (Settings.connectionReadTimeOutEnable)
                 Settings.connectionReadTimeOut = nodes.get("connectionReadTimeOut").asInt();
 
-            Settings.theme = StringUtils.trimString(nodes.get("theme").toString());
+            Settings.theme = MiscUtils.trimString(nodes.get("theme").toString());
         } catch (Exception E) {
-            System.out.println("Settings file not found. Loading default values... ");
+            Services.loggingService.logInfo("Settings file not found. Defaults will be used.", LocalDateTime.now());
         } finally {
-            System.out.println("Settings loaded.");
+            Services.loggingService.logInfo("Settings loaded.", LocalDateTime.now());
         }
     }
 }

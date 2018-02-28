@@ -40,6 +40,7 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -128,7 +129,7 @@ public class HomeWindowController implements Initializable {
                     for (DashboardState state : history)
                         addHistoryItem(state);
                 } catch (InterruptedException | ExecutionException E) {
-                    E.printStackTrace();
+                    Services.loggingService.logSevere("Task thread interrupted while populating HistoryTab.", E, LocalDateTime.now());
                 }
             });
             historyLoader.setOnFailed(e -> historyLoader.getException().printStackTrace());
@@ -162,7 +163,7 @@ public class HomeWindowController implements Initializable {
             homeWindowTabPane.getSelectionModel().select(newTab);
             dashboardControllers.add(controller);
         } catch (IOException e) {
-            e.printStackTrace();
+            Services.loggingService.logSevere("Could not add a new tab.", e, LocalDateTime.now());
         }
     }
 
@@ -174,28 +175,28 @@ public class HomeWindowController implements Initializable {
             dashboardStates.add(controller.getState());
 
         try {
-            File configFolder = new File("config/");
-            if (!configFolder.exists())
-                configFolder.mkdir();
 
-            OutputStream fileStream = new FileOutputStream("config/restaurant.state");
+            File configFolder = new File("RESTaurant/config/");
+            if (!configFolder.exists())
+                configFolder.mkdirs();
+
+            OutputStream fileStream = new FileOutputStream("RESTaurant/config/restaurant.state");
             ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
             objectStream.writeObject(dashboardStates);
             objectStream.close();
             fileStream.close();
-            System.out.println("Application state saved successfully.");
+            Services.loggingService.logInfo("Application state saved successfully.", LocalDateTime.now());
         } catch (IOException e) {
-            System.out.println("Failed to save the application's state:");
-            e.printStackTrace();
+            Services.loggingService.logSevere("Failed to save the application's state.", e, LocalDateTime.now());
         }
     }
 
     private void recoverState() {
         try {
-            InputStream fileStream = new FileInputStream("config/restaurant.state");
+            InputStream fileStream = new FileInputStream("RESTaurant/config/restaurant.state");
             ObjectInputStream objectStream = new ObjectInputStream(fileStream);
 
-            System.out.println("Application state file found. Recovering state... ");
+            Services.loggingService.logInfo("Application state file found.", LocalDateTime.now());
 
             List<DashboardState> dashboardStates = (List<DashboardState>) objectStream.readObject();
             objectStream.close();
@@ -208,13 +209,13 @@ public class HomeWindowController implements Initializable {
                 addTab();
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Application state file not found. Loading default state... ");
+            Services.loggingService.logWarning("Application state file not found. Loading default state.", e, LocalDateTime.now());
             addTab();
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Application state file is possibly corrupted. Could not recover the state.\nLoading default state... ");
+            Services.loggingService.logWarning("Application state file is possibly corrupted. Could not recover the state.\nLoading default state.", e, LocalDateTime.now());
             addTab();
         } finally {
-            System.out.println("Application loaded.");
+            Services.loggingService.logInfo("Application loaded.", LocalDateTime.now());
         }
     }
 
@@ -251,8 +252,8 @@ public class HomeWindowController implements Initializable {
                 if (mouseEvent.getButton() == MouseButton.PRIMARY)
                     addTab(state);
             });
-        } catch (IOException IOE) {
-            IOE.printStackTrace();
+        } catch (IOException e) {
+            Services.loggingService.logSevere("Could not append HistoryItem to list.", e, LocalDateTime.now());
         }
         return controller;
     }

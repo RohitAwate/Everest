@@ -5,5 +5,5 @@ RESTaurant.iml
 classes/
 src/main/java/META-INF/
 dependency-reduced-pom.xml
-history.sqlite
-/config/restaurant.state
+config/
+logs/

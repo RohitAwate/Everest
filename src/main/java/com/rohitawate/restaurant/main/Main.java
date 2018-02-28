@@ -28,10 +28,11 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        SettingsLoader settingsLoader = new SettingsLoader();
-        settingsLoader.SettingsLoaderThread.join();
+        Services.start();
+        Services.startServicesThread.join();
 
-        Class.forName("com.rohitawate.restaurant.util.Services");
+        SettingsLoader settingsLoader = new SettingsLoader();
+        settingsLoader.settingsLoaderThread.join();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
         Parent homeWindow = loader.load();

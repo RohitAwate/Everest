@@ -52,6 +52,7 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class DashboardController implements Initializable {
@@ -103,8 +104,8 @@ public class DashboardController implements Initializable {
             ThemeManager.setTheme(bodyTabContent);
             bodyTabController = bodyTabLoader.getController();
             bodyTab.setContent(bodyTabContent);
-        } catch (IOException IOE) {
-            IOE.printStackTrace();
+        } catch (IOException e) {
+            Services.loggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
         }
 
         // Select GET by default
@@ -311,7 +312,7 @@ public class DashboardController implements Initializable {
             promptLayer.setVisible(true);
             snackBar.show("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
-            E.printStackTrace();
+            Services.loggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
             errorLayer.setVisible(true);
             errorTitle.setText("Oops... That's embarrassing!");
             errorDetails.setText("Something went wrong. Try to make another request.\nRestart RESTaurant if that doesn't work.");
@@ -411,7 +412,7 @@ public class DashboardController implements Initializable {
             });
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {
-            e.printStackTrace();
+            Services.loggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
         }
     }
 
@@ -440,7 +441,7 @@ public class DashboardController implements Initializable {
         try {
             dashboardState.setTarget(addressField.getText());
         } catch (MalformedURLException e) {
-            System.out.println("Dashboard state was saved with an invalid URL.");
+            Services.loggingService.logInfo("Dashboard state was saved with an invalid URL.", LocalDateTime.now());
         }
         dashboardState.setHttpMethod(httpMethodBox.getValue());
         dashboardState.setHeaders(headerTabController.getHeaders());

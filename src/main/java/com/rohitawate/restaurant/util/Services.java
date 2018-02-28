@@ -18,12 +18,21 @@ package com.rohitawate.restaurant.util;
 
 import com.rohitawate.restaurant.homewindow.HomeWindowController;
 import com.rohitawate.restaurant.util.history.HistoryManager;
+import com.rohitawate.restaurant.util.logging.Level;
+import com.rohitawate.restaurant.util.logging.LoggingService;
 
 public class Services {
+    public static Thread startServicesThread;
     public static HistoryManager historyManager;
+    public static LoggingService loggingService;
     public static HomeWindowController homeWindowController;
 
-    static {
-        historyManager = new HistoryManager();
+    public static void start() {
+        startServicesThread = new Thread(() -> {
+            loggingService = new LoggingService(Level.INFO);
+            historyManager = new HistoryManager();
+        });
+
+        startServicesThread.start();
     }
 }

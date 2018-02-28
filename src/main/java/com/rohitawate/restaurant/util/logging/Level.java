@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.util;
+package com.rohitawate.restaurant.util.logging;
 
-public class StringUtils {
-    /**
-     * Removes leading and trailing quotation marks from strings.
-     *
-     * @param input String with leading and trailing quotation marks.
-     * @return trimmedString - String with leading and trailing quotation marks removed.
-     */
-    public static String trimString(String input) {
-        return input.replaceAll("\"", "");
+public enum Level {
+    SEVERE, WARNING, INFO;
+
+    int getValue() {
+        if (this.equals(SEVERE))
+            return 3;
+        else if (this.equals(WARNING))
+            return 2;
+        else
+            return 1;
+    }
+
+    boolean greaterThanEqualTo(Level level) {
+        return this.getValue() >= level.getValue();
     }
 }

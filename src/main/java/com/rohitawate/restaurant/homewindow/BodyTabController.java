@@ -18,6 +18,7 @@ package com.rohitawate.restaurant.homewindow;
 
 import com.rohitawate.restaurant.models.DashboardState;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
+import com.rohitawate.restaurant.util.Services;
 import com.rohitawate.restaurant.util.themes.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,6 +31,7 @@ import javafx.stage.Window;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -69,7 +71,7 @@ public class BodyTabController implements Initializable {
             urlTab.setContent(formTabContent);
             urlTabController = loader.getController();
         } catch (IOException e) {
-            e.printStackTrace();
+            Services.loggingService.logSevere("Could not load URL tab.", e, LocalDateTime.now());
         }
     }
 
@@ -173,7 +175,7 @@ public class BodyTabController implements Initializable {
                     break;
             }
         } catch (NullPointerException NPE) {
-            System.out.println("Dashboard loaded with blank request body.");
+            Services.loggingService.logInfo("Dashboard loaded with blank request body.", LocalDateTime.now());
         }
     }
 }

@@ -180,14 +180,15 @@ public class DashboardController implements Initializable {
                     requestManager.setOnFailed(e -> {
                         loadingLayer.setVisible(false);
                         promptLayer.setVisible(false);
-                        Throwable exception = requestManager.getException();
-                        exception.printStackTrace();
+                        Throwable throwable = requestManager.getException();
+                        Exception exception = (Exception) throwable;
+                        Services.loggingService.logWarning("GET request could not be processed.", exception, LocalDateTime.now());
 
-                        if (exception.getClass() == UnreliableResponseException.class) {
-                            UnreliableResponseException URE = (UnreliableResponseException) exception;
+                        if (throwable.getClass() == UnreliableResponseException.class) {
+                            UnreliableResponseException URE = (UnreliableResponseException) throwable;
                             errorTitle.setText(URE.getExceptionTitle());
                             errorDetails.setText(URE.getExceptionDetails());
-                        } else if (exception.getClass() == ProcessingException.class) {
+                        } else if (throwable.getClass() == ProcessingException.class) {
                             errorTitle.setText("RESTaurant couldn't connect.");
                             errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
                         }
@@ -233,23 +234,24 @@ public class DashboardController implements Initializable {
                     requestManager.setOnFailed(e -> {
                         loadingLayer.setVisible(false);
                         promptLayer.setVisible(false);
-                        Throwable exception = requestManager.getException();
-                        exception.printStackTrace();
+                        Throwable throwable = requestManager.getException();
+                        Exception exception = (Exception) throwable;
+                        Services.loggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
 
-                        if (exception.getClass() == UnreliableResponseException.class) {
-                            UnreliableResponseException URE = (UnreliableResponseException) exception;
+                        if (throwable.getClass() == UnreliableResponseException.class) {
+                            UnreliableResponseException URE = (UnreliableResponseException) throwable;
                             errorTitle.setText(URE.getExceptionTitle());
                             errorDetails.setText(URE.getExceptionDetails());
-                        } else if (exception.getClass() == ProcessingException.class) {
-                            if (exception.getCause().getClass() == UnknownHostException.class ||
-                                    exception.getCause().getClass() == ConnectException.class) {
+                        } else if (throwable.getClass() == ProcessingException.class) {
+                            if (throwable.getCause().getClass() == UnknownHostException.class ||
+                                    throwable.getCause().getClass() == ConnectException.class) {
                                 errorTitle.setText("RESTaurant couldn't connect.");
                                 errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
-                            } else if (exception.getCause().getClass() == IllegalArgumentException.class) {
+                            } else if (throwable.getCause().getClass() == IllegalArgumentException.class) {
                                 errorTitle.setText("Did you forget something?");
                                 errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " request.");
                             }
-                        } else if (exception.getClass() == FileNotFoundException.class)
+                        } else if (throwable.getClass() == FileNotFoundException.class)
                             snackBar.show("File could not be found.", 5000);
                         errorLayer.setVisible(true);
                         requestManager.reset();
@@ -288,14 +290,15 @@ public class DashboardController implements Initializable {
                     requestManager.setOnFailed(e -> {
                         loadingLayer.setVisible(false);
                         promptLayer.setVisible(false);
-                        Throwable exception = requestManager.getException();
-                        exception.printStackTrace();
+                        Throwable throwable = requestManager.getException();
+                        Exception exception = (Exception) throwable;
+                        Services.loggingService.logWarning("DELETE request could not be processed.", exception, LocalDateTime.now());
 
-                        if (exception.getClass() == UnreliableResponseException.class) {
-                            UnreliableResponseException URE = (UnreliableResponseException) exception;
+                        if (throwable.getClass() == UnreliableResponseException.class) {
+                            UnreliableResponseException URE = (UnreliableResponseException) throwable;
                             errorTitle.setText(URE.getExceptionTitle());
                             errorDetails.setText(URE.getExceptionDetails());
-                        } else if (exception.getClass() == ProcessingException.class) {
+                        } else if (throwable.getClass() == ProcessingException.class) {
                             errorTitle.setText("No Internet Connection");
                             errorDetails.setText("Could not connect to the server. Please check your connection.");
                         }

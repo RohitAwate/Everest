@@ -262,7 +262,15 @@ public class HomeWindowController implements Initializable {
         List<HistoryItemController> filteredList = new ArrayList<>();
 
         for (HistoryItemController controller : historyItemControllers) {
-            if (controller.getRelativityIndex(searchString) != 0)
+
+            int relativityIndex = 0;
+
+            // Split the string into words and get total relativity index as sum of individual indices.
+            String words[] = searchString.split("\\s");
+            for (String word : words)
+                relativityIndex += controller.getRelativityIndex(word);
+
+            if (relativityIndex != 0)
                 filteredList.add(controller);
         }
 

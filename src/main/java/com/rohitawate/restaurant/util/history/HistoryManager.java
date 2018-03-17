@@ -200,8 +200,6 @@ public class HistoryManager {
                 }
             } catch (SQLException e) {
                 Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
-            } finally {
-                System.out.println("Saved history item to database.");
             }
         }, "History Saver Thread").start();
 

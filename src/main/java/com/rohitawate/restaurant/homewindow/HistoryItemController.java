@@ -52,10 +52,10 @@ public class HistoryItemController implements Initializable {
         searchString = searchString.toLowerCase();
         String comparisonString;
 
-        // Checks if matches with HTTP method
-        comparisonString = dashboardState.getHttpMethod().toLowerCase();
+        // Checks if matches with target
+        comparisonString = dashboardState.getTarget().toString().toLowerCase();
         if (comparisonString.contains(searchString))
-            return 7;
+            return 10;
 
         // Checks if matches with target's hostname
         comparisonString = dashboardState.getTarget().getHost().toLowerCase();
@@ -66,6 +66,11 @@ public class HistoryItemController implements Initializable {
         comparisonString = dashboardState.getTarget().getPath().toLowerCase();
         if (comparisonString.contains(searchString))
             return 9;
+
+        // Checks if matches with HTTP method
+        comparisonString = dashboardState.getHttpMethod().toLowerCase();
+        if (comparisonString.contains(searchString))
+            return 7;
 
         // Checks for a match in the params
         for (Map.Entry param : dashboardState.getParams().entrySet()) {

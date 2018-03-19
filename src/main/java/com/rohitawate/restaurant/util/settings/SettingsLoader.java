@@ -18,7 +18,7 @@ package com.rohitawate.restaurant.util.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rohitawate.restaurant.util.MiscUtils;
+import com.rohitawate.restaurant.util.RestaurantUtilities;
 import com.rohitawate.restaurant.util.Services;
 
 import java.io.File;
@@ -60,7 +60,7 @@ public class SettingsLoader implements Runnable {
             if (Settings.connectionReadTimeOutEnable)
                 Settings.connectionReadTimeOut = nodes.get("connectionReadTimeOut").asInt();
 
-            Settings.theme = MiscUtils.trimString(nodes.get("theme").toString());
+            Settings.theme = RestaurantUtilities.trimString(nodes.get("theme").toString());
         } catch (Exception E) {
             Services.loggingService.logInfo("Settings file not found. Defaults will be used.", LocalDateTime.now());
         } finally {

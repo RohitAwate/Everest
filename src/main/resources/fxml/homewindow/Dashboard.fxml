@@ -16,26 +16,15 @@
   ~ limitations under the License.
   -->
 
-<?import com.jfoenix.controls.JFXButton?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
-
-<StackPane fx:id="dashboard" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.homewindow.DashboardController">
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<StackPane fx:id="dashboard" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../../css/Adreana.css"
+           xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rohitawate.restaurant.homewindow.DashboardController">
     <children>
         <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
@@ -146,7 +135,8 @@
                          <children>
                              <VBox fx:id="responseBox" alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
-                                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0" minHeight="50.0" VBox.vgrow="ALWAYS">
+                                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0"
+                                           minHeight="50.0" spacing="30.0" VBox.vgrow="ALWAYS">
                                          <children>
                                              <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                                                  <children>
@@ -165,20 +155,25 @@
                                                      </Label>
                                                  </children>
                                              </HBox>
+                                             <Label fx:id="responseType" text="JSON" textFill="#2dcd2d">
+                                                 <font>
+                                                     <Font name="Liberation Mono Bold" size="17.0"/>
+                                                 </font>
+                                             </Label>
                                              <Label fx:id="responseTime" text="151 ms" textFill="WHITE" HBox.hgrow="ALWAYS">
                                                  <HBox.margin>
-                                                     <Insets right="30.0" />
+                                                     <Insets/>
                                                  </HBox.margin>
                                                  <font>
-                                                     <Font name="Liberation Mono" size="20.0" />
+                                                     <Font name="Liberation Mono" size="17.0"/>
                                                  </font>
                                              </Label>
                                              <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0" text="1998 B" textFill="WHITE" HBox.hgrow="ALWAYS">
                                                  <font>
-                                                     <Font name="Liberation Mono" size="20.0" />
+                                                     <Font name="Liberation Mono" size="17.0"/>
                                                  </font>
                                                  <HBox.margin>
-                                                     <Insets right="30.0" />
+                                                     <Insets/>
                                                  </HBox.margin>
                                              </Label>
                                              <JFXButton fx:id="clearResponseAreaButton" buttonType="RAISED" onAction="#clearResponseArea" ripplerFill="WHITE" text=" CLEAR" textFill="WHITE" HBox.hgrow="ALWAYS">
@@ -230,14 +225,15 @@
                                              </VBox>
                                              <VBox fx:id="promptLayer" alignment="CENTER" prefHeight="200.0" prefWidth="100.0" visible="false">
                                                  <children>
-                                                     <Label text="Enter an address, select a method and hit send. 🚀" textFill="WHITE">
+                                                     <Label text="Enter an address, select a method and hit send."
+                                                            textFill="WHITE">
                                                          <font>
                                                              <Font size="32.0" />
                                                          </font>
                                                      </Label>
-                                                     <Label text="It's not rocket science." textFill="#9e9e9e">
+                                                     <Label text="🚀" textFill="#0093ff">
                                                          <font>
-                                                             <Font name="System Italic" size="27.0" />
+                                                             <Font size="43.0"/>
                                                          </font>
                                                      </Label>
                                                  </children>

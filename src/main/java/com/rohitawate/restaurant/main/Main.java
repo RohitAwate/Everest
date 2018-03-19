@@ -15,7 +15,7 @@
  */
 package com.rohitawate.restaurant.main;
 
-import com.rohitawate.restaurant.util.MiscUtils;
+import com.rohitawate.restaurant.util.RestaurantUtilities;
 import com.rohitawate.restaurant.util.Services;
 import com.rohitawate.restaurant.util.settings.SettingsLoader;
 import com.rohitawate.restaurant.util.themes.ThemeManager;
@@ -46,7 +46,7 @@ public class Main extends Application {
 		dashboardStage.setTitle("RESTaurant");
 		dashboardStage.show();
 
-        MiscUtils.createBugReporter();
+        RestaurantUtilities.createBugReporter();
 	}
     
     public static void main(String args[]) {

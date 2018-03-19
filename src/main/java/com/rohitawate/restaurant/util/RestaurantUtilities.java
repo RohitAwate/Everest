@@ -16,6 +16,9 @@
 
 package com.rohitawate.restaurant.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +27,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
-public class MiscUtils {
+public class RestaurantUtilities {
+    public static ObjectMapper mapper;
+
+    static {
+        mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+    }
+
     /**
      * Removes leading and trailing quotation marks from strings.
      *
@@ -42,7 +52,7 @@ public class MiscUtils {
         new Thread(() -> {
             File bugReporterFile = new File("RESTaurant/BugReporter.jar");
             if (!bugReporterFile.exists()) {
-                InputStream inputStream = MiscUtils.class.getResourceAsStream("/BugReporter.jar");
+                InputStream inputStream = RestaurantUtilities.class.getResourceAsStream("/BugReporter.jar");
                 Path bugReporter = Paths.get("RESTaurant/BugReporter.jar");
                 try {
                     Files.copy(inputStream, bugReporter);

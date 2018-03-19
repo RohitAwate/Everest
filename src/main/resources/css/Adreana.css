@@ -156,6 +156,7 @@
     -fx-background-color: #3d3d3d;
 }
 
+
 .scroll-pane .scroll-bar .thumb {
     -fx-background-color: #808080;
 }
@@ -238,6 +239,10 @@
 
 #historyItemBox:hover {
     -fx-background-color: #282828;
+}
+
+#rawInputArea {
+    -fx-font-size: 15px;
 }
 
 /* SnackBar */

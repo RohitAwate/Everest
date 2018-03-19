@@ -16,9 +16,6 @@
 
 package com.rohitawate.restaurant.requestmanager;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import javafx.concurrent.Task;
@@ -71,34 +68,9 @@ public class GETRequestManager extends RequestManager {
                     throw new UnreliableResponseException("301: Resource Moved Permanently", responseHelpText);
                 }
 
-                String type = (String) serverResponse.getHeaders().getFirst("Content-type");
                 String responseBody = serverResponse.readEntity(String.class);
 
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-
-                if (type != null) {
-                    switch (type.toLowerCase()) {
-                        case "application/json; charset=utf-8":
-                        case "application/json":
-                            JsonNode node = mapper.readTree(responseBody);
-                            response.setBody(mapper.writeValueAsString(node));
-                            break;
-                        case "application/xml; charset=utf-8":
-                        case "application/xml":
-                            response.setBody(mapper.writeValueAsString(responseBody));
-                            break;
-                        case "text/html":
-                        case "text/html; charset=utf-8":
-                            response.setBody(responseBody);
-                            break;
-                        default:
-                            response.setBody(responseBody);
-                    }
-                } else {
-                    response.setBody("No body found in the response.");
-                }
-
+                response.setBody(responseBody);
                 response.setMediaType(serverResponse.getMediaType());
                 response.setStatusCode(serverResponse.getStatus());
                 response.setSize(responseBody.length());

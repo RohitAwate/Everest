@@ -12,7 +12,7 @@
          <children>
             <Label fx:id="requestType" textFill="ORANGERED" textOverrun="WORD_ELLIPSIS">
                <font>
-                  <Font name="System Bold" size="18.0" />
+                   <Font name="Liberation Mono Bold" size="18.0"/>
                </font>
             </Label>
          </children>

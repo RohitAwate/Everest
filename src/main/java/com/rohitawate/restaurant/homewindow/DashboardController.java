@@ -15,6 +15,7 @@
  */
 package com.rohitawate.restaurant.homewindow;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
@@ -27,6 +28,7 @@ import com.rohitawate.restaurant.requestmanager.DELETERequestManager;
 import com.rohitawate.restaurant.requestmanager.DataDispatchRequestManager;
 import com.rohitawate.restaurant.requestmanager.GETRequestManager;
 import com.rohitawate.restaurant.requestmanager.RequestManager;
+import com.rohitawate.restaurant.util.RestaurantUtilities;
 import com.rohitawate.restaurant.util.Services;
 import com.rohitawate.restaurant.util.settings.Settings;
 import com.rohitawate.restaurant.util.themes.ThemeManager;
@@ -69,7 +71,8 @@ public class DashboardController implements Initializable {
     @FXML
     private TextArea responseArea;
     @FXML
-    private Label statusCode, statusCodeDescription, responseTime, responseSize, errorTitle, errorDetails;
+    private Label statusCode, statusCodeDescription, responseTime,
+            responseSize, errorTitle, errorDetails, responseType;
     @FXML
     private JFXButton sendButton, cancelButton;
     @FXML
@@ -108,12 +111,12 @@ public class DashboardController implements Initializable {
             Services.loggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
         }
 
-        // Select GET by default
-        httpMethodBox.getSelectionModel().select("GET");
-
         responseBox.getChildren().remove(0);
         promptLayer.setVisible(true);
         httpMethodBox.getItems().addAll(httpMethods);
+
+        // Select GET by default
+        httpMethodBox.getSelectionModel().select("GET");
 
         paramsControllers = new ArrayList<>();
         paramsCountProperty = new SimpleIntegerProperty(paramsControllers.size());
@@ -328,12 +331,50 @@ public class DashboardController implements Initializable {
     }
 
     private void updateDashboard(RestaurantResponse response) {
-        responseArea.setText(response.getBody());
+        prettifyResponseBody(response);
         responseBox.getChildren().add(0, responseDetails);
         statusCode.setText(Integer.toString(response.getStatusCode()));
         statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
         responseTime.setText(Long.toString(response.getTime()) + " ms");
         responseSize.setText(Integer.toString(response.getSize()) + " B");
+    }
+
+    private void prettifyResponseBody(RestaurantResponse response) {
+        String type = response.getMediaType().toString();
+        // Selects only the part preceding the ';', skipping the character encoding
+        type = type.split(";")[0];
+        String responseBody = response.getBody();
+
+        try {
+            if (type != null) {
+                switch (type.toLowerCase()) {
+                    case "application/json":
+                        responseType.setText("JSON");
+                        JsonNode node = RestaurantUtilities.mapper.readTree(responseBody);
+                        responseArea.setText(RestaurantUtilities.mapper.writeValueAsString(node));
+                        break;
+                    case "application/xml":
+                        responseType.setText("XML");
+                        responseArea.setText(RestaurantUtilities.mapper.writeValueAsString(responseBody));
+                        break;
+                    case "text/html":
+                        responseType.setText("HTML");
+                        responseArea.setText(responseBody);
+                        break;
+                    default:
+                        responseType.setText("PLAIN TEXT");
+                        responseArea.setText(responseBody);
+                }
+            } else {
+                response.setBody("No body found in the response.");
+            }
+        } catch (Exception e) {
+            snackBar.show("Response could not be parsed.", 5000);
+            Services.loggingService.logSevere("Response could not be parsed.", e, LocalDateTime.now());
+            errorLayer.setVisible(true);
+            errorTitle.setText("Parsing Error");
+            errorDetails.setText("RESTaurant could not parse the response.");
+        }
     }
 
     private void applyDashboardSettings() {

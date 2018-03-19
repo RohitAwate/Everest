@@ -134,7 +134,7 @@ public class HistoryManager {
                     }
                 }
 
-                if (state.getHttpMethod().equals("POST") || state.getHttpMethod().equals("PUT")) {
+                if (!(state.getHttpMethod().equals("GET") || state.getHttpMethod().equals("DELETE"))) {
                     // Maps the request to its ContentType for faster recovery
                     statement = conn.prepareStatement(MiscUtils.trimString(queries.get("saveRequestContentPair").toString()));
                     statement.setInt(1, requestID);
@@ -235,7 +235,7 @@ public class HistoryManager {
                 state.setParams(getTuples(requestID, "Param"));
                 state.setHttpMethod(resultSet.getString("Type"));
 
-                if (state.getHttpMethod().equals("POST") || state.getHttpMethod().equals("PUT")) {
+                if (!(state.getHttpMethod().equals("GET") || state.getHttpMethod().equals("DELETE"))) {
                     // Retrieves request body ContentType for querying corresponding table
                     statement = conn.prepareStatement(MiscUtils.trimString(queries.get("selectRequestContentType").toString()));
                     statement.setInt(1, requestID);
@@ -371,7 +371,7 @@ public class HistoryManager {
             if (!areMapsIdentical(map, newState.getParams()))
                 return false;
 
-            if (newState.getHttpMethod().equals("POST") || newState.getHttpMethod().equals("PUT")) {
+            if (!(newState.getHttpMethod().equals("GET") || newState.getHttpMethod().equals("DELETE"))) {
                 switch (newState.getContentType()) {
                     case MediaType.TEXT_PLAIN:
                     case MediaType.APPLICATION_JSON:

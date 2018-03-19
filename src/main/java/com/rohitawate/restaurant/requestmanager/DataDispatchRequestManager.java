@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.requestsmanager;
+package com.rohitawate.restaurant.requestmanager;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
-import com.rohitawate.restaurant.util.Services;
 import javafx.concurrent.Task;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
@@ -68,7 +67,7 @@ public class DataDispatchRequestManager extends RequestManager {
                 }
 
                 // Adds the request body based on the content type and generates an invocation.
-                Invocation invocation;
+                Invocation invocation = null;
                 switch (dataDispatchRequest.getContentType()) {
                     case MediaType.MULTIPART_FORM_DATA:
                         FormDataMultiPart formData = new FormDataMultiPart();
@@ -124,12 +123,20 @@ public class DataDispatchRequestManager extends RequestManager {
                         break;
                     default:
                         // Handles raw data types (JSON, Plain text, XML, HTML)
-                        if (requestType.equals("POST"))
-                            invocation = requestBuilder
-                                    .buildPost(Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
-                        else
-                            invocation = requestBuilder
-                                    .buildPut(Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
+                        switch (requestType) {
+                            case "POST":
+                                invocation = requestBuilder
+                                        .buildPost(Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
+                                break;
+                            case "PUT":
+                                invocation = requestBuilder
+                                        .buildPut(Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
+                                break;
+                            case "PATCH":
+                                invocation = requestBuilder
+                                        .build("PATCH", Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
+                                break;
+                        }
                 }
 
                 long initialTime = System.currentTimeMillis();

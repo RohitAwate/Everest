@@ -23,10 +23,10 @@ import com.rohitawate.restaurant.models.requests.DELETERequest;
 import com.rohitawate.restaurant.models.requests.DataDispatchRequest;
 import com.rohitawate.restaurant.models.requests.GETRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
-import com.rohitawate.restaurant.requestsmanager.DELETERequestManager;
-import com.rohitawate.restaurant.requestsmanager.DataDispatchRequestManager;
-import com.rohitawate.restaurant.requestsmanager.GETRequestManager;
-import com.rohitawate.restaurant.requestsmanager.RequestManager;
+import com.rohitawate.restaurant.requestmanager.DELETERequestManager;
+import com.rohitawate.restaurant.requestmanager.DataDispatchRequestManager;
+import com.rohitawate.restaurant.requestmanager.GETRequestManager;
+import com.rohitawate.restaurant.requestmanager.RequestManager;
 import com.rohitawate.restaurant.util.Services;
 import com.rohitawate.restaurant.util.settings.Settings;
 import com.rohitawate.restaurant.util.themes.ThemeManager;
@@ -122,8 +122,12 @@ public class DashboardController implements Initializable {
         addParamField(); // Adds a blank param field
 
         snackBar = new JFXSnackbar(dashboard);
-        bodyTab.disableProperty().bind(Bindings.and(httpMethodBox.valueProperty().isNotEqualTo("POST"),
-                httpMethodBox.valueProperty().isNotEqualTo("PUT")));
+        bodyTab.disableProperty().bind(
+                Bindings.or(
+                        httpMethodBox.valueProperty().isEqualTo("GET"),
+                        httpMethodBox.valueProperty().isEqualTo("DELETE")
+                )
+        );
 
         errorTitle.setText("Oops... That's embarrassing!");
         errorDetails.setText("Something went wrong. Try to make another request.\nRestart RESTaurant if that doesn't work.");
@@ -200,6 +204,7 @@ public class DashboardController implements Initializable {
                 // DataDispatchRequestManager will generate appropriate request based on the type.
                 case "POST":
                 case "PUT":
+                case "PATCH":
                     if (requestManager == null || requestManager.getClass() != DataDispatchRequestManager.class)
                         requestManager = new DataDispatchRequestManager();
                     else if (requestManager.isRunning()) {
@@ -433,6 +438,7 @@ public class DashboardController implements Initializable {
         switch (httpMethodBox.getValue()) {
             case "POST":
             case "PUT":
+            case "PATCH":
                 dashboardState = new DashboardState(bodyTabController.getBasicRequest(httpMethodBox.getValue()));
                 dashboardState.setHeaders(headerTabController.getHeaders());
                 break;
@@ -472,7 +478,7 @@ public class DashboardController implements Initializable {
             for (Map.Entry entry : dashboardState.getParams().entrySet())
                 addParamField(entry.getKey().toString(), entry.getValue().toString());
 
-        if (httpMethodBox.getValue().equals("POST") || httpMethodBox.getValue().equals("PUT"))
+        if (!(httpMethodBox.getValue().equals("GET") || httpMethodBox.getValue().equals("DELETE")))
             bodyTabController.setState(dashboardState);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.restaurant.requestsmanager;
+package com.rohitawate.restaurant.requestmanager;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.requests.DELETERequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
-import com.rohitawate.restaurant.util.Services;
 import javafx.concurrent.Task;
 
 import javax.ws.rs.client.Invocation;

@@ -54,7 +54,7 @@ public class HomeWindowController implements Initializable {
     @FXML
     private VBox historyTab, searchBox;
     @FXML
-    private StackPane historyPromptLayer, searchLayer, searchPromptLayer;
+    private StackPane historyPromptLayer, searchLayer, searchFailedLayer;
     @FXML
     private JFXButton clearSearchFieldButton;
 
@@ -72,7 +72,7 @@ public class HomeWindowController implements Initializable {
 
         historyTextField.textProperty().addListener(((observable, oldValue, newValue) -> {
             searchBox.getChildren().remove(0, searchBox.getChildren().size());
-            searchPromptLayer.setVisible(false);
+            searchFailedLayer.setVisible(false);
             List<HistoryItemController> searchResults = getSearchResults(historyTextField.getText());
 
             searchResults.sort((controller1, controller2) -> {
@@ -91,7 +91,7 @@ public class HomeWindowController implements Initializable {
                     addSearchItem(controller.getDashboardState());
                 }
             } else {
-                searchPromptLayer.setVisible(true);
+                searchFailedLayer.setVisible(true);
             }
         }));
 
@@ -132,7 +132,8 @@ public class HomeWindowController implements Initializable {
                     Services.loggingService.logSevere("Task thread interrupted while populating HistoryTab.", E, LocalDateTime.now());
                 }
             });
-            historyLoader.setOnFailed(e -> historyLoader.getException().printStackTrace());
+            historyLoader.setOnFailed(e -> Services.loggingService.logWarning(
+                    "Failed to load history.", (Exception) historyLoader.getException(), LocalDateTime.now()));
             new Thread(historyLoader).start();
         });
     }

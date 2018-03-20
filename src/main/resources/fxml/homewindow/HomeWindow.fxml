@@ -19,8 +19,7 @@
 <?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <SplitPane dividerPositions="0.3" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.restaurant.homewindow.HomeWindowController">
@@ -58,74 +57,86 @@
                    <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
                </padding>
             </HBox>
-            <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
-               <content>
-                  <StackPane>
-                     <children>
-                        <StackPane>
-                           <children>
+             <StackPane VBox.vgrow="ALWAYS">
+                 <children>
+                     <StackPane>
+                         <children>
+                             <ScrollPane fx:id="historyScrollPane" fitToHeight="true" fitToWidth="true"
+                                         hbarPolicy="NEVER">
+                                 <content>
                               <VBox fx:id="historyTab" alignment="TOP_CENTER" spacing="5.0">
                                  <padding>
                                      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
                                  </padding>
                               </VBox>
-                              <StackPane fx:id="historyPromptLayer">
+                                 </content>
+                             </ScrollPane>
+                             <StackPane fx:id="historyPromptLayer">
                                  <children>
                                      <Label text="YOUR REQUESTS HISTORY WILL APPEAR HERE" textAlignment="CENTER"
                                             textFill="#575757" wrapText="true">
-                                       <font>
-                                           <Font size="25.0"/>
-                                       </font>
-                                    </Label>
+                                         <font>
+                                             <Font size="25.0"/>
+                                         </font>
+                                     </Label>
                                  </children>
                                  <padding>
                                      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
                                  </padding>
-                              </StackPane>
-                           </children>
-                        </StackPane>
-                        <StackPane fx:id="searchLayer">
-                           <children>
-                              <VBox alignment="TOP_CENTER">
+                             </StackPane>
+                         </children>
+                     </StackPane>
+                     <StackPane fx:id="searchLayer">
+                         <children>
+                             <VBox alignment="TOP_CENTER">
                                  <children>
-                                    <Label graphicTextGap="10.0" text="SEARCH RESULTS" textFill="#199F6F">
-                                       <VBox.margin>
-                                           <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                                       </VBox.margin>
-                                       <font>
-                                           <Font size="19.0"/>
-                                       </font>
-                                    </Label>
-                                    <VBox fx:id="searchBox" alignment="TOP_CENTER" spacing="5.0" VBox.vgrow="ALWAYS">
+                                     <Label graphicTextGap="10.0" text="SEARCH RESULTS" textFill="#199F6F">
+                                         <VBox.margin>
+                                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                                         </VBox.margin>
+                                         <font>
+                                             <Font size="19.0"/>
+                                         </font>
+                                     </Label>
+                                     <ScrollPane fx:id="searchScrollPane" fitToHeight="true" fitToWidth="true"
+                                                 hbarPolicy="NEVER">
+                                         <content>
+                                             <VBox fx:id="searchBox" alignment="TOP_CENTER" spacing="5.0">
                                        <padding>
                                            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
                                        </padding>
                                     </VBox>
+                                         </content>
+                                     </ScrollPane>
                                  </children>
-                              </VBox>
-                              <StackPane fx:id="searchPromptLayer" visible="false">
+                             </VBox>
+                             <StackPane fx:id="searchFailedLayer">
                                  <children>
-                                    <VBox alignment="CENTER">
-                                       <children>
-                                           <Label text="NOTHING MATCHED YOUR QUERY." textAlignment="CENTER"
-                                                  textFill="#bfbfbf" wrapText="true" VBox.vgrow="ALWAYS">
-                                             <font>
-                                                 <Font size="25.0"/>
-                                             </font>
-                                          </Label>
-                                       </children>
-                                    </VBox>
+                                     <VBox alignment="CENTER">
+                                         <children>
+                                             <ImageView fitHeight="100.0" fitWidth="100.0" opacity="0.51"
+                                                        pickOnBounds="true" preserveRatio="true">
+                                                 <image>
+                                                     <Image url="@../../assets/Explosion.png"/>
+                                                 </image>
+                                             </ImageView>
+                                             <Label text="NO RESULTS" textAlignment="CENTER" textFill="#bfbfbf"
+                                                    wrapText="true" VBox.vgrow="ALWAYS">
+                                                 <font>
+                                                     <Font size="25.0"/>
+                                                 </font>
+                                             </Label>
+                                         </children>
+                                     </VBox>
                                  </children>
                                  <padding>
                                      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
                                  </padding>
-                              </StackPane>
-                           </children>
-                        </StackPane>
-                     </children>
-                  </StackPane>
-               </content>
-            </ScrollPane>
+                             </StackPane>
+                         </children>
+                     </StackPane>
+                 </children>
+             </StackPane>
          </children>
       </VBox>
       <TabPane fx:id="homeWindowTabPane" prefHeight="760.0" prefWidth="1280.0" tabClosingPolicy="ALL_TABS" tabMaxHeight="30.0" tabMaxWidth="200.0" tabMinHeight="30.0" tabMinWidth="200.0" SplitPane.resizableWithParent="false" />

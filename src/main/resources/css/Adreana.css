@@ -41,7 +41,7 @@
 }
 
 #clearResponseAreaButton {
-    -fx-background-color: #454545;
+    -fx-background-color: #822f2f;
 }
 
 .text-area {
@@ -211,6 +211,20 @@
 }
 
 /* History tab */
+#searchScrollPane,
+#searchScrollPane .viewport,
+#searchScrollPane .scroll-bar:vertical,
+#searchScrollPane .scroll-bar:horizontal {
+    -fx-background-color: #1A6E4D;
+}
+
+#historyScrollPane,
+#historyScrollPane .viewport,
+#historyScrollPane .scroll-bar:vertical,
+#historyScrollPane .scroll-bar:horizontal {
+    -fx-background-color: #404040;
+}
+
 #historyPane, #historyTab {
     -fx-background-color: #404040;
 }
@@ -219,7 +233,7 @@
     -fx-background-color: #1A6E4D;
 }
 
-#searchPromptLayer {
+#searchFailedLayer {
     -fx-background-color: #822f2f;
 }
 

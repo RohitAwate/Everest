@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:cc="http://creativecommons.org/ns#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        width="1000mm"
+        height="300mm"
+        viewBox="0 0 1000 300"
+        version="1.1"
+        id="svg8"
+        inkscape:export-filename="C:\Users\Rohit Awate\Desktop\EverestHeader.png"
+        inkscape:export-xdpi="25.4"
+        inkscape:export-ydpi="25.4"
+        inkscape:version="0.92.1 r15371"
+        sodipodi:docname="Header.svg">
+    <defs
+            id="defs2"/>
+    <sodipodi:namedview
+            id="base"
+            pagecolor="#ffffff"
+            bordercolor="#666666"
+            borderopacity="1.0"
+            inkscape:pageopacity="0.0"
+            inkscape:pageshadow="2"
+            inkscape:zoom="0.24748737"
+            inkscape:cx="1873.5131"
+            inkscape:cy="934.08867"
+            inkscape:document-units="mm"
+            inkscape:current-layer="layer1"
+            showgrid="false"
+            inkscape:window-width="1920"
+            inkscape:window-height="1001"
+            inkscape:window-x="-9"
+            inkscape:window-y="-9"
+            inkscape:window-maximized="1"/>
+    <metadata
+            id="metadata5">
+        <rdf:RDF>
+            <cc:Work
+                    rdf:about="">
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type
+                        rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+                <dc:title></dc:title>
+            </cc:Work>
+        </rdf:RDF>
+    </metadata>
+    <g
+            inkscape:label="Layer 1"
+            inkscape:groupmode="layer"
+            id="layer1"
+            transform="translate(0,3)">
+        <g
+                transform="matrix(0.62445497,0,0,0.62445497,149.28551,121.39735)"
+                id="layer1-3"
+                inkscape:label="Layer 1">
+            <path
+                    transform="matrix(1.2811389,0,0,1.6043135,-129.20475,-59.590329)"
+                    sodipodi:type="star"
+                    style="opacity:1;fill:#cccccc;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:9.09350967;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+                    id="path4493"
+                    sodipodi:sides="3"
+                    sodipodi:cx="373.18579"
+                    sodipodi:cy="121.21551"
+                    sodipodi:r1="135.08501"
+                    sodipodi:r2="67.542503"
+                    sodipodi:arg1="0.52359878"
+                    sodipodi:arg2="1.5707963"
+                    inkscape:flatsided="true"
+                    inkscape:rounded="0"
+                    inkscape:randomized="0"
+                    d="m 490.17284,188.75801 -233.9741,0 116.98705,-202.627509 z"
+                    inkscape:transform-center-x="8.5501103e-006"
+                    inkscape:transform-center-y="-54.179678"/>
+            <path
+                    transform="matrix(1.0503018,0,0,1.3655845,-9.6998665,-14.988965)"
+                    inkscape:transform-center-y="-67.412235"
+                    inkscape:transform-center-x="9.7002362e-006"
+                    d="m 363.83871,189.09534 -342.011529,0 171.005769,-296.19068 z"
+                    inkscape:randomized="0"
+                    inkscape:rounded="0"
+                    inkscape:flatsided="true"
+                    sodipodi:arg2="1.5707963"
+                    sodipodi:arg1="0.52359878"
+                    sodipodi:r2="98.730225"
+                    sodipodi:r1="197.46045"
+                    sodipodi:cy="90.365112"
+                    sodipodi:cx="192.83295"
+                    sodipodi:sides="3"
+                    id="path4491"
+                    style="opacity:1;fill:#ff6600;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:13.29243469;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+                    sodipodi:type="star"/>
+        </g>
+        <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:50.79999924px;line-height:0.5;font-family:Roboto;-inkscape-font-specification:Roboto;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#666666;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="457.41479"
+       y="184.02617"
+       id="text4508"><tspan
+         sodipodi:role="line"
+         id="tspan4506"
+         x="457.41479"
+         y="184.02617"
+         style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:105.83333588px;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI Light';text-align:start;text-anchor:start;fill:#666666;stroke-width:0.26458332">EVEREST</tspan></text>
+    </g>
+</svg>

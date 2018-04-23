@@ -23,8 +23,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <StackPane fx:id="dashboard" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../../css/Adreana.css"
-           xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.rohitawate.restaurant.homewindow.DashboardController">
+           xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rohitawate.everest.homewindow.DashboardController">
     <children>
         <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
@@ -32,7 +32,7 @@
                <children>
                    <ImageView fitHeight="80.0" fitWidth="80.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
                      <image>
-                         <Image url="@../../assets/LogoWithoutText.png" />
+                         <Image url="@../../assets/Logo.png"/>
                      </image>
                      <HBox.margin>
                          <Insets right="20.0" />

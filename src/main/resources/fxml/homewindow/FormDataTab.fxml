@@ -24,7 +24,7 @@
 <?import javafx.scene.layout.*?>
 <VBox fx:id="headerTabContent" alignment="CENTER" stylesheets="@../../css/Adreana.css"
       xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.rohitawate.restaurant.homewindow.FormDataTabController">
+      fx:controller="com.rohitawate.everest.homewindow.FormDataTabController">
     <children>
         <HBox alignment="CENTER" VBox.vgrow="NEVER">
             <VBox.margin>

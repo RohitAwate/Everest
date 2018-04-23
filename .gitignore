@@ -1,10 +1,10 @@
 /target/
-/RESTaurant.iml
+/Everest.iml
 .idea/
-RESTaurant.iml
+Everest.iml
 classes/
 src/main/java/META-INF/
 dependency-reduced-pom.xml
 config/
 logs/
-/RESTaurant/BugReporter.jar
+/Everest/BugReporter.jar

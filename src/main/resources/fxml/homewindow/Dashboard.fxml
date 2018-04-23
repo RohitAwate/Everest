@@ -24,7 +24,7 @@
 <?import javafx.scene.text.*?>
 <StackPane fx:id="dashboard" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../../css/Adreana.css"
            xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.rohitawate.restaurant.homewindow.DashboardController">
+           fx:controller="com.rohitawate.everest.homewindow.DashboardController">
     <children>
         <VBox prefHeight="200.0" prefWidth="100.0">
          <children>

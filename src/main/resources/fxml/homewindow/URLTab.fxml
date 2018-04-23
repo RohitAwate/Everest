@@ -23,7 +23,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <VBox stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.rohitawate.restaurant.homewindow.URLTabController">
+      fx:controller="com.rohitawate.everest.homewindow.URLTabController">
     <children>
         <HBox alignment="CENTER" VBox.vgrow="NEVER">
             <VBox.margin>

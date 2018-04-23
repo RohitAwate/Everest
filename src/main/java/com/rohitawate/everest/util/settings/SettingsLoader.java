@@ -39,7 +39,7 @@ public class SettingsLoader implements Runnable {
     @Override
     public void run() {
         try {
-            File settingsFile = new File("config/settings.json");
+            File settingsFile = new File("Everest/config/settings.json");
 
             if (settingsFile.exists())
                 System.out.print("Settings file found. Loading settings... ");

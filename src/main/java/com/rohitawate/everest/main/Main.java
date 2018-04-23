@@ -27,8 +27,6 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    public static final String applicationName = "Everest";
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         Services.start();
@@ -43,9 +41,9 @@ public class Main extends Application {
 		Stage dashboardStage = new Stage();
         ThemeManager.setTheme(homeWindow);
 
-        dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/LogoWithoutText.png").toExternalForm()));
+        dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/Logo.png").toExternalForm()));
         dashboardStage.setScene(new Scene(homeWindow));
-        dashboardStage.setTitle(applicationName);
+        dashboardStage.setTitle("Everest");
 		dashboardStage.show();
 
         EverestUtilities.createBugReporter();

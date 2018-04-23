@@ -15,6 +15,8 @@
  */
 package com.rohitawate.restaurant.requestmanager;
 
+import com.rohitawate.restaurant.exceptions.RedirectException;
+import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import com.rohitawate.restaurant.util.settings.Settings;
@@ -25,12 +27,18 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class RequestManager extends Service<RestaurantResponse> {
-    final Client client;
+    private final Client client;
     RestaurantRequest request;
+    RestaurantResponse response;
+    Builder requestBuilder;
 
-    RequestManager() {
+    RequestManager(RestaurantRequest request) {
         client = ClientBuilder.newBuilder()
                 .register(MultiPartFeature.class)
                 .build();
@@ -40,9 +48,42 @@ public abstract class RequestManager extends Service<RestaurantResponse> {
             client.property(ClientProperties.CONNECT_TIMEOUT, Settings.connectionTimeOut);
         if (Settings.connectionReadTimeOutEnable)
             client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
+
+        this.request = request;
+        this.requestBuilder = client.target(request.getTarget().toString()).request();
+        response = new RestaurantResponse();
+        appendHeaders();
     }
 
     public void setRequest(RestaurantRequest request) {
         this.request = request;
+    }
+
+    private void appendHeaders() {
+        HashMap<String, String> headers = request.getHeaders();
+        Map.Entry<String, String> mapEntry;
+
+        for (Map.Entry entry : headers.entrySet()) {
+            mapEntry = (Map.Entry) entry;
+            requestBuilder.header(mapEntry.getKey(), mapEntry.getValue());
+        }
+    }
+
+    void processServerResponse(Response serverResponse)
+            throws UnreliableResponseException, RedirectException {
+        if (serverResponse == null)
+            throw new UnreliableResponseException("The server did not respond.",
+                    "Like that crush from high school..");
+        else if (serverResponse.getStatus() == 301) {
+            String newLocation = serverResponse.getHeaderString("location");
+            throw new RedirectException(newLocation);
+        }
+
+        String responseBody = serverResponse.readEntity(String.class);
+
+        response.setBody(responseBody);
+        response.setMediaType(serverResponse.getMediaType());
+        response.setStatusCode(serverResponse.getStatus());
+        response.setSize(responseBody.length());
     }
 }

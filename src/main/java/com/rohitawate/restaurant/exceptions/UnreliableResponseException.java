@@ -18,7 +18,6 @@ package com.rohitawate.restaurant.exceptions;
 
 /**
  * Thrown when the server sends ambiguous responses.
- * For example, some servers do not provide the new location in case of a 301 Moved Permanently.
  * <p>
  * Used by DashboardController to display ErrorLayer.
  */

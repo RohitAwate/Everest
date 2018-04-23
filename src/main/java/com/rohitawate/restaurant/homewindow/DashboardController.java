@@ -18,6 +18,7 @@ package com.rohitawate.restaurant.homewindow;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.restaurant.exceptions.RedirectException;
 import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
 import com.rohitawate.restaurant.models.DashboardState;
 import com.rohitawate.restaurant.models.requests.DELETERequest;
@@ -50,10 +51,8 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -143,6 +142,7 @@ public class DashboardController implements Initializable {
             responseBox.getChildren().remove(0);
             responseArea.clear();
         }
+
         try {
             String address = addressField.getText();
             if (address.equals("")) {
@@ -152,167 +152,64 @@ public class DashboardController implements Initializable {
             }
             switch (httpMethodBox.getValue()) {
                 case "GET":
+                    GETRequest getRequest = new GETRequest(addressField.getText());
+                    getRequest.setHeaders(headerTabController.getHeaders());
+
                     /*
                         Creates a new instance if its the first request of that session or
                         the HTTP method type was changed. Also checks if a request is already being processed.
                      */
                     if (requestManager == null || requestManager.getClass() != GETRequestManager.class)
-                        requestManager = new GETRequestManager();
+                        requestManager = new GETRequestManager(getRequest);
                     else if (requestManager.isRunning()) {
                         snackBar.show("Please wait while the current request is processed.", 3000);
                         return;
+                    } else {
+                        requestManager.setRequest(getRequest);
                     }
 
-                    GETRequest getRequest = new GETRequest(addressField.getText());
-                    getRequest.setHeaders(headerTabController.getHeaders());
-                    requestManager.setRequest(getRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
-                    requestManager.setOnRunning(e -> {
-                        responseArea.clear();
-                        errorLayer.setVisible(false);
-                        loadingLayer.setVisible(true);
-                    });
-                    requestManager.setOnSucceeded(e -> {
-                        updateDashboard(requestManager.getValue());
-                        errorLayer.setVisible(false);
-                        loadingLayer.setVisible(false);
-                        requestManager.reset();
-                    });
-                    requestManager.setOnCancelled(e -> {
-                        loadingLayer.setVisible(false);
-                        promptLayer.setVisible(true);
-                        snackBar.show("Request canceled.", 2000);
-                        requestManager.reset();
-                    });
-                    requestManager.setOnFailed(e -> {
-                        loadingLayer.setVisible(false);
-                        promptLayer.setVisible(false);
-                        Throwable throwable = requestManager.getException();
-                        Exception exception = (Exception) throwable;
-                        Services.loggingService.logWarning("GET request could not be processed.", exception, LocalDateTime.now());
-
-                        if (throwable.getClass() == UnreliableResponseException.class) {
-                            UnreliableResponseException URE = (UnreliableResponseException) throwable;
-                            errorTitle.setText(URE.getExceptionTitle());
-                            errorDetails.setText(URE.getExceptionDetails());
-                        } else if (throwable.getClass() == ProcessingException.class) {
-                            errorTitle.setText("RESTaurant couldn't connect.");
-                            errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
-                        }
-                        errorLayer.setVisible(true);
-                        requestManager.reset();
-                    });
+                    configureRequestManager();
                     requestManager.start();
                     break;
                 // DataDispatchRequestManager will generate appropriate request based on the type.
                 case "POST":
                 case "PUT":
                 case "PATCH":
-                    if (requestManager == null || requestManager.getClass() != DataDispatchRequestManager.class)
-                        requestManager = new DataDispatchRequestManager();
-                    else if (requestManager.isRunning()) {
-                        snackBar.show("Please wait while the current request is processed.", 3000);
-                        return;
-                    }
-
                     DataDispatchRequest dataDispatchRequest =
                             bodyTabController.getBasicRequest(httpMethodBox.getValue());
                     dataDispatchRequest.setTarget(addressField.getText());
                     dataDispatchRequest.setHeaders(headerTabController.getHeaders());
 
-                    requestManager.setRequest(dataDispatchRequest);
-                    cancelButton.setOnAction(e -> requestManager.cancel());
-                    requestManager.setOnRunning(e -> {
-                        responseArea.clear();
-                        errorLayer.setVisible(false);
-                        loadingLayer.setVisible(true);
-                    });
-                    requestManager.setOnSucceeded(e -> {
-                        updateDashboard(requestManager.getValue());
-                        errorLayer.setVisible(false);
-                        loadingLayer.setVisible(false);
-                        requestManager.reset();
-                    });
-                    requestManager.setOnCancelled(e -> {
-                        loadingLayer.setVisible(false);
-                        promptLayer.setVisible(true);
-                        snackBar.show("Request canceled.", 2000);
-                        requestManager.reset();
-                    });
-                    requestManager.setOnFailed(e -> {
-                        loadingLayer.setVisible(false);
-                        promptLayer.setVisible(false);
-                        Throwable throwable = requestManager.getException();
-                        Exception exception = (Exception) throwable;
-                        Services.loggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
-
-                        if (throwable.getClass() == UnreliableResponseException.class) {
-                            UnreliableResponseException URE = (UnreliableResponseException) throwable;
-                            errorTitle.setText(URE.getExceptionTitle());
-                            errorDetails.setText(URE.getExceptionDetails());
-                        } else if (throwable.getClass() == ProcessingException.class) {
-                            if (throwable.getCause().getClass() == UnknownHostException.class ||
-                                    throwable.getCause().getClass() == ConnectException.class) {
-                                errorTitle.setText("RESTaurant couldn't connect.");
-                                errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
-                            } else if (throwable.getCause().getClass() == IllegalArgumentException.class) {
-                                errorTitle.setText("Did you forget something?");
-                                errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " request.");
-                            }
-                        } else if (throwable.getClass() == FileNotFoundException.class)
-                            snackBar.show("File could not be found.", 5000);
-                        errorLayer.setVisible(true);
-                        requestManager.reset();
-                    });
-                    requestManager.start();
-                    break;
-                case "DELETE":
-                    if (requestManager == null || requestManager.getClass() != DELETERequestManager.class)
-                        requestManager = new DELETERequestManager();
+                    if (requestManager == null || requestManager.getClass() != DataDispatchRequestManager.class)
+                        requestManager = new DataDispatchRequestManager(dataDispatchRequest);
                     else if (requestManager.isRunning()) {
                         snackBar.show("Please wait while the current request is processed.", 3000);
                         return;
+                    } else {
+                        requestManager.setRequest(dataDispatchRequest);
                     }
 
+                    cancelButton.setOnAction(e -> requestManager.cancel());
+                    configureRequestManager();
+                    requestManager.start();
+                    break;
+                case "DELETE":
                     DELETERequest deleteRequest = new DELETERequest(addressField.getText());
                     deleteRequest.setHeaders(headerTabController.getHeaders());
+
+                    if (requestManager == null || requestManager.getClass() != DELETERequestManager.class)
+                        requestManager = new DELETERequestManager(deleteRequest);
+                    else if (requestManager.isRunning()) {
+                        snackBar.show("Please wait while the current request is processed.", 3000);
+                        return;
+                    } else {
+                        requestManager.setRequest(deleteRequest);
+                    }
+
                     requestManager.setRequest(deleteRequest);
                     cancelButton.setOnAction(e -> requestManager.cancel());
-                    requestManager.setOnRunning(e -> {
-                        responseArea.clear();
-                        errorLayer.setVisible(false);
-                        loadingLayer.setVisible(true);
-                    });
-                    requestManager.setOnSucceeded(e -> {
-                        updateDashboard(requestManager.getValue());
-                        errorLayer.setVisible(false);
-                        loadingLayer.setVisible(false);
-                        requestManager.reset();
-                    });
-                    requestManager.setOnCancelled(e -> {
-                        loadingLayer.setVisible(false);
-                        promptLayer.setVisible(true);
-                        snackBar.show("Request canceled.", 2000);
-                        requestManager.reset();
-                    });
-                    requestManager.setOnFailed(e -> {
-                        loadingLayer.setVisible(false);
-                        promptLayer.setVisible(false);
-                        Throwable throwable = requestManager.getException();
-                        Exception exception = (Exception) throwable;
-                        Services.loggingService.logWarning("DELETE request could not be processed.", exception, LocalDateTime.now());
-
-                        if (throwable.getClass() == UnreliableResponseException.class) {
-                            UnreliableResponseException URE = (UnreliableResponseException) throwable;
-                            errorTitle.setText(URE.getExceptionTitle());
-                            errorDetails.setText(URE.getExceptionDetails());
-                        } else if (throwable.getClass() == ProcessingException.class) {
-                            errorTitle.setText("No Internet Connection");
-                            errorDetails.setText("Could not connect to the server. Please check your connection.");
-                        }
-                        errorLayer.setVisible(true);
-                        requestManager.reset();
-                    });
+                    configureRequestManager();
                     requestManager.start();
                     break;
                 default:
@@ -328,6 +225,70 @@ public class DashboardController implements Initializable {
             errorTitle.setText("Oops... That's embarrassing!");
             errorDetails.setText("Something went wrong. Try to make another request.\nRestart RESTaurant if that doesn't work.");
         }
+    }
+
+    private void configureRequestManager() {
+        requestManager.setOnRunning(e -> whileRunning());
+        requestManager.setOnSucceeded(e -> onSucceeded());
+        requestManager.setOnCancelled(e -> onCancelled());
+        requestManager.setOnFailed(e -> onFailed());
+    }
+
+    private void onFailed() {
+        loadingLayer.setVisible(false);
+        promptLayer.setVisible(false);
+        Throwable throwable = requestManager.getException();
+        Exception exception = (Exception) throwable;
+        Services.loggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
+
+        if (throwable.getClass() == UnreliableResponseException.class) {
+            UnreliableResponseException URE = (UnreliableResponseException) throwable;
+            errorTitle.setText(URE.getExceptionTitle());
+            errorDetails.setText(URE.getExceptionDetails());
+        } else if (throwable.getClass() == ProcessingException.class) {
+            errorTitle.setText("RESTaurant couldn't connect.");
+            errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
+        } else if (throwable.getClass() == RedirectException.class) {
+            RedirectException redirect = (RedirectException) throwable;
+            addressField.setText(redirect.getNewLocation());
+            snackBar.show("Resource moved permanently. Redirecting...", 3000);
+            requestManager = null;
+            sendRequest();
+            return;
+        }
+
+        if (requestManager.getClass() == DataDispatchRequestManager.class) {
+            if (throwable.getCause() != null && throwable.getCause().getClass() == IllegalArgumentException.class) {
+                errorTitle.setText("Did you forget something?");
+                errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " request.");
+            } else if (throwable.getClass() == FileNotFoundException.class) {
+                errorTitle.setText("File(s) not found:");
+                errorDetails.setText(throwable.getMessage());
+            }
+        }
+
+        errorLayer.setVisible(true);
+        requestManager.reset();
+    }
+
+    private void onCancelled() {
+        loadingLayer.setVisible(false);
+        promptLayer.setVisible(true);
+        snackBar.show("Request canceled.", 2000);
+        requestManager.reset();
+    }
+
+    private void onSucceeded() {
+        updateDashboard(requestManager.getValue());
+        errorLayer.setVisible(false);
+        loadingLayer.setVisible(false);
+        requestManager.reset();
+    }
+
+    private void whileRunning() {
+        responseArea.clear();
+        errorLayer.setVisible(false);
+        loadingLayer.setVisible(true);
     }
 
     private void updateDashboard(RestaurantResponse response) {

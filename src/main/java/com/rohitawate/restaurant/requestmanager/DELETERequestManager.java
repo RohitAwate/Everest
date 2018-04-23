@@ -16,69 +16,31 @@
 
 package com.rohitawate.restaurant.requestmanager;
 
-import com.rohitawate.restaurant.exceptions.UnreliableResponseException;
-import com.rohitawate.restaurant.models.requests.DELETERequest;
+import com.rohitawate.restaurant.models.requests.RestaurantRequest;
 import com.rohitawate.restaurant.models.responses.RestaurantResponse;
 import javafx.concurrent.Task;
 
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.Map;
 
 public class DELETERequestManager extends RequestManager {
+
+    public DELETERequestManager(RestaurantRequest request) {
+        super(request);
+    }
+
     @Override
     protected Task<RestaurantResponse> createTask() {
         return new Task<RestaurantResponse>() {
             @Override
             protected RestaurantResponse call() throws Exception {
-                DELETERequest deleteRequest = (DELETERequest) request;
-
-                RestaurantResponse response = new RestaurantResponse();
-                WebTarget target = client.target(deleteRequest.getTarget().toString());
-                Map.Entry<String, String> mapEntry;
-
-                Invocation.Builder requestBuilder = target.request();
-
-                // Add the headers to the request.
-                HashMap<String, String> headers = deleteRequest.getHeaders();
-                for (Map.Entry entry : headers.entrySet()) {
-                    mapEntry = (Map.Entry) entry;
-                    requestBuilder.header(mapEntry.getKey(), mapEntry.getValue());
-                }
-
                 Invocation invocation = requestBuilder.buildDelete();
 
                 long initialTime = System.currentTimeMillis();
                 Response serverResponse = invocation.invoke();
                 response.setTime(initialTime, System.currentTimeMillis());
 
-                if (serverResponse == null)
-                    throw new UnreliableResponseException("The server did not respond.",
-                            "Like that crush from high school..");
-                else if (serverResponse.getStatus() == 301) {
-                    String newLocation = serverResponse.getHeaderString("location");
-
-                    String responseHelpText;
-                    if (newLocation == null)
-                        responseHelpText = "The resource has been permanently moved to another location.\n" +
-                                "Here's what you can do:\n" +
-                                "- Find the new URL from the API documentation.\n" +
-                                "- Try using https instead of http if you're not already.";
-                    else
-                        responseHelpText = "The resource has been permanently moved to: " + newLocation +
-                                "\nRESTaurant doesn't automatically redirect your requests.";
-
-                    throw new UnreliableResponseException("301: Resource Moved Permanently", responseHelpText);
-                }
-
-                String responseBody = serverResponse.readEntity(String.class);
-
-                response.setBody(responseBody);
-                response.setMediaType(serverResponse.getMediaType());
-                response.setStatusCode(serverResponse.getStatus());
-                response.setSize(responseBody.length());
+                processServerResponse(serverResponse);
 
                 return response;
             }

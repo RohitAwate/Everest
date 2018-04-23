@@ -1,9 +1,8 @@
-![logo](https://user-images.githubusercontent.com/23148259/39123812-a22121b0-4716-11e8-8b38-d2e91e58f85b.png)
-# Everest
-Everest _(formerly RESTaurant)_ is an upcoming native REST client written in JavaFX.
+![everestheader](https://user-images.githubusercontent.com/23148259/39124644-c886b47a-4719-11e8-953c-f079b3edb664.png)
+
+Everest _(formerly **RESTaurant**)_ is an upcoming native REST client written in JavaFX.
 
 ![default](https://user-images.githubusercontent.com/23148259/39123684-2f7df138-4716-11e8-8ff8-589a1cc47834.PNG)
-
 _Everest running on Windows 10._
 # Why Everest?
 - Unlike other REST clients like Postman and Insomnia, Everest is a **native** application written in Java. Thus, it is significantly
@@ -16,7 +15,6 @@ _Everest running on Windows 10._
 - Everest is powered by **Jersey**, the robust and powerful Java library to build and consume RESTful web services.
 
 ![get](https://user-images.githubusercontent.com/23148259/39123790-8a828b34-4716-11e8-8913-62a6356dd36e.PNG)
-
 _Making a GET request with Everest._
 
 # Planned features
@@ -54,8 +52,7 @@ _That's all the core stuff that I can think of at the moment. Will keep updating
 _Everest's search feature in action._
 
 # Releases
-An alpha release is available via Releases.
-A few things to note about the alpha:
+An alpha release is available via Releases. A couple of things to note:
 - API authentication is not available.
 - The BugReporter currently only generates a bug report but doesn't send it to us. Kindly use GitHub Issues for issue submission.
 

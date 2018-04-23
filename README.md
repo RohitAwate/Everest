@@ -1,8 +1,10 @@
+![logo](https://user-images.githubusercontent.com/23148259/39123812-a22121b0-4716-11e8-8b38-d2e91e58f85b.png)
 # Everest
-Everest is an upcoming native REST client written in JavaFX. It is currently in the initial stages of development.
+Everest _(formerly RESTaurant)_ is an upcoming native REST client written in JavaFX.
 
-![Everest1](https://user-images.githubusercontent.com/23148259/36366992-9570476a-1576-11e8-8405-485c460a553c.png)
+![default](https://user-images.githubusercontent.com/23148259/39123684-2f7df138-4716-11e8-8ff8-589a1cc47834.PNG)
 
+_Everest running on Windows 10._
 # Why Everest?
 - Unlike other REST clients like Postman and Insomnia, Everest is a **native** application written in Java. Thus, it is significantly
   **lighter on resources and more responsive** than the Electron-based options. The goal with Everest is to provide pretty much the same
@@ -13,7 +15,9 @@ Everest is an upcoming native REST client written in JavaFX. It is currently in 
   _I want you to want to use it!_
 - Everest is powered by **Jersey**, the robust and powerful Java library to build and consume RESTful web services.
 
-![Everest2](https://user-images.githubusercontent.com/23148259/36367048-f6cea2a4-1576-11e8-84a4-9854ec30f992.png)
+![get](https://user-images.githubusercontent.com/23148259/39123790-8a828b34-4716-11e8-8913-62a6356dd36e.PNG)
+
+_Making a GET request with Everest._
 
 # Planned features
 - Ability to make requests with the common HTTP methods. _(duh)_
@@ -33,7 +37,7 @@ _That's all the core stuff that I can think of at the moment. Will keep updating
 - Postman has this really cool feature wherein it can create a **mock server**. Maybe do that.
 
 
-![Everest3](https://user-images.githubusercontent.com/23148259/36366994-95df94c6-1576-11e8-8368-c0f325f54a6f.png)
+![error](https://user-images.githubusercontent.com/23148259/39123851-d52d250e-4716-11e8-9c52-800fd708dc2b.PNG)
 
 
 # Features currently live
@@ -45,13 +49,15 @@ _That's all the core stuff that I can think of at the moment. Will keep updating
 - **History tab!** All the requests you ever made are now shown to the left of the app.
 - Everest now maintains its state between sessions so you don't lose your work.
 
+![search](https://user-images.githubusercontent.com/23148259/39123910-19ddeb8e-4717-11e8-9827-84ad53c5f16f.PNG)
+
+_Everest's search feature in action._
+
 # Releases
-I mean, it's open-source. You can build yourself a 'release' right now!
-
-Jokes aside, I'm planning to release an alpha once the GET, POST, PUT and DELETE methods are up and running.
-I'll also add the aforementioned history tab as a bonus, maybe!
-
-**Alpha ETA**: March 2018 _(hopefully)_
+An alpha release is available via Releases.
+A few things to note about the alpha:
+- API authentication is not available.
+- The BugReporter currently only generates a bug report but doesn't send it to us. Kindly use GitHub Issues for issue submission.
 
 Aaaand, that's it!
 I don't think anyone will make it down here. But if you did, you're awesome and thanks! _Cheers!_

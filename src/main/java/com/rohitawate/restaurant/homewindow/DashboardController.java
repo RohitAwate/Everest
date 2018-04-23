@@ -340,13 +340,20 @@ public class DashboardController implements Initializable {
     }
 
     private void prettifyResponseBody(RestaurantResponse response) {
-        String type = response.getMediaType().toString();
-        // Selects only the part preceding the ';', skipping the character encoding
-        type = type.split(";")[0];
+        String type;
+
+        if (response.getMediaType() != null)
+            type = response.getMediaType().toString();
+        else
+            type = null;
+
         String responseBody = response.getBody();
 
         try {
             if (type != null) {
+                // Selects only the part preceding the ';', skipping the character encoding
+                type = type.split(";")[0];
+
                 switch (type.toLowerCase()) {
                     case "application/json":
                         responseType.setText("JSON");
@@ -366,7 +373,8 @@ public class DashboardController implements Initializable {
                         responseArea.setText(responseBody);
                 }
             } else {
-                response.setBody("No body found in the response.");
+                responseType.setText("NONE");
+                responseArea.setText("No body found in the response.");
             }
         } catch (Exception e) {
             snackBar.show("Response could not be parsed.", 5000);

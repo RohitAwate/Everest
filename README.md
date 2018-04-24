@@ -4,7 +4,7 @@
 
 Everest _(formerly RESTaurant)_ is an upcoming REST API testing client written in JavaFX.
 
-![default](https://user-images.githubusercontent.com/23148259/39123684-2f7df138-4716-11e8-8ff8-589a1cc47834.PNG)
+![idle](https://user-images.githubusercontent.com/23148259/39201973-416978a6-480e-11e8-8f94-ddd656ea8784.PNG)
 _Everest running on Windows 10._
 # Why Everest?
 - Unlike other REST clients like Postman and Insomnia, Everest is written in Java. Thus, it is significantly
@@ -17,46 +17,53 @@ _Everest running on Windows 10._
 - Being a Java application, Everest is inherently **cross-platform**. It will run anywhere there's a JVM.
 - Everest is powered by **Jersey**, the robust and powerful Java library to build and consume RESTful web services.
 
-![get](https://user-images.githubusercontent.com/23148259/39123790-8a828b34-4716-11e8-8913-62a6356dd36e.PNG)	
+![get](https://user-images.githubusercontent.com/23148259/39201412-9cf453c8-480c-11e8-9fd3-da548c2f86f6.PNG)
 _Making a GET request with Everest._
-
-# Planned features
-- Ability to make requests with the common HTTP methods. _(duh)_
-- **Syntax highlighting**: I had tried using [RichTextFX](https://github.com/FXMisc/RichTextFX) for my text editor, 
-  [Ballad](https://github.com/RohitAwate/Ballad), and failed. And I really don't wish to embed an
-  online editor like Ace into Everest. So, for the time being, I'm gonna use JavaFX's inbuilt TextArea which doesn't offer syntax highlighting.
-- **History tab**, for quickly looking at your request history. 🕒
-- **API Authentication**: This is of course a primary feature of any REST client, but currently, not something I've done or used before.
-  So I will need some time to learn this stuff.
-- Theming support with JavaFX CSS. 🌈
-- **Multi-tab layout** to unleash your internal REST wizard!
-  
-_That's all the core stuff that I can think of at the moment. Will keep updating this as we go._
-
-## Not-so-certain features
-- Text prediction for the address bar based on your history.
-- Postman has this really cool feature wherein it can create a **mock server**. I'll do that once the core features are implemented and if it doesn't severely impact performance.
-
-
-![error](https://user-images.githubusercontent.com/23148259/39123851-d52d250e-4716-11e8-9c52-800fd708dc2b.PNG)
 
 
 # Features currently live
 - GET, POST, PUT, DELETE and PATCH requests.
 - Adding request headers, query parameters and the request body (raw, octet-stream, URL-encoded or form-data)
-- Response details (HTTP status code, response time, response size)
-- **Custom themes!** Changing themes needs a manual edit to the settings.json file. This will be properly integrated into a Settings menu later.
+- Response details (HTTP status code, response type, time, size)
+- **Custom themes!** I encourage you to develop new themes by taking reference of [Adreana](https://github.com/RohitAwate/RESTaurant/blob/master/src/main/resources/css/Adreana.css). I plan on documenting it better in the future. Changing themes needs a manual edit to `Everest/config/settings.json`. This will be properly integrated into a Settings menu soon. 🌈
 - **Multi-tab layout**. I'm battling with JavaFX to allow me to add a simple '+' button for adding a new tab. So far, not successful. However, you can use the Ctrl+T keyboard shortcut.
-- **History tab!** All the requests you ever made are now shown to the left of the app.
-- Everest now maintains its state between sessions so you don't lose your work.
+- **History tab!** All the requests you ever made are now shown to the left of the app. 🕒
+- **Searching through your request history**. Everest searches not just on the basis of the request target but all other parameters that form the request including headers, the request body, query parameters and even file names. It will intelligently rank the results on the basis of their relevance. 🔎
+- Everest now maintains its state between sessions so you don't lose your work. 🧠
 
-![search](https://user-images.githubusercontent.com/23148259/39123910-19ddeb8e-4717-11e8-9827-84ad53c5f16f.PNG)
+![search](https://user-images.githubusercontent.com/23148259/39201474-cc4e6e2e-480c-11e8-8770-7fc4401a2435.PNG)
 
 _Everest's search feature in action._
 
-# Releases
+# Upcoming features
+- **Syntax highlighting**: I had tried using [RichTextFX](https://github.com/FXMisc/RichTextFX) for my text editor, 
+  [Ballad](https://github.com/RohitAwate/Ballad), and failed. And I really don't wish to embed an
+  online editor like Ace into Everest. So, for the time being, I'm gonna use JavaFX's inbuilt TextArea which doesn't offer syntax highlighting.
+- **API Authentication**: This is of course a primary feature of any REST client, but currently, not something I've done or used before.
+  So I will need some time to learn this stuff.
+- **Text prediction** for the address bar based on your history.
+- _Postman_ has this really cool feature wherein it can create a **mock server**. I'll do that once the core features are implemented and if it doesn't severely impact performance.
+
+![error](https://user-images.githubusercontent.com/23148259/39202004-55cf219c-480e-11e8-80b1-41d819a5aebb.PNG)
+_Everest's simple and precise error messages help you debug faster._
+
+# Keymap
+| Shortcut     | Task                     |
+|--------------|--------------------------|
+| Ctrl + T     | New Tab                  |
+| Ctrl + W     | Close tab                |
+| Ctrl + H     | Toggle History           |
+| Ctrl + Enter | Send request             |
+| Ctrl + L     | Focus address bar        |
+| Ctrl + F     | Focus history search bar |
+| Alt + P      | Focus Params tab         |
+| Alt + A      | Focus Authentication tab |
+| Alt + H      | Focus Headers tab        |
+| Alt + B      | Focus Body tab           |
+
+# Releases 🚀
 The first alpha release is available [here](https://github.com/RohitAwate/Everest/releases/tag/Alpha-1.0).
-Make sure you read the release notes to better understand the release.
+Make sure you read the release notes to understand what works and what doesn't, how to report issues and how to run the binary.
 
 # Suggestions and improvements
 Use these options to reach me:

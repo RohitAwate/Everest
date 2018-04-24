@@ -16,7 +16,7 @@
 
 package com.rohitawate.everest.util;
 
-import com.rohitawate.everest.homewindow.HomeWindowController;
+import com.rohitawate.everest.controllers.HomeWindowController;
 import com.rohitawate.everest.util.history.HistoryManager;
 import com.rohitawate.everest.util.logging.Level;
 import com.rohitawate.everest.util.logging.LoggingService;

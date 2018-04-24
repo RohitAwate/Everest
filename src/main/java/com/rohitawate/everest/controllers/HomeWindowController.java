@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.homewindow;
+package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.rohitawate.everest.models.DashboardState;
 import com.rohitawate.everest.util.Services;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
@@ -41,30 +43,41 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class HomeWindowController implements Initializable {
+    @FXML
+    private SplitPane window;
     @FXML
     private TabPane homeWindowTabPane;
     @FXML
     private TextField historyTextField;
     @FXML
-    private VBox historyTab, searchBox;
+    private VBox historyTab, searchBox, historyPane;
     @FXML
     private StackPane historyPromptLayer, searchLayer, searchFailedLayer;
     @FXML
     private JFXButton clearSearchFieldButton;
 
-    private KeyCombination newTab = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
-    private List<DashboardController> dashboardControllers;
+    // Keyboard shortcuts
+    private final KeyCombination newTab = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination closeTab = new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination toggleHistory = new KeyCodeCombination(KeyCode.H, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination focusAddressBar = new KeyCodeCombination(KeyCode.L, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination sendRequest = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination searchHistory = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination focusParams = new KeyCodeCombination(KeyCode.P, KeyCombination.ALT_DOWN);
+    private final KeyCombination focusAuth = new KeyCodeCombination(KeyCode.A, KeyCombination.ALT_DOWN);
+    private final KeyCombination focusHeaders = new KeyCodeCombination(KeyCode.H, KeyCombination.ALT_DOWN);
+    private final KeyCombination focusBody = new KeyCodeCombination(KeyCode.B, KeyCombination.ALT_DOWN);
+
+    private HashMap<Tab, DashboardController> tabControllerMap;
     private List<HistoryItemController> historyItemControllers;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        dashboardControllers = new ArrayList<>();
+        tabControllerMap = new LinkedHashMap<>();
         historyItemControllers = new ArrayList<>();
         recoverState();
 
@@ -75,6 +88,7 @@ public class HomeWindowController implements Initializable {
             searchFailedLayer.setVisible(false);
             List<HistoryItemController> searchResults = getSearchResults(historyTextField.getText());
 
+            // Method of sorting the HistoryItemControllers
             searchResults.sort((controller1, controller2) -> {
                 int relativity1 = controller1.getRelativityIndex(historyTextField.getText());
                 int relativity2 = controller2.getRelativityIndex(historyTextField.getText());
@@ -98,15 +112,10 @@ public class HomeWindowController implements Initializable {
         clearSearchFieldButton.setOnAction(e -> historyTextField.clear());
 
         Platform.runLater(() -> {
-            // Sets the key-bindings
-            Scene thisScene = homeWindowTabPane.getScene();
-            thisScene.setOnKeyPressed(e -> {
-                if (newTab.match(e))
-                    addTab();
-            });
+            this.setGlobalShortcuts();
 
             // Saves the state of the application before closing
-            Stage thisStage = (Stage) thisScene.getWindow();
+            Stage thisStage = (Stage) window.getScene().getWindow();
             thisStage.setOnCloseRequest(e -> saveState());
 
             // Loads the history
@@ -138,6 +147,65 @@ public class HomeWindowController implements Initializable {
         });
     }
 
+    private void setGlobalShortcuts() {
+        Scene thisScene = homeWindowTabPane.getScene();
+
+        thisScene.setOnKeyPressed(e -> {
+            if (newTab.match(e)) {
+                addTab();
+            } else if (focusAddressBar.match(e)) {
+                Tab activeTab = getActiveTab();
+                tabControllerMap.get(activeTab).addressField.requestFocus();
+            } else if (sendRequest.match(e)) {
+                Tab activeTab = getActiveTab();
+                tabControllerMap.get(activeTab).sendRequest();
+            } else if (toggleHistory.match(e)) {
+                toggleHistoryPane();
+            } else if (closeTab.match(e)) {
+                if (homeWindowTabPane.getTabs().size() == 1)
+                    addTab();
+                Tab activeTab = getActiveTab();
+                homeWindowTabPane.getTabs().remove(activeTab);
+                tabControllerMap.remove(activeTab);
+            } else if (searchHistory.match(e)) {
+                historyTextField.requestFocus();
+            } else if (focusParams.match(e)) {
+                Tab activeTab = getActiveTab();
+                DashboardController controller = tabControllerMap.get(activeTab);
+                controller.requestOptionsTab.getSelectionModel().select(controller.paramsTab);
+            } else if (focusAuth.match(e)) {
+                Tab activeTab = getActiveTab();
+                DashboardController controller = tabControllerMap.get(activeTab);
+                controller.requestOptionsTab.getSelectionModel().select(controller.authTab);
+            } else if (focusHeaders.match(e)) {
+                Tab activeTab = getActiveTab();
+                DashboardController controller = tabControllerMap.get(activeTab);
+                controller.requestOptionsTab.getSelectionModel().select(controller.headersTab);
+            } else if (focusBody.match(e)) {
+                Tab activeTab = getActiveTab();
+                DashboardController controller = tabControllerMap.get(activeTab);
+                String httpMethod = controller.httpMethodBox.getValue();
+                if (!httpMethod.equals("GET") && !httpMethod.equals("DELETE")) {
+                    controller.requestOptionsTab.getSelectionModel().select(controller.bodyTab);
+                }
+            }
+        });
+    }
+
+    private Tab getActiveTab() {
+        return homeWindowTabPane.getSelectionModel().getSelectedItem();
+    }
+
+    private void toggleHistoryPane() {
+        if (historyPane.isVisible()) {
+            historyPane = (VBox) window.getItems().remove(0);
+        } else {
+            window.getItems().add(0, historyPane);
+        }
+
+        historyPane.setVisible(!historyPane.isVisible());
+    }
+
     private void addTab() {
         addTab(null);
     }
@@ -148,21 +216,29 @@ public class HomeWindowController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
             Parent dashboard = loader.load();
             DashboardController controller = loader.getController();
+
             if (dashboardState != null)
                 controller.setState(dashboardState);
+
             newTab.setContent(dashboard);
-            newTab.textProperty().bind(Bindings
-                    .when(controller.getAddressProperty().isNotEmpty())
-                    .then(controller.getAddressProperty())
-                    .otherwise("New Tab"));
+
+            // Binds the addressField text to the Tab text
+            StringProperty addressProperty = controller.addressField.textProperty();
+            newTab.textProperty().bind(
+                    Bindings.when(addressProperty.isNotEmpty())
+                            .then(addressProperty)
+                            .otherwise("New Tab"));
+
+            // Tab closing procedure
             newTab.setOnCloseRequest(e -> {
                 if (homeWindowTabPane.getTabs().size() == 1)
                     addTab();
-                dashboardControllers.remove(controller);
+                tabControllerMap.remove(newTab);
             });
+
             homeWindowTabPane.getTabs().add(newTab);
             homeWindowTabPane.getSelectionModel().select(newTab);
-            dashboardControllers.add(controller);
+            tabControllerMap.put(newTab, controller);
         } catch (IOException e) {
             Services.loggingService.logSevere("Could not add a new tab.", e, LocalDateTime.now());
         }
@@ -172,7 +248,7 @@ public class HomeWindowController implements Initializable {
         List<DashboardState> dashboardStates = new ArrayList<>();
 
         // Get the states of all the tabs
-        for (DashboardController controller : dashboardControllers)
+        for (DashboardController controller : tabControllerMap.values())
             dashboardStates.add(controller.getState());
 
         try {

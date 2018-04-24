@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.homewindow;
+package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.util.Services;
 import com.rohitawate.everest.util.themes.ThemeManager;
@@ -36,9 +36,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class URLTabController implements Initializable {
+public class HeaderTabController implements Initializable {
     @FXML
-    private VBox fieldsBox;
+    private VBox headersBox;
 
     private List<StringKeyValueFieldController> controllers;
     private IntegerProperty controllersCount;
@@ -47,23 +47,23 @@ public class URLTabController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         controllers = new ArrayList<>();
         controllersCount = new SimpleIntegerProperty(controllers.size());
-        addField();
+        addHeader();
     }
 
-    private void addField() {
-        addField("", "", null);
+    public void addHeader(String key, String value) {
+        addHeader(key, value, null);
     }
 
-    public void addField(String key, String value) {
-        addField(key, value, null);
+    private void addHeader() {
+        addHeader("", "", null);
     }
 
     @FXML
-    private void addField(ActionEvent event) {
-        addField("", "", event);
+    private void addHeader(ActionEvent event) {
+        addHeader("", "", event);
     }
 
-    private void addField(String key, String value, ActionEvent event) {
+    private void addHeader(String key, String value, ActionEvent event) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
@@ -81,8 +81,8 @@ public class URLTabController implements Initializable {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/StringKeyValueField.fxml"));
-            Parent stringField = loader.load();
-            ThemeManager.setTheme(stringField);
+            Parent headerField = loader.load();
+            ThemeManager.setTheme(headerField);
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
@@ -90,17 +90,18 @@ public class URLTabController implements Initializable {
             controllersCount.set(controllersCount.get() + 1);
             controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(controllersCount, 1));
             controller.deleteButton.setOnAction(e -> {
-                fieldsBox.getChildren().remove(stringField);
+                headersBox.getChildren().remove(headerField);
                 controllers.remove(controller);
-                controllersCount.set(controllersCount.get() + 1);
+                controllersCount.set(controllersCount.get() - 1);
             });
-            fieldsBox.getChildren().add(stringField);
+            headersBox.getChildren().add(headerField);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not load string field.", e, LocalDateTime.now());
+            Services.loggingService.logSevere("Could not string field.", e, LocalDateTime.now());
         }
     }
 
-    public HashMap<String, String> getStringTuples() {
+
+    public HashMap<String, String> getHeaders() {
         HashMap<String, String> headers = new HashMap<>();
         for (StringKeyValueFieldController controller : controllers) {
             if (controller.isChecked())

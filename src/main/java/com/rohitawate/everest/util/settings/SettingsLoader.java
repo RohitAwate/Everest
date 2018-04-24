@@ -22,7 +22,6 @@ import com.rohitawate.everest.util.EverestUtilities;
 import com.rohitawate.everest.util.Services;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 
 /**
@@ -41,10 +40,7 @@ public class SettingsLoader implements Runnable {
         try {
             File settingsFile = new File("Everest/config/settings.json");
 
-            if (settingsFile.exists())
-                System.out.print("Settings file found. Loading settings... ");
-            else
-                throw new FileNotFoundException();
+            System.out.print("Settings file found. Loading settings... ");
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode nodes = mapper.readTree(settingsFile);
@@ -62,7 +58,7 @@ public class SettingsLoader implements Runnable {
 
             Settings.theme = EverestUtilities.trimString(nodes.get("theme").toString());
         } catch (Exception E) {
-            Services.loggingService.logInfo("Settings file not found. Defaults will be used.", LocalDateTime.now());
+            Services.loggingService.logInfo("Default settings will be used.", LocalDateTime.now());
         } finally {
             Services.loggingService.logInfo("Settings loaded.", LocalDateTime.now());
         }

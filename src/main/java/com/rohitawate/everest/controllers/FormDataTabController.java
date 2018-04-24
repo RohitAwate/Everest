@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.homewindow;
+package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.util.Services;
 import com.rohitawate.everest.util.themes.ThemeManager;

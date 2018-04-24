@@ -22,10 +22,11 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<SplitPane dividerPositions="0.3" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
-           xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.homewindow.HomeWindowController">
+<SplitPane fx:id="window" dividerPositions="0.3" stylesheets="@../../css/Adreana.css"
+           xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rohitawate.everest.controllers.HomeWindowController">
    <items>
-       <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="500.0" prefWidth="400.0"
+       <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="500.0" minWidth="400.0"
              SplitPane.resizableWithParent="false">
          <children>
             <HBox fx:id="historySearchFieldBox" alignment="CENTER" fillHeight="false">
@@ -140,6 +141,7 @@
              </StackPane>
          </children>
       </VBox>
-      <TabPane fx:id="homeWindowTabPane" prefHeight="760.0" prefWidth="1280.0" tabClosingPolicy="ALL_TABS" tabMaxHeight="30.0" tabMaxWidth="200.0" tabMinHeight="30.0" tabMinWidth="200.0" SplitPane.resizableWithParent="false" />
+       <TabPane fx:id="homeWindowTabPane" tabClosingPolicy="ALL_TABS" tabMaxHeight="30.0" tabMaxWidth="200.0"
+                tabMinHeight="30.0" tabMinWidth="200.0" SplitPane.resizableWithParent="false"/>
    </items>
 </SplitPane>

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.rohitawate.everest.homewindow;
+package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jfoenix.controls.JFXButton;
@@ -36,13 +36,13 @@ import com.rohitawate.everest.util.themes.ThemeManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -60,9 +60,9 @@ public class DashboardController implements Initializable {
     @FXML
     private StackPane dashboard;
     @FXML
-    private TextField addressField;
+    TextField addressField;
     @FXML
-    private ComboBox<String> httpMethodBox;
+    ComboBox<String> httpMethodBox;
     @FXML
     private VBox responseBox, loadingLayer, promptLayer, errorLayer, paramsBox;
     @FXML
@@ -75,11 +75,11 @@ public class DashboardController implements Initializable {
     @FXML
     private JFXButton sendButton, cancelButton;
     @FXML
-    private TabPane requestOptionsTab;
+    TabPane requestOptionsTab;
     @FXML
-    private Tab paramsTab, authTab, headersTab, bodyTab;
+    Tab paramsTab, authTab, headersTab, bodyTab;
 
-    private JFXSnackbar snackBar;
+    private JFXSnackbar snackBar = new JFXSnackbar(dashboard);
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
     private List<StringKeyValueFieldController> paramsControllers;
     private List<String> appendedParams;
@@ -123,20 +123,23 @@ public class DashboardController implements Initializable {
         appendedParams = new ArrayList<>();
         addParamField(); // Adds a blank param field
 
-        snackBar = new JFXSnackbar(dashboard);
         bodyTab.disableProperty().bind(
-                Bindings.or(
-                        httpMethodBox.valueProperty().isEqualTo("GET"),
-                        httpMethodBox.valueProperty().isEqualTo("DELETE")
-                )
-        );
+                Bindings.or(httpMethodBox.valueProperty().isEqualTo("GET"),
+                        httpMethodBox.valueProperty().isEqualTo("DELETE")));
+
+        // Disabling Ctrl+Tab navigation
+        requestOptionsTab.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.TAB) {
+                e.consume();
+            }
+        });
 
         errorTitle.setText("Oops... That's embarrassing!");
         errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
     }
 
     @FXML
-    private void sendRequest() {
+    void sendRequest() {
         promptLayer.setVisible(false);
         if (responseBox.getChildren().size() == 2) {
             responseBox.getChildren().remove(0);
@@ -432,10 +435,6 @@ public class DashboardController implements Initializable {
         } catch (IOException e) {
             Services.loggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
         }
-    }
-
-    public StringProperty getAddressProperty() {
-        return addressField.textProperty();
     }
 
     /**

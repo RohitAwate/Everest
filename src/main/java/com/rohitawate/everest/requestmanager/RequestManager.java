@@ -49,14 +49,14 @@ public abstract class RequestManager extends Service<EverestResponse> {
         if (Settings.connectionReadTimeOutEnable)
             client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
 
-        this.request = request;
-        this.requestBuilder = client.target(request.getTarget().toString()).request();
         response = new EverestResponse();
-        appendHeaders();
+        setRequest(request);
     }
 
     public void setRequest(EverestRequest request) {
         this.request = request;
+        this.requestBuilder = client.target(request.getTarget().toString()).request();
+        appendHeaders();
     }
 
     private void appendHeaders() {

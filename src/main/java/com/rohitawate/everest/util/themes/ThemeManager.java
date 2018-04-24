@@ -16,10 +16,12 @@
 
 package com.rohitawate.everest.util.themes;
 
+import com.rohitawate.everest.util.Services;
 import com.rohitawate.everest.util.settings.Settings;
 import javafx.scene.Parent;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +29,7 @@ public class ThemeManager {
     private static List<Parent> parentNodes = new ArrayList<>();
 
     public static void refreshTheme() {
-        File themeFile = new File("themes/" + Settings.theme + ".css");
+        File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
         if (themeFile.exists()) {
             String themePath = themeFile.toURI().toString();
 
@@ -35,11 +37,13 @@ public class ThemeManager {
                 parent.getStylesheets().clear();
                 parent.getStylesheets().add(themePath);
             }
+
+            Services.loggingService.logInfo("Theme changed to " + Settings.theme, LocalDateTime.now());
         }
     }
 
     public static void setTheme(Parent parent) {
-        File themeFile = new File("themes/" + Settings.theme + ".css");
+        File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
         if (themeFile.exists()) {
             parent.getStylesheets().add(themeFile.toURI().toString());
             parentNodes.add(parent);

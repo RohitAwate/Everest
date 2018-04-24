@@ -22,13 +22,15 @@ import com.rohitawate.everest.util.EverestUtilities;
 import com.rohitawate.everest.util.Services;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 /**
- * Loads up custom values into Settings from settings.json.
+ * Loads up custom values into Settings from Everest/config/settings.json.
  */
 public class SettingsLoader implements Runnable {
     public Thread settingsLoaderThread;
+    private JsonNode nodes;
 
     public SettingsLoader() {
         settingsLoaderThread = new Thread(this, "Settings loader thread");
@@ -40,27 +42,64 @@ public class SettingsLoader implements Runnable {
         try {
             File settingsFile = new File("Everest/config/settings.json");
 
-            System.out.print("Settings file found. Loading settings... ");
+            System.out.println("Settings file found. Loading settings... ");
 
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode nodes = mapper.readTree(settingsFile);
+            nodes = mapper.readTree(settingsFile);
 
-            Settings.responseAreaFont = nodes.get("responseAreaFont").toString();
-            Settings.responseAreaFontSize = nodes.get("responseAreaFontSize").asInt();
+            Settings.responseAreaFont = setStringSetting(Settings.responseAreaFont, "responseAreaFont");
+            Settings.responseAreaFontSize = setIntegerSetting(Settings.responseAreaFontSize, "responseAreaFontSize");
 
-            Settings.connectionTimeOutEnable = nodes.get("connectionTimeOutEnable").asBoolean();
+            Settings.connectionTimeOutEnable = setBooleanSetting(Settings.connectionTimeOutEnable, "connectionTimeOutEnable");
             if (Settings.connectionTimeOutEnable)
-                Settings.connectionTimeOut = nodes.get("connectionTimeOut").asInt();
+                Settings.connectionTimeOut = setIntegerSetting(Settings.connectionTimeOut, "connectionTimeOut");
 
-            Settings.connectionReadTimeOutEnable = nodes.get("connectionReadTimeOutEnable").asBoolean();
+            Settings.connectionReadTimeOutEnable = setBooleanSetting(Settings.connectionReadTimeOutEnable, "connectionReadTimeOutEnable");
             if (Settings.connectionReadTimeOutEnable)
-                Settings.connectionReadTimeOut = nodes.get("connectionReadTimeOut").asInt();
+                Settings.connectionReadTimeOut = setIntegerSetting(Settings.connectionReadTimeOut, "connectionReadTimeOut");
 
-            Settings.theme = EverestUtilities.trimString(nodes.get("theme").toString());
-        } catch (Exception E) {
-            Services.loggingService.logInfo("Default settings will be used.", LocalDateTime.now());
-        } finally {
-            Services.loggingService.logInfo("Settings loaded.", LocalDateTime.now());
+            Settings.theme = EverestUtilities.trimString(setStringSetting(Settings.theme, "theme"));
+        } catch (IOException IOE) {
+            Services.loggingService.logInfo("Settings file not found. Using defaults", LocalDateTime.now());
         }
+    }
+
+    private String setStringSetting(String defaultValue, String identifier) {
+        JsonNode value = nodes.get(identifier);
+
+        if (value != null) {
+            defaultValue = value.toString();
+            Services.loggingService.logInfo("[" + identifier + "]: Loaded: " + defaultValue, LocalDateTime.now());
+        } else {
+            Services.loggingService.logInfo("[" + identifier + "]: Not found. Using default value.", LocalDateTime.now());
+        }
+
+        return defaultValue;
+    }
+
+    private int setIntegerSetting(int defaultValue, String identifier) {
+        JsonNode value = nodes.get(identifier);
+
+        if (value != null) {
+            defaultValue = value.asInt();
+            Services.loggingService.logInfo("[" + identifier + "]: Loaded: " + defaultValue, LocalDateTime.now());
+        } else {
+            Services.loggingService.logInfo("[" + identifier + "]: Not found. Using default value.", LocalDateTime.now());
+        }
+
+        return defaultValue;
+    }
+
+    private boolean setBooleanSetting(boolean defaultValue, String identifier) {
+        JsonNode value = nodes.get(identifier);
+
+        if (value != null) {
+            defaultValue = value.asBoolean();
+            Services.loggingService.logInfo("[" + identifier + "]: Loaded: " + defaultValue, LocalDateTime.now());
+        } else {
+            Services.loggingService.logInfo("[" + identifier + "]: Not found. Using default value.", LocalDateTime.now());
+        }
+
+        return defaultValue;
     }
 }

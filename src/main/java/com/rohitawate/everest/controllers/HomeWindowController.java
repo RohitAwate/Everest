@@ -19,6 +19,7 @@ package com.rohitawate.everest.controllers;
 import com.jfoenix.controls.JFXButton;
 import com.rohitawate.everest.models.DashboardState;
 import com.rohitawate.everest.util.Services;
+import com.rohitawate.everest.util.themes.ThemeManager;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
@@ -71,6 +72,7 @@ public class HomeWindowController implements Initializable {
     private final KeyCombination focusAuth = new KeyCodeCombination(KeyCode.A, KeyCombination.ALT_DOWN);
     private final KeyCombination focusHeaders = new KeyCodeCombination(KeyCode.H, KeyCombination.ALT_DOWN);
     private final KeyCombination focusBody = new KeyCodeCombination(KeyCode.B, KeyCombination.ALT_DOWN);
+    private final KeyCombination refreshTheme = new KeyCodeCombination(KeyCode.T, KeyCombination.SHIFT_DOWN);
 
     private HashMap<Tab, DashboardController> tabControllerMap;
     private List<HistoryItemController> historyItemControllers;
@@ -188,6 +190,8 @@ public class HomeWindowController implements Initializable {
                 if (!httpMethod.equals("GET") && !httpMethod.equals("DELETE")) {
                     controller.requestOptionsTab.getSelectionModel().select(controller.bodyTab);
                 }
+            } else if (refreshTheme.match(e)) {
+                ThemeManager.refreshTheme();
             }
         });
     }

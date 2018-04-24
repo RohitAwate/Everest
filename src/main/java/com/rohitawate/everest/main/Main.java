@@ -38,17 +38,17 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
         Parent homeWindow = loader.load();
         Services.homeWindowController = loader.getController();
-		Stage dashboardStage = new Stage();
+        Stage dashboardStage = new Stage();
         ThemeManager.setTheme(homeWindow);
 
         dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/Logo.png").toExternalForm()));
         dashboardStage.setScene(new Scene(homeWindow));
         dashboardStage.setTitle("Everest");
-		dashboardStage.show();
+        dashboardStage.show();
 
         EverestUtilities.createBugReporter();
-	}
-    
+    }
+
     public static void main(String args[]) {
         launch(args);
     }

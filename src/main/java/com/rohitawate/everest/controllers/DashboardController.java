@@ -79,7 +79,7 @@ public class DashboardController implements Initializable {
     @FXML
     Tab paramsTab, authTab, headersTab, bodyTab;
 
-    private JFXSnackbar snackBar = new JFXSnackbar(dashboard);
+    private JFXSnackbar snackbar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
     private List<StringKeyValueFieldController> paramsControllers;
     private List<String> appendedParams;
@@ -109,6 +109,8 @@ public class DashboardController implements Initializable {
         } catch (IOException e) {
             Services.loggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
         }
+
+        snackbar = new JFXSnackbar(dashboard);
 
         responseBox.getChildren().remove(0);
         promptLayer.setVisible(true);
@@ -150,7 +152,7 @@ public class DashboardController implements Initializable {
             String address = addressField.getText();
             if (address.equals("")) {
                 promptLayer.setVisible(true);
-                snackBar.show("Please enter an address.", 3000);
+                snackbar.show("Please enter an address.", 3000);
                 return;
             }
             switch (httpMethodBox.getValue()) {
@@ -165,7 +167,7 @@ public class DashboardController implements Initializable {
                     if (requestManager == null || requestManager.getClass() != GETRequestManager.class)
                         requestManager = new GETRequestManager(getRequest);
                     else if (requestManager.isRunning()) {
-                        snackBar.show("Please wait while the current request is processed.", 3000);
+                        snackbar.show("Please wait while the current request is processed.", 3000);
                         return;
                     } else {
                         requestManager.setRequest(getRequest);
@@ -187,7 +189,7 @@ public class DashboardController implements Initializable {
                     if (requestManager == null || requestManager.getClass() != DataDispatchRequestManager.class)
                         requestManager = new DataDispatchRequestManager(dataDispatchRequest);
                     else if (requestManager.isRunning()) {
-                        snackBar.show("Please wait while the current request is processed.", 3000);
+                        snackbar.show("Please wait while the current request is processed.", 3000);
                         return;
                     } else {
                         requestManager.setRequest(dataDispatchRequest);
@@ -204,7 +206,7 @@ public class DashboardController implements Initializable {
                     if (requestManager == null || requestManager.getClass() != DELETERequestManager.class)
                         requestManager = new DELETERequestManager(deleteRequest);
                     else if (requestManager.isRunning()) {
-                        snackBar.show("Please wait while the current request is processed.", 3000);
+                        snackbar.show("Please wait while the current request is processed.", 3000);
                         return;
                     } else {
                         requestManager.setRequest(deleteRequest);
@@ -221,7 +223,7 @@ public class DashboardController implements Initializable {
             Services.historyManager.saveHistory(getState());
         } catch (MalformedURLException MURLE) {
             promptLayer.setVisible(true);
-            snackBar.show("Invalid address. Please verify and try again.", 3000);
+            snackbar.show("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
             Services.loggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
             errorLayer.setVisible(true);
@@ -254,7 +256,7 @@ public class DashboardController implements Initializable {
         } else if (throwable.getClass() == RedirectException.class) {
             RedirectException redirect = (RedirectException) throwable;
             addressField.setText(redirect.getNewLocation());
-            snackBar.show("Resource moved permanently. Redirecting...", 3000);
+            snackbar.show("Resource moved permanently. Redirecting...", 3000);
             requestManager = null;
             sendRequest();
             return;
@@ -277,7 +279,7 @@ public class DashboardController implements Initializable {
     private void onCancelled() {
         loadingLayer.setVisible(false);
         promptLayer.setVisible(true);
-        snackBar.show("Request canceled.", 2000);
+        snackbar.show("Request canceled.", 2000);
         requestManager.reset();
     }
 
@@ -341,7 +343,7 @@ public class DashboardController implements Initializable {
                 responseArea.setText("No body found in the response.");
             }
         } catch (Exception e) {
-            snackBar.show("Response could not be parsed.", 5000);
+            snackbar.show("Response could not be parsed.", 5000);
             Services.loggingService.logSevere("Response could not be parsed.", e, LocalDateTime.now());
             errorLayer.setVisible(true);
             errorTitle.setText("Parsing Error");

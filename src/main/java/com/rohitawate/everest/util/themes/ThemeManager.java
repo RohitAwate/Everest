@@ -28,25 +28,38 @@ import java.util.List;
 public class ThemeManager {
     private static List<Parent> parentNodes = new ArrayList<>();
 
+    /**
+     * Refreshes the theme of all the registered parents by replacing
+     * the old external one with the new one. The fallback theme ie "Adreana"
+     * is always retained.
+     */
     public static void refreshTheme() {
-        File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
-        if (themeFile.exists()) {
-            String themePath = themeFile.toURI().toString();
+        if (!Settings.theme.equals("Adreana")) {
+            File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
+            if (themeFile.exists()) {
+                String themePath = themeFile.toURI().toString();
 
-            for (Parent parent : parentNodes) {
-                parent.getStylesheets().clear();
-                parent.getStylesheets().add(themePath);
+                for (Parent parent : parentNodes) {
+                    parent.getStylesheets().remove(1);
+                    parent.getStylesheets().add(1, themePath);
+                }
+
+                Services.loggingService.logInfo("Theme changed to " + Settings.theme + ".", LocalDateTime.now());
+            } else {
+                Services.loggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
             }
-
-            Services.loggingService.logInfo("Theme changed to " + Settings.theme, LocalDateTime.now());
         }
     }
 
     public static void setTheme(Parent parent) {
-        File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
-        if (themeFile.exists()) {
-            parent.getStylesheets().add(themeFile.toURI().toString());
-            parentNodes.add(parent);
+        if (!Settings.theme.equals("Adreana")) {
+            File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
+            if (themeFile.exists()) {
+                parent.getStylesheets().add(themeFile.toURI().toString());
+                parentNodes.add(parent);
+            } else {
+                Services.loggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
+            }
         }
     }
 }

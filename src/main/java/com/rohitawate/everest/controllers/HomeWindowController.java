@@ -18,6 +18,7 @@ package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.rohitawate.everest.models.DashboardState;
+import com.rohitawate.everest.util.KeyMap;
 import com.rohitawate.everest.util.Services;
 import com.rohitawate.everest.util.themes.ThemeManager;
 import javafx.application.Platform;
@@ -33,9 +34,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -49,7 +47,9 @@ import java.util.concurrent.ExecutionException;
 
 public class HomeWindowController implements Initializable {
     @FXML
-    private SplitPane window;
+    private StackPane homeWindowSP;
+    @FXML
+    private SplitPane splitPane;
     @FXML
     private TabPane homeWindowTabPane;
     @FXML
@@ -61,24 +61,12 @@ public class HomeWindowController implements Initializable {
     @FXML
     private JFXButton clearSearchFieldButton;
 
-    // Keyboard shortcuts
-    private final KeyCombination newTab = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
-    private final KeyCombination closeTab = new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN);
-    private final KeyCombination toggleHistory = new KeyCodeCombination(KeyCode.H, KeyCombination.CONTROL_DOWN);
-    private final KeyCombination focusAddressBar = new KeyCodeCombination(KeyCode.L, KeyCombination.CONTROL_DOWN);
-    private final KeyCombination sendRequest = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
-    private final KeyCombination searchHistory = new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN);
-    private final KeyCombination focusParams = new KeyCodeCombination(KeyCode.P, KeyCombination.ALT_DOWN);
-    private final KeyCombination focusAuth = new KeyCodeCombination(KeyCode.A, KeyCombination.ALT_DOWN);
-    private final KeyCombination focusHeaders = new KeyCodeCombination(KeyCode.H, KeyCombination.ALT_DOWN);
-    private final KeyCombination focusBody = new KeyCodeCombination(KeyCode.B, KeyCombination.ALT_DOWN);
-    private final KeyCombination refreshTheme = new KeyCodeCombination(KeyCode.T, KeyCombination.SHIFT_DOWN);
-
     private HashMap<Tab, DashboardController> tabControllerMap;
     private List<HistoryItemController> historyItemControllers;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Using LinkedHashMap because they retain order
         tabControllerMap = new LinkedHashMap<>();
         historyItemControllers = new ArrayList<>();
         recoverState();
@@ -113,11 +101,14 @@ public class HomeWindowController implements Initializable {
 
         clearSearchFieldButton.setOnAction(e -> historyTextField.clear());
 
+        homeWindowSP.setFocusTraversable(true);
+
         Platform.runLater(() -> {
+            homeWindowSP.requestFocus();
             this.setGlobalShortcuts();
 
             // Saves the state of the application before closing
-            Stage thisStage = (Stage) window.getScene().getWindow();
+            Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
             thisStage.setOnCloseRequest(e -> saveState());
 
             // Loads the history
@@ -150,47 +141,50 @@ public class HomeWindowController implements Initializable {
     }
 
     private void setGlobalShortcuts() {
-        Scene thisScene = homeWindowTabPane.getScene();
+        Scene thisScene = homeWindowSP.getScene();
 
         thisScene.setOnKeyPressed(e -> {
-            if (newTab.match(e)) {
+            if (KeyMap.newTab.match(e)) {
                 addTab();
-            } else if (focusAddressBar.match(e)) {
+            } else if (KeyMap.focusAddressBar.match(e)) {
                 Tab activeTab = getActiveTab();
                 tabControllerMap.get(activeTab).addressField.requestFocus();
-            } else if (sendRequest.match(e)) {
+            } else if (KeyMap.focusMethodBox.match(e)) {
+                Tab activeTab = getActiveTab();
+                tabControllerMap.get(activeTab).httpMethodBox.show();
+            } else if (KeyMap.sendRequest.match(e)) {
                 Tab activeTab = getActiveTab();
                 tabControllerMap.get(activeTab).sendRequest();
-            } else if (toggleHistory.match(e)) {
+            } else if (KeyMap.toggleHistory.match(e)) {
                 toggleHistoryPane();
-            } else if (closeTab.match(e)) {
+            } else if (KeyMap.closeTab.match(e)) {
+                Tab activeTab = getActiveTab();
                 if (homeWindowTabPane.getTabs().size() == 1)
                     addTab();
-                Tab activeTab = getActiveTab();
                 homeWindowTabPane.getTabs().remove(activeTab);
                 tabControllerMap.remove(activeTab);
-            } else if (searchHistory.match(e)) {
+            } else if (KeyMap.searchHistory.match(e)) {
                 historyTextField.requestFocus();
-            } else if (focusParams.match(e)) {
+            } else if (KeyMap.focusParams.match(e)) {
                 Tab activeTab = getActiveTab();
                 DashboardController controller = tabControllerMap.get(activeTab);
                 controller.requestOptionsTab.getSelectionModel().select(controller.paramsTab);
-            } else if (focusAuth.match(e)) {
+            } else if (KeyMap.focusAuth.match(e)) {
                 Tab activeTab = getActiveTab();
                 DashboardController controller = tabControllerMap.get(activeTab);
                 controller.requestOptionsTab.getSelectionModel().select(controller.authTab);
-            } else if (focusHeaders.match(e)) {
+            } else if (KeyMap.focusHeaders.match(e)) {
                 Tab activeTab = getActiveTab();
                 DashboardController controller = tabControllerMap.get(activeTab);
                 controller.requestOptionsTab.getSelectionModel().select(controller.headersTab);
-            } else if (focusBody.match(e)) {
+            } else if (KeyMap.focusBody.match(e)) {
                 Tab activeTab = getActiveTab();
                 DashboardController controller = tabControllerMap.get(activeTab);
                 String httpMethod = controller.httpMethodBox.getValue();
                 if (!httpMethod.equals("GET") && !httpMethod.equals("DELETE")) {
                     controller.requestOptionsTab.getSelectionModel().select(controller.bodyTab);
                 }
-            } else if (refreshTheme.match(e)) {
+            } else if (KeyMap.refreshTheme.match(e)) {
                 ThemeManager.refreshTheme();
             }
         });
@@ -202,9 +196,9 @@ public class HomeWindowController implements Initializable {
 
     private void toggleHistoryPane() {
         if (historyPane.isVisible()) {
-            historyPane = (VBox) window.getItems().remove(0);
+            historyPane = (VBox) splitPane.getItems().remove(0);
         } else {
-            window.getItems().add(0, historyPane);
+            splitPane.getItems().add(0, historyPane);
         }
 
         historyPane.setVisible(!historyPane.isVisible());

@@ -29,11 +29,12 @@
 
 .combo-box {
     -fx-background-color: #282828;
+    -fx-background-radius: 0px;
 }
 
 .combo-box .list-cell {
     -fx-background-color: #282828;
-	-fx-pref-height: 39px;
+    -fx-pref-height: 40px;
     -fx-font-size: 15px;
     -fx-text-fill: #d4d4d4;
     -fx-padding: 0 0 0 10px;
@@ -43,13 +44,19 @@
     -fx-background-color: #282828;
 }
 
-.combo-box .list-cell:hover {
+.combo-box:showing .list-cell:hover,
+.combo-box:showing .list-cell:selected {
 	-fx-background-color: orangered;
 	-fx-text-fill: white;
 }
 
 .combo-box .arrow-button .arrow {
     -fx-background-color: white;
+}
+
+.combo-box:showing {
+    -fx-background-color: orangered;
+    -fx-text-fill: black;
 }
 
 .combo-box .list-view {

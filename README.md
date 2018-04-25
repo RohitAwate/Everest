@@ -55,6 +55,7 @@ _Everest's simple and precise error messages help you debug faster._
 | Ctrl + H     | Toggle History           |
 | Ctrl + Enter | Send request             |
 | Ctrl + L     | Focus address bar        |
+| Ctrl + M     | Open HTTP Method box     |
 | Ctrl + F     | Focus history search bar |
 | Alt + P      | Focus Params tab         |
 | Alt + A      | Focus Authentication tab |

@@ -18,18 +18,56 @@ package com.rohitawate.everest.util.logging;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LoggingService {
     private Logger logger;
     private DateTimeFormatter dateFormat;
+    private String message;
+    private Exception exception;
+    private LocalDateTime time;
+    private ExecutorService executorService;
+
+    private SevereLogger severeLogger = new SevereLogger();
+    private WarningLogger warningLogger = new WarningLogger();
+    private InfoLogger infoLogger = new InfoLogger();
 
     public LoggingService(Level writerLevel) {
         logger = new Logger(writerLevel);
         dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        executorService = Executors.newSingleThreadExecutor();
     }
 
     public void logSevere(String message, Exception exception, LocalDateTime time) {
-        new Thread(() -> {
+        setValues(message, exception, time);
+        executorService.execute(severeLogger);
+    }
+
+    public void logWarning(String message, Exception exception, LocalDateTime time) {
+        setValues(message, exception, time);
+        executorService.execute(warningLogger);
+    }
+
+    public void logInfo(String message, LocalDateTime time) {
+        setValues(message, null, time);
+        executorService.execute(infoLogger);
+    }
+
+    private void setValues(String message, Exception exception, LocalDateTime time) {
+        this.message = message;
+        this.exception = exception;
+        this.time = time;
+    }
+
+    @Override
+    protected void finalize() {
+        executorService.shutdown();
+    }
+
+    private class SevereLogger implements Runnable {
+        @Override
+        public void run() {
             System.out.println(message);
             Log log = new Log();
             log.setLevel(Level.SEVERE);
@@ -37,11 +75,12 @@ public class LoggingService {
             log.setException(exception);
             log.setTime(dateFormat.format(time));
             logger.log(log);
-        }).start();
+        }
     }
 
-    public void logWarning(String message, Exception exception, LocalDateTime time) {
-        new Thread(() -> {
+    private class WarningLogger implements Runnable {
+        @Override
+        public void run() {
             System.out.println(message);
             Log log = new Log();
             log.setLevel(Level.WARNING);
@@ -49,17 +88,19 @@ public class LoggingService {
             log.setException(exception);
             log.setTime(dateFormat.format(time));
             logger.log(log);
-        }).start();
+        }
     }
 
-    public void logInfo(String message, LocalDateTime time) {
-        new Thread(() -> {
+
+    private class InfoLogger implements Runnable {
+        @Override
+        public void run() {
             System.out.println(message);
             Log log = new Log();
             log.setLevel(Level.INFO);
             log.setMessage(message);
             log.setTime(dateFormat.format(time));
             logger.log(log);
-        }).start();
+        }
     }
 }

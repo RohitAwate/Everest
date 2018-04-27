@@ -25,6 +25,7 @@ import com.rohitawate.everest.util.settings.Settings;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.sql.*;
@@ -39,6 +40,7 @@ public class HistoryManager {
     private Connection conn;
     private JsonNode queries;
     private PreparedStatement statement;
+    private HistorySaver historySaver = new HistorySaver();
 
     public HistoryManager() {
         try {
@@ -47,36 +49,46 @@ public class HistoryManager {
                 configFolder.mkdirs();
 
             conn = DriverManager.getConnection("jdbc:sqlite:Everest/config/history.sqlite");
+            initDatabase();
 
-            // Read all queries from Queries.json
-            InputStream queriesFile = getClass().getResourceAsStream("/sql/Queries.json");
-            ObjectMapper mapper = new ObjectMapper();
-            queries = mapper.readTree(queriesFile);
-
-            statement =
-                    conn.prepareStatement(EverestUtilities.trimString(queries.get("createRequestsTable").toString()));
-            statement.execute();
-
-            statement =
-                    conn.prepareStatement(EverestUtilities.trimString(queries.get("createHeadersTable").toString()));
-            statement.execute();
-
-            statement =
-                    conn.prepareStatement(EverestUtilities.trimString(queries.get("createRequestContentMapTable").toString()));
-            statement.execute();
-
-            statement =
-                    conn.prepareStatement(EverestUtilities.trimString(queries.get("createBodiesTable").toString()));
-            statement.execute();
-
-            statement =
-                    conn.prepareStatement(EverestUtilities.trimString(queries.get("createTuplesTable").toString()));
-            statement.execute();
         } catch (Exception E) {
             Services.loggingService.logSevere("Exception while initializing HistoryManager.", E, LocalDateTime.now());
         } finally {
             System.out.println("Connected to database.");
         }
+    }
+
+    /**
+     * Creates and initializes the database with necessary tables if not already done.
+     *
+     * @throws IOException
+     * @throws SQLException
+     */
+    private void initDatabase() throws IOException, SQLException {
+        // Read all queries from Queries.json
+        InputStream queriesFile = getClass().getResourceAsStream("/sql/Queries.json");
+        ObjectMapper mapper = new ObjectMapper();
+        queries = mapper.readTree(queriesFile);
+
+        statement =
+                conn.prepareStatement(EverestUtilities.trimString(queries.get("createRequestsTable").toString()));
+        statement.execute();
+
+        statement =
+                conn.prepareStatement(EverestUtilities.trimString(queries.get("createHeadersTable").toString()));
+        statement.execute();
+
+        statement =
+                conn.prepareStatement(EverestUtilities.trimString(queries.get("createRequestContentMapTable").toString()));
+        statement.execute();
+
+        statement =
+                conn.prepareStatement(EverestUtilities.trimString(queries.get("createBodiesTable").toString()));
+        statement.execute();
+
+        statement =
+                conn.prepareStatement(EverestUtilities.trimString(queries.get("createTuplesTable").toString()));
+        statement.execute();
     }
 
     // Method is made synchronized to allow only one database transaction at a time.
@@ -90,118 +102,8 @@ public class HistoryManager {
         if (isDuplicate(state))
             return;
 
-        new Thread(() -> {
-            try {
-                statement =
-                        conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequest").toString()));
-
-                statement.setString(1, state.getHttpMethod());
-                statement.setString(2, String.valueOf(state.getTarget()));
-                statement.setString(3, LocalDate.now().toString());
-
-                statement.executeUpdate();
-
-                // Get latest RequestID to insert into Headers table
-                statement = conn.prepareStatement("SELECT MAX(ID) AS MaxID FROM Requests");
-
-                ResultSet RS = statement.executeQuery();
-                int requestID = -1;
-                if (RS.next())
-                    requestID = RS.getInt("MaxID");
-
-                if (state.getHeaders().size() > 0) {
-                    // Saves request headers
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveHeader").toString()));
-                    for (Entry entry : state.getHeaders().entrySet()) {
-                        statement.setInt(1, requestID);
-                        statement.setString(2, entry.getKey().toString());
-                        statement.setString(3, entry.getValue().toString());
-
-                        statement.executeUpdate();
-                    }
-                }
-
-                if (state.getParams().size() > 0) {
-                    // Saves request parameters
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                    for (Entry entry : state.getParams().entrySet()) {
-                        statement.setInt(1, requestID);
-                        statement.setString(2, "Param");
-                        statement.setString(3, entry.getKey().toString());
-                        statement.setString(4, entry.getValue().toString());
-
-                        statement.executeUpdate();
-                    }
-                }
-
-                if (!(state.getHttpMethod().equals("GET") || state.getHttpMethod().equals("DELETE"))) {
-                    // Maps the request to its ContentType for faster recovery
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequestContentPair").toString()));
-                    statement.setInt(1, requestID);
-                    statement.setString(2, state.getContentType());
-
-                    statement.executeUpdate();
-
-                    // Determines where to fetch the body from, based on the ContentType
-                    switch (state.getContentType()) {
-                        case MediaType.TEXT_PLAIN:
-                        case MediaType.APPLICATION_JSON:
-                        case MediaType.APPLICATION_XML:
-                        case MediaType.TEXT_HTML:
-                        case MediaType.APPLICATION_OCTET_STREAM:
-                            // Saves the body in case of raw content, or the file location in case of binary
-                            statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveBody").toString()));
-                            statement.setInt(1, requestID);
-                            statement.setString(2, state.getBody());
-                            statement.executeUpdate();
-                            break;
-                        case MediaType.APPLICATION_FORM_URLENCODED:
-                            if (state.getStringTuples().size() > 0) {
-                                for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
-                                    // Saves the string tuples
-                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                                    statement.setInt(1, requestID);
-                                    statement.setString(2, "String");
-                                    statement.setString(3, entry.getKey());
-                                    statement.setString(4, entry.getValue());
-
-                                    statement.executeUpdate();
-                                }
-                            }
-                            break;
-                        case MediaType.MULTIPART_FORM_DATA:
-                            if (state.getStringTuples().size() > 0) {
-                                for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
-                                    // Saves the string tuples
-                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                                    statement.setInt(1, requestID);
-                                    statement.setString(2, "String");
-                                    statement.setString(3, entry.getKey());
-                                    statement.setString(4, entry.getValue());
-
-                                    statement.executeUpdate();
-                                }
-                            }
-
-                            if (state.getFileTuples().size() > 0) {
-                                for (Entry<String, String> entry : state.getFileTuples().entrySet()) {
-                                    // Saves the file tuples
-                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                                    statement.setInt(1, requestID);
-                                    statement.setString(2, "File");
-                                    statement.setString(3, entry.getKey());
-                                    statement.setString(4, entry.getValue());
-
-                                    statement.executeUpdate();
-                                }
-                            }
-                            break;
-                    }
-                }
-            } catch (SQLException e) {
-                Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
-            }
-        }, "History Saver Thread").start();
+        historySaver.state = state;
+        Services.singleExecutor.execute(historySaver);
 
         // Appends this history item to the HistoryTab
         Services.homeWindowController.addHistoryItem(state);
@@ -430,5 +332,123 @@ public class HistoryManager {
                 return false;
         }
         return true;
+    }
+
+    private class HistorySaver implements Runnable {
+        private DashboardState state;
+
+        @Override
+        public void run() {
+            try {
+                statement =
+                        conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequest").toString()));
+
+                statement.setString(1, state.getHttpMethod());
+                statement.setString(2, String.valueOf(state.getTarget()));
+                statement.setString(3, LocalDate.now().toString());
+
+                statement.executeUpdate();
+
+                // Get latest RequestID to insert into Headers table
+                statement = conn.prepareStatement("SELECT MAX(ID) AS MaxID FROM Requests");
+
+                ResultSet RS = statement.executeQuery();
+                int requestID = -1;
+                if (RS.next())
+                    requestID = RS.getInt("MaxID");
+
+                if (state.getHeaders().size() > 0) {
+                    // Saves request headers
+                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveHeader").toString()));
+                    for (Entry entry : state.getHeaders().entrySet()) {
+                        statement.setInt(1, requestID);
+                        statement.setString(2, entry.getKey().toString());
+                        statement.setString(3, entry.getValue().toString());
+
+                        statement.executeUpdate();
+                    }
+                }
+
+                if (state.getParams().size() > 0) {
+                    // Saves request parameters
+                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
+                    for (Entry entry : state.getParams().entrySet()) {
+                        statement.setInt(1, requestID);
+                        statement.setString(2, "Param");
+                        statement.setString(3, entry.getKey().toString());
+                        statement.setString(4, entry.getValue().toString());
+
+                        statement.executeUpdate();
+                    }
+                }
+
+                if (!(state.getHttpMethod().equals("GET") || state.getHttpMethod().equals("DELETE"))) {
+                    // Maps the request to its ContentType for faster recovery
+                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequestContentPair").toString()));
+                    statement.setInt(1, requestID);
+                    statement.setString(2, state.getContentType());
+
+                    statement.executeUpdate();
+
+                    // Determines where to fetch the body from, based on the ContentType
+                    switch (state.getContentType()) {
+                        case MediaType.TEXT_PLAIN:
+                        case MediaType.APPLICATION_JSON:
+                        case MediaType.APPLICATION_XML:
+                        case MediaType.TEXT_HTML:
+                        case MediaType.APPLICATION_OCTET_STREAM:
+                            // Saves the body in case of raw content, or the file location in case of binary
+                            statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveBody").toString()));
+                            statement.setInt(1, requestID);
+                            statement.setString(2, state.getBody());
+                            statement.executeUpdate();
+                            break;
+                        case MediaType.APPLICATION_FORM_URLENCODED:
+                            if (state.getStringTuples().size() > 0) {
+                                for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
+                                    // Saves the string tuples
+                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
+                                    statement.setInt(1, requestID);
+                                    statement.setString(2, "String");
+                                    statement.setString(3, entry.getKey());
+                                    statement.setString(4, entry.getValue());
+
+                                    statement.executeUpdate();
+                                }
+                            }
+                            break;
+                        case MediaType.MULTIPART_FORM_DATA:
+                            if (state.getStringTuples().size() > 0) {
+                                for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
+                                    // Saves the string tuples
+                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
+                                    statement.setInt(1, requestID);
+                                    statement.setString(2, "String");
+                                    statement.setString(3, entry.getKey());
+                                    statement.setString(4, entry.getValue());
+
+                                    statement.executeUpdate();
+                                }
+                            }
+
+                            if (state.getFileTuples().size() > 0) {
+                                for (Entry<String, String> entry : state.getFileTuples().entrySet()) {
+                                    // Saves the file tuples
+                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
+                                    statement.setInt(1, requestID);
+                                    statement.setString(2, "File");
+                                    statement.setString(3, entry.getKey());
+                                    statement.setString(4, entry.getValue());
+
+                                    statement.executeUpdate();
+                                }
+                            }
+                            break;
+                    }
+                }
+            } catch (SQLException e) {
+                Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+            }
+        }
     }
 }

@@ -102,5 +102,11 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.21.0.1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>24.1-jre</version>
+        </dependency>
     </dependencies>
 </project>

@@ -16,10 +16,10 @@
 
 package com.rohitawate.everest.util.logging;
 
+import com.rohitawate.everest.util.Services;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class LoggingService {
     private Logger logger;
@@ -27,7 +27,6 @@ public class LoggingService {
     private String message;
     private Exception exception;
     private LocalDateTime time;
-    private ExecutorService executorService;
 
     private SevereLogger severeLogger = new SevereLogger();
     private WarningLogger warningLogger = new WarningLogger();
@@ -36,33 +35,27 @@ public class LoggingService {
     public LoggingService(Level writerLevel) {
         logger = new Logger(writerLevel);
         dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        executorService = Executors.newSingleThreadExecutor();
     }
 
     public void logSevere(String message, Exception exception, LocalDateTime time) {
         setValues(message, exception, time);
-        executorService.execute(severeLogger);
+        Services.singleExecutor.execute(severeLogger);
     }
 
     public void logWarning(String message, Exception exception, LocalDateTime time) {
         setValues(message, exception, time);
-        executorService.execute(warningLogger);
+        Services.singleExecutor.execute(warningLogger);
     }
 
     public void logInfo(String message, LocalDateTime time) {
         setValues(message, null, time);
-        executorService.execute(infoLogger);
+        Services.singleExecutor.execute(infoLogger);
     }
 
     private void setValues(String message, Exception exception, LocalDateTime time) {
         this.message = message;
         this.exception = exception;
         this.time = time;
-    }
-
-    @Override
-    protected void finalize() {
-        executorService.shutdown();
     }
 
     private class SevereLogger implements Runnable {

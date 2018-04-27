@@ -40,6 +40,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.CacheHint;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -55,6 +56,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.Map.Entry;
 
 public class DashboardController implements Initializable {
     @FXML
@@ -78,6 +80,10 @@ public class DashboardController implements Initializable {
     TabPane requestOptionsTab;
     @FXML
     Tab paramsTab, authTab, headersTab, bodyTab;
+    @FXML
+    private Tab visualizerTab;
+    @FXML
+    private ScrollPane visualizer;
 
     private JFXSnackbar snackbar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
@@ -87,6 +93,7 @@ public class DashboardController implements Initializable {
     private HeaderTabController headerTabController;
     private BodyTabController bodyTabController;
     private IntegerProperty paramsCountProperty;
+    private Accordion accordion;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -138,6 +145,8 @@ public class DashboardController implements Initializable {
 
         errorTitle.setText("Oops... That's embarrassing!");
         errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
+
+        setupVisualizer();
     }
 
     @FXML
@@ -320,11 +329,15 @@ public class DashboardController implements Initializable {
                 // Selects only the part preceding the ';', skipping the character encoding
                 type = type.split(";")[0];
 
+                visualizerTab.setDisable(true);
                 switch (type.toLowerCase()) {
                     case "application/json":
                         responseType.setText("JSON");
                         JsonNode node = EverestUtilities.mapper.readTree(responseBody);
                         responseArea.setText(EverestUtilities.mapper.writeValueAsString(node));
+                        accordion.getPanes().clear();
+                        visualizerTab.setDisable(false);
+                        populateVisualizer(accordion, "root", node);
                         break;
                     case "application/xml":
                         responseType.setText("XML");
@@ -348,6 +361,84 @@ public class DashboardController implements Initializable {
             errorLayer.setVisible(true);
             errorTitle.setText("Parsing Error");
             errorDetails.setText("Everest could not parse the response.");
+        }
+    }
+
+    private void setupVisualizer() {
+        accordion = new Accordion();
+        accordion.setCache(true);
+        accordion.setCacheHint(CacheHint.SPEED);
+        visualizer.setContent(accordion);
+    }
+
+    private void populateVisualizer(Accordion rootAccordion, String rootName, JsonNode root) {
+        JsonNode currentNode;
+        VBox container = new VBox();
+        container.setStyle("-fx-padding: 3px 30px");
+        Label valueLabel;
+        TitledPane pane = new TitledPane(rootName, container);
+        Tooltip valueTooltip;
+
+        if (root.isArray()) {
+            Iterator<JsonNode> iterator = root.elements();
+
+            while (iterator.hasNext()) {
+                currentNode = iterator.next();
+
+                if (currentNode.isValueNode()) {
+                    valueLabel = new Label(currentNode.toString());
+                    valueLabel.getStyleClass().add("visualizerValueLabel");
+                    valueLabel.setWrapText(true);
+                    valueTooltip = new Tooltip(currentNode.toString());
+                    valueLabel.setTooltip(valueTooltip);
+
+                    container.getChildren().add(valueLabel);
+                } else if (currentNode.isObject()) {
+                    Accordion arrayAccordion = new Accordion();
+                    container.getChildren().add(arrayAccordion);
+                    populateVisualizer(arrayAccordion, "", currentNode);
+                }
+            }
+            rootAccordion.getPanes().add(pane);
+        } else {
+            Iterator<Entry<String, JsonNode>> iterator = root.fields();
+            Entry<String, JsonNode> currentEntry;
+            HBox valueContainer;
+            Label keyLabel;
+            Tooltip keyTooltip;
+
+            while (iterator.hasNext()) {
+                currentEntry = iterator.next();
+                currentNode = currentEntry.getValue();
+
+                if (currentNode.isValueNode()) {
+                    keyLabel = new Label(currentEntry.getKey() + ": ");
+                    keyLabel.setStyle("-fx-font-weight: bold");
+                    keyLabel.getStyleClass().add("visualizerKeyLabel");
+                    keyTooltip = new Tooltip(currentEntry.getKey());
+                    keyLabel.setTooltip(keyTooltip);
+
+                    valueLabel = new Label(currentNode.toString());
+                    valueLabel.getStyleClass().add("visualizerValueLabel");
+                    valueLabel.setWrapText(true);
+                    valueTooltip = new Tooltip(currentNode.toString());
+                    valueLabel.setTooltip(valueTooltip);
+
+                    valueContainer = new HBox(keyLabel, valueLabel);
+                    container.getChildren().add(valueContainer);
+                } else if (currentNode.isArray() || currentNode.isObject()) {
+                    Accordion arrayAccordion = new Accordion();
+                    container.getChildren().add(arrayAccordion);
+                    populateVisualizer(arrayAccordion, currentEntry.getKey(), currentNode);
+                }
+            }
+            rootAccordion.getPanes().add(pane);
+        }
+
+        if (!rootName.equals("root")) {
+            pane.getStyleClass().add("nonRootTitledPane"); // Special CSS class to set padding for non-root panes only
+        } else {
+            rootAccordion.setExpandedPane(pane);
         }
     }
 
@@ -482,11 +573,11 @@ public class DashboardController implements Initializable {
         httpMethodBox.getSelectionModel().select(dashboardState.getHttpMethod());
 
         if (dashboardState.getHeaders() != null)
-            for (Map.Entry entry : dashboardState.getHeaders().entrySet())
+            for (Entry entry : dashboardState.getHeaders().entrySet())
                 headerTabController.addHeader(entry.getKey().toString(), entry.getValue().toString());
 
         if (dashboardState.getParams() != null)
-            for (Map.Entry entry : dashboardState.getParams().entrySet())
+            for (Entry entry : dashboardState.getParams().entrySet())
                 addParamField(entry.getKey().toString(), entry.getValue().toString());
 
         if (!(httpMethodBox.getValue().equals("GET") || httpMethodBox.getValue().equals("DELETE")))

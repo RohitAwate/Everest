@@ -213,7 +213,7 @@ public class HistoryManager {
     public synchronized List<DashboardState> getHistory() {
         List<DashboardState> history = new ArrayList<>();
         try {
-            // Loads the requests from the last x number of days, x being stored in Settings.showHistoryRange
+            // Loads the requests from the last x number of days, x being Settings.showHistoryRange
             statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRecentRequests").toString()));
             String historyStartDate = LocalDate.now().minusDays(Settings.showHistoryRange).toString();
             statement.setString(1, historyStartDate);

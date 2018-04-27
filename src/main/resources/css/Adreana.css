@@ -76,7 +76,7 @@
 }
 
 .text-area {
-    -fx-font-family: "Liberation Mono";
+    -fx-font-family: "Liberation Mono", monospace;
     -fx-text-fill: #a1a1a1;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
@@ -118,7 +118,7 @@
     -fx-background-color: #505050;
 }
 
-.tab-pane:top .tab-header-area {
+.tab-pane .tab-header-area {
     -fx-padding: 0;
 }
 
@@ -186,7 +186,6 @@
 #bodyTabPane:top .tab-header-area .headers-region .tab:selected:top {
     -fx-background-color: #3d3d3d;
 }
-
 
 .scroll-pane .scroll-bar .thumb {
     -fx-background-color: #808080;
@@ -288,6 +287,66 @@
 
 #rawInputArea {
     -fx-font-size: 15px;
+}
+
+/* Response Visualizer */
+#responseTabPane:bottom .tab-header-area .tab-header-background,
+#responseTabPane:bottom .tab-header-area .headers-region .tab:bottom {
+    -fx-background-color: #282828;
+}
+
+#responseTabPane:bottom .tab-header-area .headers-region .tab:bottom .tab-container .tab-label .text {
+    -fx-fill: white;
+}
+
+#responseTabPane:bottom .tab-header-area .headers-region .tab:hover:bottom {
+    -fx-background-color: purple;
+}
+
+#responseTabPane:bottom .tab-header-area .headers-region .tab:selected:bottom {
+    -fx-background-color: #3d3d3d;
+}
+
+#responseTabPane .tab-content-area,
+#responseTabPane .scroll-pane .viewport {
+    -fx-background-color: #2a2a2a;
+}
+
+.nonRootTitledPane {
+    -fx-padding: 3px 0px;
+}
+
+.titled-pane .title {
+    -fx-font-family: "Liberation Mono", monospace;
+    -fx-background-color: #404040;
+}
+
+.titled-pane .content {
+    -fx-background-color: #282828;
+    -fx-border-width: 0px;
+}
+
+.titled-pane .content {
+    -fx-font-family: "Liberation Mono", monospace;
+    -fx-padding: 3px 0px;
+}
+
+.visualizerKeyLabel {
+    -fx-font-size: 18px;
+    -fx-text-fill: #bababa;
+    -fx-text-alignment: left;
+}
+
+.visualizerValueLabel {
+    -fx-font-size: 18px;
+    -fx-text-fill: #959595;
+    -fx-text-alignment: left;
+}
+
+.titled-pane .title .text,
+.titled-pane .title .arrow-button .arrow {
+    -fx-background-color: #dadada;
+    -fx-fill: #dadada;
 }
 
 /* SnackBar */

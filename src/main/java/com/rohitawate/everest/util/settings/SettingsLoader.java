@@ -59,6 +59,7 @@ public class SettingsLoader implements Runnable {
                 Settings.connectionReadTimeOut = setIntegerSetting(Settings.connectionReadTimeOut, "connectionReadTimeOut");
 
             Settings.theme = EverestUtilities.trimString(setStringSetting(Settings.theme, "theme"));
+            Settings.showHistoryRange = setIntegerSetting(Settings.showHistoryRange, "showHistoryRange");
         } catch (IOException IOE) {
             Services.loggingService.logInfo("Settings file not found. Using defaults", LocalDateTime.now());
         }

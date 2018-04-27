@@ -28,7 +28,7 @@
     <children>
         <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
-             <HBox alignment="CENTER" maxHeight="100.0" prefWidth="100.0" spacing="20.0" VBox.vgrow="ALWAYS">
+             <HBox alignment="CENTER" maxHeight="100.0" minHeight="100.0" spacing="20.0" VBox.vgrow="ALWAYS">
                <children>
                    <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true"
                               HBox.hgrow="ALWAYS">
@@ -76,7 +76,7 @@
             </HBox>
              <SplitPane dividerPositions="0.1" orientation="VERTICAL" VBox.vgrow="ALWAYS">
                  <items>
-                     <AnchorPane maxHeight="250.0">
+                     <AnchorPane maxHeight="300.0">
                          <children>
                              <TabPane fx:id="requestOptionsTab" minHeight="190.0" tabClosingPolicy="UNAVAILABLE"
                                       tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -198,9 +198,25 @@
                                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                          </padding>
                                      </HBox>
-                                     <StackPane VBox.vgrow="ALWAYS">
+                                     <StackPane VBox.vgrow="SOMETIMES">
                                          <children>
-                                             <TextArea fx:id="responseArea" editable="false" wrapText="true"/>
+                                             <TabPane fx:id="responseTabPane" side="BOTTOM" tabMinWidth="100.0">
+                                                 <tabs>
+                                                     <Tab closable="false" text="BODY">
+                                                         <content>
+                                                             <TextArea fx:id="responseArea" editable="false"
+                                                                       wrapText="true"/>
+                                                         </content>
+                                                     </Tab>
+                                                     <Tab fx:id="visualizerTab" closable="false" text="VISUALIZER">
+                                                         <content>
+                                                             <ScrollPane fx:id="visualizer" fitToHeight="true"
+                                                                         fitToWidth="true" hbarPolicy="NEVER"/>
+                                                         </content>
+                                                     </Tab>
+                                                     <Tab closable="false" text="HEADERS"/>
+                                                 </tabs>
+                                             </TabPane>
                                              <VBox fx:id="loadingLayer" alignment="CENTER" visible="false">
                                                  <children>
                                                      <HBox alignment="CENTER">
@@ -228,7 +244,7 @@
                                                      </JFXButton>
                                                  </children>
                                              </VBox>
-                                             <VBox fx:id="promptLayer" alignment="CENTER">
+                                             <VBox fx:id="promptLayer" alignment="CENTER" visible="false">
                                                  <children>
                                                      <Label text="Enter an address, select a method and hit send."
                                                             textFill="WHITE">

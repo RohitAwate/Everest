@@ -260,7 +260,7 @@ public class HomeWindowController implements Initializable {
             objectStream.writeObject(dashboardStates);
             objectStream.close();
             fileStream.close();
-            Services.loggingService.logInfo("Application state saved successfully.", LocalDateTime.now());
+            Services.loggingService.logInfo("Application state was saved successfully.", LocalDateTime.now());
         } catch (IOException e) {
             Services.loggingService.logSevere("Failed to save the application's state.", e, LocalDateTime.now());
         }
@@ -338,7 +338,7 @@ public class HomeWindowController implements Initializable {
 
         for (HistoryItemController controller : historyItemControllers) {
 
-            int relativityIndex = 0;
+            int relativityIndex = controller.getRelativityIndex(searchString);
 
             // Split the string into words and get total relativity index as sum of individual indices.
             String words[] = searchString.split("\\s");

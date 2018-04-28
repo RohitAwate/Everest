@@ -38,7 +38,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.CacheHint;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -92,7 +91,7 @@ public class DashboardController implements Initializable {
     private HeaderTabController headerTabController;
     private BodyTabController bodyTabController;
     private IntegerProperty paramsCountProperty;
-    private Accordion accordion;
+    private TreeView<HBox> treeView;
 
     private GETRequest getRequest;
     private DataDispatchRequest dataRequest;
@@ -355,9 +354,10 @@ public class DashboardController implements Initializable {
                         responseType.setText("JSON");
                         JsonNode node = EverestUtilities.mapper.readTree(responseBody);
                         responseArea.setText(EverestUtilities.mapper.writeValueAsString(node));
-                        accordion.getPanes().clear();
                         visualizerTab.setDisable(false);
-                        populateVisualizer(accordion, "root", node);
+                        TreeItem<HBox> root = new TreeItem<>();
+                        treeView.setRoot(root);
+                        populateVisualizer(root, "root", node);
                         break;
                     case "application/xml":
                         responseType.setText("XML");
@@ -385,18 +385,19 @@ public class DashboardController implements Initializable {
     }
 
     private void setupVisualizer() {
-        accordion = new Accordion();
-        accordion.setCache(true);
-        accordion.setCacheHint(CacheHint.SPEED);
-        visualizer.setContent(accordion);
+        treeView = new TreeView<>();
+        visualizer.setContent(treeView);
     }
 
-    private void populateVisualizer(Accordion rootAccordion, String rootName, JsonNode root) {
+    private void populateVisualizer(TreeItem<HBox> rootItem, String rootName, JsonNode root) {
+        Label rootLabel = new Label(rootName);
+        rootLabel.getStyleClass().addAll("visualizerRootLabel", "visualizerLabel");
+        rootItem.setValue(new HBox(rootLabel));
+
         JsonNode currentNode;
-        VBox container = new VBox();
-        container.setStyle("-fx-padding: 3px 30px");
         Label valueLabel;
-        TitledPane pane = new TitledPane(rootName, container);
+        HBox valueContainer;
+        List<TreeItem<HBox>> items = new LinkedList<>();
         Tooltip valueTooltip;
 
         if (root.isArray()) {
@@ -407,23 +408,22 @@ public class DashboardController implements Initializable {
 
                 if (currentNode.isValueNode()) {
                     valueLabel = new Label(currentNode.toString());
-                    valueLabel.getStyleClass().add("visualizerValueLabel");
+                    valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
                     valueLabel.setWrapText(true);
                     valueTooltip = new Tooltip(currentNode.toString());
                     valueLabel.setTooltip(valueTooltip);
 
-                    container.getChildren().add(valueLabel);
+                    valueContainer = new HBox(valueLabel);
+                    items.add(new TreeItem<>(valueContainer));
                 } else if (currentNode.isObject()) {
-                    Accordion arrayAccordion = new Accordion();
-                    container.getChildren().add(arrayAccordion);
-                    populateVisualizer(arrayAccordion, "", currentNode);
+                    TreeItem<HBox> newRoot = new TreeItem<>();
+                    items.add(newRoot);
+                    populateVisualizer(newRoot, "", currentNode);
                 }
             }
-            rootAccordion.getPanes().add(pane);
         } else {
             Iterator<Entry<String, JsonNode>> iterator = root.fields();
             Entry<String, JsonNode> currentEntry;
-            HBox valueContainer;
             Label keyLabel;
             Tooltip keyTooltip;
 
@@ -433,32 +433,30 @@ public class DashboardController implements Initializable {
 
                 if (currentNode.isValueNode()) {
                     keyLabel = new Label(currentEntry.getKey() + ": ");
-                    keyLabel.setStyle("-fx-font-weight: bold");
-                    keyLabel.getStyleClass().add("visualizerKeyLabel");
+                    keyLabel.getStyleClass().addAll("visualizerKeyLabel", "visualizerLabel");
                     keyTooltip = new Tooltip(currentEntry.getKey());
                     keyLabel.setTooltip(keyTooltip);
 
                     valueLabel = new Label(currentNode.toString());
-                    valueLabel.getStyleClass().add("visualizerValueLabel");
+                    valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
                     valueLabel.setWrapText(true);
                     valueTooltip = new Tooltip(currentNode.toString());
                     valueLabel.setTooltip(valueTooltip);
 
                     valueContainer = new HBox(keyLabel, valueLabel);
-                    container.getChildren().add(valueContainer);
+                    items.add(new TreeItem<>(valueContainer));
                 } else if (currentNode.isArray() || currentNode.isObject()) {
-                    Accordion arrayAccordion = new Accordion();
-                    container.getChildren().add(arrayAccordion);
-                    populateVisualizer(arrayAccordion, currentEntry.getKey(), currentNode);
+                    TreeItem<HBox> newRoot = new TreeItem<>();
+                    items.add(newRoot);
+                    populateVisualizer(newRoot, currentEntry.getKey(), currentNode);
                 }
             }
-            rootAccordion.getPanes().add(pane);
         }
 
-        if (!rootName.equals("root")) {
-            pane.getStyleClass().add("nonRootTitledPane"); // Special CSS class to set padding for non-root panes only
-        } else {
-            rootAccordion.setExpandedPane(pane);
+        rootItem.getChildren().addAll(items);
+
+        if (rootName.equals("root")) {
+            rootItem.setExpanded(true);
         }
     }
 

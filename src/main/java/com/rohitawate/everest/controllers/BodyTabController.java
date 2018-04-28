@@ -44,16 +44,16 @@ public class BodyTabController implements Initializable {
     @FXML
     private TabPane bodyTabPane;
     @FXML
-    private ComboBox<String> rawInputTypeBox;
+    ComboBox<String> rawInputTypeBox;
     @FXML
-    private TextArea rawInputArea;
+    TextArea rawInputArea;
     @FXML
-    private Tab rawTab, binaryTab, formTab, urlTab;
+    Tab rawTab, binaryTab, formTab, urlTab;
     @FXML
-    private TextField filePathField;
+    TextField filePathField;
 
-    private FormDataTabController formDataTabController;
-    private URLTabController urlTabController;
+    FormDataTabController formDataTabController;
+    URLTabController urlTabController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

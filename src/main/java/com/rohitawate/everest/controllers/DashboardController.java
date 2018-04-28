@@ -47,6 +47,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -73,7 +74,7 @@ public class DashboardController implements Initializable {
     private Label statusCode, statusCodeDescription, responseTime,
             responseSize, errorTitle, errorDetails, responseType;
     @FXML
-    private JFXButton sendButton, cancelButton;
+    private JFXButton cancelButton;
     @FXML
     TabPane requestOptionsTab;
     @FXML
@@ -92,6 +93,10 @@ public class DashboardController implements Initializable {
     private BodyTabController bodyTabController;
     private IntegerProperty paramsCountProperty;
     private Accordion accordion;
+
+    private GETRequest getRequest;
+    private DataDispatchRequest dataRequest;
+    private DELETERequest deleteRequest;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -142,7 +147,7 @@ public class DashboardController implements Initializable {
         });
 
         errorTitle.setText("Oops... That's embarrassing!");
-        errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
+        errorDetails.setText("Something went wrong. Try to make another getRequest.\nRestart Everest if that doesn't work.");
 
         setupVisualizer();
     }
@@ -164,7 +169,10 @@ public class DashboardController implements Initializable {
             }
             switch (httpMethodBox.getValue()) {
                 case "GET":
-                    GETRequest getRequest = new GETRequest(addressField.getText());
+                    if (getRequest == null)
+                        getRequest = new GETRequest();
+
+                    getRequest.setTarget(addressField.getText());
                     getRequest.setHeaders(headerTabController.getHeaders());
 
                     requestManager = Services.pool.get();
@@ -174,24 +182,61 @@ public class DashboardController implements Initializable {
                     configureRequestManager();
                     requestManager.start();
                     break;
-                // DataDispatchRequestManager will generate appropriate request based on the type.
+                // DataDispatchRequestManager will generate appropriate getRequest based on the type.
                 case "POST":
                 case "PUT":
                 case "PATCH":
-                    DataDispatchRequest dataDispatchRequest =
-                            bodyTabController.getBasicRequest(httpMethodBox.getValue());
-                    dataDispatchRequest.setTarget(addressField.getText());
-                    dataDispatchRequest.setHeaders(headerTabController.getHeaders());
+                    if (dataRequest == null)
+                        dataRequest = new DataDispatchRequest();
+
+                    dataRequest.setRequestType(httpMethodBox.getValue());
+                    dataRequest.setTarget(addressField.getText());
+                    dataRequest.setHeaders(headerTabController.getHeaders());
+
+                    if (bodyTabController.rawTab.isSelected()) {
+                        String contentType;
+                        switch (bodyTabController.rawInputTypeBox.getValue()) {
+                            case "PLAIN TEXT":
+                                contentType = MediaType.TEXT_PLAIN;
+                                break;
+                            case "JSON":
+                                contentType = MediaType.APPLICATION_JSON;
+                                break;
+                            case "XML":
+                                contentType = MediaType.APPLICATION_XML;
+                                break;
+                            case "HTML":
+                                contentType = MediaType.TEXT_HTML;
+                                break;
+                            default:
+                                contentType = MediaType.TEXT_PLAIN;
+                        }
+                        dataRequest.setContentType(contentType);
+                        dataRequest.setBody(bodyTabController.rawInputArea.getText());
+                    } else if (bodyTabController.formTab.isSelected()) {
+                        dataRequest.setStringTuples(bodyTabController.formDataTabController.getStringTuples());
+                        dataRequest.setFileTuples(bodyTabController.formDataTabController.getFileTuples());
+                        dataRequest.setContentType(MediaType.MULTIPART_FORM_DATA);
+                    } else if (bodyTabController.binaryTab.isSelected()) {
+                        dataRequest.setBody(bodyTabController.filePathField.getText());
+                        dataRequest.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+                    } else if (bodyTabController.urlTab.isSelected()) {
+                        dataRequest.setStringTuples(bodyTabController.urlTabController.getStringTuples());
+                        dataRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                    }
 
                     requestManager = Services.pool.data();
-                    requestManager.setRequest(dataDispatchRequest);
+                    requestManager.setRequest(dataRequest);
 
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     configureRequestManager();
                     requestManager.start();
                     break;
                 case "DELETE":
-                    DELETERequest deleteRequest = new DELETERequest(addressField.getText());
+                    if (deleteRequest == null)
+                        deleteRequest = new DELETERequest();
+
+                    deleteRequest.setTarget(addressField.getText());
                     deleteRequest.setHeaders(headerTabController.getHeaders());
 
                     requestManager = Services.pool.delete();
@@ -212,7 +257,7 @@ public class DashboardController implements Initializable {
             Services.loggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
             errorLayer.setVisible(true);
             errorTitle.setText("Oops... That's embarrassing!");
-            errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
+            errorDetails.setText("Something went wrong. Try to make another getRequest.\nRestart Everest if that doesn't work.");
         }
     }
 
@@ -228,7 +273,7 @@ public class DashboardController implements Initializable {
         promptLayer.setVisible(false);
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
-        Services.loggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
+        Services.loggingService.logWarning(httpMethodBox.getValue() + " getRequest could not be processed.", exception, LocalDateTime.now());
 
         if (throwable.getClass() == UnreliableResponseException.class) {
             UnreliableResponseException URE = (UnreliableResponseException) throwable;
@@ -249,7 +294,7 @@ public class DashboardController implements Initializable {
         if (requestManager.getClass() == DataDispatchRequestManager.class) {
             if (throwable.getCause() != null && throwable.getCause().getClass() == IllegalArgumentException.class) {
                 errorTitle.setText("Did you forget something?");
-                errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " request.");
+                errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " getRequest.");
             } else if (throwable.getClass() == FileNotFoundException.class) {
                 errorTitle.setText("File(s) not found:");
                 errorDetails.setText(throwable.getMessage());

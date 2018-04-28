@@ -71,4 +71,8 @@ public class DataDispatchRequest extends EverestRequest implements Serializable 
     public String getRequestType() {
         return requestType;
     }
+
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
+    }
 }

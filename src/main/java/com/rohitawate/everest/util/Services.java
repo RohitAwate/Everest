@@ -18,6 +18,7 @@ package com.rohitawate.everest.util;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.rohitawate.everest.controllers.HomeWindowController;
+import com.rohitawate.everest.requestmanager.RequestManagersPool;
 import com.rohitawate.everest.util.history.HistoryManager;
 import com.rohitawate.everest.util.logging.Level;
 import com.rohitawate.everest.util.logging.LoggingService;
@@ -30,12 +31,14 @@ public class Services {
     public static LoggingService loggingService;
     public static HomeWindowController homeWindowController;
     public static Executor singleExecutor;
+    public static RequestManagersPool pool;
 
     public static void start() {
         startServicesThread = new Thread(() -> {
             loggingService = new LoggingService(Level.INFO);
             historyManager = new HistoryManager();
             singleExecutor = MoreExecutors.directExecutor();
+            pool = new RequestManagersPool();
         });
 
         startServicesThread.start();

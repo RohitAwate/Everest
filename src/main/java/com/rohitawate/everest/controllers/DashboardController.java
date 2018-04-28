@@ -25,9 +25,7 @@ import com.rohitawate.everest.models.requests.DELETERequest;
 import com.rohitawate.everest.models.requests.DataDispatchRequest;
 import com.rohitawate.everest.models.requests.GETRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
-import com.rohitawate.everest.requestmanager.DELETERequestManager;
 import com.rohitawate.everest.requestmanager.DataDispatchRequestManager;
-import com.rohitawate.everest.requestmanager.GETRequestManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import com.rohitawate.everest.util.EverestUtilities;
 import com.rohitawate.everest.util.Services;
@@ -169,18 +167,8 @@ public class DashboardController implements Initializable {
                     GETRequest getRequest = new GETRequest(addressField.getText());
                     getRequest.setHeaders(headerTabController.getHeaders());
 
-                    /*
-                        Creates a new instance if its the first request of that session or
-                        the HTTP method type was changed. Also checks if a request is already being processed.
-                     */
-                    if (requestManager == null || requestManager.getClass() != GETRequestManager.class)
-                        requestManager = new GETRequestManager(getRequest);
-                    else if (requestManager.isRunning()) {
-                        snackbar.show("Please wait while the current request is processed.", 3000);
-                        return;
-                    } else {
-                        requestManager.setRequest(getRequest);
-                    }
+                    requestManager = Services.pool.get();
+                    requestManager.setRequest(getRequest);
 
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     configureRequestManager();
@@ -195,14 +183,8 @@ public class DashboardController implements Initializable {
                     dataDispatchRequest.setTarget(addressField.getText());
                     dataDispatchRequest.setHeaders(headerTabController.getHeaders());
 
-                    if (requestManager == null || requestManager.getClass() != DataDispatchRequestManager.class)
-                        requestManager = new DataDispatchRequestManager(dataDispatchRequest);
-                    else if (requestManager.isRunning()) {
-                        snackbar.show("Please wait while the current request is processed.", 3000);
-                        return;
-                    } else {
-                        requestManager.setRequest(dataDispatchRequest);
-                    }
+                    requestManager = Services.pool.data();
+                    requestManager.setRequest(dataDispatchRequest);
 
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     configureRequestManager();
@@ -212,16 +194,9 @@ public class DashboardController implements Initializable {
                     DELETERequest deleteRequest = new DELETERequest(addressField.getText());
                     deleteRequest.setHeaders(headerTabController.getHeaders());
 
-                    if (requestManager == null || requestManager.getClass() != DELETERequestManager.class)
-                        requestManager = new DELETERequestManager(deleteRequest);
-                    else if (requestManager.isRunning()) {
-                        snackbar.show("Please wait while the current request is processed.", 3000);
-                        return;
-                    } else {
-                        requestManager.setRequest(deleteRequest);
-                    }
-
+                    requestManager = Services.pool.delete();
                     requestManager.setRequest(deleteRequest);
+
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     configureRequestManager();
                     requestManager.start();

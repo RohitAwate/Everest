@@ -17,7 +17,6 @@
 package com.rohitawate.everest.requestmanager;
 
 import com.rohitawate.everest.models.requests.DataDispatchRequest;
-import com.rohitawate.everest.models.requests.EverestRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import javafx.concurrent.Task;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -42,8 +41,8 @@ public class DataDispatchRequestManager extends RequestManager {
     private DataDispatchRequest dataDispatchRequest;
     private String requestType;
 
-    public DataDispatchRequestManager(EverestRequest request) {
-        super(request);
+    DataDispatchRequestManager() {
+
     }
 
     @Override
@@ -55,9 +54,9 @@ public class DataDispatchRequestManager extends RequestManager {
                 requestType = dataDispatchRequest.getRequestType();
 
                 Invocation invocation = appendBody();
-                long initialTime = System.currentTimeMillis();
+                initialTime = System.currentTimeMillis();
                 Response serverResponse = invocation.invoke();
-                response.setTime(initialTime, System.currentTimeMillis());
+                finalTime = System.currentTimeMillis();
 
                 processServerResponse(serverResponse);
 

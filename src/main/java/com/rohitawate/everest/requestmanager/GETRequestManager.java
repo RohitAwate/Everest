@@ -16,7 +16,6 @@
 
 package com.rohitawate.everest.requestmanager;
 
-import com.rohitawate.everest.models.requests.EverestRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import javafx.concurrent.Task;
 
@@ -24,8 +23,8 @@ import javax.ws.rs.core.Response;
 
 public class GETRequestManager extends RequestManager {
 
-    public GETRequestManager(EverestRequest request) {
-        super(request);
+    GETRequestManager() {
+
     }
 
     @Override
@@ -33,9 +32,9 @@ public class GETRequestManager extends RequestManager {
         return new Task<EverestResponse>() {
             @Override
             protected EverestResponse call() throws Exception {
-                long initialTime = System.currentTimeMillis();
+                initialTime = System.currentTimeMillis();
                 Response serverResponse = requestBuilder.get();
-                response.setTime(initialTime, System.currentTimeMillis());
+                finalTime = System.currentTimeMillis();
 
                 processServerResponse(serverResponse);
 

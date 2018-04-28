@@ -34,11 +34,19 @@ import java.util.Map;
 
 public abstract class RequestManager extends Service<EverestResponse> {
     private final Client client;
+    long initialTime;
+    long finalTime;
+
     EverestRequest request;
     EverestResponse response;
     Builder requestBuilder;
 
-    RequestManager(EverestRequest request) {
+    RequestManager() {
+        this.client = initClient();
+    }
+
+    private Client initClient() {
+        Client client;
         client = ClientBuilder.newBuilder()
                 .register(MultiPartFeature.class)
                 .build();
@@ -48,9 +56,7 @@ public abstract class RequestManager extends Service<EverestResponse> {
             client.property(ClientProperties.CONNECT_TIMEOUT, Settings.connectionTimeOut);
         if (Settings.connectionReadTimeOutEnable)
             client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
-
-        response = new EverestResponse();
-        setRequest(request);
+        return client;
     }
 
     public void setRequest(EverestRequest request) {
@@ -80,7 +86,9 @@ public abstract class RequestManager extends Service<EverestResponse> {
         }
 
         String responseBody = serverResponse.readEntity(String.class);
+        response = new EverestResponse();
 
+        response.setTime(initialTime, finalTime);
         response.setBody(responseBody);
         response.setMediaType(serverResponse.getMediaType());
         response.setStatusCode(serverResponse.getStatus());

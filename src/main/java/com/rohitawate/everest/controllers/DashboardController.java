@@ -53,8 +53,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
     @FXML
@@ -81,7 +84,7 @@ public class DashboardController implements Initializable {
     @FXML
     private Tab visualizerTab;
     @FXML
-    private ScrollPane visualizer;
+    private ScrollPane scrollPane;
 
     private JFXSnackbar snackbar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
@@ -91,7 +94,7 @@ public class DashboardController implements Initializable {
     private HeaderTabController headerTabController;
     private BodyTabController bodyTabController;
     private IntegerProperty paramsCountProperty;
-    private TreeView<HBox> treeView;
+    private Visualizer visualizer;
 
     private GETRequest getRequest;
     private DataDispatchRequest dataRequest;
@@ -148,11 +151,17 @@ public class DashboardController implements Initializable {
         errorTitle.setText("Oops... That's embarrassing!");
         errorDetails.setText("Something went wrong. Try to make another getRequest.\nRestart Everest if that doesn't work.");
 
-        setupVisualizer();
+        visualizer = new Visualizer();
+        scrollPane.setContent(visualizer);
     }
 
     @FXML
     void sendRequest() {
+        if (requestManager != null && requestManager.isRunning()) {
+            snackbar.show("Please wait while the current request is processed.", 5000);
+            return;
+        }
+
         promptLayer.setVisible(false);
         if (responseBox.getChildren().size() == 2) {
             responseBox.getChildren().remove(0);
@@ -356,8 +365,8 @@ public class DashboardController implements Initializable {
                         responseArea.setText(EverestUtilities.mapper.writeValueAsString(node));
                         visualizerTab.setDisable(false);
                         TreeItem<HBox> root = new TreeItem<>();
-                        treeView.setRoot(root);
-                        populateVisualizer(root, "root", node);
+                        visualizer.setRoot(root);
+                        visualizer.populate(root, "root", node);
                         break;
                     case "application/xml":
                         responseType.setText("XML");
@@ -381,82 +390,6 @@ public class DashboardController implements Initializable {
             errorLayer.setVisible(true);
             errorTitle.setText("Parsing Error");
             errorDetails.setText("Everest could not parse the response.");
-        }
-    }
-
-    private void setupVisualizer() {
-        treeView = new TreeView<>();
-        visualizer.setContent(treeView);
-    }
-
-    private void populateVisualizer(TreeItem<HBox> rootItem, String rootName, JsonNode root) {
-        Label rootLabel = new Label(rootName);
-        rootLabel.getStyleClass().addAll("visualizerRootLabel", "visualizerLabel");
-        rootItem.setValue(new HBox(rootLabel));
-
-        JsonNode currentNode;
-        Label valueLabel;
-        HBox valueContainer;
-        List<TreeItem<HBox>> items = new LinkedList<>();
-        Tooltip valueTooltip;
-
-        if (root.isArray()) {
-            Iterator<JsonNode> iterator = root.elements();
-
-            while (iterator.hasNext()) {
-                currentNode = iterator.next();
-
-                if (currentNode.isValueNode()) {
-                    valueLabel = new Label(currentNode.toString());
-                    valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
-                    valueLabel.setWrapText(true);
-                    valueTooltip = new Tooltip(currentNode.toString());
-                    valueLabel.setTooltip(valueTooltip);
-
-                    valueContainer = new HBox(valueLabel);
-                    items.add(new TreeItem<>(valueContainer));
-                } else if (currentNode.isObject()) {
-                    TreeItem<HBox> newRoot = new TreeItem<>();
-                    items.add(newRoot);
-                    populateVisualizer(newRoot, "", currentNode);
-                }
-            }
-        } else {
-            Iterator<Entry<String, JsonNode>> iterator = root.fields();
-            Entry<String, JsonNode> currentEntry;
-            Label keyLabel;
-            Tooltip keyTooltip;
-
-            while (iterator.hasNext()) {
-                currentEntry = iterator.next();
-                currentNode = currentEntry.getValue();
-
-                if (currentNode.isValueNode()) {
-                    keyLabel = new Label(currentEntry.getKey() + ": ");
-                    keyLabel.getStyleClass().addAll("visualizerKeyLabel", "visualizerLabel");
-                    keyTooltip = new Tooltip(currentEntry.getKey());
-                    keyLabel.setTooltip(keyTooltip);
-
-                    valueLabel = new Label(currentNode.toString());
-                    valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
-                    valueLabel.setWrapText(true);
-                    valueTooltip = new Tooltip(currentNode.toString());
-                    valueLabel.setTooltip(valueTooltip);
-
-                    valueContainer = new HBox(keyLabel, valueLabel);
-                    items.add(new TreeItem<>(valueContainer));
-                } else if (currentNode.isArray() || currentNode.isObject()) {
-                    TreeItem<HBox> newRoot = new TreeItem<>();
-                    items.add(newRoot);
-                    populateVisualizer(newRoot, currentEntry.getKey(), currentNode);
-                }
-            }
-        }
-
-        rootItem.getChildren().addAll(items);
-
-        if (rootName.equals("root")) {
-            rootItem.setExpanded(true);
         }
     }
 

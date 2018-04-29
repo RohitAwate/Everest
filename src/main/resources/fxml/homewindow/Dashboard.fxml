@@ -210,7 +210,7 @@
                                                      </Tab>
                                                      <Tab fx:id="visualizerTab" closable="false" text="VISUALIZER">
                                                          <content>
-                                                             <ScrollPane fx:id="visualizer" fitToHeight="true"
+                                                             <ScrollPane fx:id="scrollPane" fitToHeight="true"
                                                                          fitToWidth="true" hbarPolicy="NEVER"/>
                                                          </content>
                                                      </Tab>

@@ -317,8 +317,8 @@
 }
 
 .visualizerRootLabel {
-    -fx-font-size: 19px;
-    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-text-fill: #dedede;
     -fx-font-weight: bold;
 }
 
@@ -336,11 +336,15 @@
 /* Visualizer tree */
 .tree-view {
     -fx-background-color: #353535;
-    -fx-padding: 0px;
 }
 
 .tree-cell .tree-disclosure-node .arrow {
     -fx-background-color: orangered;
+}
+
+.tree-cell:selected .tree-disclosure-node .arrow,
+.tree-cell:focused .tree-disclosure-node .arrow {
+    -fx-background-color: white;
 }
 
 .tree-cell {
@@ -348,10 +352,17 @@
     -fx-border-width: 0px;
 }
 
-.tree-cell:selected,
-.tree-cell:expanded,
-.tree-cell:focused {
+.tree-cell:expanded {
     -fx-background-color: #454545;
+}
+
+.tree-cell:selected,
+.tree-cell:focused {
+    -fx-background-color: cornflowerblue;
+}
+
+.tree-cell:selected .label {
+    -fx-text-fill: white;
 }
 
 .tree-view .scroll-bar:horizontal .increment-arrow,

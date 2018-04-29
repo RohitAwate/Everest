@@ -76,15 +76,13 @@ public class DashboardController implements Initializable {
     private Label statusCode, statusCodeDescription, responseTime,
             responseSize, errorTitle, errorDetails, responseType;
     @FXML
-    private JFXButton cancelButton;
+    private JFXButton cancelButton, copyBodyButton;
     @FXML
     TabPane requestOptionsTab;
     @FXML
     Tab paramsTab, authTab, headersTab, bodyTab;
     @FXML
-    private Tab visualizerTab;
-    @FXML
-    private ScrollPane scrollPane;
+    private Tab visualizerTab, responseHeadersTab;
 
     private JFXSnackbar snackbar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
@@ -95,6 +93,7 @@ public class DashboardController implements Initializable {
     private BodyTabController bodyTabController;
     private IntegerProperty paramsCountProperty;
     private Visualizer visualizer;
+    private ResponseHeadersViewer responseHeadersViewer;
 
     private GETRequest getRequest;
     private DataDispatchRequest dataRequest;
@@ -148,11 +147,21 @@ public class DashboardController implements Initializable {
             }
         });
 
+        copyBodyButton.setOnAction(e -> {
+            responseArea.selectAll();
+            responseArea.copy();
+            responseArea.deselect();
+            snackbar.show("Request body copied to clipboard.", 5000);
+        });
+
         errorTitle.setText("Oops... That's embarrassing!");
         errorDetails.setText("Something went wrong. Try to make another getRequest.\nRestart Everest if that doesn't work.");
 
         visualizer = new Visualizer();
-        scrollPane.setContent(visualizer);
+        visualizerTab.setContent(visualizer);
+
+        responseHeadersViewer = new ResponseHeadersViewer();
+        responseHeadersTab.setContent(responseHeadersViewer);
     }
 
     @FXML
@@ -321,7 +330,7 @@ public class DashboardController implements Initializable {
     }
 
     private void onSucceeded() {
-        updateDashboard(requestManager.getValue());
+        displayResponse(requestManager.getValue());
         errorLayer.setVisible(false);
         loadingLayer.setVisible(false);
         requestManager.reset();
@@ -333,13 +342,14 @@ public class DashboardController implements Initializable {
         loadingLayer.setVisible(true);
     }
 
-    private void updateDashboard(EverestResponse response) {
+    private void displayResponse(EverestResponse response) {
         prettifyResponseBody(response);
         responseBox.getChildren().add(0, responseDetails);
         statusCode.setText(Integer.toString(response.getStatusCode()));
         statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
         responseTime.setText(Long.toString(response.getTime()) + " ms");
         responseSize.setText(Integer.toString(response.getSize()) + " B");
+        responseHeadersViewer.populate(response);
     }
 
     private void prettifyResponseBody(EverestResponse response) {
@@ -364,9 +374,7 @@ public class DashboardController implements Initializable {
                         JsonNode node = EverestUtilities.mapper.readTree(responseBody);
                         responseArea.setText(EverestUtilities.mapper.writeValueAsString(node));
                         visualizerTab.setDisable(false);
-                        TreeItem<HBox> root = new TreeItem<>();
-                        visualizer.setRoot(root);
-                        visualizer.populate(root, "root", node);
+                        visualizer.populate(node);
                         break;
                     case "application/xml":
                         responseType.setText("XML");

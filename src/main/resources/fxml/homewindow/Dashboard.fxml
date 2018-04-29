@@ -181,6 +181,16 @@
                                                      <Insets/>
                                                  </HBox.margin>
                                              </Label>
+                                             <JFXButton fx:id="copyBodyButton" textFill="WHITE">
+                                                 <graphic>
+                                                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true"
+                                                                preserveRatio="true">
+                                                         <image>
+                                                             <Image url="@../../assets/Copy.png"/>
+                                                         </image>
+                                                     </ImageView>
+                                                 </graphic>
+                                             </JFXButton>
                                              <JFXButton fx:id="clearResponseAreaButton" buttonType="RAISED" onAction="#clearResponseArea" ripplerFill="WHITE" text=" CLEAR" textFill="WHITE" HBox.hgrow="ALWAYS">
                                                  <graphic>
                                                      <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
@@ -208,13 +218,8 @@
                                                                        wrapText="true"/>
                                                          </content>
                                                      </Tab>
-                                                     <Tab fx:id="visualizerTab" closable="false" text="VISUALIZER">
-                                                         <content>
-                                                             <ScrollPane fx:id="scrollPane" fitToHeight="true"
-                                                                         fitToWidth="true" hbarPolicy="NEVER"/>
-                                                         </content>
-                                                     </Tab>
-                                                     <Tab closable="false" text="HEADERS"/>
+                                                     <Tab fx:id="visualizerTab" closable="false" text="VISUALIZER"/>
+                                                     <Tab fx:id="responseHeadersTab" closable="false" text="HEADERS"/>
                                                  </tabs>
                                              </TabPane>
                                              <VBox fx:id="loadingLayer" alignment="CENTER" visible="false">

@@ -88,6 +88,7 @@ public abstract class RequestManager extends Service<EverestResponse> {
         String responseBody = serverResponse.readEntity(String.class);
         response = new EverestResponse();
 
+        response.setHeaders(serverResponse.getStringHeaders());
         response.setTime(initialTime, finalTime);
         response.setBody(responseBody);
         response.setMediaType(serverResponse.getMediaType());

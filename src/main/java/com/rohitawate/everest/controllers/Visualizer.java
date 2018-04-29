@@ -17,10 +17,7 @@
 package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
 import java.util.Iterator;
@@ -28,12 +25,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-class Visualizer extends TreeView<HBox> {
+class Visualizer extends ScrollPane {
+    private TreeView<HBox> visualizer;
+
     Visualizer() {
-        this.setShowRoot(false);
+        this.visualizer = new TreeView<>();
+        this.visualizer.setShowRoot(false);
+        this.setContent(this.visualizer);
+
+        this.setFitToHeight(true);
+        this.setFitToWidth(true);
     }
 
-    void populate(TreeItem<HBox> rootItem, String rootName, JsonNode root) {
+    void populate(JsonNode node) {
+        this.populate(new TreeItem<>(), "root", node);
+    }
+
+    private void populate(TreeItem<HBox> rootItem, String rootName, JsonNode root) {
+        if (rootName.equals("root")) {
+            this.visualizer.setRoot(rootItem);
+        }
+
         Label rootLabel = new Label(rootName);
         rootLabel.getStyleClass().addAll("visualizerRootLabel", "visualizerLabel");
         rootItem.setValue(new HBox(rootLabel));

@@ -71,6 +71,10 @@
     -fx-background-color: #1b1b1b;
 }
 
+#copyBodyButton {
+    -fx-background-color: transparent;
+}
+
 #clearResponseAreaButton {
     -fx-background-color: #822f2f;
 }
@@ -317,19 +321,19 @@
 }
 
 .visualizerRootLabel {
-    -fx-font-size: 18px;
+    -fx-font-size: 17px;
     -fx-text-fill: #dedede;
     -fx-font-weight: bold;
 }
 
 .visualizerKeyLabel {
-    -fx-font-size: 18px;
+    -fx-font-size: 17px;
     -fx-text-fill: #bababa;
     -fx-font-weight: bold;
 }
 
 .visualizerValueLabel {
-    -fx-font-size: 18px;
+    -fx-font-size: 16px;
     -fx-text-fill: #959595;
 }
 

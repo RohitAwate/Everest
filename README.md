@@ -1,7 +1,5 @@
 ![everestheader](https://user-images.githubusercontent.com/23148259/39124644-c886b47a-4719-11e8-953c-f079b3edb664.png)
 
-----
-
 Everest _(formerly RESTaurant)_ is an upcoming REST API testing client written in JavaFX.
 
 ![idle](https://user-images.githubusercontent.com/23148259/39201973-416978a6-480e-11e8-8f94-ddd656ea8784.PNG)
@@ -17,7 +15,7 @@ _Everest running on Windows 10._
 - Being a Java application, Everest is inherently **cross-platform**. It will run anywhere there's a JVM.
 - Everest is powered by **Jersey**, the robust and powerful Java library to build and consume RESTful web services.
 
-![get](https://user-images.githubusercontent.com/23148259/39201412-9cf453c8-480c-11e8-9fd3-da548c2f86f6.PNG)
+![get](https://user-images.githubusercontent.com/23148259/39441570-030b27b8-4ccc-11e8-8ae7-688398073f7a.PNG)
 _Making a GET request with Everest._
 
 
@@ -30,6 +28,7 @@ _Making a GET request with Everest._
 - **History tab!** All the requests you ever made are now shown to the left of the app. 🕒
 - **Searching through your request history**. Everest searches not just on the basis of the request target but all other parameters that form the request including headers, the request body, query parameters and even file names. It will intelligently rank the results on the basis of their relevance. 🔎
 - Everest now maintains its state between sessions so you don't lose your work. 🧠
+- **Visualizer** You can now view JSON responses just as you would your file tree. Support for XML coming up next!
 
 ![search](https://user-images.githubusercontent.com/23148259/39201474-cc4e6e2e-480c-11e8-8770-7fc4401a2435.PNG)
 
@@ -44,8 +43,8 @@ _Everest's search feature in action._
 - **Text prediction** for the address bar based on your history.
 - _Postman_ has this really cool feature wherein it can create a **mock server**. I'll do that once the core features are implemented and if it doesn't severely impact performance.
 
-![error](https://user-images.githubusercontent.com/23148259/39202004-55cf219c-480e-11e8-80b1-41d819a5aebb.PNG)
-_Everest's simple and precise error messages help you debug faster._
+![vis](https://user-images.githubusercontent.com/23148259/39441746-8ca31756-4ccc-11e8-993f-f3ec3519d627.PNG)
+_Everest's convenient Visualizer makes reading response bodies a breeze!_
 
 # Keymap
 | Shortcut     | Task                     |

@@ -1,0 +1,10 @@
+language: java
+sudo: true
+
+script: mvn clean package
+
+deploy:
+  provider: releases
+  api_key:
+    secure: yep
+  file: target/Everest-Alpha-1.0.jar

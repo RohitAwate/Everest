@@ -151,7 +151,7 @@ public class DashboardController implements Initializable {
             responseArea.selectAll();
             responseArea.copy();
             responseArea.deselect();
-            snackbar.show("Request body copied to clipboard.", 5000);
+            snackbar.show("Response body copied to clipboard.", 5000);
         });
 
         errorTitle.setText("Oops... That's embarrassing!");

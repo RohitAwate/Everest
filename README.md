@@ -2,6 +2,9 @@
 
 Everest _(formerly RESTaurant)_ is an upcoming REST API testing client written in JavaFX.
 
+[![Build Status](https://travis-ci.org/RohitAwate/Everest.svg?branch=master)](https://travis-ci.org/RohitAwate/Everest)
+
+
 ![idle](https://user-images.githubusercontent.com/23148259/39201973-416978a6-480e-11e8-8f94-ddd656ea8784.PNG)
 _Everest running on Windows 10._
 # Why Everest?

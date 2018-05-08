@@ -51,11 +51,14 @@ public abstract class RequestManager extends Service<EverestResponse> {
                 .register(MultiPartFeature.class)
                 .build();
 
+        // Required for making PATCH requests through Jersey
         client.property(HttpUrlConnectorProvider.SET_METHOD_WORKAROUND, true);
+
         if (Settings.connectionTimeOutEnable)
             client.property(ClientProperties.CONNECT_TIMEOUT, Settings.connectionTimeOut);
         if (Settings.connectionReadTimeOutEnable)
             client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
+
         return client;
     }
 

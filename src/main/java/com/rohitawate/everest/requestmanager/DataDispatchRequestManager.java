@@ -72,6 +72,11 @@ public class DataDispatchRequestManager extends RequestManager {
      * @return invocation object
      */
     private Invocation appendBody() throws Exception {
+        /*
+            Checks if a custom mime-type is mentioned in the headers.
+            If present, it will override the logical Content-Type.
+         */
+        String overriddenContentType = request.getHeaders().get("Content-Type");
         Invocation invocation = null;
         Map.Entry<String, String> mapEntry;
 
@@ -79,6 +84,7 @@ public class DataDispatchRequestManager extends RequestManager {
             case MediaType.MULTIPART_FORM_DATA:
                 FormDataMultiPart formData = new FormDataMultiPart();
 
+                // Adding the string tuples to the request
                 HashMap<String, String> pairs = dataDispatchRequest.getStringTuples();
                 for (Map.Entry entry : pairs.entrySet()) {
                     mapEntry = (Map.Entry) entry;
@@ -88,8 +94,10 @@ public class DataDispatchRequestManager extends RequestManager {
                 String filePath;
                 File file;
                 boolean fileException = false;
-                StringBuilder fileExceptionMessage = new StringBuilder();
+                String fileExceptionMessage = null;
                 pairs = dataDispatchRequest.getFileTuples();
+
+                // Adding the file tuples to the request
                 for (Map.Entry entry : pairs.entrySet()) {
                     mapEntry = (Map.Entry) entry;
                     filePath = mapEntry.getValue();
@@ -100,14 +108,13 @@ public class DataDispatchRequestManager extends RequestManager {
                                 file, MediaType.APPLICATION_OCTET_STREAM_TYPE));
                     else {
                         fileException = true;
-                        fileExceptionMessage.append(" - ");
-                        fileExceptionMessage.append(filePath);
-                        fileExceptionMessage.append("\n");
+                        // For pretty-printing FileNotFoundException to the UI
+                        fileExceptionMessage = " - " + filePath + "\n";
                     }
                 }
 
                 if (fileException) {
-                    throw new FileNotFoundException(fileExceptionMessage.toString());
+                    throw new FileNotFoundException(fileExceptionMessage);
                 }
 
                 formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
@@ -118,6 +125,8 @@ public class DataDispatchRequestManager extends RequestManager {
                     invocation = requestBuilder.buildPut(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
                 break;
             case MediaType.APPLICATION_OCTET_STREAM:
+                if (overriddenContentType == null)
+                    overriddenContentType = MediaType.APPLICATION_OCTET_STREAM;
                 filePath = dataDispatchRequest.getBody();
 
                 File check = new File(filePath);
@@ -129,11 +138,14 @@ public class DataDispatchRequestManager extends RequestManager {
                 FileInputStream stream = new FileInputStream(filePath);
 
                 if (requestType.equals("POST"))
-                    invocation = requestBuilder.buildPost(Entity.entity(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                    invocation = requestBuilder.buildPost(Entity.entity(stream, overriddenContentType));
                 else
-                    invocation = requestBuilder.buildPut(Entity.entity(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                    invocation = requestBuilder.buildPut(Entity.entity(stream, overriddenContentType));
                 break;
             case MediaType.APPLICATION_FORM_URLENCODED:
+                if (overriddenContentType == null)
+                    overriddenContentType = MediaType.APPLICATION_FORM_URLENCODED;
+
                 Form form = new Form();
 
                 for (Map.Entry entry : dataDispatchRequest.getStringTuples().entrySet()) {
@@ -142,24 +154,27 @@ public class DataDispatchRequestManager extends RequestManager {
                 }
 
                 if (requestType.equals("POST"))
-                    invocation = requestBuilder.buildPost(Entity.form(form));
+                    invocation = requestBuilder.buildPost(Entity.entity(form, overriddenContentType));
                 else
-                    invocation = requestBuilder.buildPut(Entity.form(form));
+                    invocation = requestBuilder.buildPut(Entity.entity(form, overriddenContentType));
                 break;
             default:
                 // Handles raw data types (JSON, Plain text, XML, HTML)
+                String originalContentType = dataDispatchRequest.getContentType();
+                if (overriddenContentType == null)
+                    overriddenContentType = originalContentType;
                 switch (requestType) {
                     case "POST":
                         invocation = requestBuilder
-                                .buildPost(Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
+                                .buildPost(Entity.entity(dataDispatchRequest.getBody(), overriddenContentType));
                         break;
                     case "PUT":
                         invocation = requestBuilder
-                                .buildPut(Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
+                                .buildPut(Entity.entity(dataDispatchRequest.getBody(), overriddenContentType));
                         break;
                     case "PATCH":
                         invocation = requestBuilder
-                                .build("PATCH", Entity.entity(dataDispatchRequest.getBody(), dataDispatchRequest.getContentType()));
+                                .build("PATCH", Entity.entity(dataDispatchRequest.getBody(), overriddenContentType));
                         break;
                 }
         }

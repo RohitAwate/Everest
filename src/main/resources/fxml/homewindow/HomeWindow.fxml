@@ -22,12 +22,12 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<StackPane fx:id="homeWindowSP" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
+<StackPane fx:id="homeWindowSP" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.HomeWindowController">
     <children>
         <SplitPane fx:id="splitPane" dividerPositions="0.3">
             <items>
-                <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="500.0" minWidth="400.0"
+                <VBox fx:id="historyPane" alignment="TOP_CENTER" maxWidth="450.0" minWidth="400.0"
                       SplitPane.resizableWithParent="false">
                     <children>
                         <HBox fx:id="historySearchFieldBox" alignment="CENTER" fillHeight="false">

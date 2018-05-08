@@ -155,7 +155,7 @@ public class DashboardController implements Initializable {
         });
 
         errorTitle.setText("Oops... That's embarrassing!");
-        errorDetails.setText("Something went wrong. Try to make another getRequest.\nRestart Everest if that doesn't work.");
+        errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
 
         visualizer = new Visualizer();
         visualizerTab.setContent(visualizer);
@@ -199,7 +199,6 @@ public class DashboardController implements Initializable {
                     configureRequestManager();
                     requestManager.start();
                     break;
-                // DataDispatchRequestManager will generate appropriate getRequest based on the type.
                 case "POST":
                 case "PUT":
                 case "PATCH":
@@ -274,7 +273,7 @@ public class DashboardController implements Initializable {
             Services.loggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
             errorLayer.setVisible(true);
             errorTitle.setText("Oops... That's embarrassing!");
-            errorDetails.setText("Something went wrong. Try to make another getRequest.\nRestart Everest if that doesn't work.");
+            errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
         }
     }
 
@@ -290,7 +289,7 @@ public class DashboardController implements Initializable {
         promptLayer.setVisible(false);
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
-        Services.loggingService.logWarning(httpMethodBox.getValue() + " getRequest could not be processed.", exception, LocalDateTime.now());
+        Services.loggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
 
         if (throwable.getClass() == UnreliableResponseException.class) {
             UnreliableResponseException URE = (UnreliableResponseException) throwable;
@@ -311,7 +310,7 @@ public class DashboardController implements Initializable {
         if (requestManager.getClass() == DataDispatchRequestManager.class) {
             if (throwable.getCause() != null && throwable.getCause().getClass() == IllegalArgumentException.class) {
                 errorTitle.setText("Did you forget something?");
-                errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " getRequest.");
+                errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " request.");
             } else if (throwable.getClass() == FileNotFoundException.class) {
                 errorTitle.setText("File(s) not found:");
                 errorDetails.setText(throwable.getMessage());

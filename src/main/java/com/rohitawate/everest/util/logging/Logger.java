@@ -39,15 +39,11 @@ class Logger {
      * @param log - The log to be written to file.
      */
     synchronized void log(Log log) {
-        if (log.getLevel().greaterThanEqualTo(this.writerLevel)) {
-            try {
-                String logFileContents = readFile(logFilePath);
-                String logEntry = generateLogEntry(log);
-                logFileContents = logFileContents.replace("<!-- Placeholder for new log -->", logEntry);
-                BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath));
+        System.out.println(log.message);
+        if (log.level.greaterThanEqualTo(this.writerLevel)) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath, true))) {
                 writer.flush();
-                writer.write(logFileContents);
-                writer.close();
+                writer.append(getLogEntry(log));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -63,19 +59,19 @@ class Logger {
      * Yellow = Warning
      * Green = Info
      */
-    private String generateLogEntry(Log log) {
+    private String getLogEntry(Log log) {
         String logEntry = this.logEntryTemplate;
-        logEntry = logEntry.replace("%% LogLevel %%", log.getLevel().toString());
-        logEntry = logEntry.replace("%% Time %%", log.getTime());
-        logEntry = logEntry.replace("%% Message %%", log.getMessage());
+        logEntry = logEntry.replace("%% LogLevel %%", log.level.toString());
+        logEntry = logEntry.replace("%% Time %%", log.time);
+        logEntry = logEntry.replace("%% Message %%", log.message);
         StringBuilder builder = new StringBuilder();
 
-        if (log.getException() != null) {
-            StackTraceElement[] stackTrace = log.getException().getStackTrace();
-            builder.append(log.getException().toString());
+        if (log.exception != null) {
+            StackTraceElement[] stackTrace = log.exception.getStackTrace();
+            builder.append(log.exception.toString());
             builder.append("<br>\n");
             if (stackTrace.length != 0) {
-                for (StackTraceElement element : log.getException().getStackTrace()) {
+                for (StackTraceElement element : log.exception.getStackTrace()) {
                     builder.append(" -- ");
                     builder.append(element.toString());
                     builder.append("<br>\n");
@@ -126,25 +122,6 @@ class Logger {
             builder.append("\n");
         }
         scanner.close();
-
-        return builder.toString();
-    }
-
-    private String readFile(String filePath) {
-        StringBuilder builder = new StringBuilder();
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));
-            Scanner scanner = new Scanner(bufferedReader);
-
-            while (scanner.hasNext()) {
-                builder.append(scanner.nextLine());
-                builder.append("\n");
-            }
-            scanner.close();
-            bufferedReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         return builder.toString();
     }

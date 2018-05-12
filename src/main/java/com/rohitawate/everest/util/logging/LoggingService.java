@@ -24,17 +24,12 @@ import java.time.format.DateTimeFormatter;
 public class LoggingService {
     private Logger logger;
     private DateTimeFormatter dateFormat;
-    private String message;
-    private Exception exception;
-    private LocalDateTime time;
-
-    private SevereLogger severeLogger = new SevereLogger();
-    private WarningLogger warningLogger = new WarningLogger();
-    private InfoLogger infoLogger = new InfoLogger();
+    private Log log;
 
     public LoggingService(Level writerLevel) {
-        logger = new Logger(writerLevel);
-        dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        this.log = new Log();
+        this.logger = new Logger(writerLevel);
+        this.dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     }
 
     public void logSevere(String message, Exception exception, LocalDateTime time) {
@@ -53,47 +48,23 @@ public class LoggingService {
     }
 
     private void setValues(String message, Exception exception, LocalDateTime time) {
-        this.message = message;
-        this.exception = exception;
-        this.time = time;
+        this.log.message = message;
+        this.log.exception = exception;
+        this.log.time = dateFormat.format(time);
     }
 
-    private class SevereLogger implements Runnable {
-        @Override
-        public void run() {
-            System.out.println(message);
-            Log log = new Log();
-            log.setLevel(Level.SEVERE);
-            log.setMessage(message);
-            log.setException(exception);
-            log.setTime(dateFormat.format(time));
-            logger.log(log);
-        }
-    }
+    private Runnable severeLogger = () -> {
+        this.log.level = Level.SEVERE;
+        this.logger.log(this.log);
+    };
 
-    private class WarningLogger implements Runnable {
-        @Override
-        public void run() {
-            System.out.println(message);
-            Log log = new Log();
-            log.setLevel(Level.WARNING);
-            log.setMessage(message);
-            log.setException(exception);
-            log.setTime(dateFormat.format(time));
-            logger.log(log);
-        }
-    }
+    private Runnable warningLogger = () -> {
+        this.log.level = Level.WARNING;
+        this.logger.log(log);
+    };
 
-
-    private class InfoLogger implements Runnable {
-        @Override
-        public void run() {
-            System.out.println(message);
-            Log log = new Log();
-            log.setLevel(Level.INFO);
-            log.setMessage(message);
-            log.setTime(dateFormat.format(time));
-            logger.log(log);
-        }
-    }
+    private Runnable infoLogger = () -> {
+        this.log.level = Level.INFO;
+        this.logger.log(log);
+    };
 }

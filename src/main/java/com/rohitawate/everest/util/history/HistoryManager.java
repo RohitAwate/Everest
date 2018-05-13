@@ -61,8 +61,8 @@ public class HistoryManager {
     /**
      * Creates and initializes the database with necessary tables if not already done.
      *
-     * @throws IOException
-     * @throws SQLException
+     * @throws IOException - If unable to establish a connection to the database.
+     * @throws SQLException - If invalid statement is executed on the database.
      */
     private void initDatabase() throws IOException, SQLException {
         // Read all queries from Queries.json

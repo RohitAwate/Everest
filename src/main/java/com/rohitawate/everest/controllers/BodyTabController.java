@@ -135,24 +135,16 @@ public class BodyTabController implements Initializable {
         try {
             switch (dashboardState.getContentType()) {
                 case MediaType.TEXT_PLAIN:
-                    rawInputArea.setText(dashboardState.getBody());
-                    rawInputTypeBox.getSelectionModel().select("PLAIN TEXT");
-                    bodyTabPane.getSelectionModel().select(rawTab);
+                    setRawTab(dashboardState, "PLAIN TEXT");
                     break;
                 case MediaType.APPLICATION_JSON:
-                    rawInputArea.setText(dashboardState.getBody());
-                    rawInputTypeBox.getSelectionModel().select("JSON");
-                    bodyTabPane.getSelectionModel().select(rawTab);
+                    setRawTab(dashboardState, "JSON");
                     break;
                 case MediaType.APPLICATION_XML:
-                    rawInputArea.setText(dashboardState.getBody());
-                    rawInputTypeBox.getSelectionModel().select("XML");
-                    bodyTabPane.getSelectionModel().select(rawTab);
+                    setRawTab(dashboardState, "XML");
                     break;
                 case MediaType.TEXT_HTML:
-                    rawInputArea.setText(dashboardState.getBody());
-                    rawInputTypeBox.getSelectionModel().select("HTML");
-                    bodyTabPane.getSelectionModel().select(rawTab);
+                    setRawTab(dashboardState, "HTML");
                     break;
                 case MediaType.MULTIPART_FORM_DATA:
                     // For file tuples
@@ -177,5 +169,11 @@ public class BodyTabController implements Initializable {
         } catch (NullPointerException NPE) {
             Services.loggingService.logInfo("Dashboard loaded with blank request body.", LocalDateTime.now());
         }
+    }
+
+    private void setRawTab(DashboardState dashboardState, String contentType) {
+        rawInputArea.setText(dashboardState.getBody());
+        rawInputTypeBox.getSelectionModel().select(contentType);
+        bodyTabPane.getSelectionModel().select(rawTab);
     }
 }

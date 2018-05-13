@@ -58,12 +58,13 @@ class Visualizer extends ScrollPane {
 
         if (root.isArray()) {
             Iterator<JsonNode> iterator = root.elements();
+            int i = 0;
 
             while (iterator.hasNext()) {
                 currentNode = iterator.next();
 
                 if (currentNode.isValueNode()) {
-                    valueLabel = new Label(currentNode.toString());
+                    valueLabel = new Label(i++ + ": " + currentNode.toString());
                     valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
                     valueLabel.setWrapText(true);
                     valueTooltip = new Tooltip(currentNode.toString());
@@ -74,7 +75,7 @@ class Visualizer extends ScrollPane {
                 } else if (currentNode.isObject()) {
                     TreeItem<HBox> newRoot = new TreeItem<>();
                     items.add(newRoot);
-                    populate(newRoot, "[Anonymous Object]", currentNode);
+                    populate(newRoot, i++ + ": [Anonymous Object]", currentNode);
                 }
             }
         } else {

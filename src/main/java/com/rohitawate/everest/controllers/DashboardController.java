@@ -98,6 +98,7 @@ public class DashboardController implements Initializable {
     private GETRequest getRequest;
     private DataDispatchRequest dataRequest;
     private DELETERequest deleteRequest;
+    private HashMap<String, String> params;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -190,7 +191,7 @@ public class DashboardController implements Initializable {
                         getRequest = new GETRequest();
 
                     getRequest.setTarget(addressField.getText());
-                    getRequest.setHeaders(headerTabController.getHeaders());
+                    getRequest.setHeaders(headerTabController.getSelectedHeaders());
 
                     requestManager = Services.pool.get();
                     requestManager.setRequest(getRequest);
@@ -207,7 +208,7 @@ public class DashboardController implements Initializable {
 
                     dataRequest.setRequestType(httpMethodBox.getValue());
                     dataRequest.setTarget(addressField.getText());
-                    dataRequest.setHeaders(headerTabController.getHeaders());
+                    dataRequest.setHeaders(headerTabController.getSelectedHeaders());
 
                     if (bodyTabController.rawTab.isSelected()) {
                         String contentType;
@@ -253,7 +254,7 @@ public class DashboardController implements Initializable {
                         deleteRequest = new DELETERequest();
 
                     deleteRequest.setTarget(addressField.getText());
-                    deleteRequest.setHeaders(headerTabController.getHeaders());
+                    deleteRequest.setHeaders(headerTabController.getSelectedHeaders());
 
                     requestManager = Services.pool.delete();
                     requestManager.setRequest(deleteRequest);
@@ -430,8 +431,10 @@ public class DashboardController implements Initializable {
     }
 
     private HashMap<String, String> getParams() {
-        HashMap<String, String> params = new HashMap<>();
+        if (params == null)
+            params = new HashMap<>();
 
+        params.clear();
         for (StringKeyValueFieldController controller : paramsControllers)
             if (controller.isChecked())
                 params.put(controller.getHeader().getKey(), controller.getHeader().getValue());
@@ -500,7 +503,7 @@ public class DashboardController implements Initializable {
             case "PUT":
             case "PATCH":
                 dashboardState = new DashboardState(bodyTabController.getBasicRequest(httpMethodBox.getValue()));
-                dashboardState.setHeaders(headerTabController.getHeaders());
+                dashboardState.setHeaders(headerTabController.getSelectedHeaders());
                 break;
             default:
                 // For GET, DELETE requests
@@ -513,7 +516,7 @@ public class DashboardController implements Initializable {
             Services.loggingService.logInfo("Dashboard state was saved with an invalid URL.", LocalDateTime.now());
         }
         dashboardState.setHttpMethod(httpMethodBox.getValue());
-        dashboardState.setHeaders(headerTabController.getHeaders());
+        dashboardState.setHeaders(headerTabController.getSelectedHeaders());
         dashboardState.setParams(getParams());
 
         return dashboardState;

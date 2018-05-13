@@ -42,6 +42,7 @@ public class URLTabController implements Initializable {
 
     private List<StringKeyValueFieldController> controllers;
     private IntegerProperty controllersCount;
+    private HashMap<String, String> tuples;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -101,11 +102,14 @@ public class URLTabController implements Initializable {
     }
 
     public HashMap<String, String> getStringTuples() {
-        HashMap<String, String> headers = new HashMap<>();
+        if (tuples == null)
+            tuples = new HashMap<>();
+
+        tuples.clear();
         for (StringKeyValueFieldController controller : controllers) {
             if (controller.isChecked())
-                headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+                tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
-        return headers;
+        return tuples;
     }
 }

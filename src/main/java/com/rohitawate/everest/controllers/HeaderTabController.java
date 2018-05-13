@@ -43,6 +43,8 @@ public class HeaderTabController implements Initializable {
     private List<StringKeyValueFieldController> controllers;
     private IntegerProperty controllersCount;
 
+    private HashMap<String, String> headers;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         controllers = new ArrayList<>();
@@ -100,9 +102,14 @@ public class HeaderTabController implements Initializable {
         }
     }
 
+    /**
+     * Returns a map of the selected headers.
+     */
+    public HashMap<String, String> getSelectedHeaders() {
+        if (headers == null)
+            headers = new HashMap<>();
 
-    public HashMap<String, String> getHeaders() {
-        HashMap<String, String> headers = new HashMap<>();
+        headers.clear();
         for (StringKeyValueFieldController controller : controllers) {
             if (controller.isChecked())
                 headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());

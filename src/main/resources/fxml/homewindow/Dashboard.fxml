@@ -16,36 +16,47 @@
   ~ limitations under the License.
   -->
 
-<?import com.jfoenix.controls.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<StackPane fx:id="dashboard" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
-           xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.DashboardController">
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXProgressBar?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="dashboard" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.DashboardController">
     <children>
         <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
              <HBox alignment="CENTER" maxHeight="100.0" minHeight="100.0" spacing="20.0" VBox.vgrow="ALWAYS">
                <children>
-                   <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true"
-                              HBox.hgrow="ALWAYS">
+                   <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
                      <image>
-                         <Image url="@../../assets/Logo.png"/>
+                         <Image url="@../../assets/Logo.png" />
                      </image>
                   </ImageView>
                    <HBox fx:id="addressSection" alignment="CENTER" maxHeight="40.0" HBox.hgrow="ALWAYS">
                        <children>
                            <StackPane fx:id="comboContainer" minHeight="40.0" minWidth="130.0">
                                <children>
-                                   <ComboBox fx:id="httpMethodBox" minHeight="40.0" minWidth="130.0"
-                                             StackPane.alignment="CENTER"/>
+                                   <ComboBox fx:id="httpMethodBox" minHeight="40.0" minWidth="130.0" StackPane.alignment="CENTER" />
                                </children>
                            </StackPane>
                            <TextField fx:id="addressField" promptText="URL" HBox.hgrow="ALWAYS">
                                <font>
-                                   <Font size="18.0"/>
+                                   <Font size="18.0" />
                                </font>
                            </TextField>
                        </children>
@@ -58,7 +69,7 @@
                         <Font size="18.0" />
                      </font>
                      <HBox.margin>
-                         <Insets/>
+                         <Insets />
                      </HBox.margin>
                        <graphic>
                            <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
@@ -70,16 +81,14 @@
                   </JFXButton>
                </children>
                  <padding>
-                     <Insets left="20.0" right="20.0"/>
+                     <Insets left="20.0" right="20.0" />
                  </padding>
             </HBox>
              <SplitPane dividerPositions="0.1" orientation="VERTICAL" VBox.vgrow="ALWAYS">
                  <items>
                      <AnchorPane maxHeight="300.0">
                          <children>
-                             <TabPane fx:id="requestOptionsTab" minHeight="190.0" tabClosingPolicy="UNAVAILABLE"
-                                      tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                             <TabPane fx:id="requestOptionsTab" minHeight="190.0" tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <tabs>
                                      <Tab fx:id="paramsTab" text="PARAMS">
                                          <content>
@@ -139,8 +148,7 @@
                          <children>
                              <VBox fx:id="responseBox" alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
-                                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0"
-                                           minHeight="50.0" spacing="30.0" VBox.vgrow="ALWAYS">
+                                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0" minHeight="50.0" spacing="30.0" VBox.vgrow="ALWAYS">
                                          <children>
                                              <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                                                  <children>
@@ -161,31 +169,30 @@
                                              </HBox>
                                              <Label fx:id="responseType" text="JSON" textFill="#2dcd2d">
                                                  <font>
-                                                     <Font name="Liberation Mono Bold" size="17.0"/>
+                                                     <Font name="Liberation Mono Bold" size="17.0" />
                                                  </font>
                                              </Label>
                                              <Label fx:id="responseTime" text="151 ms" textFill="WHITE" HBox.hgrow="ALWAYS">
                                                  <HBox.margin>
-                                                     <Insets/>
+                                                     <Insets />
                                                  </HBox.margin>
                                                  <font>
-                                                     <Font name="Liberation Mono" size="17.0"/>
+                                                     <Font name="Liberation Mono" size="17.0" />
                                                  </font>
                                              </Label>
                                              <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0" text="1998 B" textFill="WHITE" HBox.hgrow="ALWAYS">
                                                  <font>
-                                                     <Font name="Liberation Mono" size="17.0"/>
+                                                     <Font name="Liberation Mono" size="17.0" />
                                                  </font>
                                                  <HBox.margin>
-                                                     <Insets/>
+                                                     <Insets />
                                                  </HBox.margin>
                                              </Label>
                                              <JFXButton fx:id="copyBodyButton" textFill="WHITE">
                                                  <graphic>
-                                                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true"
-                                                                preserveRatio="true">
+                                                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                          <image>
-                                                             <Image url="@../../assets/Copy.png"/>
+                                                             <Image url="@../../assets/Copy.png" />
                                                          </image>
                                                      </ImageView>
                                                  </graphic>
@@ -213,31 +220,22 @@
                                                  <tabs>
                                                      <Tab closable="false" text="BODY">
                                                          <content>
-                                                             <TextArea fx:id="responseArea" editable="false"
-                                                                       wrapText="true"/>
+                                                             <TextArea fx:id="responseArea" editable="false" wrapText="true" />
                                                          </content>
                                                      </Tab>
-                                                     <Tab fx:id="visualizerTab" closable="false" text="VISUALIZER"/>
-                                                     <Tab fx:id="responseHeadersTab" closable="false" text="HEADERS"/>
+                                                     <Tab fx:id="visualizerTab" closable="false" text="VISUALIZER" />
+                                                     <Tab fx:id="responseHeadersTab" closable="false" text="HEADERS" />
                                                  </tabs>
                                              </TabPane>
-                                             <VBox fx:id="loadingLayer" alignment="CENTER" visible="false">
+                                             <VBox fx:id="loadingLayer" alignment="CENTER" spacing="10.0">
                                                  <children>
-                                                     <HBox alignment="CENTER">
-                                                         <children>
-                                                             <ImageView fitHeight="150.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
-                                                                 <image>
-                                                                     <Image url="@../../assets/LoadingCircle_WhiteOnOrange.gif" />
-                                                                 </image>
-                                                             </ImageView>
-                                                             <Label text="LOADING" textFill="WHITE">
-                                                                 <font>
-                                                                     <Font size="70.0" />
-                                                                 </font>
-                                                             </Label>
-                                                         </children>
-                                                     </HBox>
-                                                     <JFXButton fx:id="cancelButton" text=" CANCEL" textFill="WHITE" VBox.vgrow="ALWAYS">
+                                                       <Label text="LOADING" textFill="WHITE">
+                                                           <font>
+                                                               <Font size="70.0" />
+                                                           </font>
+                                                       </Label>
+                                          <JFXProgressBar fx:id="progressBar" VBox.vgrow="ALWAYS" />
+                                                     <JFXButton fx:id="cancelButton" text=" CANCEL" textFill="WHITE">
                                                          <graphic>
                                                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                                                  <image>
@@ -250,16 +248,14 @@
                                              </VBox>
                                              <VBox fx:id="promptLayer" alignment="CENTER" visible="false">
                                                  <children>
-                                                     <Label text="Enter an address, select a method and hit send."
-                                                            textFill="WHITE">
+                                                     <Label text="Enter an address, select a method and hit send." textFill="WHITE">
                                                          <font>
                                                              <Font size="32.0" />
                                                          </font>
                                                      </Label>
                                                  </children>
                                              </VBox>
-                                             <VBox fx:id="errorLayer" alignment="CENTER" layoutX="10.0" layoutY="10.0"
-                                                   visible="false">
+                                             <VBox fx:id="errorLayer" alignment="CENTER" layoutX="10.0" layoutY="10.0" visible="false">
                                                  <children>
                                                      <ImageView fitHeight="100.0" fitWidth="100.0" opacity="0.75" pickOnBounds="true" preserveRatio="true">
                                                          <image>

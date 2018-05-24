@@ -17,6 +17,7 @@ package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
@@ -83,6 +84,8 @@ public class DashboardController implements Initializable {
     Tab paramsTab, authTab, headersTab, bodyTab;
     @FXML
     private Tab visualizerTab, responseHeadersTab;
+    @FXML
+    private JFXProgressBar progressBar;
 
     private JFXSnackbar snackbar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
@@ -279,6 +282,7 @@ public class DashboardController implements Initializable {
     }
 
     private void configureRequestManager() {
+        progressBar.progressProperty().bind(requestManager.progressProperty());
         requestManager.setOnRunning(e -> whileRunning());
         requestManager.setOnSucceeded(e -> onSucceeded());
         requestManager.setOnCancelled(e -> onCancelled());

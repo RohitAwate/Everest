@@ -185,7 +185,7 @@ public class DashboardController implements Initializable {
             String address = addressField.getText();
 
             // Prepends "https://" to the address if not already done.
-            if (!address.startsWith("https://") || !address.startsWith("http://")) {
+            if (!(address.startsWith("https://") || address.startsWith("http://"))) {
                 address = "https://" + address;
                 addressField.setText(address);
                 responseArea.requestFocus();

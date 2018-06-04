@@ -112,4 +112,8 @@ class Visualizer extends ScrollPane {
 
         rootItem.getChildren().addAll(items);
     }
+
+    public void clear() {
+        this.visualizer.setRoot(null);
+    }
 }

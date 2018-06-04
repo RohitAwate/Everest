@@ -183,6 +183,14 @@ public class DashboardController implements Initializable {
 
         try {
             String address = addressField.getText();
+
+            // Prepends "https://" to the address if not already done.
+            if (!address.startsWith("https://") || !address.startsWith("http://")) {
+                address = "https://" + address;
+                addressField.setText(address);
+                responseArea.requestFocus();
+            }
+
             if (address.equals("")) {
                 promptLayer.setVisible(true);
                 snackbar.show("Please enter an address.", 3000);
@@ -193,7 +201,7 @@ public class DashboardController implements Initializable {
                     if (getRequest == null)
                         getRequest = new GETRequest();
 
-                    getRequest.setTarget(addressField.getText());
+                    getRequest.setTarget(address);
                     getRequest.setHeaders(headerTabController.getSelectedHeaders());
 
                     requestManager = Services.pool.get();
@@ -210,7 +218,7 @@ public class DashboardController implements Initializable {
                         dataRequest = new DataDispatchRequest();
 
                     dataRequest.setRequestType(httpMethodBox.getValue());
-                    dataRequest.setTarget(addressField.getText());
+                    dataRequest.setTarget(address);
                     dataRequest.setHeaders(headerTabController.getSelectedHeaders());
 
                     if (bodyTabController.rawTab.isSelected()) {
@@ -256,7 +264,7 @@ public class DashboardController implements Initializable {
                     if (deleteRequest == null)
                         deleteRequest = new DELETERequest();
 
-                    deleteRequest.setTarget(addressField.getText());
+                    deleteRequest.setTarget(address);
                     deleteRequest.setHeaders(headerTabController.getSelectedHeaders());
 
                     requestManager = Services.pool.delete();
@@ -366,12 +374,13 @@ public class DashboardController implements Initializable {
 
         String responseBody = response.getBody();
 
+        visualizerTab.setDisable(true);
+        visualizer.clear();
         try {
             if (type != null) {
                 // Selects only the part preceding the ';', skipping the character encoding
                 type = type.split(";")[0];
 
-                visualizerTab.setDisable(true);
                 switch (type.toLowerCase()) {
                     case "application/json":
                         responseType.setText("JSON");

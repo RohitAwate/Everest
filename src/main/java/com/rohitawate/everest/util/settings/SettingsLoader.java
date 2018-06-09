@@ -17,7 +17,6 @@
 package com.rohitawate.everest.util.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohitawate.everest.util.EverestUtilities;
 import com.rohitawate.everest.util.Services;
 
@@ -44,8 +43,7 @@ public class SettingsLoader implements Runnable {
 
             System.out.println("Settings file found. Loading settings... ");
 
-            ObjectMapper mapper = new ObjectMapper();
-            nodes = mapper.readTree(settingsFile);
+            nodes = EverestUtilities.mapper.readTree(settingsFile);
 
             Settings.responseAreaFont = setStringSetting(Settings.responseAreaFont, "responseAreaFont");
             Settings.responseAreaFontSize = setIntegerSetting(Settings.responseAreaFontSize, "responseAreaFontSize");
@@ -61,7 +59,7 @@ public class SettingsLoader implements Runnable {
             Settings.theme = EverestUtilities.trimString(setStringSetting(Settings.theme, "theme"));
             Settings.showHistoryRange = setIntegerSetting(Settings.showHistoryRange, "showHistoryRange");
         } catch (IOException IOE) {
-            Services.loggingService.logInfo("Settings file not found. Using defaults", LocalDateTime.now());
+            Services.loggingService.logInfo("Settings file not found. Using defaults.", LocalDateTime.now());
         }
     }
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util;
-
 import java.io.*;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
@@ -28,44 +26,30 @@ public class BugReporter {
     public static void main(String args[]) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Everest Bug Reporting Service");
-        System.out.println();
-        System.out.println("Please describe the issue with as much detail and clarity as possible: ");
+        System.out.println("-----------------------------\n");
+        System.out.println("Please describe the issue with as much detail and clarity as possible (no newline): ");
         String userMessage = scanner.nextLine();
-        StringBuilder builder = new StringBuilder();
-        builder.append("\nThank you for your input! The issue was recorded.\n\n");
-        builder.append("With your permission, this service can collect some anonymous, non-personal information about your system.\n");
-        builder.append("This information will help us to better reproduce the issue and fix it quickly.\n");
-        builder.append("This includes:\n");
-        builder.append(" - Operating system details.\n");
-        builder.append(" - Details about your Java Runtime Environment.\n\n");
-        builder.append("Allow? (Y/N)\n>> ");
-        System.out.print(builder.toString());
-        String allowSystemData = scanner.nextLine();
-
-        allowSystemData = allowSystemData.toLowerCase();
-
-        StringBuilder report = new StringBuilder();
-        report.append("Log date: ");
-        report.append(LocalDateTime.now());
-        report.append("\n\n");
-        if (allowSystemData.equals("y") || allowSystemData.equals("yes")) {
-            report.append(generateSystemDetails());
-            System.out.println("\nThat's great! We will include your system details in with the bug report.");
-        } else {
-            System.out.println("\nAlrighty! We will only include Everest's log files in the report.");
-        }
-
         scanner.close();
-        report.append("User Message:\n");
-        report.append(userMessage);
-        generateReport(report.toString());
+
+        generateReportFile(generateReport(userMessage));
         generateZipFile();
 
-        System.out.println("\nYour issue was successfully reported and will be fixed soon.");
+        System.out.println("\nYour report was submitted successfully reported and will be evaluated soon.");
         System.out.println("Thank you! :)");
     }
 
-    private static String generateSystemDetails() {
+    private static String generateReport(String userMessage) {
+        StringBuilder report = new StringBuilder();
+        report.append("Report date: ");
+        report.append(LocalDateTime.now());
+        report.append("\n\n");
+        report.append(getSystemDetails());
+        report.append("User Message:\n");
+        report.append(userMessage);
+        return report.toString();
+    }
+
+    private static String getSystemDetails() {
         StringBuilder builder = new StringBuilder();
         String OS = System.getProperty("os.name");
         if (OS.equals("Linux")) {
@@ -77,19 +61,18 @@ public class BugReporter {
         builder.append(System.getProperty("os.arch"));
         builder.append(" ");
         builder.append(System.getProperty("os.version"));
-        builder.append("\n");
-        builder.append("Java VM: ");
+        builder.append("\nJava VM: ");
         builder.append(System.getProperty("java.vm.name"));
-        builder.append(" ");
+        builder.append("\nVM Version: ");
         builder.append(System.getProperty("java.version"));
-        builder.append("\nJava VM Vendor: ");
+        builder.append("\nVM Vendor: ");
         builder.append(System.getProperty("java.vendor"));
         builder.append("\n\n");
 
         return builder.toString();
     }
 
-    private static void generateReport(String reportContents) {
+    private static void generateReportFile(String reportContents) {
         String reportFileName = "Report - " + LocalDate.now() + ".txt";
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("logs/" + reportFileName));
@@ -104,7 +87,7 @@ public class BugReporter {
         try {
             Scanner scanner;
             FileInputStream fileInputStream;
-            ZipOutputStream zipStream = new ZipOutputStream(new FileOutputStream("Logs.zip"), Charset.forName("UTF-8"));
+            ZipOutputStream zipStream = new ZipOutputStream(new FileOutputStream("BugReport-" + LocalDate.now() + ".zip"), Charset.forName("UTF-8"));
             File sourceDir = new File("logs/");
             String[] logFiles = sourceDir.list();
 
@@ -132,7 +115,7 @@ public class BugReporter {
     }
 
     private static String getLinuxDetails() {
-        String line = "";
+        String line;
 
         try {
             File etcDir = new File("/etc/");

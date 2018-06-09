@@ -17,40 +17,8 @@
 package com.rohitawate.everest.util.logging;
 
 class Log {
-    private Level level;
-    private String message;
-    private String time;
-    private Exception exception;
-
-    public Level getLevel() {
-        return level;
-    }
-
-    public void setLevel(Level level) {
-        this.level = level;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public Exception getException() {
-        return exception;
-    }
-
-    public void setException(Exception exception) {
-        this.exception = exception;
-    }
+    Level level;
+    String message;
+    String time;
+    Exception exception;
 }

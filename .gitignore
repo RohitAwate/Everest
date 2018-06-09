@@ -4,9 +4,12 @@
 classes/
 src/main/java/META-INF/
 dependency-reduced-pom.xml
-Everest/
 
 # Hides Eclipse Artifacts
 .settings/
 .classpath
 .project
+
+/BugReporter/src/META-INF/
+BugReporter/src/META-INF/
+out/

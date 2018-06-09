@@ -44,16 +44,16 @@ public class BodyTabController implements Initializable {
     @FXML
     private TabPane bodyTabPane;
     @FXML
-    private ComboBox<String> rawInputTypeBox;
+    ComboBox<String> rawInputTypeBox;
     @FXML
-    private TextArea rawInputArea;
+    TextArea rawInputArea;
     @FXML
-    private Tab rawTab, binaryTab, formTab, urlTab;
+    Tab rawTab, binaryTab, formTab, urlTab;
     @FXML
-    private TextField filePathField;
+    TextField filePathField;
 
-    private FormDataTabController formDataTabController;
-    private URLTabController urlTabController;
+    FormDataTabController formDataTabController;
+    URLTabController urlTabController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -135,24 +135,16 @@ public class BodyTabController implements Initializable {
         try {
             switch (dashboardState.getContentType()) {
                 case MediaType.TEXT_PLAIN:
-                    rawInputArea.setText(dashboardState.getBody());
-                    rawInputTypeBox.getSelectionModel().select("PLAIN TEXT");
-                    bodyTabPane.getSelectionModel().select(rawTab);
+                    setRawTab(dashboardState, "PLAIN TEXT");
                     break;
                 case MediaType.APPLICATION_JSON:
-                    rawInputArea.setText(dashboardState.getBody());
-                    rawInputTypeBox.getSelectionModel().select("JSON");
-                    bodyTabPane.getSelectionModel().select(rawTab);
+                    setRawTab(dashboardState, "JSON");
                     break;
                 case MediaType.APPLICATION_XML:
-                    rawInputArea.setText(dashboardState.getBody());
-                    rawInputTypeBox.getSelectionModel().select("XML");
-                    bodyTabPane.getSelectionModel().select(rawTab);
+                    setRawTab(dashboardState, "XML");
                     break;
                 case MediaType.TEXT_HTML:
-                    rawInputArea.setText(dashboardState.getBody());
-                    rawInputTypeBox.getSelectionModel().select("HTML");
-                    bodyTabPane.getSelectionModel().select(rawTab);
+                    setRawTab(dashboardState, "HTML");
                     break;
                 case MediaType.MULTIPART_FORM_DATA:
                     // For file tuples
@@ -177,5 +169,11 @@ public class BodyTabController implements Initializable {
         } catch (NullPointerException NPE) {
             Services.loggingService.logInfo("Dashboard loaded with blank request body.", LocalDateTime.now());
         }
+    }
+
+    private void setRawTab(DashboardState dashboardState, String contentType) {
+        rawInputArea.setText(dashboardState.getBody());
+        rawInputTypeBox.getSelectionModel().select(contentType);
+        bodyTabPane.getSelectionModel().select(rawTab);
     }
 }

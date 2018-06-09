@@ -71,6 +71,10 @@
     -fx-background-color: #1b1b1b;
 }
 
+#copyBodyButton {
+    -fx-background-color: transparent;
+}
+
 #clearResponseAreaButton {
     -fx-background-color: #822f2f;
 }
@@ -312,41 +316,64 @@
     -fx-background-color: #2a2a2a;
 }
 
-.nonRootTitledPane {
-    -fx-padding: 3px 0px;
-}
-
-.titled-pane .title {
+.visualizerLabel {
     -fx-font-family: "Liberation Mono", monospace;
-    -fx-background-color: #404040;
 }
 
-.titled-pane .content {
+.visualizerRootLabel {
+    -fx-font-size: 17px;
+    -fx-text-fill: #dedede;
+    -fx-font-weight: bold;
+}
+
+.visualizerKeyLabel {
+    -fx-font-size: 17px;
+    -fx-text-fill: #bababa;
+    -fx-font-weight: bold;
+}
+
+.visualizerValueLabel {
+    -fx-font-size: 16px;
+    -fx-text-fill: #959595;
+}
+
+/* Visualizer tree */
+.tree-view {
+    -fx-background-color: #353535;
+}
+
+.tree-cell .tree-disclosure-node .arrow {
+    -fx-background-color: orangered;
+}
+
+.tree-cell:selected .tree-disclosure-node .arrow,
+.tree-cell:focused .tree-disclosure-node .arrow {
+    -fx-background-color: white;
+}
+
+.tree-cell {
     -fx-background-color: #282828;
     -fx-border-width: 0px;
 }
 
-.titled-pane .content {
-    -fx-font-family: "Liberation Mono", monospace;
-    -fx-padding: 3px 0px;
+.tree-cell:expanded {
+    -fx-background-color: #454545;
 }
 
-.visualizerKeyLabel {
-    -fx-font-size: 18px;
-    -fx-text-fill: #bababa;
-    -fx-text-alignment: left;
+.tree-cell:selected,
+.tree-cell:focused {
+    -fx-background-color: cornflowerblue;
 }
 
-.visualizerValueLabel {
-    -fx-font-size: 18px;
-    -fx-text-fill: #959595;
-    -fx-text-alignment: left;
+.tree-cell:selected .label {
+    -fx-text-fill: white;
 }
 
-.titled-pane .title .text,
-.titled-pane .title .arrow-button .arrow {
-    -fx-background-color: #dadada;
-    -fx-fill: #dadada;
+.tree-view .scroll-bar:horizontal .increment-arrow,
+.tree-view .scroll-bar:horizontal .decrement-arrow,
+.tree-view .scroll-bar:horizontal .increment-button,
+.tree-view .scroll-bar:horizontal .decrement-button {
+    -fx-padding: 0;
 }
 
 /* SnackBar */

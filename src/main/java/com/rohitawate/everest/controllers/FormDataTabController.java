@@ -44,6 +44,9 @@ public class FormDataTabController implements Initializable {
     private List<FileKeyValueFieldController> fileControllers;
     private IntegerProperty fileControllersCount, stringControllersCount;
 
+    private HashMap<String, String> stringMap;
+    private HashMap<String, String> fileMap;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         stringControllers = new ArrayList<>();
@@ -56,13 +59,14 @@ public class FormDataTabController implements Initializable {
         addStringField();
     }
 
-    private void addFileField() {
-        addFileField("", "", null);
-    }
 
     @FXML
     private void addFileField(ActionEvent event) {
         addFileField("", "", event);
+    }
+
+    private void addFileField() {
+        addFileField("", "", null);
     }
 
     public void addFileField(String key, String value) {
@@ -70,10 +74,7 @@ public class FormDataTabController implements Initializable {
     }
 
     private void addFileField(String key, String value, ActionEvent event) {
-        /*
-            Re-uses previous field if it is empty,
-            else loads a new one.
-         */
+        //Re-uses previous field if it is empty else loads a new one.
         if (fileControllers.size() > 0 && event == null) {
             FileKeyValueFieldController previousController = fileControllers.get(fileControllers.size() - 1);
 
@@ -106,13 +107,13 @@ public class FormDataTabController implements Initializable {
         }
     }
 
-    private void addStringField() {
-        addStringField("", "", null);
-    }
-
     @FXML
     private void addStringField(ActionEvent event) {
         addStringField("", "", event);
+    }
+
+    private void addStringField() {
+        addStringField("", "", null);
     }
 
     public void addStringField(String key, String value) {
@@ -156,20 +157,26 @@ public class FormDataTabController implements Initializable {
     }
 
     public HashMap<String, String> getStringTuples() {
-        HashMap<String, String> tuples = new HashMap<>();
+        if (stringMap == null)
+            stringMap = new HashMap<>();
+
+        stringMap.clear();
         for (StringKeyValueFieldController controller : stringControllers) {
             if (controller.isChecked())
-                tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+                stringMap.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
-        return tuples;
+        return stringMap;
     }
 
     public HashMap<String, String> getFileTuples() {
-        HashMap<String, String> tuples = new HashMap<>();
+        if (fileMap == null)
+            fileMap = new HashMap<>();
+
+        fileMap.clear();
         for (FileKeyValueFieldController controller : fileControllers) {
             if (controller.isChecked())
-                tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+                fileMap.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
-        return tuples;
+        return fileMap;
     }
 }

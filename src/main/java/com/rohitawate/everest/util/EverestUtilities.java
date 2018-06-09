@@ -19,12 +19,12 @@ package com.rohitawate.everest.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
 public class EverestUtilities {
@@ -50,19 +50,15 @@ public class EverestUtilities {
      */
     public static void createBugReporter() {
         new Thread(() -> {
-            File bugReporterFile = new File("Everest/BugReporter.jar");
-            if (!bugReporterFile.exists()) {
-                InputStream inputStream = EverestUtilities.class.getResourceAsStream("/BugReporter.jar");
-                Path bugReporter = Paths.get("Everest/BugReporter.jar");
-                try {
-                    Files.copy(inputStream, bugReporter);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Services.loggingService.logInfo("BugReporter was copied to installation folder.", LocalDateTime.now());
-            } else {
-                Services.loggingService.logInfo("BugReporter was found.", LocalDateTime.now());
+            InputStream inputStream = EverestUtilities.class.getResourceAsStream("/BugReporter.jar");
+            Path bugReporter = Paths.get("Everest/BugReporter.jar");
+            try {
+                Files.copy(inputStream, bugReporter, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            Services.loggingService.logInfo("BugReporter was copied to installation folder.", LocalDateTime.now());
+
         }).start();
     }
 }

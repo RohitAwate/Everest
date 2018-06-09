@@ -17,6 +17,7 @@
 package com.rohitawate.everest.models.responses;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 
 public class EverestResponse {
     private String body;
@@ -24,6 +25,7 @@ public class EverestResponse {
     private long time;
     private int size;
     private MediaType mediaType;
+    private MultivaluedMap<String, String> headers;
 
     public String getBody() {
         return body;
@@ -63,5 +65,13 @@ public class EverestResponse {
 
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public MultivaluedMap<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(MultivaluedMap<String, String> headers) {
+        this.headers = headers;
     }
 }

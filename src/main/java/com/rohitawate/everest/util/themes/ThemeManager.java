@@ -27,6 +27,7 @@ import java.util.List;
 
 public class ThemeManager {
     private static List<Parent> parentNodes = new ArrayList<>();
+    private static File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
 
     /**
      * Refreshes the theme of all the registered parents by replacing
@@ -35,7 +36,6 @@ public class ThemeManager {
      */
     public static void refreshTheme() {
         if (!Settings.theme.equals("Adreana")) {
-            File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
             if (themeFile.exists()) {
                 String themePath = themeFile.toURI().toString();
 
@@ -53,7 +53,6 @@ public class ThemeManager {
 
     public static void setTheme(Parent parent) {
         if (!Settings.theme.equals("Adreana")) {
-            File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
             if (themeFile.exists()) {
                 parent.getStylesheets().add(themeFile.toURI().toString());
                 parentNodes.add(parent);

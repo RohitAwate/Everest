@@ -17,6 +17,7 @@ package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
@@ -25,9 +26,7 @@ import com.rohitawate.everest.models.requests.DELETERequest;
 import com.rohitawate.everest.models.requests.DataDispatchRequest;
 import com.rohitawate.everest.models.requests.GETRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
-import com.rohitawate.everest.requestmanager.DELETERequestManager;
 import com.rohitawate.everest.requestmanager.DataDispatchRequestManager;
-import com.rohitawate.everest.requestmanager.GETRequestManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import com.rohitawate.everest.util.EverestUtilities;
 import com.rohitawate.everest.util.Services;
@@ -40,7 +39,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.CacheHint;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -49,14 +47,18 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
     @FXML
@@ -75,15 +77,15 @@ public class DashboardController implements Initializable {
     private Label statusCode, statusCodeDescription, responseTime,
             responseSize, errorTitle, errorDetails, responseType;
     @FXML
-    private JFXButton sendButton, cancelButton;
+    private JFXButton cancelButton, copyBodyButton;
     @FXML
     TabPane requestOptionsTab;
     @FXML
     Tab paramsTab, authTab, headersTab, bodyTab;
     @FXML
-    private Tab visualizerTab;
+    private Tab visualizerTab, responseHeadersTab;
     @FXML
-    private ScrollPane visualizer;
+    private JFXProgressBar progressBar;
 
     private JFXSnackbar snackbar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
@@ -93,7 +95,13 @@ public class DashboardController implements Initializable {
     private HeaderTabController headerTabController;
     private BodyTabController bodyTabController;
     private IntegerProperty paramsCountProperty;
-    private Accordion accordion;
+    private Visualizer visualizer;
+    private ResponseHeadersViewer responseHeadersViewer;
+
+    private GETRequest getRequest;
+    private DataDispatchRequest dataRequest;
+    private DELETERequest deleteRequest;
+    private HashMap<String, String> params;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -143,14 +151,30 @@ public class DashboardController implements Initializable {
             }
         });
 
+        copyBodyButton.setOnAction(e -> {
+            responseArea.selectAll();
+            responseArea.copy();
+            responseArea.deselect();
+            snackbar.show("Response body copied to clipboard.", 5000);
+        });
+
         errorTitle.setText("Oops... That's embarrassing!");
         errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
 
-        setupVisualizer();
+        visualizer = new Visualizer();
+        visualizerTab.setContent(visualizer);
+
+        responseHeadersViewer = new ResponseHeadersViewer();
+        responseHeadersTab.setContent(responseHeadersViewer);
     }
 
     @FXML
     void sendRequest() {
+        if (requestManager != null && requestManager.isRunning()) {
+            snackbar.show("Please wait while the current request is processed.", 5000);
+            return;
+        }
+
         promptLayer.setVisible(false);
         if (responseBox.getChildren().size() == 2) {
             responseBox.getChildren().remove(0);
@@ -159,6 +183,14 @@ public class DashboardController implements Initializable {
 
         try {
             String address = addressField.getText();
+
+            // Prepends "https://" to the address if not already done.
+            if (!(address.startsWith("https://") || address.startsWith("http://"))) {
+                address = "https://" + address;
+                addressField.setText(address);
+                responseArea.requestFocus();
+            }
+
             if (address.equals("")) {
                 promptLayer.setVisible(true);
                 snackbar.show("Please enter an address.", 3000);
@@ -166,62 +198,78 @@ public class DashboardController implements Initializable {
             }
             switch (httpMethodBox.getValue()) {
                 case "GET":
-                    GETRequest getRequest = new GETRequest(addressField.getText());
-                    getRequest.setHeaders(headerTabController.getHeaders());
+                    if (getRequest == null)
+                        getRequest = new GETRequest();
 
-                    /*
-                        Creates a new instance if its the first request of that session or
-                        the HTTP method type was changed. Also checks if a request is already being processed.
-                     */
-                    if (requestManager == null || requestManager.getClass() != GETRequestManager.class)
-                        requestManager = new GETRequestManager(getRequest);
-                    else if (requestManager.isRunning()) {
-                        snackbar.show("Please wait while the current request is processed.", 3000);
-                        return;
-                    } else {
-                        requestManager.setRequest(getRequest);
-                    }
+                    getRequest.setTarget(address);
+                    getRequest.setHeaders(headerTabController.getSelectedHeaders());
+
+                    requestManager = Services.pool.get();
+                    requestManager.setRequest(getRequest);
 
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     configureRequestManager();
                     requestManager.start();
                     break;
-                // DataDispatchRequestManager will generate appropriate request based on the type.
                 case "POST":
                 case "PUT":
                 case "PATCH":
-                    DataDispatchRequest dataDispatchRequest =
-                            bodyTabController.getBasicRequest(httpMethodBox.getValue());
-                    dataDispatchRequest.setTarget(addressField.getText());
-                    dataDispatchRequest.setHeaders(headerTabController.getHeaders());
+                    if (dataRequest == null)
+                        dataRequest = new DataDispatchRequest();
 
-                    if (requestManager == null || requestManager.getClass() != DataDispatchRequestManager.class)
-                        requestManager = new DataDispatchRequestManager(dataDispatchRequest);
-                    else if (requestManager.isRunning()) {
-                        snackbar.show("Please wait while the current request is processed.", 3000);
-                        return;
-                    } else {
-                        requestManager.setRequest(dataDispatchRequest);
+                    dataRequest.setRequestType(httpMethodBox.getValue());
+                    dataRequest.setTarget(address);
+                    dataRequest.setHeaders(headerTabController.getSelectedHeaders());
+
+                    if (bodyTabController.rawTab.isSelected()) {
+                        String contentType;
+                        switch (bodyTabController.rawInputTypeBox.getValue()) {
+                            case "PLAIN TEXT":
+                                contentType = MediaType.TEXT_PLAIN;
+                                break;
+                            case "JSON":
+                                contentType = MediaType.APPLICATION_JSON;
+                                break;
+                            case "XML":
+                                contentType = MediaType.APPLICATION_XML;
+                                break;
+                            case "HTML":
+                                contentType = MediaType.TEXT_HTML;
+                                break;
+                            default:
+                                contentType = MediaType.TEXT_PLAIN;
+                        }
+                        dataRequest.setContentType(contentType);
+                        dataRequest.setBody(bodyTabController.rawInputArea.getText());
+                    } else if (bodyTabController.formTab.isSelected()) {
+                        dataRequest.setStringTuples(bodyTabController.formDataTabController.getStringTuples());
+                        dataRequest.setFileTuples(bodyTabController.formDataTabController.getFileTuples());
+                        dataRequest.setContentType(MediaType.MULTIPART_FORM_DATA);
+                    } else if (bodyTabController.binaryTab.isSelected()) {
+                        dataRequest.setBody(bodyTabController.filePathField.getText());
+                        dataRequest.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+                    } else if (bodyTabController.urlTab.isSelected()) {
+                        dataRequest.setStringTuples(bodyTabController.urlTabController.getStringTuples());
+                        dataRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
                     }
+
+                    requestManager = Services.pool.data();
+                    requestManager.setRequest(dataRequest);
 
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     configureRequestManager();
                     requestManager.start();
                     break;
                 case "DELETE":
-                    DELETERequest deleteRequest = new DELETERequest(addressField.getText());
-                    deleteRequest.setHeaders(headerTabController.getHeaders());
+                    if (deleteRequest == null)
+                        deleteRequest = new DELETERequest();
 
-                    if (requestManager == null || requestManager.getClass() != DELETERequestManager.class)
-                        requestManager = new DELETERequestManager(deleteRequest);
-                    else if (requestManager.isRunning()) {
-                        snackbar.show("Please wait while the current request is processed.", 3000);
-                        return;
-                    } else {
-                        requestManager.setRequest(deleteRequest);
-                    }
+                    deleteRequest.setTarget(address);
+                    deleteRequest.setHeaders(headerTabController.getSelectedHeaders());
 
+                    requestManager = Services.pool.delete();
                     requestManager.setRequest(deleteRequest);
+
                     cancelButton.setOnAction(e -> requestManager.cancel());
                     configureRequestManager();
                     requestManager.start();
@@ -242,6 +290,7 @@ public class DashboardController implements Initializable {
     }
 
     private void configureRequestManager() {
+        progressBar.progressProperty().bind(requestManager.progressProperty());
         requestManager.setOnRunning(e -> whileRunning());
         requestManager.setOnSucceeded(e -> onSucceeded());
         requestManager.setOnCancelled(e -> onCancelled());
@@ -293,7 +342,7 @@ public class DashboardController implements Initializable {
     }
 
     private void onSucceeded() {
-        updateDashboard(requestManager.getValue());
+        displayResponse(requestManager.getValue());
         errorLayer.setVisible(false);
         loadingLayer.setVisible(false);
         requestManager.reset();
@@ -305,13 +354,14 @@ public class DashboardController implements Initializable {
         loadingLayer.setVisible(true);
     }
 
-    private void updateDashboard(EverestResponse response) {
+    private void displayResponse(EverestResponse response) {
         prettifyResponseBody(response);
         responseBox.getChildren().add(0, responseDetails);
         statusCode.setText(Integer.toString(response.getStatusCode()));
         statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
         responseTime.setText(Long.toString(response.getTime()) + " ms");
         responseSize.setText(Integer.toString(response.getSize()) + " B");
+        responseHeadersViewer.populate(response);
     }
 
     private void prettifyResponseBody(EverestResponse response) {
@@ -324,20 +374,20 @@ public class DashboardController implements Initializable {
 
         String responseBody = response.getBody();
 
+        visualizerTab.setDisable(true);
+        visualizer.clear();
         try {
             if (type != null) {
                 // Selects only the part preceding the ';', skipping the character encoding
                 type = type.split(";")[0];
 
-                visualizerTab.setDisable(true);
                 switch (type.toLowerCase()) {
                     case "application/json":
                         responseType.setText("JSON");
                         JsonNode node = EverestUtilities.mapper.readTree(responseBody);
                         responseArea.setText(EverestUtilities.mapper.writeValueAsString(node));
-                        accordion.getPanes().clear();
                         visualizerTab.setDisable(false);
-                        populateVisualizer(accordion, "root", node);
+                        visualizer.populate(node);
                         break;
                     case "application/xml":
                         responseType.setText("XML");
@@ -361,84 +411,6 @@ public class DashboardController implements Initializable {
             errorLayer.setVisible(true);
             errorTitle.setText("Parsing Error");
             errorDetails.setText("Everest could not parse the response.");
-        }
-    }
-
-    private void setupVisualizer() {
-        accordion = new Accordion();
-        accordion.setCache(true);
-        accordion.setCacheHint(CacheHint.SPEED);
-        visualizer.setContent(accordion);
-    }
-
-    private void populateVisualizer(Accordion rootAccordion, String rootName, JsonNode root) {
-        JsonNode currentNode;
-        VBox container = new VBox();
-        container.setStyle("-fx-padding: 3px 30px");
-        Label valueLabel;
-        TitledPane pane = new TitledPane(rootName, container);
-        Tooltip valueTooltip;
-
-        if (root.isArray()) {
-            Iterator<JsonNode> iterator = root.elements();
-
-            while (iterator.hasNext()) {
-                currentNode = iterator.next();
-
-                if (currentNode.isValueNode()) {
-                    valueLabel = new Label(currentNode.toString());
-                    valueLabel.getStyleClass().add("visualizerValueLabel");
-                    valueLabel.setWrapText(true);
-                    valueTooltip = new Tooltip(currentNode.toString());
-                    valueLabel.setTooltip(valueTooltip);
-
-                    container.getChildren().add(valueLabel);
-                } else if (currentNode.isObject()) {
-                    Accordion arrayAccordion = new Accordion();
-                    container.getChildren().add(arrayAccordion);
-                    populateVisualizer(arrayAccordion, "", currentNode);
-                }
-            }
-            rootAccordion.getPanes().add(pane);
-        } else {
-            Iterator<Entry<String, JsonNode>> iterator = root.fields();
-            Entry<String, JsonNode> currentEntry;
-            HBox valueContainer;
-            Label keyLabel;
-            Tooltip keyTooltip;
-
-            while (iterator.hasNext()) {
-                currentEntry = iterator.next();
-                currentNode = currentEntry.getValue();
-
-                if (currentNode.isValueNode()) {
-                    keyLabel = new Label(currentEntry.getKey() + ": ");
-                    keyLabel.setStyle("-fx-font-weight: bold");
-                    keyLabel.getStyleClass().add("visualizerKeyLabel");
-                    keyTooltip = new Tooltip(currentEntry.getKey());
-                    keyLabel.setTooltip(keyTooltip);
-
-                    valueLabel = new Label(currentNode.toString());
-                    valueLabel.getStyleClass().add("visualizerValueLabel");
-                    valueLabel.setWrapText(true);
-                    valueTooltip = new Tooltip(currentNode.toString());
-                    valueLabel.setTooltip(valueTooltip);
-
-                    valueContainer = new HBox(keyLabel, valueLabel);
-                    container.getChildren().add(valueContainer);
-                } else if (currentNode.isArray() || currentNode.isObject()) {
-                    Accordion arrayAccordion = new Accordion();
-                    container.getChildren().add(arrayAccordion);
-                    populateVisualizer(arrayAccordion, currentEntry.getKey(), currentNode);
-                }
-            }
-            rootAccordion.getPanes().add(pane);
-        }
-
-        if (!rootName.equals("root")) {
-            pane.getStyleClass().add("nonRootTitledPane"); // Special CSS class to set padding for non-root panes only
-        } else {
-            rootAccordion.setExpandedPane(pane);
         }
     }
 
@@ -472,8 +444,10 @@ public class DashboardController implements Initializable {
     }
 
     private HashMap<String, String> getParams() {
-        HashMap<String, String> params = new HashMap<>();
+        if (params == null)
+            params = new HashMap<>();
 
+        params.clear();
         for (StringKeyValueFieldController controller : paramsControllers)
             if (controller.isChecked())
                 params.put(controller.getHeader().getKey(), controller.getHeader().getValue());
@@ -542,7 +516,7 @@ public class DashboardController implements Initializable {
             case "PUT":
             case "PATCH":
                 dashboardState = new DashboardState(bodyTabController.getBasicRequest(httpMethodBox.getValue()));
-                dashboardState.setHeaders(headerTabController.getHeaders());
+                dashboardState.setHeaders(headerTabController.getSelectedHeaders());
                 break;
             default:
                 // For GET, DELETE requests
@@ -555,7 +529,7 @@ public class DashboardController implements Initializable {
             Services.loggingService.logInfo("Dashboard state was saved with an invalid URL.", LocalDateTime.now());
         }
         dashboardState.setHttpMethod(httpMethodBox.getValue());
-        dashboardState.setHeaders(headerTabController.getHeaders());
+        dashboardState.setHeaders(headerTabController.getSelectedHeaders());
         dashboardState.setParams(getParams());
 
         return dashboardState;

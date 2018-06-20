@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.everest.controllers.responsearea.EverestCodeArea;
+import com.rohitawate.everest.controllers.responsearea.EverestCodeArea.HighlightMode;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.models.DashboardState;
@@ -30,7 +32,6 @@ import com.rohitawate.everest.requestmanager.DataDispatchRequestManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import com.rohitawate.everest.util.EverestUtilities;
 import com.rohitawate.everest.util.Services;
-import com.rohitawate.everest.util.settings.Settings;
 import com.rohitawate.everest.util.themes.ThemeManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
@@ -45,6 +46,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.MediaType;
@@ -72,8 +74,6 @@ public class DashboardController implements Initializable {
     @FXML
     private HBox responseDetails;
     @FXML
-    private TextArea responseArea;
-    @FXML
     private Label statusCode, statusCodeDescription, responseTime,
             responseSize, errorTitle, errorDetails, responseType;
     @FXML
@@ -83,7 +83,7 @@ public class DashboardController implements Initializable {
     @FXML
     Tab paramsTab, authTab, headersTab, bodyTab;
     @FXML
-    private Tab visualizerTab, responseHeadersTab;
+    private Tab responseBodyTab, visualizerTab, responseHeadersTab;
     @FXML
     private JFXProgressBar progressBar;
 
@@ -102,11 +102,10 @@ public class DashboardController implements Initializable {
     private DataDispatchRequest dataRequest;
     private DELETERequest deleteRequest;
     private HashMap<String, String> params;
+    private EverestCodeArea responseArea;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        applyDashboardSettings();
-
         try {
             // Loading the headers tab
             FXMLLoader headerTabLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HeaderTab.fxml"));
@@ -163,6 +162,11 @@ public class DashboardController implements Initializable {
 
         visualizer = new Visualizer();
         visualizerTab.setContent(visualizer);
+
+        responseArea = new EverestCodeArea();
+        responseArea.setEditable(false);
+        ThemeManager.setSyntaxTheme(responseArea);
+        responseBodyTab.setContent(new VirtualizedScrollPane<>(responseArea));
 
         responseHeadersViewer = new ResponseHeadersViewer();
         responseHeadersTab.setContent(responseHeadersViewer);
@@ -385,25 +389,25 @@ public class DashboardController implements Initializable {
                     case "application/json":
                         responseType.setText("JSON");
                         JsonNode node = EverestUtilities.mapper.readTree(responseBody);
-                        responseArea.setText(EverestUtilities.mapper.writeValueAsString(node));
+                        responseArea.setText(EverestUtilities.mapper.writeValueAsString(node), HighlightMode.JSON);
                         visualizerTab.setDisable(false);
                         visualizer.populate(node);
                         break;
                     case "application/xml":
                         responseType.setText("XML");
-                        responseArea.setText(EverestUtilities.mapper.writeValueAsString(responseBody));
+                        responseArea.setText(EverestUtilities.mapper.writeValueAsString(responseBody), HighlightMode.XML);
                         break;
                     case "text/html":
                         responseType.setText("HTML");
-                        responseArea.setText(responseBody);
+                        responseArea.setText(responseBody, HighlightMode.NONE);
                         break;
                     default:
                         responseType.setText("PLAIN TEXT");
-                        responseArea.setText(responseBody);
+                        responseArea.setText(responseBody, HighlightMode.NONE);
                 }
             } else {
                 responseType.setText("NONE");
-                responseArea.setText("No body found in the response.");
+                responseArea.setText("No body found in the response.", HighlightMode.NONE);
             }
         } catch (Exception e) {
             snackbar.show("Response could not be parsed.", 5000);
@@ -412,12 +416,6 @@ public class DashboardController implements Initializable {
             errorTitle.setText("Parsing Error");
             errorDetails.setText("Everest could not parse the response.");
         }
-    }
-
-    private void applyDashboardSettings() {
-        String responseAreaCSS = "-fx-font-family: " + Settings.responseAreaFont + ";" +
-                "-fx-font-size: " + Settings.responseAreaFontSize;
-        responseArea.setStyle(responseAreaCSS);
     }
 
     @FXML

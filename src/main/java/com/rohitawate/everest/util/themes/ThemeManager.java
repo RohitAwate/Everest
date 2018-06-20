@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.util.themes;
 
+import com.rohitawate.everest.controllers.responsearea.EverestCodeArea;
 import com.rohitawate.everest.util.Services;
 import com.rohitawate.everest.util.settings.Settings;
 import javafx.scene.Parent;
@@ -28,6 +29,7 @@ import java.util.List;
 public class ThemeManager {
     private static List<Parent> parentNodes = new ArrayList<>();
     private static File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
+    private static File syntaxThemeFile = new File("Everest/themes/syntax/" + Settings.syntaxTheme + ".css");
 
     /**
      * Refreshes the theme of all the registered parents by replacing
@@ -58,6 +60,16 @@ public class ThemeManager {
                 parentNodes.add(parent);
             } else {
                 Services.loggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
+            }
+        }
+    }
+
+    public static void setSyntaxTheme(EverestCodeArea everestCodeArea) {
+        if (!Settings.theme.equals("Ganges")) {
+            if (syntaxThemeFile.exists()) {
+                everestCodeArea.getStylesheets().add(syntaxThemeFile.toURI().toString());
+            } else {
+                Services.loggingService.logInfo(Settings.syntaxTheme + ": No such theme file found.", LocalDateTime.now());
             }
         }
     }

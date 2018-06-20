@@ -79,7 +79,7 @@
     -fx-background-color: #822f2f;
 }
 
-.text-area {
+.everest-code-area {
     -fx-font-family: "Liberation Mono", monospace;
     -fx-text-fill: #a1a1a1;
     -fx-background-radius: 0;
@@ -88,7 +88,7 @@
     -fx-border-width: 0px;
 }
 
-.text-area .content {
+.everest-code-area .content {
     -fx-background-radius: 0;
     -fx-background-color: #2a2a2a;
 }
@@ -136,6 +136,8 @@
 #headersBox,
 .scroll-pane,
 .scroll-pane .viewport,
+.virtualized-scroll-pane .scroll-bar:vertical,
+.virtualized-scroll-pane .scroll-bar:horizontal,
 .scroll-pane .scroll-bar:vertical,
 .scroll-pane .scroll-bar:horizontal {
     -fx-background-color: #3d3d3d;
@@ -191,6 +193,7 @@
     -fx-background-color: #3d3d3d;
 }
 
+.virtualized-scroll-pane .scroll-bar .thumb,
 .scroll-pane .scroll-bar .thumb {
     -fx-background-color: #808080;
 }

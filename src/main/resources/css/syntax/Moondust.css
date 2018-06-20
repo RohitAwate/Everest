@@ -1,3 +1,17 @@
+.everest-code-area {
+    -fx-background-color: #282828;
+}
+
+.everest-code-area .text {
+    -fx-fill: azure;
+    -fx-font-family: "Liberation Mono";
+    -fx-font-size: 17px;
+}
+
+.everest-code-area .caret {
+    -fx-stroke: white;
+}
+
 .json_curly {
     -fx-fill: coral !important;
 }
@@ -23,18 +37,4 @@
 .json_number {
     -fx-fill: greenyellow !important;
     -fx-font-weight: bold;
-}
-
-.everest-code-area {
-    -fx-background-color: #282828;
-}
-
-.everest-code-area .text {
-    -fx-fill: azure;
-    -fx-font-family: "Liberation Mono";
-    -fx-font-size: 17px;
-}
-
-.everest-code-area .caret {
-    -fx-stroke: white;
 }

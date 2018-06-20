@@ -16,6 +16,8 @@
 
 package com.rohitawate.everest.controllers;
 
+import com.rohitawate.everest.controllers.responsearea.EverestCodeArea;
+import com.rohitawate.everest.controllers.responsearea.EverestCodeArea.HighlightMode;
 import com.rohitawate.everest.models.DashboardState;
 import com.rohitawate.everest.models.requests.DataDispatchRequest;
 import com.rohitawate.everest.util.Services;
@@ -24,9 +26,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -46,12 +53,13 @@ public class BodyTabController implements Initializable {
     @FXML
     ComboBox<String> rawInputTypeBox;
     @FXML
-    TextArea rawInputArea;
-    @FXML
     Tab rawTab, binaryTab, formTab, urlTab;
     @FXML
     TextField filePathField;
+    @FXML
+    private VBox rawVBox;
 
+    EverestCodeArea rawInputArea;
     FormDataTabController formDataTabController;
     URLTabController urlTabController;
 
@@ -59,6 +67,29 @@ public class BodyTabController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         rawInputTypeBox.getItems().addAll("PLAIN TEXT", "JSON", "XML", "HTML");
         rawInputTypeBox.getSelectionModel().select(0);
+
+        rawInputArea = new EverestCodeArea();
+        rawInputArea.setPrefHeight(1500);   // Hack to make the EverestCodeArea stretch with the Composer
+        rawVBox.getChildren().add(new VirtualizedScrollPane<>(rawInputArea));
+
+        rawInputTypeBox.valueProperty().addListener(change -> {
+            String type = rawInputTypeBox.getValue();
+            HighlightMode mode;
+            switch (type) {
+                case "JSON":
+                    mode = HighlightMode.JSON;
+                    break;
+                case "XML":
+                    mode = HighlightMode.XML;
+                    break;
+                case "HTML":
+                    mode = HighlightMode.HTML;
+                    break;
+                default:
+                    mode = HighlightMode.NONE;
+            }
+            rawInputArea.setMode(mode);
+        });
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/FormDataTab.fxml"));
@@ -172,7 +203,23 @@ public class BodyTabController implements Initializable {
     }
 
     private void setRawTab(DashboardState dashboardState, String contentType) {
-        rawInputArea.setText(dashboardState.getBody());
+        HighlightMode mode;
+
+        switch (contentType) {
+            case MediaType.APPLICATION_JSON:
+                mode = HighlightMode.JSON;
+                break;
+            case MediaType.APPLICATION_XML:
+                mode = HighlightMode.XML;
+                break;
+            case MediaType.TEXT_HTML:
+                mode = HighlightMode.HTML;
+                break;
+            default:
+                mode = HighlightMode.NONE;
+        }
+
+        rawInputArea.setText(dashboardState.getBody(), mode);
         rawInputTypeBox.getSelectionModel().select(contentType);
         bodyTabPane.getSelectionModel().select(rawTab);
     }

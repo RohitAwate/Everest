@@ -1,7 +1,8 @@
-package com.rohitawate.everest.controllers.responsearea;
+package com.rohitawate.everest.controllers.codearea;
 
-import com.rohitawate.everest.controllers.responsearea.highlighters.Highlighter;
-import com.rohitawate.everest.controllers.responsearea.highlighters.JSONHighlighter;
+import com.rohitawate.everest.controllers.codearea.highlighters.Highlighter;
+import com.rohitawate.everest.controllers.codearea.highlighters.JSONHighlighter;
+import com.rohitawate.everest.util.settings.Settings;
 import org.fxmisc.richtext.CodeArea;
 
 import java.time.Duration;
@@ -17,8 +18,10 @@ public class EverestCodeArea extends CodeArea {
     public EverestCodeArea() {
         this.getStylesheets().add(getClass().getResource("/css/syntax/Moondust.css").toString());
         this.getStyleClass().add("everest-code-area");
+        this.setWrapText(Settings.editorWrapText);
 
         jsonHighlighter = new JSONHighlighter();
+        setMode(HighlightMode.NONE);
 
         this.multiPlainChanges()
                 .successionEnds(Duration.ofMillis(1))

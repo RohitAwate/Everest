@@ -1,4 +1,4 @@
-package com.rohitawate.everest.controllers.responsearea.highlighters;
+package com.rohitawate.everest.controllers.codearea.highlighters;
 
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;

@@ -53,6 +53,8 @@ public class SettingsLoader implements Runnable {
             if (Settings.connectionReadTimeOutEnable)
                 Settings.connectionReadTimeOut = setIntegerSetting(Settings.connectionReadTimeOut, "connectionReadTimeOut");
 
+            Settings.editorWrapText = setBooleanSetting(Settings.editorWrapText, "editorWrapText");
+
             Settings.theme = EverestUtilities.trimString(setStringSetting(Settings.theme, "theme"));
             Settings.syntaxTheme = EverestUtilities.trimString(setStringSetting(Settings.syntaxTheme, "syntaxTheme"));
             Settings.showHistoryRange = setIntegerSetting(Settings.showHistoryRange, "showHistoryRange");

@@ -19,8 +19,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
-import com.rohitawate.everest.controllers.responsearea.EverestCodeArea;
-import com.rohitawate.everest.controllers.responsearea.EverestCodeArea.HighlightMode;
+import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
+import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.models.DashboardState;
@@ -188,6 +188,12 @@ public class DashboardController implements Initializable {
         try {
             String address = addressField.getText();
 
+            if (address.equals("")) {
+                promptLayer.setVisible(true);
+                snackbar.show("Please enter an address.", 3000);
+                return;
+            }
+
             // Prepends "https://" to the address if not already done.
             if (!(address.startsWith("https://") || address.startsWith("http://"))) {
                 address = "https://" + address;
@@ -195,11 +201,6 @@ public class DashboardController implements Initializable {
                 responseArea.requestFocus();
             }
 
-            if (address.equals("")) {
-                promptLayer.setVisible(true);
-                snackbar.show("Please enter an address.", 3000);
-                return;
-            }
             switch (httpMethodBox.getValue()) {
                 case "GET":
                     if (getRequest == null)

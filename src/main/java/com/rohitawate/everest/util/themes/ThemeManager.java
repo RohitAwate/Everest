@@ -16,7 +16,7 @@
 
 package com.rohitawate.everest.util.themes;
 
-import com.rohitawate.everest.controllers.responsearea.EverestCodeArea;
+import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.util.Services;
 import com.rohitawate.everest.util.settings.Settings;
 import javafx.scene.Parent;
@@ -65,7 +65,7 @@ public class ThemeManager {
     }
 
     public static void setSyntaxTheme(EverestCodeArea everestCodeArea) {
-        if (!Settings.theme.equals("Ganges")) {
+        if (!Settings.syntaxTheme.equals("Moondust")) {
             if (syntaxThemeFile.exists()) {
                 everestCodeArea.getStylesheets().add(syntaxThemeFile.toURI().toString());
             } else {

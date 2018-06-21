@@ -28,6 +28,8 @@ public class Settings {
     public static int connectionReadTimeOut = 30000;
 
     public static String theme = "Adreana";
-    public static String syntaxTheme = "Ganges";
+    public static String syntaxTheme = "Moondust";
     public static int showHistoryRange = 7;
+
+    public static boolean editorWrapText = false;
 }

@@ -79,20 +79,6 @@
     -fx-background-color: #822f2f;
 }
 
-.everest-code-area {
-    -fx-font-family: "Liberation Mono", monospace;
-    -fx-text-fill: #a1a1a1;
-    -fx-background-radius: 0;
-    -fx-background-insets: 0;
-    -fx-background-color: transparent;
-    -fx-border-width: 0px;
-}
-
-.everest-code-area .content {
-    -fx-background-radius: 0;
-    -fx-background-color: #2a2a2a;
-}
-
 #loadingLayer {
     -fx-background-color: #bf8829;
 }

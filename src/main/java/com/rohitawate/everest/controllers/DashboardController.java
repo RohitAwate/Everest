@@ -400,15 +400,15 @@ public class DashboardController implements Initializable {
                         break;
                     case "text/html":
                         responseType.setText("HTML");
-                        responseArea.setText(responseBody, HighlightMode.NONE);
+                        responseArea.setText(responseBody, HighlightMode.HTML);
                         break;
                     default:
                         responseType.setText("PLAIN TEXT");
-                        responseArea.setText(responseBody, HighlightMode.NONE);
+                        responseArea.setText(responseBody, HighlightMode.PLAIN);
                 }
             } else {
-                responseType.setText("NONE");
-                responseArea.setText("No body found in the response.", HighlightMode.NONE);
+                responseType.setText("PLAIN");
+                responseArea.setText("No body found in the response.", HighlightMode.PLAIN);
             }
         } catch (Exception e) {
             snackbar.show("Response could not be parsed.", 5000);

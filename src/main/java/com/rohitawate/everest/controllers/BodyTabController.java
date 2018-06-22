@@ -87,7 +87,7 @@ public class BodyTabController implements Initializable {
                     mode = HighlightMode.HTML;
                     break;
                 default:
-                    mode = HighlightMode.NONE;
+                    mode = HighlightMode.PLAIN;
             }
             rawInputArea.setMode(mode);
         });
@@ -217,7 +217,7 @@ public class BodyTabController implements Initializable {
                 mode = HighlightMode.HTML;
                 break;
             default:
-                mode = HighlightMode.NONE;
+                mode = HighlightMode.PLAIN;
         }
 
         rawInputArea.setText(dashboardState.getBody(), mode);

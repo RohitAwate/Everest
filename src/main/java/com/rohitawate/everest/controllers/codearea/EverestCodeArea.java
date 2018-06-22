@@ -2,6 +2,7 @@ package com.rohitawate.everest.controllers.codearea;
 
 import com.rohitawate.everest.controllers.codearea.highlighters.Highlighter;
 import com.rohitawate.everest.controllers.codearea.highlighters.JSONHighlighter;
+import com.rohitawate.everest.controllers.codearea.highlighters.PlaintextHighlighter;
 import com.rohitawate.everest.controllers.codearea.highlighters.XMLHighlighter;
 import com.rohitawate.everest.util.settings.Settings;
 import javafx.geometry.Insets;
@@ -15,8 +16,10 @@ public class EverestCodeArea extends CodeArea {
     }
 
     private Highlighter highlighter;
-    private JSONHighlighter jsonHighlighter;
-    private XMLHighlighter xmlHighlighter;
+
+    private static JSONHighlighter jsonHighlighter;
+    private static XMLHighlighter xmlHighlighter;
+    private static PlaintextHighlighter plaintextHighlighter;
 
     public EverestCodeArea() {
         this.getStylesheets().add(getClass().getResource("/css/syntax/Moondust.css").toString());
@@ -26,6 +29,7 @@ public class EverestCodeArea extends CodeArea {
 
         jsonHighlighter = new JSONHighlighter();
         xmlHighlighter = new XMLHighlighter();
+        plaintextHighlighter = new PlaintextHighlighter();
 
         setMode(HighlightMode.PLAIN);
 
@@ -39,9 +43,12 @@ public class EverestCodeArea extends CodeArea {
             case JSON:
                 highlighter = jsonHighlighter;
                 break;
-            default:
+            case XML:
+            case HTML:
                 highlighter = xmlHighlighter;
                 break;
+            default:
+                highlighter = plaintextHighlighter;
         }
 
         // Re-computes the highlighting for the new mode

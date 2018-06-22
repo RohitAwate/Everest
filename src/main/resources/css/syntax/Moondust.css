@@ -14,6 +14,10 @@
     -fx-stroke: white;
 }
 
+.plain-text {
+    -fx-fill: azure !important;
+}
+
 /*Common to JSON and XML*/
 
 .xml_bracket,

@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rohitawate</groupId>
     <artifactId>Everest</artifactId>
-    <version>Alpha-1.0</version>
+    <version>Alpha-1.2</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

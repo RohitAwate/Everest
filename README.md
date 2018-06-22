@@ -16,7 +16,6 @@ _Everest running on Windows 10._
 - Everest is powered by **Jersey**, the robust and powerful Java library to build and consume RESTful web services.
 
 ![get](https://user-images.githubusercontent.com/23148259/41772368-f9276dae-7635-11e8-97ec-1a1e8aa608c4.PNG)
-
 _Making a GET request with Everest._
 
 # Features currently live

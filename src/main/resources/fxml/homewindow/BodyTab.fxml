@@ -28,32 +28,15 @@
         <Tab fx:id="urlTab" text="URL ENCODED"/>
         <Tab fx:id="rawTab" text="RAW">
             <content>
-                <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
-                    <content>
-                        <VBox alignment="CENTER">
-                            <children>
-                                <HBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS">
-                                    <children>
-                                        <ComboBox fx:id="rawInputTypeBox" HBox.hgrow="ALWAYS">
-                                            <HBox.margin>
-                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                                            </HBox.margin>
-                                        </ComboBox>
-                                    </children>
-                                    <VBox.margin>
-                                        <Insets/>
-                                    </VBox.margin>
-                                </HBox>
-                                <TextArea fx:id="rawInputArea" promptText="Raw data goes here..." wrapText="true"
-                                          VBox.vgrow="ALWAYS">
-                                    <VBox.margin>
-                                        <Insets bottom="10.0" left="10.0" right="10.0"/>
-                                    </VBox.margin>
-                                </TextArea>
-                            </children>
-                        </VBox>
-                    </content>
-                </ScrollPane>
+                <VBox fx:id="rawVBox">
+                    <children>
+                        <ComboBox fx:id="rawInputTypeBox" maxHeight="30.0" visibleRowCount="5" VBox.vgrow="SOMETIMES">
+                            <VBox.margin>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </VBox.margin>
+                        </ComboBox>
+                    </children>
+                </VBox>
             </content>
         </Tab>
         <Tab fx:id="binaryTab" text="BINARY">

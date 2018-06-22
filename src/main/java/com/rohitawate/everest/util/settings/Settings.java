@@ -21,9 +21,6 @@ package com.rohitawate.everest.util.settings;
  * get overwritten by SettingsLoader.
  */
 public class Settings {
-    public static String responseAreaFont = "\"Liberation Mono\"";
-    public static int responseAreaFontSize = 18;
-
     public static boolean connectionTimeOutEnable = false;
     public static int connectionTimeOut = 10000;
 
@@ -31,5 +28,8 @@ public class Settings {
     public static int connectionReadTimeOut = 30000;
 
     public static String theme = "Adreana";
+    public static String syntaxTheme = "Moondust";
     public static int showHistoryRange = 7;
+
+    public static boolean editorWrapText = false;
 }

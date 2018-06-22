@@ -43,10 +43,7 @@ public class SettingsLoader implements Runnable {
 
             System.out.println("Settings file found. Loading settings... ");
 
-            nodes = EverestUtilities.mapper.readTree(settingsFile);
-
-            Settings.responseAreaFont = setStringSetting(Settings.responseAreaFont, "responseAreaFont");
-            Settings.responseAreaFontSize = setIntegerSetting(Settings.responseAreaFontSize, "responseAreaFontSize");
+            nodes = EverestUtilities.jsonMapper.readTree(settingsFile);
 
             Settings.connectionTimeOutEnable = setBooleanSetting(Settings.connectionTimeOutEnable, "connectionTimeOutEnable");
             if (Settings.connectionTimeOutEnable)
@@ -56,7 +53,10 @@ public class SettingsLoader implements Runnable {
             if (Settings.connectionReadTimeOutEnable)
                 Settings.connectionReadTimeOut = setIntegerSetting(Settings.connectionReadTimeOut, "connectionReadTimeOut");
 
+            Settings.editorWrapText = setBooleanSetting(Settings.editorWrapText, "editorWrapText");
+
             Settings.theme = EverestUtilities.trimString(setStringSetting(Settings.theme, "theme"));
+            Settings.syntaxTheme = EverestUtilities.trimString(setStringSetting(Settings.syntaxTheme, "syntaxTheme"));
             Settings.showHistoryRange = setIntegerSetting(Settings.showHistoryRange, "showHistoryRange");
         } catch (IOException IOE) {
             Services.loggingService.logInfo("Settings file not found. Using defaults.", LocalDateTime.now());

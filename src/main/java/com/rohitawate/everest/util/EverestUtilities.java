@@ -28,11 +28,11 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
 public class EverestUtilities {
-    public static ObjectMapper mapper;
+    public static ObjectMapper jsonMapper;
 
     static {
-        mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        jsonMapper = new ObjectMapper();
+        jsonMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
     }
 
     /**

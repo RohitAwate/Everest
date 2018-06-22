@@ -43,7 +43,7 @@ public class SettingsLoader implements Runnable {
 
             System.out.println("Settings file found. Loading settings... ");
 
-            nodes = EverestUtilities.mapper.readTree(settingsFile);
+            nodes = EverestUtilities.jsonMapper.readTree(settingsFile);
 
             Settings.connectionTimeOutEnable = setBooleanSetting(Settings.connectionTimeOutEnable, "connectionTimeOutEnable");
             if (Settings.connectionTimeOutEnable)

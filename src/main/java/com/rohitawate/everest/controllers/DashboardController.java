@@ -68,14 +68,14 @@ public class DashboardController implements Initializable {
     @FXML
     TextField addressField;
     @FXML
-    ComboBox<String> httpMethodBox;
+    ComboBox<String> httpMethodBox, responseTypeBox;
     @FXML
     private VBox responseBox, loadingLayer, promptLayer, errorLayer, paramsBox;
     @FXML
     private HBox responseDetails;
     @FXML
     private Label statusCode, statusCodeDescription, responseTime,
-            responseSize, errorTitle, errorDetails, responseType;
+            responseSize, errorTitle, errorDetails;
     @FXML
     private JFXButton cancelButton, copyBodyButton;
     @FXML
@@ -155,6 +155,30 @@ public class DashboardController implements Initializable {
             responseArea.copy();
             responseArea.deselect();
             snackbar.show("Response body copied to clipboard.", 5000);
+        });
+
+        responseTypeBox.getItems().addAll("JSON", "XML", "HTML", "PLAIN TEXT");
+
+        responseTypeBox.valueProperty().addListener(change -> {
+            String type = responseTypeBox.getValue();
+            try {
+                switch (type) {
+                    case "JSON":
+                        JsonNode node = EverestUtilities.jsonMapper.readTree(responseArea.getText());
+                        responseArea.setText(EverestUtilities.jsonMapper.writeValueAsString(node), HighlightMode.JSON);
+                        break;
+                    case "XML":
+                        responseArea.setText(responseArea.getText(), HighlightMode.XML);
+                        break;
+                    case "HTML":
+                        responseArea.setText(responseArea.getText(), HighlightMode.HTML);
+                        break;
+                    default:
+                        responseArea.setText(responseArea.getText(), HighlightMode.PLAIN);
+                }
+            } catch (IOException e) {
+                Services.loggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
+            }
         });
 
         errorTitle.setText("Oops... That's embarrassing!");
@@ -388,26 +412,26 @@ public class DashboardController implements Initializable {
 
                 switch (type.toLowerCase()) {
                     case "application/json":
-                        responseType.setText("JSON");
-                        JsonNode node = EverestUtilities.mapper.readTree(responseBody);
-                        responseArea.setText(EverestUtilities.mapper.writeValueAsString(node), HighlightMode.JSON);
+                        responseTypeBox.setValue("JSON");
+                        JsonNode node = EverestUtilities.jsonMapper.readTree(responseBody);
+                        responseArea.setText(EverestUtilities.jsonMapper.writeValueAsString(node), HighlightMode.JSON);
                         visualizerTab.setDisable(false);
                         visualizer.populate(node);
                         break;
                     case "application/xml":
-                        responseType.setText("XML");
-                        responseArea.setText(EverestUtilities.mapper.writeValueAsString(responseBody), HighlightMode.XML);
+                        responseTypeBox.setValue("XML");
+                        responseArea.setText(responseBody, HighlightMode.XML);
                         break;
                     case "text/html":
-                        responseType.setText("HTML");
+                        responseTypeBox.setValue("HTML");
                         responseArea.setText(responseBody, HighlightMode.HTML);
                         break;
                     default:
-                        responseType.setText("PLAIN TEXT");
+                        responseTypeBox.setValue("PLAIN TEXT");
                         responseArea.setText(responseBody, HighlightMode.PLAIN);
                 }
             } else {
-                responseType.setText("PLAIN");
+                responseTypeBox.setValue("PLAIN");
                 responseArea.setText("No body found in the response.", HighlightMode.PLAIN);
             }
         } catch (Exception e) {

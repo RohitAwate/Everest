@@ -66,7 +66,7 @@ Everest uses Maven, so building from the source code is very simple. You need to
 1. Clone the repository: `git clone https://github.com/RohitAwate/Everest.git`
 2. Enter the repository: `cd Everest`
 3. Build a binary: `mvn package`
-4. Run the binary: `java -jar target\Everest-Alpha-1.X.jar` replacing 'X' with the current version.
+4. Run the binary: `java -jar target/Everest-Alpha-1.X.jar` replacing 'X' with the current version.
 
 # Suggestions and improvements
 Use these options to reach me:

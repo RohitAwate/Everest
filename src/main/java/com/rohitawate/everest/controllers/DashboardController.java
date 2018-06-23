@@ -210,7 +210,7 @@ public class DashboardController implements Initializable {
         }
 
         try {
-            String address = addressField.getText();
+            String address = addressField.getText().trim();
 
             if (address.equals("")) {
                 promptLayer.setVisible(true);
@@ -221,9 +221,11 @@ public class DashboardController implements Initializable {
             // Prepends "https://" to the address if not already done.
             if (!(address.startsWith("https://") || address.startsWith("http://"))) {
                 address = "https://" + address;
-                addressField.setText(address);
                 responseArea.requestFocus();
             }
+
+            // Set again in case the address is manipulated by the above logic
+            addressField.setText(address);
 
             switch (httpMethodBox.getValue()) {
                 case "GET":

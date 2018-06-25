@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util.settings;
+package com.rohitawate.everest.logging;
 
-/**
- * Holds default settings values which may
- * get overwritten by SettingsLoader.
- */
-public class Settings {
-    public static boolean connectionTimeOutEnable = false;
-    public static int connectionTimeOut = 10000;
+public enum Level {
+    SEVERE, WARNING, INFO;
 
-    public static boolean connectionReadTimeOutEnable = false;
-    public static int connectionReadTimeOut = 30000;
+    int getValue() {
+        if (this.equals(SEVERE))
+            return 3;
+        else if (this.equals(WARNING))
+            return 2;
+        else
+            return 1;
+    }
 
-    public static String theme = "Adreana";
-    public static String syntaxTheme = "Moondust";
-    public static int showHistoryRange = 7;
-
-    public static boolean editorWrapText = false;
+    boolean greaterThanEqualTo(Level level) {
+        return this.getValue() >= level.getValue();
+    }
 }

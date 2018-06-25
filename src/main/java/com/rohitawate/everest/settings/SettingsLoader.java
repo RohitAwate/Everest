@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util.settings;
+package com.rohitawate.everest.settings;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.rohitawate.everest.util.EverestUtilities;
-import com.rohitawate.everest.util.Services;
+import com.rohitawate.everest.misc.EverestUtilities;
+import com.rohitawate.everest.misc.Services;
 
 import java.io.File;
 import java.io.IOException;

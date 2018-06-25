@@ -16,8 +16,8 @@
 
 package com.rohitawate.everest.controllers;
 
-import com.rohitawate.everest.util.Services;
-import com.rohitawate.everest.util.themes.ThemeManager;
+import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.misc.ThemeManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;

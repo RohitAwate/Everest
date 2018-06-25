@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util.themes;
+package com.rohitawate.everest.misc;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
-import com.rohitawate.everest.util.Services;
-import com.rohitawate.everest.util.settings.Settings;
+import com.rohitawate.everest.settings.Settings;
 import javafx.scene.Parent;
 
 import java.io.File;

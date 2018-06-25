@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util;
+package com.rohitawate.everest.misc;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.rohitawate.everest.controllers.HomeWindowController;
+import com.rohitawate.everest.history.HistoryManager;
+import com.rohitawate.everest.logging.Level;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.requestmanager.RequestManagersPool;
-import com.rohitawate.everest.util.history.HistoryManager;
-import com.rohitawate.everest.util.logging.Level;
-import com.rohitawate.everest.util.logging.LoggingService;
 
 import java.util.concurrent.Executor;
 

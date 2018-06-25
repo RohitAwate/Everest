@@ -19,7 +19,7 @@ import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.models.requests.EverestRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
-import com.rohitawate.everest.util.settings.Settings;
+import com.rohitawate.everest.settings.Settings;
 import javafx.concurrent.Service;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;

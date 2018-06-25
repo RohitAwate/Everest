@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util;
+package com.rohitawate.everest.misc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

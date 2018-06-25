@@ -15,10 +15,10 @@
  */
 package com.rohitawate.everest;
 
-import com.rohitawate.everest.util.EverestUtilities;
-import com.rohitawate.everest.util.Services;
-import com.rohitawate.everest.util.settings.SettingsLoader;
-import com.rohitawate.everest.util.themes.ThemeManager;
+import com.rohitawate.everest.misc.EverestUtilities;
+import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.misc.ThemeManager;
+import com.rohitawate.everest.settings.SettingsLoader;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;

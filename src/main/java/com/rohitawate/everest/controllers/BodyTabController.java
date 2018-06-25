@@ -18,10 +18,10 @@ package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
+import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.DashboardState;
 import com.rohitawate.everest.models.requests.DataDispatchRequest;
-import com.rohitawate.everest.util.Services;
-import com.rohitawate.everest.util.themes.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util.history;
+package com.rohitawate.everest.history;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rohitawate.everest.misc.EverestUtilities;
+import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.models.DashboardState;
-import com.rohitawate.everest.util.EverestUtilities;
-import com.rohitawate.everest.util.Services;
-import com.rohitawate.everest.util.settings.Settings;
+import com.rohitawate.everest.settings.Settings;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;

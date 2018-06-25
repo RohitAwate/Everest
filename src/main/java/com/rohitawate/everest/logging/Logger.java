@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util.logging;
+package com.rohitawate.everest.logging;
 
 import java.io.*;
 import java.time.LocalDate;

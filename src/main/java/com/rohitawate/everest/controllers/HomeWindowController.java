@@ -17,10 +17,10 @@
 package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
+import com.rohitawate.everest.misc.KeyMap;
+import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.DashboardState;
-import com.rohitawate.everest.util.KeyMap;
-import com.rohitawate.everest.util.Services;
-import com.rohitawate.everest.util.themes.ThemeManager;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;

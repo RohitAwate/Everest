@@ -20,7 +20,7 @@ import com.rohitawate.everest.controllers.codearea.highlighters.Highlighter;
 import com.rohitawate.everest.controllers.codearea.highlighters.JSONHighlighter;
 import com.rohitawate.everest.controllers.codearea.highlighters.PlaintextHighlighter;
 import com.rohitawate.everest.controllers.codearea.highlighters.XMLHighlighter;
-import com.rohitawate.everest.util.settings.Settings;
+import com.rohitawate.everest.settings.Settings;
 import javafx.geometry.Insets;
 import org.fxmisc.richtext.CodeArea;
 

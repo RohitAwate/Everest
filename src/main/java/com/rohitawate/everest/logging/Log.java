@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util.logging;
+package com.rohitawate.everest.logging;
 
-public enum Level {
-    SEVERE, WARNING, INFO;
-
-    int getValue() {
-        if (this.equals(SEVERE))
-            return 3;
-        else if (this.equals(WARNING))
-            return 2;
-        else
-            return 1;
-    }
-
-    boolean greaterThanEqualTo(Level level) {
-        return this.getValue() >= level.getValue();
-    }
+class Log {
+    Level level;
+    String message;
+    String time;
+    Exception exception;
 }

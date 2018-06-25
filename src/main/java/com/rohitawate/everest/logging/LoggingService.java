@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util.logging;
+package com.rohitawate.everest.logging;
 
-import com.rohitawate.everest.util.Services;
+import com.rohitawate.everest.misc.Services;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

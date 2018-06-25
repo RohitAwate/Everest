@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.util;
+package com.rohitawate.everest.misc;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;

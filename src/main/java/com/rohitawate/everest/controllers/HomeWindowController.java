@@ -16,7 +16,9 @@
 
 package com.rohitawate.everest.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.jfoenix.controls.JFXButton;
+import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
@@ -39,7 +41,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -243,39 +246,36 @@ public class HomeWindowController implements Initializable {
     }
 
     private void saveState() {
-        List<DashboardState> dashboardStates = new ArrayList<>();
+        ArrayList<DashboardState> dashboardStates = new ArrayList<>();
 
         // Get the states of all the tabs
         for (DashboardController controller : tabControllerMap.values())
             dashboardStates.add(controller.getState());
 
         try {
-
-            File configFolder = new File("Everest/config/");
-            if (!configFolder.exists())
-                configFolder.mkdirs();
-
-            OutputStream fileStream = new FileOutputStream("Everest/config/everest.state");
-            ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
-            objectStream.writeObject(dashboardStates);
-            objectStream.close();
-            fileStream.close();
-            Services.loggingService.logInfo("Application state was saved successfully.", LocalDateTime.now());
+            File stateFile = new File("Everest/config/state.json");
+            EverestUtilities.jsonMapper.writeValue(stateFile, dashboardStates);
+            Services.loggingService.logInfo("Application state saved.", LocalDateTime.now());
         } catch (IOException e) {
-            Services.loggingService.logSevere("Failed to save the application's state.", e, LocalDateTime.now());
+            Services.loggingService.logSevere("Failed to save application state.", e, LocalDateTime.now());
         }
     }
 
     private void recoverState() {
         try {
-            InputStream fileStream = new FileInputStream("Everest/config/everest.state");
-            ObjectInputStream objectStream = new ObjectInputStream(fileStream);
+            File stateFile = new File("Everest/config/state.json");
 
-            Services.loggingService.logInfo("Application state file found.", LocalDateTime.now());
+            if (!stateFile.exists()) {
+                Services.loggingService.logInfo("Application state file not found. Loading default state.", LocalDateTime.now());
+                addTab();
+                return;
+            }
 
-            List<DashboardState> dashboardStates = (List<DashboardState>) objectStream.readObject();
-            objectStream.close();
-            fileStream.close();
+            ArrayList<DashboardState> dashboardStates = EverestUtilities.jsonMapper
+                    .reader()
+                    .forType(new TypeReference<ArrayList<DashboardState>>() {
+                    })
+                    .readValue(stateFile);
 
             if (dashboardStates.size() > 0) {
                 for (DashboardState dashboardState : dashboardStates)
@@ -283,15 +283,12 @@ public class HomeWindowController implements Initializable {
             } else {
                 addTab();
             }
-        } catch (FileNotFoundException e) {
-            Services.loggingService.logWarning("Application state file not found. Loading default state.", e, LocalDateTime.now());
-            addTab();
-        } catch (IOException | ClassNotFoundException e) {
-            Services.loggingService.logWarning("Application state file is possibly corrupted. Could not recover the state.\nLoading default state.", e, LocalDateTime.now());
-            addTab();
+        } catch (IOException e) {
+            Services.loggingService.logWarning("Application state file is possibly corrupted. State recovery failed. Loading default state.", e, LocalDateTime.now());
         } finally {
             Services.loggingService.logInfo("Application loaded.", LocalDateTime.now());
         }
+
     }
 
     public void addHistoryItem(DashboardState state) {

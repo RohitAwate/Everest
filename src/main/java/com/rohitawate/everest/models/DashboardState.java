@@ -18,17 +18,17 @@ package com.rohitawate.everest.models;
 
 import com.rohitawate.everest.models.requests.DataDispatchRequest;
 
-import java.io.Serializable;
 import java.util.HashMap;
 
 /**
  * Convenience class to abstract the state of the application.
  */
-public class DashboardState extends DataDispatchRequest implements Serializable {
+public class DashboardState extends DataDispatchRequest {
     private HashMap<String, String> params;
     private String httpMethod;
 
     public DashboardState() {
+
     }
 
     /*

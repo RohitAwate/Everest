@@ -101,14 +101,17 @@ public class URLTabController implements Initializable {
         }
     }
 
-    public HashMap<String, String> getStringTuples() {
+    public HashMap<String, String> getStringTuples(boolean onlyChecked) {
         if (tuples == null)
             tuples = new HashMap<>();
 
         tuples.clear();
         for (StringKeyValueFieldController controller : controllers) {
-            if (controller.isChecked())
-                tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+            if (onlyChecked)
+                if (!controller.isChecked())
+                    continue;
+
+            tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
         return tuples;
     }

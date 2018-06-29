@@ -22,7 +22,6 @@ import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
-import com.rohitawate.everest.models.DashboardState;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
@@ -309,9 +308,9 @@ public class HomeWindowController implements Initializable {
 
             controller = loader.getController();
 
-            controller.setRequestType(state.getHttpMethod());
+            controller.setRequestType(state.httpMethod);
 
-            controller.setAddress(state.getTarget().toString());
+            controller.setAddress(state.target);
             controller.setDashboardState(state);
 
             if (appendToStart)

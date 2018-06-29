@@ -26,7 +26,6 @@ import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
-import com.rohitawate.everest.models.DashboardState;
 import com.rohitawate.everest.models.requests.DELETERequest;
 import com.rohitawate.everest.models.requests.DataDispatchRequest;
 import com.rohitawate.everest.models.requests.GETRequest;
@@ -114,14 +113,14 @@ public class DashboardController implements Initializable {
             headerTabController = headerTabLoader.getController();
             headersTab.setContent(headerTabContent);
 
-            // Loading the body tab
+            // Loading the rawBody tab
             FXMLLoader bodyTabLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/BodyTab.fxml"));
             Parent bodyTabContent = bodyTabLoader.load();
             ThemeManager.setTheme(bodyTabContent);
             bodyTabController = bodyTabLoader.getController();
             bodyTab.setContent(bodyTabContent);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
+            Services.loggingService.logSevere("Could not load headers/rawBody tabs.", e, LocalDateTime.now());
         }
 
         snackbar = new JFXSnackbar(dashboard);
@@ -154,7 +153,7 @@ public class DashboardController implements Initializable {
             responseArea.selectAll();
             responseArea.copy();
             responseArea.deselect();
-            snackbar.show("Response body copied to clipboard.", 5000);
+            snackbar.show("Response rawBody copied to clipboard.", 5000);
         });
 
         responseTypeBox.getItems().addAll("JSON", "XML", "HTML", "PLAIN TEXT");
@@ -233,7 +232,7 @@ public class DashboardController implements Initializable {
                         getRequest = new GETRequest();
 
                     getRequest.setTarget(address);
-                    getRequest.setHeaders(headerTabController.getSelectedHeaders());
+                    getRequest.setHeaders(headerTabController.getHeaders(true));
 
                     requestManager = Services.pool.get();
                     requestManager.setRequest(getRequest);
@@ -250,7 +249,7 @@ public class DashboardController implements Initializable {
 
                     dataRequest.setRequestType(httpMethodBox.getValue());
                     dataRequest.setTarget(address);
-                    dataRequest.setHeaders(headerTabController.getSelectedHeaders());
+                    dataRequest.setHeaders(headerTabController.getHeaders(true));
 
                     if (bodyTabController.rawTab.isSelected()) {
                         String contentType;
@@ -273,14 +272,14 @@ public class DashboardController implements Initializable {
                         dataRequest.setContentType(contentType);
                         dataRequest.setBody(bodyTabController.rawInputArea.getText());
                     } else if (bodyTabController.formTab.isSelected()) {
-                        dataRequest.setStringTuples(bodyTabController.formDataTabController.getStringTuples());
-                        dataRequest.setFileTuples(bodyTabController.formDataTabController.getFileTuples());
+                        dataRequest.setStringTuples(bodyTabController.formDataTabController.getStringTuples(true));
+                        dataRequest.setFileTuples(bodyTabController.formDataTabController.getFileTuples(true));
                         dataRequest.setContentType(MediaType.MULTIPART_FORM_DATA);
                     } else if (bodyTabController.binaryTab.isSelected()) {
                         dataRequest.setBody(bodyTabController.filePathField.getText());
                         dataRequest.setContentType(MediaType.APPLICATION_OCTET_STREAM);
                     } else if (bodyTabController.urlTab.isSelected()) {
-                        dataRequest.setStringTuples(bodyTabController.urlTabController.getStringTuples());
+                        dataRequest.setStringTuples(bodyTabController.urlTabController.getStringTuples(true));
                         dataRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
                     }
 
@@ -296,7 +295,7 @@ public class DashboardController implements Initializable {
                         deleteRequest = new DELETERequest();
 
                     deleteRequest.setTarget(address);
-                    deleteRequest.setHeaders(headerTabController.getSelectedHeaders());
+                    deleteRequest.setHeaders(headerTabController.getHeaders(true));
 
                     requestManager = Services.pool.delete();
                     requestManager.setRequest(deleteRequest);
@@ -354,7 +353,7 @@ public class DashboardController implements Initializable {
         if (requestManager.getClass() == DataDispatchRequestManager.class) {
             if (throwable.getCause() != null && throwable.getCause().getClass() == IllegalArgumentException.class) {
                 errorTitle.setText("Did you forget something?");
-                errorDetails.setText("Please specify at least one body part for your " + httpMethodBox.getValue() + " request.");
+                errorDetails.setText("Please specify at least one rawBody part for your " + httpMethodBox.getValue() + " request.");
             } else if (throwable.getClass() == FileNotFoundException.class) {
                 errorTitle.setText("File(s) not found:");
                 errorDetails.setText(throwable.getMessage());
@@ -434,7 +433,7 @@ public class DashboardController implements Initializable {
                 }
             } else {
                 responseTypeBox.setValue("PLAIN");
-                responseArea.setText("No body found in the response.", HighlightMode.PLAIN);
+                responseArea.setText("No rawBody found in the response.", HighlightMode.PLAIN);
             }
         } catch (Exception e) {
             snackbar.show("Response could not be parsed.", 5000);
@@ -468,14 +467,19 @@ public class DashboardController implements Initializable {
         }
     }
 
-    private HashMap<String, String> getParams() {
+    private HashMap<String, String> getParams(boolean onlyChecked) {
         if (params == null)
             params = new HashMap<>();
 
         params.clear();
-        for (StringKeyValueFieldController controller : paramsControllers)
-            if (controller.isChecked())
-                params.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+        for (StringKeyValueFieldController controller : paramsControllers) {
+            if (onlyChecked)
+                if (!controller.isChecked())
+                    continue;
+
+            params.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+        }
+
         return params;
     }
 
@@ -540,22 +544,17 @@ public class DashboardController implements Initializable {
             case "POST":
             case "PUT":
             case "PATCH":
-                dashboardState = new DashboardState(bodyTabController.getBasicRequest(httpMethodBox.getValue()));
-                dashboardState.setHeaders(headerTabController.getSelectedHeaders());
+                dashboardState = bodyTabController.getState();
                 break;
             default:
                 // For GET, DELETE requests
                 dashboardState = new DashboardState();
         }
 
-        try {
-            dashboardState.setTarget(addressField.getText());
-        } catch (MalformedURLException e) {
-            Services.loggingService.logInfo("Dashboard state was saved with an invalid URL.", LocalDateTime.now());
-        }
-        dashboardState.setHttpMethod(httpMethodBox.getValue());
-        dashboardState.setHeaders(headerTabController.getSelectedHeaders());
-        dashboardState.setParams(getParams());
+        dashboardState.target = addressField.getText();
+        dashboardState.httpMethod = httpMethodBox.getValue();
+        dashboardState.headers = headerTabController.getHeaders(false);
+        dashboardState.params = getParams(false);
 
         return dashboardState;
     }
@@ -563,23 +562,34 @@ public class DashboardController implements Initializable {
     /**
      * Sets the Dashboard to the given application state.
      *
-     * @param dashboardState - State of the dashboard
+     * @param state - State of the dashboard
      */
-    public void setState(DashboardState dashboardState) {
-        if (dashboardState.getTarget() != null)
-            addressField.setText(dashboardState.getTarget().toString());
+    public void setState(DashboardState state) {
+        boolean validMethod = false;
+        for (String method : httpMethods) {
+            if (state.httpMethod.equals(method))
+                validMethod = true;
+        }
 
-        httpMethodBox.getSelectionModel().select(dashboardState.getHttpMethod());
+        if (!validMethod) {
+            Services.loggingService.logInfo("Application state file was tampered with. State could not be recovered.", LocalDateTime.now());
+            return;
+        }
 
-        if (dashboardState.getHeaders() != null)
-            for (Entry entry : dashboardState.getHeaders().entrySet())
+        httpMethodBox.setValue(state.httpMethod);
+
+        if (state.target != null)
+            addressField.setText(state.target);
+
+        if (state.headers != null)
+            for (Entry entry : state.headers.entrySet())
                 headerTabController.addHeader(entry.getKey().toString(), entry.getValue().toString());
 
-        if (dashboardState.getParams() != null)
-            for (Entry entry : dashboardState.getParams().entrySet())
+        if (state.params != null)
+            for (Entry entry : state.params.entrySet())
                 addParamField(entry.getKey().toString(), entry.getValue().toString());
 
         if (!(httpMethodBox.getValue().equals("GET") || httpMethodBox.getValue().equals("DELETE")))
-            bodyTabController.setState(dashboardState);
+            bodyTabController.setState(state);
     }
 }

@@ -156,26 +156,33 @@ public class FormDataTabController implements Initializable {
         }
     }
 
-    public HashMap<String, String> getStringTuples() {
+    public HashMap<String, String> getStringTuples(boolean onlyChecked) {
         if (stringMap == null)
             stringMap = new HashMap<>();
 
         stringMap.clear();
         for (StringKeyValueFieldController controller : stringControllers) {
-            if (controller.isChecked())
-                stringMap.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+            if (onlyChecked)
+                if (!controller.isChecked())
+                    continue;
+
+            stringMap.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
+
         return stringMap;
     }
 
-    public HashMap<String, String> getFileTuples() {
+    public HashMap<String, String> getFileTuples(boolean onlyChecked) {
         if (fileMap == null)
             fileMap = new HashMap<>();
 
         fileMap.clear();
         for (FileKeyValueFieldController controller : fileControllers) {
-            if (controller.isChecked())
-                fileMap.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+            if (onlyChecked)
+                if (!controller.isChecked())
+                    continue;
+
+            fileMap.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
         return fileMap;
     }

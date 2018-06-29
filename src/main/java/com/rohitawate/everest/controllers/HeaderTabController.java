@@ -103,16 +103,20 @@ public class HeaderTabController implements Initializable {
     }
 
     /**
-     * Returns a map of the selected headers.
+     * Returns a map of the checked/unchecked headers.
+     * @param onlyChecked
      */
-    public HashMap<String, String> getSelectedHeaders() {
+    public HashMap<String, String> getHeaders(boolean onlyChecked) {
         if (headers == null)
             headers = new HashMap<>();
 
         headers.clear();
         for (StringKeyValueFieldController controller : controllers) {
-            if (controller.isChecked())
-                headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+            if (onlyChecked)
+                if (!controller.isChecked())
+                    continue;
+
+            headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
         return headers;
     }

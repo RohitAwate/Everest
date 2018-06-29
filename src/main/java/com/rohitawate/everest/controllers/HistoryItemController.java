@@ -16,14 +16,16 @@
 
 package com.rohitawate.everest.controllers;
 
-import com.rohitawate.everest.models.DashboardState;
+import com.rohitawate.everest.misc.Services;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 
 import javax.ws.rs.core.MediaType;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -69,54 +71,60 @@ public class HistoryItemController implements Initializable {
         String comparisonString;
 
         // Checks if matches with target
-        comparisonString = dashboardState.getTarget().toString().toLowerCase();
+        comparisonString = dashboardState.target.toLowerCase();
         if (comparisonString.contains(searchString))
             return 10;
 
-        // Checks if matches with target's hostname
-        comparisonString = dashboardState.getTarget().getHost().toLowerCase();
-        if (comparisonString.contains(searchString))
-            return 10;
+        try {
+            URL url = new URL(dashboardState.target);
 
-        // Checks if matches with target's path
-        comparisonString = dashboardState.getTarget().getPath().toLowerCase();
-        if (comparisonString.contains(searchString))
-            return 9;
+            // Checks if matches with target's hostname
+            comparisonString = url.getHost().toLowerCase();
+            if (comparisonString.contains(searchString))
+                return 10;
+
+            // Checks if matches with target's path
+            comparisonString = url.getPath().toLowerCase();
+            if (comparisonString.contains(searchString))
+                return 9;
+        } catch (MalformedURLException e) {
+            Services.loggingService.logInfo("Failed to parse URL while calculating relativity index.", LocalDateTime.now());
+        }
 
         // Checks if matches with HTTP method
-        comparisonString = dashboardState.getHttpMethod().toLowerCase();
+        comparisonString = dashboardState.httpMethod.toLowerCase();
         if (comparisonString.contains(searchString))
             return 7;
 
         // Checks for a match in the params
-        for (Map.Entry param : dashboardState.getParams().entrySet()) {
+        for (Map.Entry param : dashboardState.params.entrySet()) {
             if (param.getKey().toString().toLowerCase().contains(searchString) ||
                     param.getKey().toString().toLowerCase().contains(searchString))
                 return 5;
         }
 
         // Checks for a match in the headers
-        for (Map.Entry header : dashboardState.getHeaders().entrySet()) {
+        for (Map.Entry header : dashboardState.headers.entrySet()) {
             if (header.getKey().toString().toLowerCase().contains(searchString) ||
                     header.getValue().toString().toLowerCase().contains(searchString))
                 return 6;
         }
 
-        if (dashboardState.getHttpMethod().equals("POST") || dashboardState.getHttpMethod().equals("PUT")) {
-            switch (dashboardState.getContentType()) {
+        if (dashboardState.httpMethod.equals("POST") || dashboardState.httpMethod.equals("PUT")) {
+            switch (dashboardState.contentType) {
                 case MediaType.TEXT_PLAIN:
                 case MediaType.APPLICATION_JSON:
                 case MediaType.APPLICATION_XML:
                 case MediaType.TEXT_HTML:
                 case MediaType.APPLICATION_OCTET_STREAM:
-                    // Checks for match in body of the request
-                    comparisonString = dashboardState.getBody().toLowerCase();
+                    // Checks for match in rawBody of the request
+                    comparisonString = dashboardState.rawBody.toLowerCase();
                     if (comparisonString.contains(searchString))
                         return 8;
                     break;
                 case MediaType.APPLICATION_FORM_URLENCODED:
                     // Checks for match in string tuples
-                    for (Map.Entry tuple : dashboardState.getStringTuples().entrySet()) {
+                    for (Map.Entry tuple : dashboardState.urlStringTuples.entrySet()) {
                         if (tuple.getKey().toString().toLowerCase().contains(searchString) ||
                                 tuple.getValue().toString().toLowerCase().contains(searchString))
                             return 8;
@@ -124,13 +132,13 @@ public class HistoryItemController implements Initializable {
                     break;
                 case MediaType.MULTIPART_FORM_DATA:
                     // Checks for match in string and file tuples
-                    for (Map.Entry tuple : dashboardState.getStringTuples().entrySet()) {
+                    for (Map.Entry tuple : dashboardState.formStringTuples.entrySet()) {
                         if (tuple.getKey().toString().toLowerCase().contains(searchString) ||
                                 tuple.getValue().toString().toLowerCase().contains(searchString))
                             return 8;
                     }
 
-                    for (Map.Entry tuple : dashboardState.getFileTuples().entrySet()) {
+                    for (Map.Entry tuple : dashboardState.formFileTuples.entrySet()) {
                         if (tuple.getKey().toString().toLowerCase().contains(searchString) ||
                                 tuple.getValue().toString().toLowerCase().contains(searchString))
                             return 8;

@@ -18,16 +18,15 @@ package com.rohitawate.everest.history;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rohitawate.everest.controllers.DashboardState;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
-import com.rohitawate.everest.models.DashboardState;
 import com.rohitawate.everest.settings.Settings;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -61,7 +60,7 @@ public class HistoryManager {
     /**
      * Creates and initializes the database with necessary tables if not already done.
      *
-     * @throws IOException - If unable to establish a connection to the database.
+     * @throws IOException  - If unable to establish a connection to the database.
      * @throws SQLException - If invalid statement is executed on the database.
      */
     private void initDatabase() throws IOException, SQLException {
@@ -126,18 +125,14 @@ public class HistoryManager {
             while (resultSet.next()) {
                 state = new DashboardState();
 
-                try {
-                    state.setTarget(resultSet.getString("Target"));
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+                state.target = resultSet.getString("Target");
 
                 int requestID = resultSet.getInt("ID");
-                state.setHeaders(getRequestHeaders(requestID));
-                state.setParams(getTuples(requestID, "Param"));
-                state.setHttpMethod(resultSet.getString("Type"));
+                state.headers = getRequestHeaders(requestID);
+                state.params = getTuples(requestID, "Param");
+                state.httpMethod = resultSet.getString("Type");
 
-                if (!(state.getHttpMethod().equals("GET") || state.getHttpMethod().equals("DELETE"))) {
+                if (!(state.httpMethod.equals("GET") || state.httpMethod.equals("DELETE"))) {
                     // Retrieves request body ContentType for querying corresponding table
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestContentType").toString()));
                     statement.setInt(1, requestID);
@@ -148,7 +143,7 @@ public class HistoryManager {
                     if (RS.next())
                         contentType = RS.getString("ContentType");
 
-                    state.setContentType(contentType);
+                    state.contentType = contentType;
 
                     // Retrieves body from corresponding table
                     switch (contentType) {
@@ -163,14 +158,14 @@ public class HistoryManager {
                             RS = statement.executeQuery();
 
                             if (RS.next())
-                                state.setBody(RS.getString("Body"));
+                                state.rawBody = RS.getString("Body");
                             break;
                         case MediaType.APPLICATION_FORM_URLENCODED:
-                            state.setStringTuples(getTuples(requestID, "String"));
+                            state.urlStringTuples = getTuples(requestID, "String");
                             break;
                         case MediaType.MULTIPART_FORM_DATA:
-                            state.setStringTuples(getTuples(requestID, "String"));
-                            state.setFileTuples(getTuples(requestID, "File"));
+                            state.formStringTuples = getTuples(requestID, "String");
+                            state.formFileTuples = getTuples(requestID, "File");
                             break;
                     }
                 }
@@ -249,8 +244,8 @@ public class HistoryManager {
 
             int lastRequestID = -1;
             if (RS.next()) {
-                if (!(newState.getHttpMethod().equals(RS.getString("Type"))) ||
-                        !(newState.getTarget().toString().equals(RS.getString("Target"))) ||
+                if (!(newState.httpMethod.equals(RS.getString("Type"))) ||
+                        !(newState.target.equals(RS.getString("Target"))) ||
                         !(LocalDate.now().equals(LocalDate.parse(RS.getString("Date")))))
                     return false;
                 else
@@ -265,16 +260,16 @@ public class HistoryManager {
 
             // Checks for new or modified headers
             map = getRequestHeaders(lastRequestID);
-            if (!areMapsIdentical(map, newState.getHeaders()))
+            if (!areMapsIdentical(map, newState.headers))
                 return false;
 
             // Checks for new or modified params
             map = getTuples(lastRequestID, "Param");
-            if (!areMapsIdentical(map, newState.getParams()))
+            if (!areMapsIdentical(map, newState.params))
                 return false;
 
-            if (!(newState.getHttpMethod().equals("GET") || newState.getHttpMethod().equals("DELETE"))) {
-                switch (newState.getContentType()) {
+            if (!(newState.httpMethod.equals("GET") || newState.httpMethod.equals("DELETE"))) {
+                switch (newState.contentType) {
                     case MediaType.TEXT_PLAIN:
                     case MediaType.APPLICATION_JSON:
                     case MediaType.APPLICATION_XML:
@@ -286,22 +281,22 @@ public class HistoryManager {
                         RS = statement.executeQuery();
 
                         if (RS.next())
-                            if (!RS.getString("Body").equals(newState.getBody()))
+                            if (!RS.getString("Body").equals(newState.rawBody))
                                 return false;
 
                         break;
                     case MediaType.APPLICATION_FORM_URLENCODED:
                         // Checks for new or modified string tuples
                         map = getTuples(lastRequestID, "String");
-                        return areMapsIdentical(map, newState.getStringTuples());
+                        return areMapsIdentical(map, newState.urlStringTuples);
                     case MediaType.MULTIPART_FORM_DATA:
                         // Checks for new or modified string tuples
                         map = getTuples(lastRequestID, "String");
-                        boolean stringComparison = areMapsIdentical(map, newState.getStringTuples());
+                        boolean stringComparison = areMapsIdentical(map, newState.formStringTuples);
 
                         // Checks for new or modified file tuples
                         map = getTuples(lastRequestID, "File");
-                        boolean fileComparison = areMapsIdentical(map, newState.getFileTuples());
+                        boolean fileComparison = areMapsIdentical(map, newState.formFileTuples);
 
                         return stringComparison && fileComparison;
                 }
@@ -343,8 +338,8 @@ public class HistoryManager {
                 statement =
                         conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequest").toString()));
 
-                statement.setString(1, state.getHttpMethod());
-                statement.setString(2, String.valueOf(state.getTarget()));
+                statement.setString(1, state.httpMethod);
+                statement.setString(2, String.valueOf(state.target));
                 statement.setString(3, LocalDate.now().toString());
 
                 statement.executeUpdate();
@@ -357,10 +352,10 @@ public class HistoryManager {
                 if (RS.next())
                     requestID = RS.getInt("MaxID");
 
-                if (state.getHeaders().size() > 0) {
+                if (state.headers.size() > 0) {
                     // Saves request headers
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveHeader").toString()));
-                    for (Entry entry : state.getHeaders().entrySet()) {
+                    for (Entry entry : state.headers.entrySet()) {
                         statement.setInt(1, requestID);
                         statement.setString(2, entry.getKey().toString());
                         statement.setString(3, entry.getValue().toString());
@@ -369,10 +364,10 @@ public class HistoryManager {
                     }
                 }
 
-                if (state.getParams().size() > 0) {
+                if (state.params.size() > 0) {
                     // Saves request parameters
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                    for (Entry entry : state.getParams().entrySet()) {
+                    for (Entry entry : state.params.entrySet()) {
                         statement.setInt(1, requestID);
                         statement.setString(2, "Param");
                         statement.setString(3, entry.getKey().toString());
@@ -382,16 +377,16 @@ public class HistoryManager {
                     }
                 }
 
-                if (!(state.getHttpMethod().equals("GET") || state.getHttpMethod().equals("DELETE"))) {
-                    // Maps the request to its ContentType for faster recovery
+                if (!(state.httpMethod.equals("GET") || state.httpMethod.equals("DELETE"))) {
+                    // Maps the request to its ContentType for faster retrieval
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequestContentPair").toString()));
                     statement.setInt(1, requestID);
-                    statement.setString(2, state.getContentType());
+                    statement.setString(2, state.contentType);
 
                     statement.executeUpdate();
 
                     // Determines where to fetch the body from, based on the ContentType
-                    switch (state.getContentType()) {
+                    switch (state.contentType) {
                         case MediaType.TEXT_PLAIN:
                         case MediaType.APPLICATION_JSON:
                         case MediaType.APPLICATION_XML:
@@ -400,12 +395,12 @@ public class HistoryManager {
                             // Saves the body in case of raw content, or the file location in case of binary
                             statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveBody").toString()));
                             statement.setInt(1, requestID);
-                            statement.setString(2, state.getBody());
+                            statement.setString(2, state.rawBody);
                             statement.executeUpdate();
                             break;
                         case MediaType.APPLICATION_FORM_URLENCODED:
-                            if (state.getStringTuples().size() > 0) {
-                                for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
+                            if (state.urlStringTuples.size() > 0) {
+                                for (Entry<String, String> entry : state.urlStringTuples.entrySet()) {
                                     // Saves the string tuples
                                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);
@@ -418,8 +413,8 @@ public class HistoryManager {
                             }
                             break;
                         case MediaType.MULTIPART_FORM_DATA:
-                            if (state.getStringTuples().size() > 0) {
-                                for (Entry<String, String> entry : state.getStringTuples().entrySet()) {
+                            if (state.formStringTuples.size() > 0) {
+                                for (Entry<String, String> entry : state.formStringTuples.entrySet()) {
                                     // Saves the string tuples
                                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);
@@ -431,8 +426,8 @@ public class HistoryManager {
                                 }
                             }
 
-                            if (state.getFileTuples().size() > 0) {
-                                for (Entry<String, String> entry : state.getFileTuples().entrySet()) {
+                            if (state.formFileTuples.size() > 0) {
+                                for (Entry<String, String> entry : state.formFileTuples.entrySet()) {
                                     // Saves the file tuples
                                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
                                     statement.setInt(1, requestID);

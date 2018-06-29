@@ -104,7 +104,7 @@ public class HeaderTabController implements Initializable {
 
     /**
      * Returns a map of the checked/unchecked headers.
-     * @param onlyChecked
+     * @param onlyChecked - Returns only the headers which are selected by the user
      */
     public HashMap<String, String> getHeaders(boolean onlyChecked) {
         if (headers == null)

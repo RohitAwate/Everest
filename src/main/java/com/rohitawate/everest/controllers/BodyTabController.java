@@ -20,7 +20,6 @@ import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
-import com.rohitawate.everest.models.requests.DataDispatchRequest;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -103,48 +102,6 @@ public class BodyTabController implements Initializable {
         }
     }
 
-    /**
-     * Returns a EverestRequest object initialized with the request rawBody.
-     */
-    public DataDispatchRequest getBasicRequest(String requestType) {
-        DataDispatchRequest request = new DataDispatchRequest(requestType);
-
-        // Raw and binary types get saved in Body.
-        // Form and URL encoded types use tuple objects
-        if (rawTab.isSelected()) {
-            String contentType;
-            switch (rawInputTypeBox.getValue()) {
-                case "PLAIN TEXT":
-                    contentType = MediaType.TEXT_PLAIN;
-                    break;
-                case "JSON":
-                    contentType = MediaType.APPLICATION_JSON;
-                    break;
-                case "XML":
-                    contentType = MediaType.APPLICATION_XML;
-                    break;
-                case "HTML":
-                    contentType = MediaType.TEXT_HTML;
-                    break;
-                default:
-                    contentType = MediaType.TEXT_PLAIN;
-            }
-            request.setContentType(contentType);
-            request.setBody(rawInputArea.getText());
-        } else if (formTab.isSelected()) {
-            request.setStringTuples(formDataTabController.getStringTuples(true));
-            request.setFileTuples(formDataTabController.getFileTuples(true));
-            request.setContentType(MediaType.MULTIPART_FORM_DATA);
-        } else if (binaryTab.isSelected()) {
-            request.setBody(filePathField.getText());
-            request.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        } else if (urlTab.isSelected()) {
-            request.setStringTuples(urlTabController.getStringTuples(true));
-            request.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        }
-        return request;
-    }
-
     @FXML
     private void browseFile() {
         FileChooser fileChooser = new FileChooser();
@@ -197,17 +154,20 @@ public class BodyTabController implements Initializable {
     }
 
     public void setState(DashboardState state) {
+        // Adding URL tab's tuples
+        if (state.urlStringTuples != null)
+            for (Entry<String, String> entry : state.urlStringTuples.entrySet())
+                urlTabController.addField(entry.getKey(), entry.getValue());
+
         // Adding Form tab's string tuples
-        for (Entry<String, String> entry : state.formStringTuples.entrySet())
-            formDataTabController.addStringField(entry.getKey(), entry.getValue());
+        if (state.formStringTuples != null)
+            for (Entry<String, String> entry : state.formStringTuples.entrySet())
+                formDataTabController.addStringField(entry.getKey(), entry.getValue());
 
         // Adding Form tab's file tuples
-        for (Entry<String, String> entry : state.formFileTuples.entrySet())
-            formDataTabController.addFileField(entry.getKey(), entry.getValue());
-
-        // Adding URL tab's tuples
-        for (Entry<String, String> entry : state.urlStringTuples.entrySet())
-            urlTabController.addField(entry.getKey(), entry.getValue());
+        if (state.formFileTuples != null)
+            for (Entry<String, String> entry : state.formFileTuples.entrySet())
+                formDataTabController.addFileField(entry.getKey(), entry.getValue());
 
         setRawTab(state);
 
@@ -217,21 +177,23 @@ public class BodyTabController implements Initializable {
     private void setRawTab(DashboardState state) {
         HighlightMode mode;
 
-        switch (state.rawBodyType) {
-            case "JSON":
-                mode = HighlightMode.JSON;
-                break;
-            case "XML":
-                mode = HighlightMode.XML;
-                break;
-            case "HTML":
-                mode = HighlightMode.HTML;
-                break;
-            default:
-                mode = HighlightMode.PLAIN;
+        if (state.rawBodyType != null && state.rawBody != null) {
+            switch (state.rawBodyType) {
+                case "JSON":
+                    mode = HighlightMode.JSON;
+                    break;
+                case "XML":
+                    mode = HighlightMode.XML;
+                    break;
+                case "HTML":
+                    mode = HighlightMode.HTML;
+                    break;
+                default:
+                    mode = HighlightMode.PLAIN;
+            }
+            rawInputArea.setText(state.rawBody, mode);
+        } else {
+            rawInputArea.setText("", HighlightMode.PLAIN);
         }
-
-        rawInputArea.setText(state.rawBody, mode);
-        rawInputTypeBox.getSelectionModel().select(state.rawBodyType);
     }
 }

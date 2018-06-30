@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.controllers;
 
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.beans.binding.Bindings;
@@ -51,20 +52,25 @@ public class URLTabController implements Initializable {
         addField();
     }
 
+
+    public void addField(FieldState state) {
+        addField(state.key, state.value, null, state.checked);
+    }
+
     private void addField() {
-        addField("", "", null);
+        addField("", "", null, false);
     }
 
     public void addField(String key, String value) {
-        addField(key, value, null);
+        addField(key, value, null, false);
     }
 
     @FXML
     private void addField(ActionEvent event) {
-        addField("", "", event);
+        addField("", "", event, false);
     }
 
-    private void addField(String key, String value, ActionEvent event) {
+    private void addField(String key, String value, ActionEvent event, boolean checked) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
@@ -114,5 +120,18 @@ public class URLTabController implements Initializable {
             tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
         return tuples;
+    }
+
+
+    /**
+     * Return an ArrayList of the state of all the fields in the URL-encoded tab.
+     */
+    public ArrayList<FieldState> getFieldStates() {
+        ArrayList<FieldState> states = new ArrayList<>();
+
+        for (StringKeyValueFieldController controller : controllers)
+            states.add(controller.getState());
+
+        return states;
     }
 }

@@ -16,6 +16,8 @@
 
 package com.rohitawate.everest.controllers;
 
+import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -26,7 +28,6 @@ import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 public class HistoryItemController implements Initializable {
@@ -35,35 +36,21 @@ public class HistoryItemController implements Initializable {
     @FXML
     private Tooltip tooltip;
 
-    private DashboardState dashboardState;
-
-    public void setRequestType(String requestType) {
-        this.requestType.setText(requestType);
-    }
-
-    public void setAddress(String address) {
-        this.address.setText(address);
-    }
-
-    public String getRequestType() {
-        return requestType.getText();
-    }
-
-    public String getAddress() {
-        return address.getText();
-    }
+    private DashboardState state;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         tooltip.textProperty().bind(address.textProperty());
     }
 
-    public DashboardState getDashboardState() {
-        return dashboardState;
+    public DashboardState getState() {
+        return state;
     }
 
-    public void setDashboardState(DashboardState dashboardState) {
-        this.dashboardState = dashboardState;
+    public void setState(DashboardState state) {
+        this.state = state;
+        this.requestType.setText(state.httpMethod);
+        this.address.setText(state.target);
     }
 
     public int getRelativityIndex(String searchString) {
@@ -71,12 +58,12 @@ public class HistoryItemController implements Initializable {
         String comparisonString;
 
         // Checks if matches with target
-        comparisonString = dashboardState.target.toLowerCase();
+        comparisonString = state.target.toLowerCase();
         if (comparisonString.contains(searchString))
             return 10;
 
         try {
-            URL url = new URL(dashboardState.target);
+            URL url = new URL(state.target);
 
             // Checks if matches with target's hostname
             comparisonString = url.getHost().toLowerCase();
@@ -92,55 +79,55 @@ public class HistoryItemController implements Initializable {
         }
 
         // Checks if matches with HTTP method
-        comparisonString = dashboardState.httpMethod.toLowerCase();
+        comparisonString = state.httpMethod.toLowerCase();
         if (comparisonString.contains(searchString))
             return 7;
 
         // Checks for a match in the params
-        for (Map.Entry param : dashboardState.params.entrySet()) {
-            if (param.getKey().toString().toLowerCase().contains(searchString) ||
-                    param.getKey().toString().toLowerCase().contains(searchString))
+        for (FieldState state : state.params) {
+            if (state.key.toLowerCase().contains(searchString) ||
+                    state.value.toLowerCase().contains(searchString))
                 return 5;
         }
 
         // Checks for a match in the headers
-        for (Map.Entry header : dashboardState.headers.entrySet()) {
-            if (header.getKey().toString().toLowerCase().contains(searchString) ||
-                    header.getValue().toString().toLowerCase().contains(searchString))
+        for (FieldState state : state.headers) {
+            if (state.key.toLowerCase().contains(searchString) ||
+                    state.value.toLowerCase().contains(searchString))
                 return 6;
         }
 
-        if (dashboardState.httpMethod.equals("POST") || dashboardState.httpMethod.equals("PUT")) {
-            switch (dashboardState.contentType) {
+        if (state.httpMethod.equals("POST") || state.httpMethod.equals("PUT")) {
+            switch (state.contentType) {
                 case MediaType.TEXT_PLAIN:
                 case MediaType.APPLICATION_JSON:
                 case MediaType.APPLICATION_XML:
                 case MediaType.TEXT_HTML:
                 case MediaType.APPLICATION_OCTET_STREAM:
                     // Checks for match in rawBody of the request
-                    comparisonString = dashboardState.rawBody.toLowerCase();
+                    comparisonString = state.rawBody.toLowerCase();
                     if (comparisonString.contains(searchString))
                         return 8;
                     break;
                 case MediaType.APPLICATION_FORM_URLENCODED:
                     // Checks for match in string tuples
-                    for (Map.Entry tuple : dashboardState.urlStringTuples.entrySet()) {
-                        if (tuple.getKey().toString().toLowerCase().contains(searchString) ||
-                                tuple.getValue().toString().toLowerCase().contains(searchString))
+                    for (FieldState state : state.urlStringTuples) {
+                        if (state.key.toLowerCase().contains(searchString) ||
+                                state.value.toLowerCase().contains(searchString))
                             return 8;
                     }
                     break;
                 case MediaType.MULTIPART_FORM_DATA:
                     // Checks for match in string and file tuples
-                    for (Map.Entry tuple : dashboardState.formStringTuples.entrySet()) {
-                        if (tuple.getKey().toString().toLowerCase().contains(searchString) ||
-                                tuple.getValue().toString().toLowerCase().contains(searchString))
+                    for (FieldState state : state.formStringTuples) {
+                        if (state.key.toLowerCase().contains(searchString) ||
+                                state.value.toLowerCase().contains(searchString))
                             return 8;
                     }
 
-                    for (Map.Entry tuple : dashboardState.formFileTuples.entrySet()) {
-                        if (tuple.getKey().toString().toLowerCase().contains(searchString) ||
-                                tuple.getValue().toString().toLowerCase().contains(searchString))
+                    for (FieldState state : state.formFileTuples) {
+                        if (state.key.toLowerCase().contains(searchString) ||
+                                state.value.toLowerCase().contains(searchString))
                             return 8;
                     }
                     break;

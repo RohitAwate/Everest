@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.controllers;
+package com.rohitawate.everest.controllers.state;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * Convenience class to abstract the state of the application.
@@ -24,13 +24,23 @@ import java.util.HashMap;
 public class DashboardState {
     public String target;
     public String httpMethod;
-    public HashMap<String, String> params;
-    public HashMap<String, String> headers;
+    public ArrayList<FieldState> params;
+    public ArrayList<FieldState> headers;
+
+    // Determined from the active tab within the Body tab
     public String contentType;
+
+    // Body and content-type of requests with raw bodies
     public String rawBody;
     public String rawBodyType;
-    public HashMap<String, String> urlStringTuples;
-    public HashMap<String, String> formStringTuples;
-    public HashMap<String, String> formFileTuples;
+
+    // Tuples of URL-encoded requests
+    public ArrayList<FieldState> urlStringTuples;
+
+    // String and file tuples of multipart-form requests
+    public ArrayList<FieldState> formStringTuples;
+    public ArrayList<FieldState> formFileTuples;
+
+    // File path of application/octet-stream requests
     public String binaryFilePath;
 }

@@ -18,6 +18,7 @@ package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.jfoenix.controls.JFXButton;
+import com.rohitawate.everest.controllers.state.DashboardState;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.Services;
@@ -94,7 +95,7 @@ public class HomeWindowController implements Initializable {
 
             if (searchResults.size() != 0) {
                 for (HistoryItemController controller : searchResults) {
-                    addSearchItem(controller.getDashboardState());
+                    addSearchItem(controller.getState());
                 }
             } else {
                 searchFailedLayer.setVisible(true);
@@ -307,11 +308,7 @@ public class HomeWindowController implements Initializable {
             Parent historyItem = loader.load();
 
             controller = loader.getController();
-
-            controller.setRequestType(state.httpMethod);
-
-            controller.setAddress(state.target);
-            controller.setDashboardState(state);
+            controller.setState(state);
 
             if (appendToStart)
                 layer.getChildren().add(0, historyItem);

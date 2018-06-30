@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.controllers;
 
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.beans.binding.Bindings;
@@ -52,20 +53,20 @@ public class HeaderTabController implements Initializable {
         addHeader();
     }
 
-    public void addHeader(String key, String value) {
-        addHeader(key, value, null);
+    public void addHeader(FieldState state) {
+        addHeader(state.key, state.value, null, state.checked);
     }
 
     private void addHeader() {
-        addHeader("", "", null);
+        addHeader("", "", null, false);
     }
 
     @FXML
     private void addHeader(ActionEvent event) {
-        addHeader("", "", event);
+        addHeader("", "", event, false);
     }
 
-    private void addHeader(String key, String value, ActionEvent event) {
+    private void addHeader(String key, String value, ActionEvent event, boolean checked) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
@@ -88,6 +89,7 @@ public class HeaderTabController implements Initializable {
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
+            controller.setChecked(checked);
             controllers.add(controller);
             controllersCount.set(controllersCount.get() + 1);
             controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(controllersCount, 1));
@@ -118,6 +120,19 @@ public class HeaderTabController implements Initializable {
 
             headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
+
         return headers;
+    }
+
+    /**
+     * Return an ArrayList of the state of all the fields in the Headers tab.
+     */
+    public ArrayList<FieldState> getFieldStates() {
+        ArrayList<FieldState> states = new ArrayList<>();
+
+        for (StringKeyValueFieldController controller : controllers)
+            states.add(controller.getState());
+
+        return states;
     }
 }

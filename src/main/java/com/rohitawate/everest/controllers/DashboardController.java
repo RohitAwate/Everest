@@ -21,6 +21,8 @@ import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
+import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.misc.EverestUtilities;
@@ -58,7 +60,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
@@ -483,21 +484,33 @@ public class DashboardController implements Initializable {
         return params;
     }
 
-    private void addParamField() {
-        addParamField("", "", null);
+    /**
+     * Return an ArrayList of the state of all the fields in the Params tab.
+     */
+    public ArrayList<FieldState> getParamFieldStates() {
+        ArrayList<FieldState> states = new ArrayList<>();
+
+        for (StringKeyValueFieldController controller : paramsControllers)
+            states.add(controller.getState());
+
+        return states;
     }
 
-    private void addParamField(String key, String value) {
-        addParamField(key, value, null);
+    private void addParamField() {
+        addParamField("", "", null, false);
+    }
+
+    private void addParamField(FieldState state) {
+        addParamField(state.key, state.value, null, state.checked);
     }
 
     @FXML
     private void addParamField(ActionEvent event) {
-        addParamField("", "", event);
+        addParamField("", "", event, false);
     }
 
     // Adds a new URL-parameter field
-    private void addParamField(String key, String value, ActionEvent event) {
+    private void addParamField(String key, String value, ActionEvent event, boolean checked) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
@@ -519,6 +532,7 @@ public class DashboardController implements Initializable {
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
+            controller.setChecked(checked);
             paramsControllers.add(controller);
             paramsCountProperty.set(paramsCountProperty.get() + 1);
             controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(paramsCountProperty, 1));
@@ -553,8 +567,8 @@ public class DashboardController implements Initializable {
 
         dashboardState.target = addressField.getText();
         dashboardState.httpMethod = httpMethodBox.getValue();
-        dashboardState.headers = headerTabController.getHeaders(false);
-        dashboardState.params = getParams(false);
+        dashboardState.headers = headerTabController.getFieldStates();
+        dashboardState.params = getParamFieldStates();
 
         return dashboardState;
     }
@@ -582,12 +596,12 @@ public class DashboardController implements Initializable {
             addressField.setText(state.target);
 
         if (state.headers != null)
-            for (Entry entry : state.headers.entrySet())
-                headerTabController.addHeader(entry.getKey().toString(), entry.getValue().toString());
+            for (FieldState fieldState : state.headers)
+                headerTabController.addHeader(fieldState);
 
         if (state.params != null)
-            for (Entry entry : state.params.entrySet())
-                addParamField(entry.getKey().toString(), entry.getValue().toString());
+            for (FieldState fieldState : state.params)
+                addParamField(fieldState);
 
         if (!(httpMethodBox.getValue().equals("GET") || httpMethodBox.getValue().equals("DELETE")))
             bodyTabController.setState(state);

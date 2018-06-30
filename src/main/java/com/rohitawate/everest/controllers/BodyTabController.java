@@ -18,6 +18,8 @@ package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
+import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.fxml.FXML;
@@ -36,7 +38,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Map.Entry;
 import java.util.ResourceBundle;
 
 /*
@@ -123,9 +124,9 @@ public class BodyTabController implements Initializable {
 
         state.rawBodyType = rawInputTypeBox.getValue();
         state.rawBody = rawInputArea.getText();
-        state.urlStringTuples = urlTabController.getStringTuples(false);
-        state.formStringTuples = formDataTabController.getStringTuples(false);
-        state.formFileTuples = formDataTabController.getFileTuples(false);
+        state.urlStringTuples = urlTabController.getFieldStates();
+        state.formStringTuples = formDataTabController.getStringFieldStates();
+        state.formFileTuples = formDataTabController.getFileFieldStates();
         state.binaryFilePath = filePathField.getText();
 
         if (rawTab.isSelected()) {
@@ -156,18 +157,18 @@ public class BodyTabController implements Initializable {
     public void setState(DashboardState state) {
         // Adding URL tab's tuples
         if (state.urlStringTuples != null)
-            for (Entry<String, String> entry : state.urlStringTuples.entrySet())
-                urlTabController.addField(entry.getKey(), entry.getValue());
+            for (FieldState fieldState : state.urlStringTuples)
+                urlTabController.addField(fieldState);
 
         // Adding Form tab's string tuples
         if (state.formStringTuples != null)
-            for (Entry<String, String> entry : state.formStringTuples.entrySet())
-                formDataTabController.addStringField(entry.getKey(), entry.getValue());
+            for (FieldState fieldState : state.formStringTuples)
+                formDataTabController.addStringField(fieldState);
 
         // Adding Form tab's file tuples
         if (state.formFileTuples != null)
-            for (Entry<String, String> entry : state.formFileTuples.entrySet())
-                formDataTabController.addFileField(entry.getKey(), entry.getValue());
+            for (FieldState fieldState : state.formFileTuples)
+                formDataTabController.addFileField(fieldState);
 
         setRawTab(state);
 

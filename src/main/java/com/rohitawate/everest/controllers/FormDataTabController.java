@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.controllers;
 
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.beans.binding.Bindings;
@@ -59,21 +60,20 @@ public class FormDataTabController implements Initializable {
         addStringField();
     }
 
+    public void addFileField(FieldState state) {
+        addFileField(state.key, state.value, null, state.checked);
+    }
 
     @FXML
     private void addFileField(ActionEvent event) {
-        addFileField("", "", event);
+        addFileField("", "", event, false);
     }
 
     private void addFileField() {
-        addFileField("", "", null);
+        addFileField("", "", null, false);
     }
 
-    public void addFileField(String key, String value) {
-        addFileField(key, value, null);
-    }
-
-    private void addFileField(String key, String value, ActionEvent event) {
+    private void addFileField(String key, String value, ActionEvent event, boolean checked) {
         //Re-uses previous field if it is empty else loads a new one.
         if (fileControllers.size() > 0 && event == null) {
             FileKeyValueFieldController previousController = fileControllers.get(fileControllers.size() - 1);
@@ -93,6 +93,7 @@ public class FormDataTabController implements Initializable {
             FileKeyValueFieldController controller = loader.getController();
             controller.setFileKeyField(key);
             controller.setFileValueField(value);
+            controller.setChecked(checked);
             fileControllers.add(controller);
             fileControllersCount.set(fileControllersCount.get() + 1);
             controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(fileControllersCount, 1));
@@ -107,20 +108,20 @@ public class FormDataTabController implements Initializable {
         }
     }
 
+    public void addStringField(FieldState state) {
+        addStringField(state.key, state.value, null, state.checked);
+    }
+
     @FXML
     private void addStringField(ActionEvent event) {
-        addStringField("", "", event);
+        addStringField("", "", event, false);
     }
 
     private void addStringField() {
-        addStringField("", "", null);
+        addStringField("", "", null, false);
     }
 
-    public void addStringField(String key, String value) {
-        addStringField(key, value, null);
-    }
-
-    private void addStringField(String key, String value, ActionEvent event) {
+    private void addStringField(String key, String value, ActionEvent event, boolean checked) {
         /*
             Re-uses previous field if it is empty,
             else loads a new one.
@@ -142,6 +143,7 @@ public class FormDataTabController implements Initializable {
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
+            controller.setChecked(checked);
             stringControllers.add(controller);
             stringControllersCount.set(stringControllersCount.get() + 1);
             controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(stringControllersCount, 1));
@@ -185,5 +187,31 @@ public class FormDataTabController implements Initializable {
             fileMap.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
         return fileMap;
+    }
+
+
+    /**
+     * Return an ArrayList of the state of all the string fields in the Form data tab.
+     */
+    public ArrayList<FieldState> getStringFieldStates() {
+        ArrayList<FieldState> states = new ArrayList<>();
+
+        for (StringKeyValueFieldController controller : stringControllers)
+            states.add(controller.getState());
+
+        return states;
+    }
+
+
+    /**
+     * Return an ArrayList of the state of all the file fields in the Form data tab.
+     */
+    public ArrayList<FieldState> getFileFieldStates() {
+        ArrayList<FieldState> states = new ArrayList<>();
+
+        for (FileKeyValueFieldController controller : fileControllers)
+            states.add(controller.getState());
+
+        return states;
     }
 }

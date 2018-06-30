@@ -273,6 +273,18 @@ public class HistoryManager {
                 return false;
 
             if (!(newState.httpMethod.equals("GET") || newState.httpMethod.equals("DELETE"))) {
+                statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestContentType").toString()));
+                statement.setInt(1, lastRequestID);
+
+                RS = statement.executeQuery();
+
+                String previousContentType = "";
+                if (RS.next())
+                    previousContentType = RS.getString("ContentType");
+
+                if (!newState.contentType.equals(previousContentType))
+                    return false;
+
                 switch (newState.contentType) {
                     case MediaType.TEXT_PLAIN:
                     case MediaType.APPLICATION_JSON:

@@ -68,8 +68,10 @@ public class HeaderTabController implements Initializable {
 
     private void addHeader(String key, String value, ActionEvent event, boolean checked) {
         /*
-            Re-uses previous field if it is empty,
-            else loads a new one.
+            Re-uses previous field if it is empty, else loads a new one.
+            A value of null for the 'event' parameter indicates that the method call
+            came from code and not from the user. This call is made while recovering
+            the application state.
          */
         if (controllers.size() > 0 && event == null) {
             StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
@@ -100,38 +102,35 @@ public class HeaderTabController implements Initializable {
             });
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not string field.", e, LocalDateTime.now());
+            Services.loggingService.logSevere("Could not add string field.", e, LocalDateTime.now());
         }
     }
 
     /**
-     * Returns a map of the checked/unchecked headers.
-     * @param onlyChecked - Returns only the headers which are selected by the user
+     * @return Map of the selected headers.
      */
-    public HashMap<String, String> getHeaders(boolean onlyChecked) {
+    public HashMap<String, String> getHeaders() {
         if (headers == null)
             headers = new HashMap<>();
 
         headers.clear();
         for (StringKeyValueFieldController controller : controllers) {
-            if (onlyChecked)
-                if (!controller.isChecked())
-                    continue;
-
-            headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
+            if (controller.isChecked())
+                headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
 
         return headers;
     }
 
     /**
-     * Return an ArrayList of the state of all the fields in the Headers tab.
+     * Return a list of the state of all the non-empty fields in the Headers tab.
      */
     public ArrayList<FieldState> getFieldStates() {
         ArrayList<FieldState> states = new ArrayList<>();
 
         for (StringKeyValueFieldController controller : controllers)
-            states.add(controller.getState());
+            if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
+                states.add(controller.getState());
 
         return states;
     }

@@ -233,7 +233,7 @@ public class DashboardController implements Initializable {
                         getRequest = new GETRequest();
 
                     getRequest.setTarget(address);
-                    getRequest.setHeaders(headerTabController.getHeaders(true));
+                    getRequest.setHeaders(headerTabController.getHeaders());
 
                     requestManager = Services.pool.get();
                     requestManager.setRequest(getRequest);
@@ -250,7 +250,7 @@ public class DashboardController implements Initializable {
 
                     dataRequest.setRequestType(httpMethodBox.getValue());
                     dataRequest.setTarget(address);
-                    dataRequest.setHeaders(headerTabController.getHeaders(true));
+                    dataRequest.setHeaders(headerTabController.getHeaders());
 
                     if (bodyTabController.rawTab.isSelected()) {
                         String contentType;
@@ -273,14 +273,14 @@ public class DashboardController implements Initializable {
                         dataRequest.setContentType(contentType);
                         dataRequest.setBody(bodyTabController.rawInputArea.getText());
                     } else if (bodyTabController.formTab.isSelected()) {
-                        dataRequest.setStringTuples(bodyTabController.formDataTabController.getStringTuples(true));
-                        dataRequest.setFileTuples(bodyTabController.formDataTabController.getFileTuples(true));
+                        dataRequest.setStringTuples(bodyTabController.formDataTabController.getStringTuples());
+                        dataRequest.setFileTuples(bodyTabController.formDataTabController.getFileTuples());
                         dataRequest.setContentType(MediaType.MULTIPART_FORM_DATA);
                     } else if (bodyTabController.binaryTab.isSelected()) {
                         dataRequest.setBody(bodyTabController.filePathField.getText());
                         dataRequest.setContentType(MediaType.APPLICATION_OCTET_STREAM);
                     } else if (bodyTabController.urlTab.isSelected()) {
-                        dataRequest.setStringTuples(bodyTabController.urlTabController.getStringTuples(true));
+                        dataRequest.setStringTuples(bodyTabController.urlTabController.getStringTuples());
                         dataRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
                     }
 
@@ -296,7 +296,7 @@ public class DashboardController implements Initializable {
                         deleteRequest = new DELETERequest();
 
                     deleteRequest.setTarget(address);
-                    deleteRequest.setHeaders(headerTabController.getHeaders(true));
+                    deleteRequest.setHeaders(headerTabController.getHeaders());
 
                     requestManager = Services.pool.delete();
                     requestManager.setRequest(deleteRequest);
@@ -468,30 +468,15 @@ public class DashboardController implements Initializable {
         }
     }
 
-    private HashMap<String, String> getParams(boolean onlyChecked) {
-        if (params == null)
-            params = new HashMap<>();
-
-        params.clear();
-        for (StringKeyValueFieldController controller : paramsControllers) {
-            if (onlyChecked)
-                if (!controller.isChecked())
-                    continue;
-
-            params.put(controller.getHeader().getKey(), controller.getHeader().getValue());
-        }
-
-        return params;
-    }
-
     /**
-     * Return an ArrayList of the state of all the fields in the Params tab.
+     * @return List of the states of all the non-empty fields in the Params tab.
      */
     public ArrayList<FieldState> getParamFieldStates() {
         ArrayList<FieldState> states = new ArrayList<>();
 
         for (StringKeyValueFieldController controller : paramsControllers)
-            states.add(controller.getState());
+            if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
+                states.add(controller.getState());
 
         return states;
     }
@@ -509,11 +494,15 @@ public class DashboardController implements Initializable {
         addParamField("", "", event, false);
     }
 
-    // Adds a new URL-parameter field
+    /**
+     * Adds a new URL-parameter field
+     */
     private void addParamField(String key, String value, ActionEvent event, boolean checked) {
         /*
-            Re-uses previous field if it is empty,
-            else loads a new one.
+            Re-uses previous field if it is empty, else loads a new one.
+            A value of null for the 'event' parameter indicates that the method call
+            came from code and not from the user. This call is made while recovering
+            the application state.
          */
         if (paramsControllers.size() > 0 && event == null) {
             StringKeyValueFieldController previousController = paramsControllers.get(paramsControllers.size() - 1);
@@ -548,9 +537,7 @@ public class DashboardController implements Initializable {
     }
 
     /**
-     * Returns the current state of the Dashboard
-     *
-     * @return DashboardState - Current state of the Dashboard
+     * @return Current state of the Dashboard.
      */
     public DashboardState getState() {
         DashboardState dashboardState;

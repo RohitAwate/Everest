@@ -317,7 +317,7 @@ public class HistoryManager {
         return true;
     }
 
-    private boolean areListsEqual(ArrayList<FieldState> firstList, ArrayList<FieldState> secondList) {
+    private static boolean areListsEqual(ArrayList<FieldState> firstList, ArrayList<FieldState> secondList) {
         if (firstList == null && secondList == null)
             return true;
 
@@ -343,7 +343,7 @@ public class HistoryManager {
                         conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequest").toString()));
 
                 statement.setString(1, state.httpMethod);
-                statement.setString(2, String.valueOf(state.target));
+                statement.setString(2, state.target);
                 statement.setString(3, LocalDate.now().toString());
 
                 statement.executeUpdate();

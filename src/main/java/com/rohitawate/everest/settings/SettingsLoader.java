@@ -41,7 +41,8 @@ public class SettingsLoader implements Runnable {
         try {
             File settingsFile = new File("Everest/config/settings.json");
 
-            System.out.println("Settings file found. Loading settings... ");
+            if (settingsFile.exists())
+                System.out.println("Settings file found. Loading settings... ");
 
             nodes = EverestUtilities.jsonMapper.readTree(settingsFile);
 

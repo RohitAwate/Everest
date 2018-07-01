@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.controllers;
 
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.beans.binding.Bindings;
@@ -52,23 +53,25 @@ public class HeaderTabController implements Initializable {
         addHeader();
     }
 
-    public void addHeader(String key, String value) {
-        addHeader(key, value, null);
+    public void addHeader(FieldState state) {
+        addHeader(state.key, state.value, null, state.checked);
     }
 
     private void addHeader() {
-        addHeader("", "", null);
+        addHeader("", "", null, false);
     }
 
     @FXML
     private void addHeader(ActionEvent event) {
-        addHeader("", "", event);
+        addHeader("", "", event, false);
     }
 
-    private void addHeader(String key, String value, ActionEvent event) {
+    private void addHeader(String key, String value, ActionEvent event, boolean checked) {
         /*
-            Re-uses previous field if it is empty,
-            else loads a new one.
+            Re-uses previous field if it is empty, else loads a new one.
+            A value of null for the 'event' parameter indicates that the method call
+            came from code and not from the user. This call is made while recovering
+            the application state.
          */
         if (controllers.size() > 0 && event == null) {
             StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
@@ -88,6 +91,7 @@ public class HeaderTabController implements Initializable {
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
+            controller.setChecked(checked);
             controllers.add(controller);
             controllersCount.set(controllersCount.get() + 1);
             controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(controllersCount, 1));
@@ -98,14 +102,14 @@ public class HeaderTabController implements Initializable {
             });
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not string field.", e, LocalDateTime.now());
+            Services.loggingService.logSevere("Could not add string field.", e, LocalDateTime.now());
         }
     }
 
     /**
-     * Returns a map of the selected headers.
+     * @return Map of the selected headers.
      */
-    public HashMap<String, String> getSelectedHeaders() {
+    public HashMap<String, String> getHeaders() {
         if (headers == null)
             headers = new HashMap<>();
 
@@ -114,6 +118,20 @@ public class HeaderTabController implements Initializable {
             if (controller.isChecked())
                 headers.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
+
         return headers;
+    }
+
+    /**
+     * Return a list of the state of all the non-empty fields in the Headers tab.
+     */
+    public ArrayList<FieldState> getFieldStates() {
+        ArrayList<FieldState> states = new ArrayList<>();
+
+        for (StringKeyValueFieldController controller : controllers)
+            if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
+                states.add(controller.getState());
+
+        return states;
     }
 }

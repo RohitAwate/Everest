@@ -18,17 +18,16 @@ package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
+import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
-import com.rohitawate.everest.models.DashboardState;
-import com.rohitawate.everest.models.requests.DataDispatchRequest;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -39,7 +38,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 /*
@@ -48,8 +46,6 @@ import java.util.ResourceBundle;
     URL encoded and Form tabs have special FXMLs.
  */
 public class BodyTabController implements Initializable {
-    @FXML
-    private TabPane bodyTabPane;
     @FXML
     ComboBox<String> rawInputTypeBox;
     @FXML
@@ -107,121 +103,98 @@ public class BodyTabController implements Initializable {
         }
     }
 
-    /**
-     * Returns a EverestRequest object initialized with the request body.
-     */
-    public DataDispatchRequest getBasicRequest(String requestType) {
-        DataDispatchRequest request = new DataDispatchRequest(requestType);
-
-        // Raw and binary types get saved in Body.
-        // Form and URL encoded types use tuple objects
-        if (rawTab.isSelected()) {
-            String contentType;
-            switch (rawInputTypeBox.getValue()) {
-                case "PLAIN TEXT":
-                    contentType = MediaType.TEXT_PLAIN;
-                    break;
-                case "JSON":
-                    contentType = MediaType.APPLICATION_JSON;
-                    break;
-                case "XML":
-                    contentType = MediaType.APPLICATION_XML;
-                    break;
-                case "HTML":
-                    contentType = MediaType.TEXT_HTML;
-                    break;
-                default:
-                    contentType = MediaType.TEXT_PLAIN;
-            }
-            request.setContentType(contentType);
-            request.setBody(rawInputArea.getText());
-        } else if (formTab.isSelected()) {
-            request.setStringTuples(formDataTabController.getStringTuples());
-            request.setFileTuples(formDataTabController.getFileTuples());
-            request.setContentType(MediaType.MULTIPART_FORM_DATA);
-        } else if (binaryTab.isSelected()) {
-            request.setBody(filePathField.getText());
-            request.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        } else if (urlTab.isSelected()) {
-            request.setStringTuples(urlTabController.getStringTuples());
-            request.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        }
-        return request;
-    }
-
     @FXML
     private void browseFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a binary file to add to request...");
         Window dashboardWindow = filePathField.getScene().getWindow();
         String filePath;
+
         try {
             filePath = fileChooser.showOpenDialog(dashboardWindow).getAbsolutePath();
         } catch (NullPointerException NPE) {
             filePath = "";
         }
+
         filePathField.setText(filePath);
     }
 
-    public void setState(DashboardState dashboardState) {
-        try {
-            switch (dashboardState.getContentType()) {
-                case MediaType.TEXT_PLAIN:
-                    setRawTab(dashboardState, "PLAIN TEXT");
-                    break;
-                case MediaType.APPLICATION_JSON:
-                    setRawTab(dashboardState, "JSON");
-                    break;
-                case MediaType.APPLICATION_XML:
-                    setRawTab(dashboardState, "XML");
-                    break;
-                case MediaType.TEXT_HTML:
-                    setRawTab(dashboardState, "HTML");
-                    break;
-                case MediaType.MULTIPART_FORM_DATA:
-                    // For file tuples
-                    for (Map.Entry entry : dashboardState.getFileTuples().entrySet())
-                        formDataTabController.addFileField(entry.getKey().toString(), entry.getValue().toString());
+    public DashboardState getState() {
+        DashboardState state = new DashboardState();
 
-                    // For string tuples
-                    for (Map.Entry entry : dashboardState.getStringTuples().entrySet())
-                        formDataTabController.addStringField(entry.getKey().toString(), entry.getValue().toString());
-                    bodyTabPane.getSelectionModel().select(formTab);
+        state.rawBodyType = rawInputTypeBox.getValue();
+        state.rawBody = rawInputArea.getText();
+        state.urlStringTuples = urlTabController.getFieldStates();
+        state.formStringTuples = formDataTabController.getStringFieldStates();
+        state.formFileTuples = formDataTabController.getFileFieldStates();
+        state.binaryFilePath = filePathField.getText();
+
+        if (rawTab.isSelected()) {
+            switch (rawInputTypeBox.getValue()) {
+                case "JSON":
+                    state.contentType = MediaType.APPLICATION_JSON;
                     break;
-                case MediaType.APPLICATION_OCTET_STREAM:
-                    filePathField.setText(dashboardState.getBody());
-                    bodyTabPane.getSelectionModel().select(binaryTab);
+                case "XML":
+                    state.contentType = MediaType.APPLICATION_XML;
                     break;
-                case MediaType.APPLICATION_FORM_URLENCODED:
-                    for (Map.Entry entry : dashboardState.getStringTuples().entrySet())
-                        urlTabController.addField(entry.getKey().toString(), entry.getValue().toString());
-                    bodyTabPane.getSelectionModel().select(urlTab);
+                case "HTML":
+                    state.contentType = MediaType.TEXT_HTML;
                     break;
+                default:
+                    state.contentType = MediaType.TEXT_PLAIN;
             }
-        } catch (NullPointerException NPE) {
-            Services.loggingService.logInfo("Dashboard loaded with blank request body.", LocalDateTime.now());
+        } else if (formTab.isSelected()) {
+            state.contentType = MediaType.MULTIPART_FORM_DATA;
+        } else if (urlTab.isSelected()) {
+            state.contentType = MediaType.APPLICATION_FORM_URLENCODED;
+        } else {
+            state.contentType = MediaType.APPLICATION_OCTET_STREAM;
         }
+
+        return state;
     }
 
-    private void setRawTab(DashboardState dashboardState, String contentType) {
+    public void setState(DashboardState state) {
+        // Adding URL tab's tuples
+        if (state.urlStringTuples != null)
+            for (FieldState fieldState : state.urlStringTuples)
+                urlTabController.addField(fieldState);
+
+        // Adding Form tab's string tuples
+        if (state.formStringTuples != null)
+            for (FieldState fieldState : state.formStringTuples)
+                formDataTabController.addStringField(fieldState);
+
+        // Adding Form tab's file tuples
+        if (state.formFileTuples != null)
+            for (FieldState fieldState : state.formFileTuples)
+                formDataTabController.addFileField(fieldState);
+
+        setRawTab(state);
+
+        filePathField.setText(state.binaryFilePath);
+    }
+
+    private void setRawTab(DashboardState state) {
         HighlightMode mode;
 
-        switch (contentType) {
-            case MediaType.APPLICATION_JSON:
-                mode = HighlightMode.JSON;
-                break;
-            case MediaType.APPLICATION_XML:
-                mode = HighlightMode.XML;
-                break;
-            case MediaType.TEXT_HTML:
-                mode = HighlightMode.HTML;
-                break;
-            default:
-                mode = HighlightMode.PLAIN;
+        if (state.rawBodyType != null && state.rawBody != null) {
+            switch (state.rawBodyType) {
+                case "JSON":
+                    mode = HighlightMode.JSON;
+                    break;
+                case "XML":
+                    mode = HighlightMode.XML;
+                    break;
+                case "HTML":
+                    mode = HighlightMode.HTML;
+                    break;
+                default:
+                    mode = HighlightMode.PLAIN;
+            }
+            rawInputArea.setText(state.rawBody, mode);
+        } else {
+            rawInputArea.setText("", HighlightMode.PLAIN);
         }
-
-        rawInputArea.setText(dashboardState.getBody(), mode);
-        rawInputTypeBox.getSelectionModel().select(contentType);
-        bodyTabPane.getSelectionModel().select(rawTab);
     }
 }

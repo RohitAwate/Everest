@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.controllers;
 
+import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.beans.binding.Bindings;
@@ -51,23 +52,26 @@ public class URLTabController implements Initializable {
         addField();
     }
 
-    private void addField() {
-        addField("", "", null);
+
+    public void addField(FieldState state) {
+        addField(state.key, state.value, null, state.checked);
     }
 
-    public void addField(String key, String value) {
-        addField(key, value, null);
+    private void addField() {
+        addField("", "", null, false);
     }
 
     @FXML
     private void addField(ActionEvent event) {
-        addField("", "", event);
+        addField("", "", event, false);
     }
 
-    private void addField(String key, String value, ActionEvent event) {
+    private void addField(String key, String value, ActionEvent event, boolean checked) {
         /*
-            Re-uses previous field if it is empty,
-            else loads a new one.
+            Re-uses previous field if it is empty, else loads a new one.
+            A value of null for the 'event' parameter indicates that the method call
+            came from code and not from the user. This call is made while recovering
+            the application state.
          */
         if (controllers.size() > 0 && event == null) {
             StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
@@ -87,6 +91,7 @@ public class URLTabController implements Initializable {
             StringKeyValueFieldController controller = loader.getController();
             controller.setKeyField(key);
             controller.setValueField(value);
+            controller.setChecked(checked);
             controllers.add(controller);
             controllersCount.set(controllersCount.get() + 1);
             controller.deleteButton.visibleProperty().bind(Bindings.greaterThan(controllersCount, 1));
@@ -97,10 +102,13 @@ public class URLTabController implements Initializable {
             });
             fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not load string field.", e, LocalDateTime.now());
+            Services.loggingService.logSevere("Could not add string field.", e, LocalDateTime.now());
         }
     }
 
+    /**
+     * @return Map of selected string tuples from URL-encoded tab.
+     */
     public HashMap<String, String> getStringTuples() {
         if (tuples == null)
             tuples = new HashMap<>();
@@ -110,6 +118,21 @@ public class URLTabController implements Initializable {
             if (controller.isChecked())
                 tuples.put(controller.getHeader().getKey(), controller.getHeader().getValue());
         }
+
         return tuples;
+    }
+
+
+    /**
+     * @return A list of the states of all the non-empty fields in the URL-encoded tab.
+     */
+    public ArrayList<FieldState> getFieldStates() {
+        ArrayList<FieldState> states = new ArrayList<>();
+
+        for (StringKeyValueFieldController controller : controllers)
+            if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
+                states.add(controller.getState());
+
+        return states;
     }
 }

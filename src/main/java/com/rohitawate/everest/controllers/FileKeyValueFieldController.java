@@ -18,6 +18,7 @@ package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
+import com.rohitawate.everest.controllers.state.FieldState;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -107,5 +108,13 @@ public class FileKeyValueFieldController implements Initializable {
 
     public boolean isFileValueFieldEmpty() {
         return fileValueField.getText().isEmpty();
+    }
+
+    public FieldState getState() {
+        return new FieldState(fileKeyField.getText(), fileValueField.getText(), checkBox.isSelected());
+    }
+
+    public void setChecked(boolean checked) {
+        checkBox.setSelected(checked);
     }
 }

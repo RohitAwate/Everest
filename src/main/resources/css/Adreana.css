@@ -306,7 +306,7 @@
 }
 
 .visualizerLabel {
-    -fx-font-family: "Liberation Mono", monospace;
+    -fx-font-family: "Liberation Mono", "Consolas", "Courier New", "Monaco", "DejaVu Sans Mono", monospace;
 }
 
 .visualizerRootLabel {
@@ -373,4 +373,9 @@
 .jfx-snackbar-toast {
     -fx-text-fill: white;
     -fx-alignment: center;
+}
+
+.jfx-snackbar-action .text {
+    -fx-fill: azure;
+    -fx-font-weight: bold;
 }

@@ -43,6 +43,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -52,9 +54,11 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -154,31 +158,33 @@ public class DashboardController implements Initializable {
             responseArea.selectAll();
             responseArea.copy();
             responseArea.deselect();
-            snackbar.show("Response rawBody copied to clipboard.", 5000);
+            snackbar.show("Response body copied to clipboard.", 5000);
         });
 
         responseTypeBox.getItems().addAll("JSON", "XML", "HTML", "PLAIN TEXT");
 
         responseTypeBox.valueProperty().addListener(change -> {
             String type = responseTypeBox.getValue();
-            try {
-                switch (type) {
-                    case "JSON":
+            HighlightMode mode;
+            switch (type) {
+                case "JSON":
+                    try {
                         JsonNode node = EverestUtilities.jsonMapper.readTree(responseArea.getText());
                         responseArea.setText(EverestUtilities.jsonMapper.writeValueAsString(node), HighlightMode.JSON);
-                        break;
-                    case "XML":
-                        responseArea.setText(responseArea.getText(), HighlightMode.XML);
-                        break;
-                    case "HTML":
-                        responseArea.setText(responseArea.getText(), HighlightMode.HTML);
-                        break;
-                    default:
-                        responseArea.setText(responseArea.getText(), HighlightMode.PLAIN);
-                }
-            } catch (IOException e) {
-                Services.loggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
+                    } catch (IOException e) {
+                        Services.loggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
+                    }
+                    return;
+                case "XML":
+                    mode = HighlightMode.XML;
+                    break;
+                case "HTML":
+                    mode = HighlightMode.XML;
+                    break;
+                default:
+                    mode = HighlightMode.PLAIN;
             }
+            responseArea.setMode(mode);
         });
 
         errorTitle.setText("Oops... That's embarrassing!");
@@ -427,6 +433,18 @@ public class DashboardController implements Initializable {
                     case "text/html":
                         responseTypeBox.setValue("HTML");
                         responseArea.setText(responseBody, HighlightMode.HTML);
+                        if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                            snackbar.show("Open link in browser?", "YES", 5000, e -> {
+                                snackbar.close();
+                                new Thread(() -> {
+                                    try {
+                                        Desktop.getDesktop().browse(new URI(addressField.getText()));
+                                    } catch (Exception ex) {
+                                        Services.loggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
+                                    }
+                                }).start();
+                            });
+                        }
                         break;
                     default:
                         responseTypeBox.setValue("PLAIN TEXT");
@@ -566,6 +584,16 @@ public class DashboardController implements Initializable {
      * @param state - State of the dashboard
      */
     public void setState(DashboardState state) {
+        /*
+             The only value from a set of constants in the state.json file is the httpMethod
+             which, if manipulated to a non-standard value by the user, would still
+             be loaded into the httpMethodBox, causing severe errors while making requests.
+
+             To prevent this, we check if it is a standard value (GET, POST, PUT, PATCH or DELETE) and
+             only then proceed to applying the rest of the state values to the Dashboard.
+
+             This is an extreme case, but still something to be taken care of.
+         */
         boolean validMethod = false;
         for (String method : httpMethods) {
             if (state.httpMethod.equals(method))

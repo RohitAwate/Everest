@@ -57,7 +57,7 @@ public class EverestUtilities {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Services.loggingService.logInfo("BugReporter was copied to installation folder.", LocalDateTime.now());
+            Services.loggingService.logInfo("BugReporter was copied to installation directory.", LocalDateTime.now());
 
         }).start();
     }

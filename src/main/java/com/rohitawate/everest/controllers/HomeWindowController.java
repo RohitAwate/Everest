@@ -333,7 +333,7 @@ public class HomeWindowController implements Initializable {
 
             int relativityIndex = controller.getRelativityIndex(searchString);
 
-            // Split the string into words and get total relativity index as sum of individual indices.
+            // Split the string into words and get total relativity index as the sum of individual indices.
             String words[] = searchString.split("\\s");
             for (String word : words)
                 relativityIndex += controller.getRelativityIndex(word);

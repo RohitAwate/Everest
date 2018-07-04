@@ -23,6 +23,7 @@ import java.util.ResourceBundle;
 
 import javax.ws.rs.core.MediaType;
 
+import com.rohitawate.everest.controllers.search.Searchable;
 import com.rohitawate.everest.controllers.state.DashboardState;
 import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;

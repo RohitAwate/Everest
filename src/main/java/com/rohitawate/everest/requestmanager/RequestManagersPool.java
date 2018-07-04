@@ -16,79 +16,74 @@
 
 package com.rohitawate.everest.requestmanager;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
+/**
+ * Provides the various RequestManagers employed by Everest.
+ * <p>
+ * Pools are created as needed i.e. the first DELETE request
+ * will create the pool of DELETERequestManagers. If a DELETE
+ * request is never made, the pool won't be created. Same applies
+ * for all other types of requests.
+ * <p>
+ * When demanding a RequestManager, the pool is checked linearly.
+ * The first RequestManager which is not currently running will be
+ * returned to the caller. If all the managers in the pool are running,
+ * a new one is created, added to the pool, and returned.
+ */
 public class RequestManagersPool {
-    private LinkedList<GETRequestManager> getManagers;
-    private LinkedList<DataDispatchRequestManager> dataManagers;
-    private LinkedList<DELETERequestManager> deleteManagers;
+    private ArrayList<GETRequestManager> getManagers;
+    private ArrayList<DataDispatchRequestManager> dataManagers;
+    private ArrayList<DELETERequestManager> deleteManagers;
 
     public GETRequestManager get() {
-        if (getManagers == null) {
-            GETRequestManager newManager = new GETRequestManager();
+        if (getManagers == null)
+            getManagers = new ArrayList<>();
 
-            new Thread(() -> {
-                getManagers = new LinkedList<>();
-                getManagers.add(newManager);
-            }).start();
-
-            return newManager;
-        } else {
-            for (GETRequestManager getManager : getManagers) {
-                if (!getManager.isRunning())
-                    return getManager;
+        for (GETRequestManager getManager : getManagers) {
+            if (!getManager.isRunning()) {
+                getManager.reset();
+                return getManager;
             }
-
-            GETRequestManager newManager = new GETRequestManager();
-            getManagers.add(newManager);
-
-            return newManager;
         }
+
+        GETRequestManager newManager = new GETRequestManager();
+        getManagers.add(newManager);
+
+        return newManager;
     }
 
     public DataDispatchRequestManager data() {
-        if (dataManagers == null) {
-            DataDispatchRequestManager newManager = new DataDispatchRequestManager();
+        if (dataManagers == null)
+            dataManagers = new ArrayList<>();
 
-            new Thread(() -> {
-                dataManagers = new LinkedList<>();
-                dataManagers.add(newManager);
-            }).start();
-
-            return newManager;
-        } else {
-            for (DataDispatchRequestManager dataManager : dataManagers) {
-                if (!dataManager.isRunning())
-                    return dataManager;
+        for (DataDispatchRequestManager dataManager : dataManagers) {
+            if (!dataManager.isRunning()) {
+                dataManager.reset();
+                return dataManager;
             }
-
-            DataDispatchRequestManager newManager = new DataDispatchRequestManager();
-            dataManagers.add(newManager);
-
-            return newManager;
         }
+
+        DataDispatchRequestManager newManager = new DataDispatchRequestManager();
+        dataManagers.add(newManager);
+
+        return newManager;
     }
 
     public DELETERequestManager delete() {
-        if (deleteManagers == null) {
-            DELETERequestManager newManager = new DELETERequestManager();
+        if (deleteManagers == null)
+            deleteManagers = new ArrayList<>();
 
-            new Thread(() -> {
-                deleteManagers = new LinkedList<>();
-                deleteManagers.add(newManager);
-            }).start();
-
-            return newManager;
-        } else {
-            for (DELETERequestManager deleteManager : deleteManagers) {
-                if (!deleteManager.isRunning())
-                    return deleteManager;
+        for (DELETERequestManager deleteManager : deleteManagers) {
+            if (!deleteManager.isRunning()) {
+                deleteManager.reset();
+                return deleteManager;
             }
-
-            DELETERequestManager newManager = new DELETERequestManager();
-            deleteManagers.add(newManager);
-
-            return newManager;
         }
+
+        DELETERequestManager newManager = new DELETERequestManager();
+        deleteManagers.add(newManager);
+
+        return newManager;
     }
 }

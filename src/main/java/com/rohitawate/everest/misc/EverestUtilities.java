@@ -19,14 +19,6 @@ package com.rohitawate.everest.misc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
-
 public class EverestUtilities {
     public static ObjectMapper jsonMapper;
 
@@ -43,22 +35,5 @@ public class EverestUtilities {
      */
     public static String trimString(String input) {
         return input.replaceAll("\"", "");
-    }
-
-    /**
-     * Copies the BugReporter from within the JAR to the installation directory.
-     */
-    public static void createBugReporter() {
-        new Thread(() -> {
-            InputStream inputStream = EverestUtilities.class.getResourceAsStream("/BugReporter.jar");
-            Path bugReporter = Paths.get("Everest/BugReporter.jar");
-            try {
-                Files.copy(inputStream, bugReporter, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Services.loggingService.logInfo("BugReporter was copied to installation directory.", LocalDateTime.now());
-
-        }).start();
     }
 }

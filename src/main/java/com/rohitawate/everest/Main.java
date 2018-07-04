@@ -15,7 +15,6 @@
  */
 package com.rohitawate.everest;
 
-import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.settings.SettingsLoader;
@@ -51,8 +50,6 @@ public class Main extends Application {
         dashboardStage.setScene(new Scene(homeWindow));
         dashboardStage.setTitle("Everest");
         dashboardStage.show();
-
-        EverestUtilities.createBugReporter();
     }
 
     public static void main(String args[]) {

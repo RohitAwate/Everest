@@ -16,21 +16,6 @@
 
 package com.rohitawate.everest.history;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohitawate.everest.controllers.state.DashboardState;
@@ -38,6 +23,16 @@ import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.settings.Settings;
+
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HistoryManager {
     private Connection conn;
@@ -387,19 +382,8 @@ public class HistoryManager {
                     }
                 }
 
-                if (state.params.size() > 0) {
-                    // Saves request parameters
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                    for (FieldState fieldState : state.params) {
-                        statement.setInt(1, requestID);
-                        statement.setString(2, "Param");
-                        statement.setString(3, fieldState.key);
-                        statement.setString(4, fieldState.value);
-                        statement.setInt(5, fieldState.checked ? 1 : 0);
-
-                        statement.executeUpdate();
-                    }
-                }
+                // Saves request parameters
+                saveTuple(state.params, "Param", requestID);
 
                 if (!(state.httpMethod.equals("GET") || state.httpMethod.equals("DELETE"))) {
                     // Maps the request to its ContentType for faster retrieval
@@ -423,53 +407,36 @@ public class HistoryManager {
                             statement.executeUpdate();
                             break;
                         case MediaType.APPLICATION_FORM_URLENCODED:
-                            if (state.urlStringTuples.size() > 0) {
-                                for (FieldState fieldState : state.urlStringTuples) {
-                                    // Saves the string tuples
-                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                                    statement.setInt(1, requestID);
-                                    statement.setString(2, "String");
-                                    statement.setString(3, fieldState.key);
-                                    statement.setString(4, fieldState.value);
-                                    statement.setInt(5, fieldState.checked ? 1 : 0);
-
-                                    statement.executeUpdate();
-                                }
-                            }
+                            saveTuple(state.urlStringTuples, "String", requestID);
                             break;
                         case MediaType.MULTIPART_FORM_DATA:
-                            if (state.formStringTuples.size() > 0) {
-                                for (FieldState fieldState : state.formStringTuples) {
-                                    // Saves the string tuples
-                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                                    statement.setInt(1, requestID);
-                                    statement.setString(2, "String");
-                                    statement.setString(3, fieldState.key);
-                                    statement.setString(4, fieldState.value);
-                                    statement.setInt(5, fieldState.checked ? 1 : 0);
-
-                                    statement.executeUpdate();
-                                }
-                            }
-
-                            if (state.formFileTuples.size() > 0) {
-                                for (FieldState fieldState : state.formFileTuples) {
-                                    // Saves the string tuples
-                                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                                    statement.setInt(1, requestID);
-                                    statement.setString(2, "File");
-                                    statement.setString(3, fieldState.key);
-                                    statement.setString(4, fieldState.value);
-                                    statement.setInt(5, fieldState.checked ? 1 : 0);
-
-                                    statement.executeUpdate();
-                                }
-                            }
+                            saveTuple(state.formStringTuples, "String", requestID);
+                            saveTuple(state.formFileTuples, "File", requestID);
                             break;
                     }
                 }
             } catch (SQLException e) {
                 Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+            }
+        }
+
+        private void saveTuple(ArrayList<FieldState> tuples, String tupleType, int requestID) {
+            if (tuples.size() > 0) {
+                for (FieldState fieldState : tuples) {
+                    // Saves the string tuples
+                    try {
+                        statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
+                        statement.setInt(1, requestID);
+                        statement.setString(2, tupleType);
+                        statement.setString(3, fieldState.key);
+                        statement.setString(4, fieldState.value);
+                        statement.setInt(5, fieldState.checked ? 1 : 0);
+
+                        statement.executeUpdate();
+                    } catch (SQLException e) {
+                        Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+                    }
+                }
             }
         }
     }

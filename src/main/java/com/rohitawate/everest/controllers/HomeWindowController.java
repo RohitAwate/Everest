@@ -16,24 +16,12 @@
 
 package com.rohitawate.everest.controllers;
 
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.rohitawate.everest.controllers.state.DashboardState;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
-
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
@@ -45,10 +33,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.ResourceBundle;
 
 public class HomeWindowController implements Initializable {
     @FXML
@@ -57,9 +52,8 @@ public class HomeWindowController implements Initializable {
     private SplitPane splitPane;
     @FXML
     private TabPane homeWindowTabPane;
-    
     @FXML
-    private SearchPaneController searchPaneController;
+    private HistoryPaneController historyPaneController;
 
     private HashMap<Tab, DashboardController> tabControllerMap;
 
@@ -69,7 +63,7 @@ public class HomeWindowController implements Initializable {
         tabControllerMap = new LinkedHashMap<>();
         recoverState();
 
-        searchPaneController.addItemClickHandler(this::addTab);
+        historyPaneController.addItemClickHandler(this::addTab);
         homeWindowSP.setFocusTraversable(true);
 
         Platform.runLater(() -> {
@@ -79,9 +73,6 @@ public class HomeWindowController implements Initializable {
             // Saves the state of the application before closing
             Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
             thisStage.setOnCloseRequest(e -> saveState());
-
-         
-
         });
     }
 
@@ -109,7 +100,7 @@ public class HomeWindowController implements Initializable {
                 homeWindowTabPane.getTabs().remove(activeTab);
                 tabControllerMap.remove(activeTab);
             } else if (KeyMap.searchHistory.match(e)) {
-            	searchPaneController.focusSearchField();
+                historyPaneController.focusSearchField();
             } else if (KeyMap.focusParams.match(e)) {
                 Tab activeTab = getActiveTab();
                 DashboardController controller = tabControllerMap.get(activeTab);
@@ -140,7 +131,7 @@ public class HomeWindowController implements Initializable {
     }
 
     private void toggleHistoryPane() {
-        searchPaneController.toggleVisibilityIn(splitPane);
+        historyPaneController.toggleVisibilityIn(splitPane);
     }
 
     private void addTab() {
@@ -224,12 +215,9 @@ public class HomeWindowController implements Initializable {
         } finally {
             Services.loggingService.logInfo("Application loaded.", LocalDateTime.now());
         }
-
     }
 
-	public void addHistoryItem(DashboardState state) {
-		searchPaneController.addHistoryItem(state);
-	}
-
-  
+    public void addHistoryItem(DashboardState state) {
+        historyPaneController.addHistoryItem(state);
+    }
 }

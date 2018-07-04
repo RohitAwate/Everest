@@ -16,21 +16,23 @@
 
 package com.rohitawate.everest.controllers;
 
-import com.rohitawate.everest.controllers.state.DashboardState;
-import com.rohitawate.everest.controllers.state.FieldState;
-import com.rohitawate.everest.misc.Services;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
-
-import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
-public class HistoryItemController implements Initializable {
+import javax.ws.rs.core.MediaType;
+
+import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.FieldState;
+import com.rohitawate.everest.misc.Services;
+
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
+
+public class HistoryItemController implements Initializable, Searchable<DashboardState> {
     @FXML
     private Label requestType, address;
     @FXML

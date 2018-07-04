@@ -77,7 +77,7 @@
 								</VBox>
 							</content>
 						</ScrollPane>
-						<StackPane fx:id="promptLayer">
+						<StackPane fx:id="searchPromptLayer">
 							<children>
 								<Label text="YOUR REQUESTS HISTORY WILL APPEAR HERE"
 									textAlignment="CENTER" textFill="#575757" wrapText="true">

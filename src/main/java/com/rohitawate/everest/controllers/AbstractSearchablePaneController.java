@@ -24,7 +24,7 @@ import javafx.scene.layout.VBox;
 public abstract class AbstractSearchablePaneController<T> implements Initializable {
 
 	@FXML
-	private StackPane promptLayer, searchLayer, searchFailedLayer;
+	private StackPane searchPromptLayer, searchLayer, searchFailedLayer;
 
 	@FXML
 	private JFXButton clearSearchFieldButton;
@@ -99,7 +99,7 @@ public abstract class AbstractSearchablePaneController<T> implements Initializab
 			try {
 				List<T> entries = entryLoader.get();
 				if (entries.size() == 0) {
-					promptLayer.setVisible(true);
+					searchPromptLayer.setVisible(true);
 					return;
 				}
 
@@ -127,7 +127,7 @@ public abstract class AbstractSearchablePaneController<T> implements Initializab
 	}
 
 	private Searchable<T> appendToList(T state, VBox layer, boolean appendToStart) {
-		promptLayer.setVisible(false);
+		searchPromptLayer.setVisible(false);
 		try {
 			SearchEntry<T> searchEntry = createEntryFromState(state);
 

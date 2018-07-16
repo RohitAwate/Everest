@@ -18,7 +18,7 @@ package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
-import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
@@ -119,8 +119,8 @@ public class BodyTabController implements Initializable {
         filePathField.setText(filePath);
     }
 
-    public DashboardState getState() {
-        DashboardState state = new DashboardState();
+    public ComposerState getState() {
+        ComposerState state = new ComposerState();
 
         state.rawBodyType = rawInputTypeBox.getValue();
         state.rawBody = rawInputArea.getText();
@@ -154,7 +154,7 @@ public class BodyTabController implements Initializable {
         return state;
     }
 
-    public void setState(DashboardState state) {
+    public void setState(ComposerState state) {
         // Adding URL tab's tuples
         if (state.urlStringTuples != null)
             for (FieldState fieldState : state.urlStringTuples)
@@ -175,7 +175,7 @@ public class BodyTabController implements Initializable {
         filePathField.setText(state.binaryFilePath);
     }
 
-    private void setRawTab(DashboardState state) {
+    private void setRawTab(ComposerState state) {
         HighlightMode mode;
 
         if (state.rawBodyType != null && state.rawBody != null) {

@@ -21,7 +21,7 @@ import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
-import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
@@ -557,25 +557,25 @@ public class DashboardController implements Initializable {
     /**
      * @return Current state of the Dashboard.
      */
-    public DashboardState getState() {
-        DashboardState dashboardState;
+    public ComposerState getState() {
+        ComposerState composerState;
         switch (httpMethodBox.getValue()) {
             case "POST":
             case "PUT":
             case "PATCH":
-                dashboardState = bodyTabController.getState();
+                composerState = bodyTabController.getState();
                 break;
             default:
                 // For GET, DELETE requests
-                dashboardState = new DashboardState();
+                composerState = new ComposerState();
         }
 
-        dashboardState.target = addressField.getText();
-        dashboardState.httpMethod = httpMethodBox.getValue();
-        dashboardState.headers = headerTabController.getFieldStates();
-        dashboardState.params = getParamFieldStates();
+        composerState.target = addressField.getText();
+        composerState.httpMethod = httpMethodBox.getValue();
+        composerState.headers = headerTabController.getFieldStates();
+        composerState.params = getParamFieldStates();
 
-        return dashboardState;
+        return composerState;
     }
 
     /**
@@ -583,7 +583,7 @@ public class DashboardController implements Initializable {
      *
      * @param state - State of the dashboard
      */
-    public void setState(DashboardState state) {
+    public void setState(ComposerState state) {
         /*
              The only value from a set of constants in the state.json file is the httpMethod
              which, if manipulated to a non-standard value by the user, would still

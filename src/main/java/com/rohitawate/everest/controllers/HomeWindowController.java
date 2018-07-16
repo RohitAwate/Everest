@@ -17,7 +17,7 @@
 package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.Services;
@@ -34,6 +34,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -54,11 +55,23 @@ public class HomeWindowController implements Initializable {
     private TabPane homeWindowTabPane;
     @FXML
     private HistoryPaneController historyPaneController;
+    @FXML
+    private VBox tabDashboardBox;
 
     private HashMap<Tab, DashboardController> tabControllerMap;
+    private DashboardController dashboard;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
+        try {
+            Parent dashboardFXML = loader.load();
+            dashboard = loader.getController();
+            tabDashboardBox.getChildren().add(dashboardFXML);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // Using LinkedHashMap because they retain order
         tabControllerMap = new LinkedHashMap<>();
         recoverState();
@@ -138,15 +151,15 @@ public class HomeWindowController implements Initializable {
         addTab(null);
     }
 
-    private void addTab(DashboardState dashboardState) {
+    private void addTab(ComposerState composerState) {
         try {
             Tab newTab = new Tab();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
             Parent dashboard = loader.load();
             DashboardController controller = loader.getController();
 
-            if (dashboardState != null)
-                controller.setState(dashboardState);
+            if (composerState != null)
+                controller.setState(composerState);
 
             newTab.setContent(dashboard);
 
@@ -173,15 +186,15 @@ public class HomeWindowController implements Initializable {
     }
 
     private void saveState() {
-        ArrayList<DashboardState> dashboardStates = new ArrayList<>();
+        ArrayList<ComposerState> composerStates = new ArrayList<>();
 
         // Get the states of all the tabs
         for (DashboardController controller : tabControllerMap.values())
-            dashboardStates.add(controller.getState());
+            composerStates.add(controller.getState());
 
         try {
             File stateFile = new File("Everest/config/state.json");
-            EverestUtilities.jsonMapper.writeValue(stateFile, dashboardStates);
+            EverestUtilities.jsonMapper.writeValue(stateFile, composerStates);
             Services.loggingService.logInfo("Application state saved.", LocalDateTime.now());
         } catch (IOException e) {
             Services.loggingService.logSevere("Failed to save application state.", e, LocalDateTime.now());
@@ -198,15 +211,15 @@ public class HomeWindowController implements Initializable {
                 return;
             }
 
-            ArrayList<DashboardState> dashboardStates = EverestUtilities.jsonMapper
+            ArrayList<ComposerState> composerStates = EverestUtilities.jsonMapper
                     .reader()
-                    .forType(new TypeReference<ArrayList<DashboardState>>() {
+                    .forType(new TypeReference<ArrayList<ComposerState>>() {
                     })
                     .readValue(stateFile);
 
-            if (dashboardStates.size() > 0) {
-                for (DashboardState dashboardState : dashboardStates)
-                    addTab(dashboardState);
+            if (composerStates.size() > 0) {
+                for (ComposerState composerState : composerStates)
+                    addTab(composerState);
             } else {
                 addTab();
             }
@@ -217,7 +230,7 @@ public class HomeWindowController implements Initializable {
         }
     }
 
-    public void addHistoryItem(DashboardState state) {
+    public void addHistoryItem(ComposerState state) {
         historyPaneController.addHistoryItem(state);
     }
 }

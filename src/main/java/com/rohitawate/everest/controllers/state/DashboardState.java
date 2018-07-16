@@ -16,31 +16,14 @@
 
 package com.rohitawate.everest.controllers.state;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
-/**
- * Convenience class to abstract the state of the application.
- */
 public class DashboardState {
-    public String target;
-    public String httpMethod;
-    public ArrayList<FieldState> params;
-    public ArrayList<FieldState> headers;
-
-    // Determined from the active tab within the Body tab
-    public String contentType;
-
-    // Body and content-type of requests with raw bodies
-    public String rawBody;
-    public String rawBodyType;
-
-    // Tuples of URL-encoded requests
-    public ArrayList<FieldState> urlStringTuples;
-
-    // String and file tuples of multipart-form requests
-    public ArrayList<FieldState> formStringTuples;
-    public ArrayList<FieldState> formFileTuples;
-
-    // File path of application/octet-stream requests
-    public String binaryFilePath;
+    public ComposerState composer;
+    public boolean showResponse;
+    public int statusCode;
+    public String responseType;
+    public int responseTime;
+    public int responseSize;
+    public HashMap<String, String> responseHeaders;
 }

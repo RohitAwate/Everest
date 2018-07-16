@@ -18,7 +18,7 @@ package com.rohitawate.everest.history;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
@@ -96,7 +96,7 @@ public class HistoryManager {
      *
      * @param state - The state of the Dashboard while making the request.
      */
-    public synchronized void saveHistory(DashboardState state) {
+    public synchronized void saveHistory(ComposerState state) {
         if (isDuplicate(state))
             return;
 
@@ -110,8 +110,8 @@ public class HistoryManager {
     /**
      * Returns a list of all the recent requests.
      */
-    public synchronized List<DashboardState> getHistory() {
-        List<DashboardState> history = new ArrayList<>();
+    public synchronized List<ComposerState> getHistory() {
+        List<ComposerState> history = new ArrayList<>();
         try {
             // Loads the requests from the last x number of days, x being Settings.showHistoryRange
             statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRecentRequests").toString()));
@@ -120,9 +120,9 @@ public class HistoryManager {
 
             ResultSet resultSet = statement.executeQuery();
 
-            DashboardState state;
+            ComposerState state;
             while (resultSet.next()) {
-                state = new DashboardState();
+                state = new ComposerState();
 
                 state.target = resultSet.getString("Target");
 
@@ -241,7 +241,7 @@ public class HistoryManager {
      * @param newState The new request.
      * @return true, if request is same as the last one in the database. false, otherwise.
      */
-    private boolean isDuplicate(DashboardState newState) {
+    private boolean isDuplicate(ComposerState newState) {
         try {
             statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectMostRecentRequest").toString()));
             ResultSet RS = statement.executeQuery();
@@ -346,7 +346,7 @@ public class HistoryManager {
     }
 
     private class HistorySaver implements Runnable {
-        private DashboardState state;
+        private ComposerState state;
 
         @Override
         public void run() {

@@ -16,41 +16,39 @@
 
 package com.rohitawate.everest.controllers;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.util.ResourceBundle;
-
-import javax.ws.rs.core.MediaType;
-
 import com.rohitawate.everest.controllers.search.Searchable;
-import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.misc.Services;
-
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 
-public class HistoryItemController implements Initializable, Searchable<DashboardState> {
+import javax.ws.rs.core.MediaType;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ResourceBundle;
+
+public class HistoryItemController implements Initializable, Searchable<ComposerState> {
     @FXML
     private Label requestType, address;
     @FXML
     private Tooltip tooltip;
 
-    private DashboardState state;
+    private ComposerState state;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         tooltip.textProperty().bind(address.textProperty());
     }
 
-    public DashboardState getState() {
+    public ComposerState getState() {
         return state;
     }
 
-    public void setState(DashboardState state) {
+    public void setState(ComposerState state) {
         this.state = state;
         this.requestType.setText(state.httpMethod);
         this.address.setText(state.target);

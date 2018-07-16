@@ -17,7 +17,7 @@
 package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.search.SearchablePaneController;
-import com.rohitawate.everest.controllers.state.DashboardState;
+import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.misc.Services;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -28,16 +28,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class HistoryPaneController extends SearchablePaneController<DashboardState> {
+public class HistoryPaneController extends SearchablePaneController<ComposerState> {
 
-	private List<Consumer<DashboardState>> stateClickHandler = new LinkedList<>();
+    private List<Consumer<ComposerState>> stateClickHandler = new LinkedList<>();
 
 	@Override
-	protected List<DashboardState> loadInitialEntries() {
+    protected List<ComposerState> loadInitialEntries() {
 		return Services.historyManager.getHistory();
 	}
 
-	protected SearchEntry<DashboardState> createEntryFromState(DashboardState state) throws IOException {
+    protected SearchEntry<ComposerState> createEntryFromState(ComposerState state) throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryItem.fxml"));
 		Parent historyItem = loader.load();
 
@@ -53,13 +53,13 @@ public class HistoryPaneController extends SearchablePaneController<DashboardSta
 		return new SearchEntry<>(historyItem, controller);
 	}
 
-	private void handleClick(DashboardState state) {
-		for (Consumer<DashboardState> consumer : stateClickHandler) {
+    private void handleClick(ComposerState state) {
+        for (Consumer<ComposerState> consumer : stateClickHandler) {
 			consumer.accept(state);
 		}
 	}
 
-	public void addItemClickHandler(Consumer<DashboardState> handler) {
+    public void addItemClickHandler(Consumer<ComposerState> handler) {
 		stateClickHandler.add(handler);
 	}
 }

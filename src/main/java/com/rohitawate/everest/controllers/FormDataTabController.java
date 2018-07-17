@@ -223,4 +223,22 @@ public class FormDataTabController implements Initializable {
 
         return states;
     }
+
+    void clear() {
+        if (stringMap != null)
+            stringMap.clear();
+
+        if (fileMap != null)
+            fileMap.clear();
+
+        if (stringControllers != null)
+            stringControllers.clear();
+
+        if (fileControllers != null)
+            fileControllers.clear();
+
+        fieldsBox.getChildren().clear();
+        addStringField();
+        addFileField();
+    }
 }

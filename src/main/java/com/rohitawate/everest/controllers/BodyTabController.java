@@ -156,14 +156,18 @@ public class BodyTabController implements Initializable {
 
     public void setState(ComposerState state) {
         // Adding URL tab's tuples
-        if (state.urlStringTuples != null)
+        if (state.urlStringTuples != null) {
+            urlTabController.clear();
             for (FieldState fieldState : state.urlStringTuples)
                 urlTabController.addField(fieldState);
+        }
 
         // Adding Form tab's string tuples
-        if (state.formStringTuples != null)
+        formDataTabController.clear();
+        if (state.formStringTuples != null) {
             for (FieldState fieldState : state.formStringTuples)
                 formDataTabController.addStringField(fieldState);
+        }
 
         // Adding Form tab's file tuples
         if (state.formFileTuples != null)
@@ -171,7 +175,6 @@ public class BodyTabController implements Initializable {
                 formDataTabController.addFileField(fieldState);
 
         setRawTab(state);
-
         filePathField.setText(state.binaryFilePath);
     }
 

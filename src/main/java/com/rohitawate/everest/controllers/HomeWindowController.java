@@ -18,6 +18,7 @@ package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.rohitawate.everest.controllers.state.ComposerState;
+import com.rohitawate.everest.controllers.state.DashboardState;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.Services;
@@ -25,6 +26,7 @@ import com.rohitawate.everest.misc.ThemeManager;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -58,7 +60,7 @@ public class HomeWindowController implements Initializable {
     @FXML
     private VBox tabDashboardBox;
 
-    private HashMap<Tab, DashboardController> tabControllerMap;
+    private HashMap<Tab, DashboardState> tabStateMap;
     private DashboardController dashboard;
 
     @Override
@@ -73,7 +75,7 @@ public class HomeWindowController implements Initializable {
         }
 
         // Using LinkedHashMap because they retain order
-        tabControllerMap = new LinkedHashMap<>();
+        tabStateMap = new LinkedHashMap<>();
         recoverState();
 
         historyPaneController.addItemClickHandler(this::addTab);
@@ -87,6 +89,16 @@ public class HomeWindowController implements Initializable {
             Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
             thisStage.setOnCloseRequest(e -> saveState());
         });
+
+        homeWindowTabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
+    }
+
+    private void onTabSwitched(ObservableValue<? extends Tab> obs, Tab prevTab, Tab newTab) {
+        DashboardState dashboardState = dashboard.getState();
+        tabStateMap.replace(prevTab, dashboardState);
+
+        dashboardState = tabStateMap.get(newTab);
+        dashboard.setState(dashboardState);
     }
 
     private void setGlobalShortcuts() {
@@ -96,14 +108,11 @@ public class HomeWindowController implements Initializable {
             if (KeyMap.newTab.match(e)) {
                 addTab();
             } else if (KeyMap.focusAddressBar.match(e)) {
-                Tab activeTab = getActiveTab();
-                tabControllerMap.get(activeTab).addressField.requestFocus();
+                dashboard.addressField.requestFocus();
             } else if (KeyMap.focusMethodBox.match(e)) {
-                Tab activeTab = getActiveTab();
-                tabControllerMap.get(activeTab).httpMethodBox.show();
+                dashboard.httpMethodBox.show();
             } else if (KeyMap.sendRequest.match(e)) {
-                Tab activeTab = getActiveTab();
-                tabControllerMap.get(activeTab).sendRequest();
+                dashboard.sendRequest();
             } else if (KeyMap.toggleHistory.match(e)) {
                 toggleHistoryPane();
             } else if (KeyMap.closeTab.match(e)) {
@@ -111,27 +120,19 @@ public class HomeWindowController implements Initializable {
                 if (homeWindowTabPane.getTabs().size() == 1)
                     addTab();
                 homeWindowTabPane.getTabs().remove(activeTab);
-                tabControllerMap.remove(activeTab);
+                tabStateMap.remove(activeTab);
             } else if (KeyMap.searchHistory.match(e)) {
                 historyPaneController.focusSearchField();
             } else if (KeyMap.focusParams.match(e)) {
-                Tab activeTab = getActiveTab();
-                DashboardController controller = tabControllerMap.get(activeTab);
-                controller.requestOptionsTab.getSelectionModel().select(controller.paramsTab);
+                dashboard.requestOptionsTab.getSelectionModel().select(dashboard.paramsTab);
             } else if (KeyMap.focusAuth.match(e)) {
-                Tab activeTab = getActiveTab();
-                DashboardController controller = tabControllerMap.get(activeTab);
-                controller.requestOptionsTab.getSelectionModel().select(controller.authTab);
+                dashboard.requestOptionsTab.getSelectionModel().select(dashboard.authTab);
             } else if (KeyMap.focusHeaders.match(e)) {
-                Tab activeTab = getActiveTab();
-                DashboardController controller = tabControllerMap.get(activeTab);
-                controller.requestOptionsTab.getSelectionModel().select(controller.headersTab);
+                dashboard.requestOptionsTab.getSelectionModel().select(dashboard.headersTab);
             } else if (KeyMap.focusBody.match(e)) {
-                Tab activeTab = getActiveTab();
-                DashboardController controller = tabControllerMap.get(activeTab);
-                String httpMethod = controller.httpMethodBox.getValue();
+                String httpMethod = dashboard.httpMethodBox.getValue();
                 if (!httpMethod.equals("GET") && !httpMethod.equals("DELETE")) {
-                    controller.requestOptionsTab.getSelectionModel().select(controller.bodyTab);
+                    dashboard.requestOptionsTab.getSelectionModel().select(dashboard.bodyTab);
                 }
             } else if (KeyMap.refreshTheme.match(e)) {
                 ThemeManager.refreshTheme();
@@ -152,45 +153,26 @@ public class HomeWindowController implements Initializable {
     }
 
     private void addTab(ComposerState composerState) {
-        try {
-            Tab newTab = new Tab();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
-            Parent dashboard = loader.load();
-            DashboardController controller = loader.getController();
+        Tab newTab = new Tab();
+        homeWindowTabPane.getTabs().add(newTab);
 
-            if (composerState != null)
-                controller.setState(composerState);
+        StringProperty addressProperty = dashboard.addressField.textProperty();
+        newTab.textProperty().bind(
+                Bindings.when(addressProperty.isNotEmpty())
+                        .then(addressProperty)
+                        .otherwise("New Tab"));
 
-            newTab.setContent(dashboard);
-
-            // Binds the addressField text to the Tab text
-            StringProperty addressProperty = controller.addressField.textProperty();
-            newTab.textProperty().bind(
-                    Bindings.when(addressProperty.isNotEmpty())
-                            .then(addressProperty)
-                            .otherwise("New Tab"));
-
-            // Tab closing procedure
-            newTab.setOnCloseRequest(e -> {
-                if (homeWindowTabPane.getTabs().size() == 1)
-                    addTab();
-                tabControllerMap.remove(newTab);
-            });
-
-            homeWindowTabPane.getTabs().add(newTab);
-            homeWindowTabPane.getSelectionModel().select(newTab);
-            tabControllerMap.put(newTab, controller);
-        } catch (IOException e) {
-            Services.loggingService.logSevere("Could not add a new tab.", e, LocalDateTime.now());
-        }
+        DashboardState dashboardState = new DashboardState();
+        dashboardState.composer = composerState;
+        tabStateMap.put(newTab, dashboardState);
     }
 
     private void saveState() {
         ArrayList<ComposerState> composerStates = new ArrayList<>();
 
         // Get the states of all the tabs
-        for (DashboardController controller : tabControllerMap.values())
-            composerStates.add(controller.getState());
+        for (DashboardState dashboardState : tabStateMap.values())
+            composerStates.add(dashboardState.composer);
 
         try {
             File stateFile = new File("Everest/config/state.json");

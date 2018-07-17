@@ -134,4 +134,14 @@ public class HeaderTabController implements Initializable {
 
         return states;
     }
+
+    void clear() {
+        if (headers != null)
+            headers.clear();
+        if (controllers != null)
+            controllers.clear();
+
+        headersBox.getChildren().clear();
+        addHeader();
+    }
 }

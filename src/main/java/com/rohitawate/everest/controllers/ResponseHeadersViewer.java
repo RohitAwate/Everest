@@ -23,8 +23,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import java.util.HashMap;
+
 class ResponseHeadersViewer extends ScrollPane {
     private VBox container;
+    private MultivaluedHashMap<String, String> map;
 
     ResponseHeadersViewer() {
         this.container = new VBox();
@@ -33,12 +37,26 @@ class ResponseHeadersViewer extends ScrollPane {
 
         this.setFitToHeight(true);
         this.setFitToWidth(true);
+
+        map = new MultivaluedHashMap<>();
+    }
+
+    void populate(HashMap<String, String> headers) {
+        map.clear();
+        headers.forEach((key, value) -> map.putSingle(key, value));
+        populate();
     }
 
     void populate(EverestResponse response) {
+        map.clear();
+        map = (MultivaluedHashMap<String, String>) response.getHeaders();
+        populate();
+    }
+
+    private void populate() {
         container.getChildren().clear();
 
-        response.getHeaders().forEach((key, value) -> {
+        map.forEach((key, value) -> {
             Label keyLabel = new Label(key + ": ");
             keyLabel.getStyleClass().addAll("visualizerKeyLabel", "visualizerLabel");
 
@@ -47,5 +65,6 @@ class ResponseHeadersViewer extends ScrollPane {
 
             container.getChildren().add(new HBox(keyLabel, valueLabel));
         });
+
     }
 }

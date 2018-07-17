@@ -22,6 +22,7 @@ import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
 import com.rohitawate.everest.controllers.state.ComposerState;
+import com.rohitawate.everest.controllers.state.DashboardState;
 import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
@@ -314,7 +315,7 @@ public class DashboardController implements Initializable {
                 default:
                     loadingLayer.setVisible(false);
             }
-            Services.historyManager.saveHistory(getState());
+            Services.historyManager.saveHistory(getState().composer);
         } catch (MalformedURLException MURLE) {
             promptLayer.setVisible(true);
             snackbar.show("Invalid address. Please verify and try again.", 3000);
@@ -401,38 +402,41 @@ public class DashboardController implements Initializable {
         responseHeadersViewer.populate(response);
     }
 
-    private void prettifyResponseBody(EverestResponse response) {
-        String type;
+    private void displayResponse(DashboardState state) {
+        prettifyResponseBody(state.responseBody, state.responseType);
+        responseBox.getChildren().remove(responseDetails);
+        responseBox.getChildren().add(0, responseDetails);
+        statusCode.setText(Integer.toString(state.statusCode));
+        statusCodeDescription.setText(Response.Status.fromStatusCode(state.statusCode).getReasonPhrase());
+        responseTime.setText(Long.toString(state.responseTime) + " ms");
+        responseSize.setText(Integer.toString(state.responseSize) + " B");
+        responseHeadersViewer.populate(state.responseHeaders);
+    }
 
-        if (response.getMediaType() != null)
-            type = response.getMediaType().toString();
-        else
-            type = null;
-
-        String responseBody = response.getBody();
-
+    private void prettifyResponseBody(String body, String contentType) {
         visualizerTab.setDisable(true);
         visualizer.clear();
-        try {
-            if (type != null) {
-                // Selects only the part preceding the ';', skipping the character encoding
-                type = type.split(";")[0];
 
-                switch (type.toLowerCase()) {
+        try {
+            if (contentType != null) {
+                // Selects only the part preceding the ';', skipping the character encoding
+                contentType = contentType.split(";")[0];
+
+                switch (contentType.toLowerCase()) {
                     case "application/json":
                         responseTypeBox.setValue("JSON");
-                        JsonNode node = EverestUtilities.jsonMapper.readTree(responseBody);
+                        JsonNode node = EverestUtilities.jsonMapper.readTree(body);
                         responseArea.setText(EverestUtilities.jsonMapper.writeValueAsString(node), HighlightMode.JSON);
                         visualizerTab.setDisable(false);
                         visualizer.populate(node);
                         break;
                     case "application/xml":
                         responseTypeBox.setValue("XML");
-                        responseArea.setText(responseBody, HighlightMode.XML);
+                        responseArea.setText(body, HighlightMode.XML);
                         break;
                     case "text/html":
                         responseTypeBox.setValue("HTML");
-                        responseArea.setText(responseBody, HighlightMode.HTML);
+                        responseArea.setText(body, HighlightMode.HTML);
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                             snackbar.show("Open link in browser?", "YES", 5000, e -> {
                                 snackbar.close();
@@ -448,7 +452,7 @@ public class DashboardController implements Initializable {
                         break;
                     default:
                         responseTypeBox.setValue("PLAIN TEXT");
-                        responseArea.setText(responseBody, HighlightMode.PLAIN);
+                        responseArea.setText(body, HighlightMode.PLAIN);
                 }
             } else {
                 responseTypeBox.setValue("PLAIN");
@@ -461,6 +465,20 @@ public class DashboardController implements Initializable {
             errorTitle.setText("Parsing Error");
             errorDetails.setText("Everest could not parse the response.");
         }
+    }
+
+
+    private void prettifyResponseBody(EverestResponse response) {
+        String type;
+
+        if (response.getMediaType() != null)
+            type = response.getMediaType().toString();
+        else
+            type = "";
+
+        String responseBody = response.getBody();
+
+        prettifyResponseBody(responseBody, type);
     }
 
     @FXML
@@ -557,8 +575,10 @@ public class DashboardController implements Initializable {
     /**
      * @return Current state of the Dashboard.
      */
-    public ComposerState getState() {
+    public DashboardState getState() {
+        DashboardState dashboardState = new DashboardState();
         ComposerState composerState;
+
         switch (httpMethodBox.getValue()) {
             case "POST":
             case "PUT":
@@ -575,7 +595,26 @@ public class DashboardController implements Initializable {
         composerState.headers = headerTabController.getFieldStates();
         composerState.params = getParamFieldStates();
 
-        return composerState;
+        dashboardState.composer = composerState;
+        dashboardState.showResponse = responseArea.isVisible();
+
+        if (dashboardState.showResponse) {
+            dashboardState.responseHeaders = headerTabController.getHeaders();
+            dashboardState.statusCode = Integer.parseInt(statusCode.getText());
+
+            String temp = responseSize.getText();
+            temp = temp.substring(0, temp.length() - 2);
+            dashboardState.responseSize = Integer.parseInt(temp);
+
+            temp = responseTime.getText();
+            temp = temp.substring(0, temp.length() - 3);
+            dashboardState.responseTime = Integer.parseInt(temp);
+
+            dashboardState.responseBody = responseArea.getText();
+            dashboardState.responseType = responseTypeBox.getValue();
+        }
+
+        return dashboardState;
     }
 
     /**
@@ -583,7 +622,14 @@ public class DashboardController implements Initializable {
      *
      * @param state - State of the dashboard
      */
-    public void setState(ComposerState state) {
+    public void setState(DashboardState state) {
+        if (state.showResponse) {
+            displayResponse(state);
+        }
+
+        if (state.composer == null)
+            return;
+
         /*
              The only value from a set of constants in the state.json file is the httpMethod
              which, if manipulated to a non-standard value by the user, would still
@@ -596,7 +642,7 @@ public class DashboardController implements Initializable {
          */
         boolean validMethod = false;
         for (String method : httpMethods) {
-            if (state.httpMethod.equals(method))
+            if (state.composer.httpMethod.equals(method))
                 validMethod = true;
         }
 
@@ -605,20 +651,35 @@ public class DashboardController implements Initializable {
             return;
         }
 
-        httpMethodBox.setValue(state.httpMethod);
+        httpMethodBox.setValue(state.composer.httpMethod);
 
-        if (state.target != null)
-            addressField.setText(state.target);
+        if (state.composer.target != null)
+            addressField.setText(state.composer.target);
 
-        if (state.headers != null)
-            for (FieldState fieldState : state.headers)
+        if (state.composer.headers != null) {
+            headerTabController.clear();
+            for (FieldState fieldState : state.composer.headers)
                 headerTabController.addHeader(fieldState);
+        }
 
-        if (state.params != null)
-            for (FieldState fieldState : state.params)
+        if (state.composer.params != null) {
+            clearParams();
+            for (FieldState fieldState : state.composer.params)
                 addParamField(fieldState);
+        }
 
         if (!(httpMethodBox.getValue().equals("GET") || httpMethodBox.getValue().equals("DELETE")))
-            bodyTabController.setState(state);
+            bodyTabController.setState(state.composer);
+    }
+
+    void clearParams() {
+        if (params != null)
+            params.clear();
+
+        if (paramsControllers != null)
+            paramsControllers.clear();
+
+        paramsBox.getChildren().clear();
+        addParamField();
     }
 }

@@ -135,4 +135,14 @@ public class URLTabController implements Initializable {
 
         return states;
     }
+
+    void clear() {
+        if (tuples != null)
+            tuples.clear();
+        if (controllers != null)
+            controllers.clear();
+
+        fieldsBox.getChildren().clear();
+        addField();
+    }
 }

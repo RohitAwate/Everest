@@ -23,6 +23,7 @@ public class DashboardState {
     public boolean showResponse;
     public int statusCode;
     public String responseType;
+    public String responseBody;
     public int responseTime;
     public int responseSize;
     public HashMap<String, String> responseHeaders;

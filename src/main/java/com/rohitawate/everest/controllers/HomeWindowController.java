@@ -98,6 +98,7 @@ public class HomeWindowController implements Initializable {
         tabStateMap.replace(prevTab, dashboardState);
 
         dashboardState = tabStateMap.get(newTab);
+        dashboard.reset();
         dashboard.setState(dashboardState);
     }
 
@@ -165,6 +166,7 @@ public class HomeWindowController implements Initializable {
         DashboardState dashboardState = new DashboardState();
         dashboardState.composer = composerState;
         tabStateMap.put(newTab, dashboardState);
+        homeWindowTabPane.getSelectionModel().select(newTab);
     }
 
     private void saveState() {

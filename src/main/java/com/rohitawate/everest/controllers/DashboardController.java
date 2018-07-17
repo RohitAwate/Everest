@@ -657,19 +657,25 @@ public class DashboardController implements Initializable {
             addressField.setText(state.composer.target);
 
         if (state.composer.headers != null) {
-            headerTabController.clear();
             for (FieldState fieldState : state.composer.headers)
                 headerTabController.addHeader(fieldState);
         }
 
         if (state.composer.params != null) {
-            clearParams();
             for (FieldState fieldState : state.composer.params)
                 addParamField(fieldState);
         }
 
         if (!(httpMethodBox.getValue().equals("GET") || httpMethodBox.getValue().equals("DELETE")))
             bodyTabController.setState(state.composer);
+    }
+
+    void reset() {
+        httpMethodBox.setValue("GET");
+        addressField.clear();
+        headerTabController.clear();
+        clearParams();
+        bodyTabController.reset();
     }
 
     void clearParams() {

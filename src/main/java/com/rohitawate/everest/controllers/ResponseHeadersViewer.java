@@ -49,7 +49,7 @@ class ResponseHeadersViewer extends ScrollPane {
 
     void populate(EverestResponse response) {
         map.clear();
-        map = (MultivaluedHashMap<String, String>) response.getHeaders();
+        response.getHeaders().forEach((key, value) -> map.putSingle(key, value.get(0)));
         populate();
     }
 

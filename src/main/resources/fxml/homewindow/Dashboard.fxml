@@ -22,7 +22,8 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<StackPane fx:id="dashboard" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.DashboardController">
+<StackPane fx:id="dashboard" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
+           xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.DashboardController">
     <children>
         <VBox>
          <children>
@@ -134,77 +135,100 @@
                          <children>
                              <VBox fx:id="responseBox" alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
-                                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0" minHeight="50.0" spacing="30.0" VBox.vgrow="ALWAYS">
-                                         <children>
-                                             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                                                 <children>
-                                                     <Label fx:id="statusCode" text="404" textFill="WHITE" HBox.hgrow="ALWAYS">
-                                                         <font>
-                                                             <Font name="System Bold" size="35.0" />
-                                                         </font>
-                                                         <HBox.margin>
-                                                             <Insets right="10.0" />
-                                                         </HBox.margin>
-                                                     </Label>
-                                                     <Label fx:id="statusCodeDescription" text="Not Found" textFill="WHITE" HBox.hgrow="ALWAYS">
-                                                         <font>
-                                                             <Font size="30.0" />
-                                                         </font>
-                                                     </Label>
-                                                 </children>
-                                             </HBox>
-                                             <ComboBox fx:id="responseTypeBox" minHeight="30.0" prefWidth="100.0"/>
-                                             <Label fx:id="responseTime" text="151 ms" textFill="WHITE" HBox.hgrow="ALWAYS">
-                                                 <HBox.margin>
-                                                     <Insets />
-                                                 </HBox.margin>
-                                                 <font>
-                                                     <Font name="Liberation Mono" size="17.0" />
-                                                 </font>
-                                             </Label>
-                                             <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0" text="1998 B" textFill="WHITE" HBox.hgrow="ALWAYS">
-                                                 <font>
-                                                     <Font name="Liberation Mono" size="17.0" />
-                                                 </font>
-                                                 <HBox.margin>
-                                                     <Insets />
-                                                 </HBox.margin>
-                                             </Label>
-                                             <JFXButton fx:id="copyBodyButton" textFill="WHITE">
-                                                 <graphic>
-                                                     <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                             <Image url="@../../assets/Copy.png" />
-                                                         </image>
-                                                     </ImageView>
-                                                 </graphic>
-                                             </JFXButton>
-                                             <JFXButton fx:id="clearResponseAreaButton" buttonType="RAISED" onAction="#clearResponseArea" ripplerFill="WHITE" text=" CLEAR" textFill="WHITE" HBox.hgrow="ALWAYS">
-                                                 <graphic>
-                                                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                             <Image url="@../../assets/CrossMark.png" />
-                                                         </image>
-                                                     </ImageView>
-                                                 </graphic>
-                                                 <tooltip>
-                                                     <Tooltip autoHide="true" text="Clears this bar and the response body below." />
-                                                 </tooltip>
-                                             </JFXButton>
-                                         </children>
-                                         <padding>
-                                             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                         </padding>
-                                     </HBox>
                                      <StackPane VBox.vgrow="SOMETIMES">
                                          <children>
-                                             <TabPane fx:id="responseTabPane" side="BOTTOM" tabMinWidth="100.0">
-                                                 <tabs>
-                                                     <Tab fx:id="responseBodyTab" closable="false" text="BODY"/>
-                                                     <Tab fx:id="visualizerTab" closable="false" text="VISUALIZER" />
-                                                     <Tab fx:id="responseHeadersTab" closable="false" text="HEADERS" />
-                                                 </tabs>
-                                             </TabPane>
+                                             <VBox fx:id="responseLayer">
+                                                 <children>
+                                                     <HBox fx:id="responseDetails" alignment="CENTER_RIGHT"
+                                                           maxHeight="50.0" minHeight="50.0" spacing="30.0"
+                                                           VBox.vgrow="ALWAYS">
+                                                         <children>
+                                                             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                                                 <children>
+                                                                     <Label fx:id="statusCode" text="404"
+                                                                            textFill="WHITE" HBox.hgrow="ALWAYS">
+                                                                         <font>
+                                                                             <Font name="System Bold" size="35.0"/>
+                                                                         </font>
+                                                                         <HBox.margin>
+                                                                             <Insets right="10.0"/>
+                                                                         </HBox.margin>
+                                                                     </Label>
+                                                                     <Label fx:id="statusCodeDescription"
+                                                                            text="Not Found" textFill="WHITE"
+                                                                            HBox.hgrow="ALWAYS">
+                                                                         <font>
+                                                                             <Font size="30.0"/>
+                                                                         </font>
+                                                                     </Label>
+                                                                 </children>
+                                                             </HBox>
+                                                             <ComboBox fx:id="responseTypeBox" minHeight="30.0"
+                                                                       prefWidth="100.0"/>
+                                                             <Label fx:id="responseTime" text="151 ms" textFill="WHITE"
+                                                                    HBox.hgrow="ALWAYS">
+                                                                 <HBox.margin>
+                                                                     <Insets/>
+                                                                 </HBox.margin>
+                                                                 <font>
+                                                                     <Font name="Liberation Mono" size="17.0"/>
+                                                                 </font>
+                                                             </Label>
+                                                             <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0"
+                                                                    text="1998 B" textFill="WHITE" HBox.hgrow="ALWAYS">
+                                                                 <font>
+                                                                     <Font name="Liberation Mono" size="17.0"/>
+                                                                 </font>
+                                                                 <HBox.margin>
+                                                                     <Insets/>
+                                                                 </HBox.margin>
+                                                             </Label>
+                                                             <JFXButton fx:id="copyBodyButton" textFill="WHITE">
+                                                                 <graphic>
+                                                                     <ImageView fitHeight="20.0" fitWidth="20.0"
+                                                                                pickOnBounds="true"
+                                                                                preserveRatio="true">
+                                                                         <image>
+                                                                             <Image url="@../../assets/Copy.png"/>
+                                                                         </image>
+                                                                     </ImageView>
+                                                                 </graphic>
+                                                             </JFXButton>
+                                                             <JFXButton fx:id="clearResponseAreaButton"
+                                                                        buttonType="RAISED"
+                                                                        onAction="#clearResponseArea"
+                                                                        ripplerFill="WHITE" text=" CLEAR"
+                                                                        textFill="WHITE" HBox.hgrow="ALWAYS">
+                                                                 <graphic>
+                                                                     <ImageView fitHeight="15.0" fitWidth="15.0"
+                                                                                pickOnBounds="true"
+                                                                                preserveRatio="true">
+                                                                         <image>
+                                                                             <Image url="@../../assets/CrossMark.png"/>
+                                                                         </image>
+                                                                     </ImageView>
+                                                                 </graphic>
+                                                                 <tooltip>
+                                                                     <Tooltip autoHide="true"
+                                                                              text="Clears this bar and the response body below."/>
+                                                                 </tooltip>
+                                                             </JFXButton>
+                                                         </children>
+                                                         <padding>
+                                                             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                                                         </padding>
+                                                     </HBox>
+                                                     <TabPane fx:id="responseTabPane" side="BOTTOM" tabMinWidth="100.0">
+                                                         <tabs>
+                                                             <Tab fx:id="responseBodyTab" closable="false" text="BODY"/>
+                                                             <Tab fx:id="visualizerTab" closable="false"
+                                                                  text="VISUALIZER"/>
+                                                             <Tab fx:id="responseHeadersTab" closable="false"
+                                                                  text="HEADERS"/>
+                                                         </tabs>
+                                                     </TabPane>
+                                                 </children>
+                                             </VBox>
                                              <VBox fx:id="loadingLayer" alignment="CENTER" spacing="10.0">
                                                  <children>
                                                        <Label text="LOADING" textFill="WHITE">

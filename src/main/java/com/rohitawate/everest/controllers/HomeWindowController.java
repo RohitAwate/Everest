@@ -128,12 +128,28 @@ public class HomeWindowController implements Initializable {
         dashboardState.composer = composerState;
         tabStateMap.put(newTab, dashboardState);
         homeWindowTabPane.getSelectionModel().select(newTab);
+
+        newTab.setOnCloseRequest(e -> {
+            tabStateMap.remove(newTab);
+
+            if (homeWindowTabPane.getTabs().size() == 1) {
+                Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
+                thisStage.close();
+            }
+        });
     }
 
     private void saveState() {
-        ArrayList<ComposerState> composerStates = new ArrayList<>();
+        /*
+            Updating the state of the selected tab before saving it.
+            Other tabs will already have their states saved when they
+            were loaded from state.json or on a tab switch.
+          */
+        Tab currentTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
+        DashboardState currentState = dashboard.getState();
+        tabStateMap.put(currentTab, currentState);
 
-        // Get the states of all the tabs
+        ArrayList<ComposerState> composerStates = new ArrayList<>();
         for (DashboardState dashboardState : tabStateMap.values())
             composerStates.add(dashboardState.composer);
 
@@ -196,10 +212,12 @@ public class HomeWindowController implements Initializable {
                     toggleHistoryPane();
                 } else if (KeyMap.closeTab.match(e)) {
                     Tab activeTab = getActiveTab();
-                    if (homeWindowTabPane.getTabs().size() == 1)
-                        addTab();
-                    homeWindowTabPane.getTabs().remove(activeTab);
                     tabStateMap.remove(activeTab);
+                    if (homeWindowTabPane.getTabs().size() == 1) {
+                        Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
+                        thisStage.close();
+                        homeWindowTabPane.getTabs().remove(activeTab);
+                    }
                 } else if (KeyMap.searchHistory.match(e)) {
                     historyPaneController.focusSearchField();
                 } else if (KeyMap.focusParams.match(e)) {

@@ -47,7 +47,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.fxmisc.flowless.VirtualizedScrollPane;
@@ -75,16 +74,14 @@ public class DashboardController implements Initializable {
     @FXML
     ComboBox<String> httpMethodBox, responseTypeBox;
     @FXML
-    private VBox responseBox, loadingLayer, promptLayer, errorLayer, paramsBox;
-    @FXML
-    private HBox responseDetails;
+    private VBox responseBox, responseLayer, loadingLayer, promptLayer, errorLayer, paramsBox;
     @FXML
     private Label statusCode, statusCodeDescription, responseTime,
             responseSize, errorTitle, errorDetails;
     @FXML
     private JFXButton cancelButton, copyBodyButton;
     @FXML
-    TabPane requestOptionsTab;
+    TabPane requestOptionsTab, responseTabPane;
     @FXML
     Tab paramsTab, authTab, headersTab, bodyTab;
     @FXML
@@ -109,6 +106,10 @@ public class DashboardController implements Initializable {
     private HashMap<String, String> params;
     private EverestCodeArea responseArea;
 
+    private enum ResponseLayer {
+        PROMPT, LOADING, RESPONSE, ERROR
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
@@ -131,8 +132,7 @@ public class DashboardController implements Initializable {
 
         snackbar = new JFXSnackbar(dashboard);
 
-        responseBox.getChildren().remove(0);
-        promptLayer.setVisible(true);
+        displayLayer(ResponseLayer.PROMPT);
         httpMethodBox.getItems().addAll(httpMethods);
 
         // Select GET by default
@@ -392,9 +392,38 @@ public class DashboardController implements Initializable {
         loadingLayer.setVisible(true);
     }
 
+    private void displayLayer(ResponseLayer layer) {
+        switch (layer) {
+            case ERROR:
+                errorLayer.setVisible(true);
+                loadingLayer.setVisible(false);
+                promptLayer.setVisible(false);
+                responseLayer.setVisible(false);
+                break;
+            case LOADING:
+                loadingLayer.setVisible(true);
+                errorLayer.setVisible(false);
+                promptLayer.setVisible(false);
+                responseLayer.setVisible(false);
+                break;
+            case RESPONSE:
+                responseLayer.setVisible(true);
+                errorLayer.setVisible(false);
+                loadingLayer.setVisible(false);
+                promptLayer.setVisible(false);
+                break;
+            case PROMPT:
+            default:
+                promptLayer.setVisible(true);
+                loadingLayer.setVisible(false);
+                errorLayer.setVisible(false);
+                responseLayer.setVisible(false);
+                break;
+        }
+    }
+
     private void displayResponse(EverestResponse response) {
         prettifyResponseBody(response);
-        responseBox.getChildren().add(0, responseDetails);
         statusCode.setText(Integer.toString(response.getStatusCode()));
         statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
         responseTime.setText(Long.toString(response.getTime()) + " ms");
@@ -404,8 +433,6 @@ public class DashboardController implements Initializable {
 
     private void displayResponse(DashboardState state) {
         prettifyResponseBody(state.responseBody, state.responseType);
-        responseBox.getChildren().remove(responseDetails);
-        responseBox.getChildren().add(0, responseDetails);
         statusCode.setText(Integer.toString(state.statusCode));
         statusCodeDescription.setText(Response.Status.fromStatusCode(state.statusCode).getReasonPhrase());
         responseTime.setText(Long.toString(state.responseTime) + " ms");
@@ -414,6 +441,7 @@ public class DashboardController implements Initializable {
     }
 
     private void prettifyResponseBody(String body, String contentType) {
+        displayLayer(ResponseLayer.RESPONSE);
         visualizerTab.setDisable(true);
         visualizer.clear();
 
@@ -456,7 +484,7 @@ public class DashboardController implements Initializable {
                 }
             } else {
                 responseTypeBox.setValue("PLAIN");
-                responseArea.setText("No rawBody found in the response.", HighlightMode.PLAIN);
+                responseArea.setText("No body found in the response.", HighlightMode.PLAIN);
             }
         } catch (Exception e) {
             snackbar.show("Response could not be parsed.", 5000);
@@ -596,7 +624,7 @@ public class DashboardController implements Initializable {
         composerState.params = getParamFieldStates();
 
         dashboardState.composer = composerState;
-        dashboardState.showResponse = responseArea.isVisible();
+        dashboardState.showResponse = responseLayer.isVisible();
 
         if (dashboardState.showResponse) {
             dashboardState.responseHeaders = headerTabController.getHeaders();
@@ -611,7 +639,23 @@ public class DashboardController implements Initializable {
             dashboardState.responseTime = Integer.parseInt(temp);
 
             dashboardState.responseBody = responseArea.getText();
-            dashboardState.responseType = responseTypeBox.getValue();
+
+            String contentType;
+            switch (responseTypeBox.getValue()) {
+                case "JSON":
+                    contentType = MediaType.APPLICATION_JSON;
+                    break;
+                case "XML":
+                    contentType = MediaType.APPLICATION_XML;
+                    break;
+                case "HTML":
+                    contentType = MediaType.TEXT_HTML;
+                    break;
+                default:
+                    contentType = MediaType.TEXT_PLAIN;
+            }
+
+            dashboardState.responseType = contentType;
         }
 
         return dashboardState;
@@ -623,9 +667,11 @@ public class DashboardController implements Initializable {
      * @param state - State of the dashboard
      */
     public void setState(DashboardState state) {
-        if (state.showResponse) {
+        if (state == null)
+            return;
+
+        if (state.showResponse)
             displayResponse(state);
-        }
 
         if (state.composer == null)
             return;
@@ -676,6 +722,9 @@ public class DashboardController implements Initializable {
         headerTabController.clear();
         clearParams();
         bodyTabController.reset();
+        responseArea.clear();
+        displayLayer(ResponseLayer.PROMPT);
+        responseTabPane.getSelectionModel().select(0);
     }
 
     void clearParams() {

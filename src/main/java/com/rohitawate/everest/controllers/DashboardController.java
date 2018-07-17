@@ -437,6 +437,7 @@ public class DashboardController implements Initializable {
         statusCodeDescription.setText(Response.Status.fromStatusCode(state.statusCode).getReasonPhrase());
         responseTime.setText(Long.toString(state.responseTime) + " ms");
         responseSize.setText(Integer.toString(state.responseSize) + " B");
+        System.out.println(state.responseHeaders.size());
         responseHeadersViewer.populate(state.responseHeaders);
     }
 
@@ -627,7 +628,7 @@ public class DashboardController implements Initializable {
         dashboardState.showResponse = responseLayer.isVisible();
 
         if (dashboardState.showResponse) {
-            dashboardState.responseHeaders = headerTabController.getHeaders();
+            dashboardState.responseHeaders = responseHeadersViewer.getHeaders();
             dashboardState.statusCode = Integer.parseInt(statusCode.getText());
 
             String temp = responseSize.getText();

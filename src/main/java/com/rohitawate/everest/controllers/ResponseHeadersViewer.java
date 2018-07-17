@@ -23,12 +23,11 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import javax.ws.rs.core.MultivaluedHashMap;
 import java.util.HashMap;
 
 class ResponseHeadersViewer extends ScrollPane {
     private VBox container;
-    private MultivaluedHashMap<String, String> map;
+    private HashMap<String, String> map;
 
     ResponseHeadersViewer() {
         this.container = new VBox();
@@ -38,18 +37,18 @@ class ResponseHeadersViewer extends ScrollPane {
         this.setFitToHeight(true);
         this.setFitToWidth(true);
 
-        map = new MultivaluedHashMap<>();
+        map = new HashMap<>();
     }
 
     void populate(HashMap<String, String> headers) {
         map.clear();
-        headers.forEach((key, value) -> map.putSingle(key, value));
+        headers.forEach((key, value) -> map.put(key, value));
         populate();
     }
 
     void populate(EverestResponse response) {
         map.clear();
-        response.getHeaders().forEach((key, value) -> map.putSingle(key, value.get(0)));
+        response.getHeaders().forEach((key, value) -> map.put(key, value.get(0)));
         populate();
     }
 
@@ -60,11 +59,15 @@ class ResponseHeadersViewer extends ScrollPane {
             Label keyLabel = new Label(key + ": ");
             keyLabel.getStyleClass().addAll("visualizerKeyLabel", "visualizerLabel");
 
-            Label valueLabel = new Label(value.get(0));
+            Label valueLabel = new Label(value);
             valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
 
             container.getChildren().add(new HBox(keyLabel, valueLabel));
         });
 
+    }
+
+    public HashMap<String, String> getHeaders() {
+        return new HashMap<>(map);
     }
 }

@@ -83,7 +83,7 @@ public class HomeWindowController implements Initializable {
 
         Platform.runLater(() -> {
             homeWindowSP.requestFocus();
-            this.setGlobalShortcuts();
+            new KeymapHandler();
 
             // Saves the state of the application before closing
             Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
@@ -100,45 +100,6 @@ public class HomeWindowController implements Initializable {
         dashboardState = tabStateMap.get(newTab);
         dashboard.reset();
         dashboard.setState(dashboardState);
-    }
-
-    private void setGlobalShortcuts() {
-        Scene thisScene = homeWindowSP.getScene();
-
-        thisScene.setOnKeyPressed(e -> {
-            if (KeyMap.newTab.match(e)) {
-                addTab();
-            } else if (KeyMap.focusAddressBar.match(e)) {
-                dashboard.addressField.requestFocus();
-            } else if (KeyMap.focusMethodBox.match(e)) {
-                dashboard.httpMethodBox.show();
-            } else if (KeyMap.sendRequest.match(e)) {
-                dashboard.sendRequest();
-            } else if (KeyMap.toggleHistory.match(e)) {
-                toggleHistoryPane();
-            } else if (KeyMap.closeTab.match(e)) {
-                Tab activeTab = getActiveTab();
-                if (homeWindowTabPane.getTabs().size() == 1)
-                    addTab();
-                homeWindowTabPane.getTabs().remove(activeTab);
-                tabStateMap.remove(activeTab);
-            } else if (KeyMap.searchHistory.match(e)) {
-                historyPaneController.focusSearchField();
-            } else if (KeyMap.focusParams.match(e)) {
-                dashboard.requestOptionsTab.getSelectionModel().select(dashboard.paramsTab);
-            } else if (KeyMap.focusAuth.match(e)) {
-                dashboard.requestOptionsTab.getSelectionModel().select(dashboard.authTab);
-            } else if (KeyMap.focusHeaders.match(e)) {
-                dashboard.requestOptionsTab.getSelectionModel().select(dashboard.headersTab);
-            } else if (KeyMap.focusBody.match(e)) {
-                String httpMethod = dashboard.httpMethodBox.getValue();
-                if (!httpMethod.equals("GET") && !httpMethod.equals("DELETE")) {
-                    dashboard.requestOptionsTab.getSelectionModel().select(dashboard.bodyTab);
-                }
-            } else if (KeyMap.refreshTheme.match(e)) {
-                ThemeManager.refreshTheme();
-            }
-        });
     }
 
     private Tab getActiveTab() {
@@ -216,5 +177,46 @@ public class HomeWindowController implements Initializable {
 
     public void addHistoryItem(ComposerState state) {
         historyPaneController.addHistoryItem(state);
+    }
+
+    private class KeymapHandler {
+        private KeymapHandler() {
+            Scene thisScene = homeWindowSP.getScene();
+
+            thisScene.setOnKeyPressed(e -> {
+                if (KeyMap.newTab.match(e)) {
+                    addTab();
+                } else if (KeyMap.focusAddressBar.match(e)) {
+                    dashboard.addressField.requestFocus();
+                } else if (KeyMap.focusMethodBox.match(e)) {
+                    dashboard.httpMethodBox.show();
+                } else if (KeyMap.sendRequest.match(e)) {
+                    dashboard.sendRequest();
+                } else if (KeyMap.toggleHistory.match(e)) {
+                    toggleHistoryPane();
+                } else if (KeyMap.closeTab.match(e)) {
+                    Tab activeTab = getActiveTab();
+                    if (homeWindowTabPane.getTabs().size() == 1)
+                        addTab();
+                    homeWindowTabPane.getTabs().remove(activeTab);
+                    tabStateMap.remove(activeTab);
+                } else if (KeyMap.searchHistory.match(e)) {
+                    historyPaneController.focusSearchField();
+                } else if (KeyMap.focusParams.match(e)) {
+                    dashboard.requestOptionsTab.getSelectionModel().select(dashboard.paramsTab);
+                } else if (KeyMap.focusAuth.match(e)) {
+                    dashboard.requestOptionsTab.getSelectionModel().select(dashboard.authTab);
+                } else if (KeyMap.focusHeaders.match(e)) {
+                    dashboard.requestOptionsTab.getSelectionModel().select(dashboard.headersTab);
+                } else if (KeyMap.focusBody.match(e)) {
+                    String httpMethod = dashboard.httpMethodBox.getValue();
+                    if (!httpMethod.equals("GET") && !httpMethod.equals("DELETE")) {
+                        dashboard.requestOptionsTab.getSelectionModel().select(dashboard.bodyTab);
+                    }
+                } else if (KeyMap.refreshTheme.match(e)) {
+                    ThemeManager.refreshTheme();
+                }
+            });
+        }
     }
 }

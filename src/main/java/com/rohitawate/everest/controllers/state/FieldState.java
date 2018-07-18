@@ -16,6 +16,8 @@
 
 package com.rohitawate.everest.controllers.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 /**
@@ -47,5 +49,10 @@ public class FieldState {
         return checked == that.checked &&
                 Objects.equals(key, that.key) &&
                 Objects.equals(value, that.value);
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+        return key.isEmpty() && value.isEmpty();
     }
 }

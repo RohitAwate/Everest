@@ -338,7 +338,7 @@ public class HistoryManager {
             return false;
 
         for (FieldState state : secondList) {
-            if (!firstList.contains(state))
+            if (!state.isEmpty() && state.checked && !firstList.contains(state))
                 return false;
         }
 
@@ -373,12 +373,14 @@ public class HistoryManager {
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveHeader").toString()));
 
                     for (FieldState fieldState : state.headers) {
-                        statement.setInt(1, requestID);
-                        statement.setString(2, fieldState.key);
-                        statement.setString(3, fieldState.value);
-                        statement.setInt(4, fieldState.checked ? 1 : 0);
+                        if (!fieldState.isEmpty() && fieldState.checked) {
+                            statement.setInt(1, requestID);
+                            statement.setString(2, fieldState.key);
+                            statement.setString(3, fieldState.value);
+                            statement.setInt(4, fieldState.checked ? 1 : 0);
 
-                        statement.executeUpdate();
+                            statement.executeUpdate();
+                        }
                     }
                 }
 
@@ -423,18 +425,19 @@ public class HistoryManager {
         private void saveTuple(ArrayList<FieldState> tuples, String tupleType, int requestID) {
             if (tuples.size() > 0) {
                 for (FieldState fieldState : tuples) {
-                    // Saves the string tuples
-                    try {
-                        statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
-                        statement.setInt(1, requestID);
-                        statement.setString(2, tupleType);
-                        statement.setString(3, fieldState.key);
-                        statement.setString(4, fieldState.value);
-                        statement.setInt(5, fieldState.checked ? 1 : 0);
+                    if (!fieldState.isEmpty() && fieldState.checked) {
+                        try {
+                            statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
+                            statement.setInt(1, requestID);
+                            statement.setString(2, tupleType);
+                            statement.setString(3, fieldState.key);
+                            statement.setString(4, fieldState.value);
+                            statement.setInt(5, fieldState.checked ? 1 : 0);
 
-                        statement.executeUpdate();
-                    } catch (SQLException e) {
-                        Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+                            statement.executeUpdate();
+                        } catch (SQLException e) {
+                            Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+                        }
                     }
                 }
             }

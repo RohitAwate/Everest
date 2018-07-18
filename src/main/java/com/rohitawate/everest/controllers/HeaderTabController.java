@@ -123,14 +123,13 @@ public class HeaderTabController implements Initializable {
     }
 
     /**
-     * Return a list of the state of all the non-empty fields in the Headers tab.
+     * Return a list of the state of all the fields in the Headers tab.
      */
     public ArrayList<FieldState> getFieldStates() {
         ArrayList<FieldState> states = new ArrayList<>();
 
         for (StringKeyValueFieldController controller : controllers)
-            if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
-                states.add(controller.getState());
+            states.add(controller.getState());
 
         return states;
     }

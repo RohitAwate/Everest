@@ -58,6 +58,7 @@ public class HomeWindowController implements Initializable {
     private HashMap<Tab, DashboardState> tabStateMap;
     private HistoryPaneController historyController;
     private DashboardController dashboard;
+    private StringProperty addressProperty;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -72,6 +73,7 @@ public class HomeWindowController implements Initializable {
             Parent dashboardFXML = dashboardLoader.load();
             dashboard = dashboardLoader.getController();
             dashboardContainer.getChildren().add(dashboardFXML);
+            addressProperty = dashboard.addressField.textProperty();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -139,25 +141,6 @@ public class HomeWindowController implements Initializable {
     private void addTab(ComposerState composerState) {
         Tab newTab = new Tab();
 
-        StringProperty addressProperty = dashboard.addressField.textProperty();
-
-        newTab.textProperty().bind(
-                Bindings.when(addressProperty.isNotEmpty())
-                        .then(addressProperty)
-                        .otherwise("New Tab"));
-
-        newTab.setOnCloseRequest(e -> {
-            tabStateMap.remove(newTab);
-            tabPane.getTabs().remove(newTab);
-
-            // Closes the application if the last tab is closed
-            if (tabPane.getTabs().size() == 0) {
-                saveState();
-                Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
-                thisStage.close();
-            }
-        });
-
         DashboardState newState = new DashboardState(composerState);
         tabStateMap.put(newTab, newState);
 
@@ -174,6 +157,34 @@ public class HomeWindowController implements Initializable {
         tabPane.getTabs().add(newTab);
         tabPane.getSelectionModel().select(newTab);
         onTabSwitched(prevState, prevTab, newTab);
+
+        // Makes the Tab's text change with the URL
+        newTab.textProperty().bind(
+                Bindings.when(Bindings.and(addressProperty.isNotEmpty(), newTab.selectedProperty()))
+                        .then(addressProperty)
+                        .otherwise(getTabText(newTab))
+        );
+
+        newTab.setOnCloseRequest(e -> {
+            tabStateMap.remove(newTab);
+            tabPane.getTabs().remove(newTab);
+
+            // Closes the application if the last tab is closed
+            if (tabPane.getTabs().size() == 0) {
+                saveState();
+                Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
+                thisStage.close();
+            }
+        });
+    }
+
+    private String getTabText(Tab newTab) {
+        DashboardState state = tabStateMap.get(newTab);
+
+        if (state == null || state.composer == null || state.composer.target.equals(""))
+            return "New Tab";
+        else
+            return state.composer.target;
     }
 
     private void saveState() {

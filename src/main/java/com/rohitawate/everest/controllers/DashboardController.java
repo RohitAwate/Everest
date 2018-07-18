@@ -119,14 +119,14 @@ public class DashboardController implements Initializable {
             headerTabController = headerTabLoader.getController();
             headersTab.setContent(headerTabContent);
 
-            // Loading the rawBody tab
+            // Loading the body tab
             FXMLLoader bodyTabLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/BodyTab.fxml"));
             Parent bodyTabContent = bodyTabLoader.load();
             ThemeManager.setTheme(bodyTabContent);
             bodyTabController = bodyTabLoader.getController();
             bodyTab.setContent(bodyTabContent);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not load headers/rawBody tabs.", e, LocalDateTime.now());
+            Services.loggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
         }
 
         snackbar = new JFXSnackbar(dashboard);
@@ -360,7 +360,7 @@ public class DashboardController implements Initializable {
         if (requestManager.getClass() == DataDispatchRequestManager.class) {
             if (throwable.getCause() != null && throwable.getCause().getClass() == IllegalArgumentException.class) {
                 errorTitle.setText("Did you forget something?");
-                errorDetails.setText("Please specify at least one rawBody part for your " + httpMethodBox.getValue() + " request.");
+                errorDetails.setText("Please specify a body for your " + httpMethodBox.getValue() + " request.");
             } else if (throwable.getClass() == FileNotFoundException.class) {
                 errorTitle.setText("File(s) not found:");
                 errorDetails.setText(throwable.getMessage());
@@ -372,23 +372,20 @@ public class DashboardController implements Initializable {
     }
 
     private void onCancelled() {
-        loadingLayer.setVisible(false);
-        promptLayer.setVisible(true);
+        displayLayer(ResponseLayer.PROMPT);
         snackbar.show("Request canceled.", 2000);
         requestManager.reset();
     }
 
     private void onSucceeded() {
         displayResponse(requestManager.getValue());
-        errorLayer.setVisible(false);
-        loadingLayer.setVisible(false);
+        displayLayer(ResponseLayer.RESPONSE);
         requestManager.reset();
     }
 
     private void whileRunning() {
         responseArea.clear();
-        errorLayer.setVisible(false);
-        loadingLayer.setVisible(true);
+        displayLayer(ResponseLayer.LOADING);
     }
 
     private void displayLayer(ResponseLayer layer) {

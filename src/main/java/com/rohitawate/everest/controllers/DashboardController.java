@@ -47,7 +47,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 
@@ -68,7 +67,7 @@ import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
     @FXML
-    private StackPane dashboard;
+    private VBox dashboard;
     @FXML
     TextField addressField;
     @FXML

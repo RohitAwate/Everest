@@ -96,15 +96,15 @@
 }
 
 /* Home window tab */
-#homeWindowTabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
+#tabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
     -fx-background-color: white;
 }
 
-#homeWindowTabPane:top .tab-header-area .headers-region .tab:hover:top {
+#tabPane:top .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: orangered;
 }
 
-#homeWindowTabPane:top .tab-header-area .headers-region .tab:selected:top {
+#tabPane:top .tab-header-area .headers-region .tab:selected:top {
     -fx-background-color: #505050;
 }
 

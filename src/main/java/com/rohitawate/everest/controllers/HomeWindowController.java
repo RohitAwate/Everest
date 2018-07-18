@@ -36,7 +36,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -50,26 +49,29 @@ import java.util.ResourceBundle;
 
 public class HomeWindowController implements Initializable {
     @FXML
-    private StackPane homeWindowSP;
+    private StackPane homeWindowSP, dashboardContainer;
     @FXML
     private SplitPane splitPane;
     @FXML
-    private TabPane homeWindowTabPane;
-    @FXML
-    private HistoryPaneController historyPaneController;
-    @FXML
-    private VBox tabDashboardBox;
+    private TabPane tabPane;
 
     private HashMap<Tab, DashboardState> tabStateMap;
+    private HistoryPaneController historyController;
     private DashboardController dashboard;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
         try {
-            Parent dashboardFXML = loader.load();
-            dashboard = loader.getController();
-            tabDashboardBox.getChildren().add(dashboardFXML);
+            FXMLLoader historyLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryPane.fxml"));
+            Parent historyFXML = historyLoader.load();
+            splitPane.getItems().add(0, historyFXML);
+            historyController = historyLoader.getController();
+            historyController.addItemClickHandler(this::addTab);
+
+            FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
+            Parent dashboardFXML = dashboardLoader.load();
+            dashboard = dashboardLoader.getController();
+            dashboardContainer.getChildren().add(dashboardFXML);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,7 +80,6 @@ public class HomeWindowController implements Initializable {
         tabStateMap = new LinkedHashMap<>();
         recoverState();
 
-        historyPaneController.addItemClickHandler(this::addTab);
         homeWindowSP.setFocusTraversable(true);
 
         Platform.runLater(() -> {
@@ -90,7 +91,7 @@ public class HomeWindowController implements Initializable {
             thisStage.setOnCloseRequest(e -> saveState());
         });
 
-        homeWindowTabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
+        tabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
     }
 
     /**
@@ -132,7 +133,7 @@ public class HomeWindowController implements Initializable {
     }
 
     /**
-     * Adds a new tab to the homeWindowTabPane initialized with
+     * Adds a new tab to the tabPane initialized with
      * the ComposerState provided.
      */
     private void addTab(ComposerState composerState) {
@@ -147,10 +148,10 @@ public class HomeWindowController implements Initializable {
 
         newTab.setOnCloseRequest(e -> {
             tabStateMap.remove(newTab);
-            homeWindowTabPane.getTabs().remove(newTab);
+            tabPane.getTabs().remove(newTab);
 
             // Closes the application if the last tab is closed
-            if (homeWindowTabPane.getTabs().size() == 0) {
+            if (tabPane.getTabs().size() == 0) {
                 saveState();
                 Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
                 thisStage.close();
@@ -168,10 +169,10 @@ public class HomeWindowController implements Initializable {
              4. Switch to the new tab.
              5. Call onTabSwitched() to update the Dashboard and save the oldState.
          */
-        Tab prevTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
+        Tab prevTab = tabPane.getSelectionModel().getSelectedItem();
         DashboardState prevState = dashboard.getState();
-        homeWindowTabPane.getTabs().add(newTab);
-        homeWindowTabPane.getSelectionModel().select(newTab);
+        tabPane.getTabs().add(newTab);
+        tabPane.getSelectionModel().select(newTab);
         onTabSwitched(prevState, prevTab, newTab);
     }
 
@@ -181,7 +182,7 @@ public class HomeWindowController implements Initializable {
             Other tabs will already have their states saved when they
             were loaded from state.json or on a tab switch.
           */
-        Tab currentTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
+        Tab currentTab = tabPane.getSelectionModel().getSelectedItem();
         DashboardState currentState = dashboard.getState();
         tabStateMap.put(currentTab, currentState);
 
@@ -228,11 +229,11 @@ public class HomeWindowController implements Initializable {
     }
 
     public void addHistoryItem(ComposerState state) {
-        historyPaneController.addHistoryItem(state);
+        historyController.addHistoryItem(state);
     }
 
     private void toggleHistoryPane() {
-        historyPaneController.toggleVisibilityIn(splitPane);
+        historyController.toggleVisibilityIn(splitPane);
     }
 
     private class KeymapHandler {
@@ -251,17 +252,17 @@ public class HomeWindowController implements Initializable {
                 } else if (KeyMap.toggleHistory.match(e)) {
                     toggleHistoryPane();
                 } else if (KeyMap.closeTab.match(e)) {
-                    Tab activeTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
+                    Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
                     tabStateMap.remove(activeTab);
-                    homeWindowTabPane.getTabs().remove(activeTab);
-                    if (homeWindowTabPane.getTabs().size() == 0) {
+                    tabPane.getTabs().remove(activeTab);
+                    if (tabPane.getTabs().size() == 0) {
                         saveState();
                         Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
                         thisStage.close();
                     }
-                    homeWindowTabPane.getTabs().remove(activeTab);
+                    tabPane.getTabs().remove(activeTab);
                 } else if (KeyMap.searchHistory.match(e)) {
-                    historyPaneController.focusSearchField();
+                    historyController.focusSearchField();
                 } else if (KeyMap.focusParams.match(e)) {
                     dashboard.requestOptionsTab.getSelectionModel().select(dashboard.paramsTab);
                 } else if (KeyMap.focusAuth.match(e)) {

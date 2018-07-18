@@ -18,18 +18,18 @@
 
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<StackPane fx:id="homeWindowSP" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
+<?import javafx.scene.layout.*?>
+<StackPane fx:id="homeWindowSP" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.HomeWindowController">
 	<children>
-		<SplitPane fx:id="splitPane" dividerPositions="0.3">
+        <SplitPane fx:id="splitPane">
 			<items>
-				<fx:include fx:id="historyPane" source="HistoryPane.fxml" />
-                <VBox fx:id="tabDashboardBox" SplitPane.resizableWithParent="false">
+                <VBox fx:id="tabDashboardBox" alignment="TOP_CENTER" SplitPane.resizableWithParent="false">
                     <children>
-                        <TabPane fx:id="homeWindowTabPane" tabClosingPolicy="ALL_TABS" tabMaxHeight="30.0"
-                                 tabMaxWidth="200.0" tabMinHeight="30.0" tabMinWidth="200.0" VBox.vgrow="ALWAYS"/>
+                        <TabPane fx:id="tabPane" maxHeight="35.0" minHeight="35.0" tabClosingPolicy="ALL_TABS"
+                                 tabMaxHeight="35.0" tabMaxWidth="200.0" tabMinHeight="35.0" tabMinWidth="200.0"
+                                 VBox.vgrow="ALWAYS"/>
+                        <StackPane fx:id="dashboardContainer" VBox.vgrow="ALWAYS"/>
                     </children>
                 </VBox>
 			</items>

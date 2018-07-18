@@ -37,7 +37,7 @@ public class HomeWindowController implements Initializable {
 	@FXML
 	private SplitPane splitPane;
 	@FXML
-	private TabPane homeWindowTabPane;
+	private TabPane tabPane;
 	@FXML
 	private TextField historyTextField;
 	@FXML

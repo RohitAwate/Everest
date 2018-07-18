@@ -131,6 +131,10 @@ public class HomeWindowController implements Initializable {
         addTab(null);
     }
 
+    /**
+     * Adds a new tab to the homeWindowTabPane initialized with
+     * the ComposerState provided.
+     */
     private void addTab(ComposerState composerState) {
         Tab newTab = new Tab();
 
@@ -143,9 +147,11 @@ public class HomeWindowController implements Initializable {
 
         newTab.setOnCloseRequest(e -> {
             tabStateMap.remove(newTab);
+            homeWindowTabPane.getTabs().remove(newTab);
 
             // Closes the application if the last tab is closed
-            if (homeWindowTabPane.getTabs().size() == 1) {
+            if (homeWindowTabPane.getTabs().size() == 0) {
+                saveState();
                 Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
                 thisStage.close();
             }
@@ -247,7 +253,9 @@ public class HomeWindowController implements Initializable {
                 } else if (KeyMap.closeTab.match(e)) {
                     Tab activeTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
                     tabStateMap.remove(activeTab);
-                    if (homeWindowTabPane.getTabs().size() == 1) {
+                    homeWindowTabPane.getTabs().remove(activeTab);
+                    if (homeWindowTabPane.getTabs().size() == 0) {
+                        saveState();
                         Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
                         thisStage.close();
                     }

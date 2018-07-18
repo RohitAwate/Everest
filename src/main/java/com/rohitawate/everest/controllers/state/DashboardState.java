@@ -27,4 +27,11 @@ public class DashboardState {
     public int responseTime;
     public int responseSize;
     public HashMap<String, String> responseHeaders;
+
+    public DashboardState() {
+    }
+
+    public DashboardState(ComposerState composer) {
+        this.composer = composer;
+    }
 }

@@ -437,7 +437,6 @@ public class DashboardController implements Initializable {
         statusCodeDescription.setText(Response.Status.fromStatusCode(state.statusCode).getReasonPhrase());
         responseTime.setText(Long.toString(state.responseTime) + " ms");
         responseSize.setText(Integer.toString(state.responseSize) + " B");
-        System.out.println(state.responseHeaders.size());
         responseHeadersViewer.populate(state.responseHeaders);
     }
 
@@ -689,7 +688,7 @@ public class DashboardController implements Initializable {
          */
         boolean validMethod = false;
         for (String method : httpMethods) {
-            if (state.composer.httpMethod.equals(method))
+            if (method.equals(state.composer.httpMethod))
                 validMethod = true;
         }
 

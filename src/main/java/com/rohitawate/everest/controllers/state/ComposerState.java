@@ -23,6 +23,7 @@ import java.util.ArrayList;
  */
 public class ComposerState {
     public String target;
+
     public String httpMethod;
     public ArrayList<FieldState> params;
     public ArrayList<FieldState> headers;
@@ -43,4 +44,8 @@ public class ComposerState {
 
     // File path of application/octet-stream requests
     public String binaryFilePath;
+
+    public ComposerState() {
+        this.httpMethod = "GET";
+    }
 }

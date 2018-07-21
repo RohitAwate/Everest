@@ -24,7 +24,6 @@ import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -94,6 +93,29 @@ public class HomeWindowController implements Initializable {
         });
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
+
+        initAddressReflection();
+    }
+
+    private void initAddressReflection() {
+        addressProperty.addListener(((observable, oldValue, newValue) -> {
+            Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
+            if (activeTab != null) {
+                if (newValue.equals(""))
+                    activeTab.setText("New Tab");
+                else
+                    activeTab.setText(newValue);
+            }
+        }));
+
+        // Initialize the text of tabs loaded by the state recovery logic
+        tabPane.getTabs().forEach(tab -> {
+            String target = tabStateMap.get(tab).composer.target;
+            if (target.equals(""))
+                tab.setText("New Tab");
+            else
+                tab.setText(target);
+        });
     }
 
     /**
@@ -131,7 +153,7 @@ public class HomeWindowController implements Initializable {
     }
 
     private void addTab() {
-        addTab(null);
+        addTab(new ComposerState());
     }
 
     /**
@@ -140,6 +162,7 @@ public class HomeWindowController implements Initializable {
      */
     private void addTab(ComposerState composerState) {
         Tab newTab = new Tab();
+        newTab.setText("New Tab");
 
         DashboardState newState = new DashboardState(composerState);
         tabStateMap.put(newTab, newState);
@@ -158,13 +181,6 @@ public class HomeWindowController implements Initializable {
         tabPane.getSelectionModel().select(newTab);
         onTabSwitched(prevState, prevTab, newTab);
 
-        // Makes the Tab's text change with the URL
-        newTab.textProperty().bind(
-                Bindings.when(Bindings.and(addressProperty.isNotEmpty(), newTab.selectedProperty()))
-                        .then(addressProperty)
-                        .otherwise(getTabText(newTab))
-        );
-
         newTab.setOnCloseRequest(e -> {
             tabStateMap.remove(newTab);
             tabPane.getTabs().remove(newTab);
@@ -176,15 +192,6 @@ public class HomeWindowController implements Initializable {
                 thisStage.close();
             }
         });
-    }
-
-    private String getTabText(Tab newTab) {
-        DashboardState state = tabStateMap.get(newTab);
-
-        if (state == null || state.composer == null || state.composer.target.equals(""))
-            return "New Tab";
-        else
-            return state.composer.target;
     }
 
     private void saveState() {

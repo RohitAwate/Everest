@@ -16,16 +16,25 @@
 
 package com.rohitawate.everest.controllers.state;
 
+import com.rohitawate.everest.controllers.DashboardController.ResponseLayer;
+
 import java.util.HashMap;
 
 public class DashboardState {
     public ComposerState composer;
-    public boolean showResponse;
-    public int statusCode;
+    public ResponseLayer visibleLayer;
+
+    // ResponseLayer parameters
+    public int responseCode;
     public String responseType;
     public String responseBody;
     public int responseTime;
     public int responseSize;
+
+    // ErrorLayer parameters
+    public String errorTitle;
+    public String errorDetails;
+
     public HashMap<String, String> responseHeaders;
 
     public DashboardState() {

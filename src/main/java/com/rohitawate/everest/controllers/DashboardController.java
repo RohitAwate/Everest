@@ -104,8 +104,9 @@ public class DashboardController implements Initializable {
     private DELETERequest deleteRequest;
     private HashMap<String, String> params;
     private EverestCodeArea responseArea;
+    private ResponseLayer visibleLayer;
 
-    private enum ResponseLayer {
+    public enum ResponseLayer {
         PROMPT, LOADING, RESPONSE, ERROR
     }
 
@@ -131,7 +132,7 @@ public class DashboardController implements Initializable {
 
         snackbar = new JFXSnackbar(dashboard);
 
-        displayLayer(ResponseLayer.PROMPT);
+        showLayer(ResponseLayer.PROMPT);
         httpMethodBox.getItems().addAll(httpMethods);
 
         // Select GET by default
@@ -209,7 +210,6 @@ public class DashboardController implements Initializable {
             return;
         }
 
-        promptLayer.setVisible(false);
         if (responseBox.getChildren().size() == 2) {
             responseBox.getChildren().remove(0);
             responseArea.clear();
@@ -219,7 +219,7 @@ public class DashboardController implements Initializable {
             String address = addressField.getText().trim();
 
             if (address.equals("")) {
-                promptLayer.setVisible(true);
+                showLayer(ResponseLayer.PROMPT);
                 snackbar.show("Please enter an address.", 3000);
                 return;
             }
@@ -312,15 +312,15 @@ public class DashboardController implements Initializable {
                     requestManager.start();
                     break;
                 default:
-                    loadingLayer.setVisible(false);
+                    showLayer(ResponseLayer.PROMPT);
             }
             Services.historyManager.saveHistory(getState().composer);
         } catch (MalformedURLException MURLE) {
-            promptLayer.setVisible(true);
+            showLayer(ResponseLayer.PROMPT);
             snackbar.show("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
             Services.loggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
-            errorLayer.setVisible(true);
+            showLayer(ResponseLayer.ERROR);
             errorTitle.setText("Oops... That's embarrassing!");
             errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
         }
@@ -335,8 +335,7 @@ public class DashboardController implements Initializable {
     }
 
     private void onFailed() {
-        loadingLayer.setVisible(false);
-        promptLayer.setVisible(false);
+        showLayer(ResponseLayer.ERROR);
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
         Services.loggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
@@ -367,28 +366,29 @@ public class DashboardController implements Initializable {
             }
         }
 
-        errorLayer.setVisible(true);
         requestManager.reset();
     }
 
     private void onCancelled() {
-        displayLayer(ResponseLayer.PROMPT);
+        showLayer(ResponseLayer.PROMPT);
         snackbar.show("Request canceled.", 2000);
         requestManager.reset();
     }
 
     private void onSucceeded() {
-        displayResponse(requestManager.getValue());
-        displayLayer(ResponseLayer.RESPONSE);
+        showResponse(requestManager.getValue());
+        showLayer(ResponseLayer.RESPONSE);
         requestManager.reset();
     }
 
     private void whileRunning() {
         responseArea.clear();
-        displayLayer(ResponseLayer.LOADING);
+        showLayer(ResponseLayer.LOADING);
     }
 
-    private void displayLayer(ResponseLayer layer) {
+    private void showLayer(ResponseLayer layer) {
+        this.visibleLayer = layer;
+
         switch (layer) {
             case ERROR:
                 errorLayer.setVisible(true);
@@ -418,7 +418,7 @@ public class DashboardController implements Initializable {
         }
     }
 
-    private void displayResponse(EverestResponse response) {
+    private void showResponse(EverestResponse response) {
         prettifyResponseBody(response);
         statusCode.setText(Integer.toString(response.getStatusCode()));
         statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
@@ -427,17 +427,17 @@ public class DashboardController implements Initializable {
         responseHeadersViewer.populate(response);
     }
 
-    private void displayResponse(DashboardState state) {
+    private void showResponse(DashboardState state) {
         prettifyResponseBody(state.responseBody, state.responseType);
-        statusCode.setText(Integer.toString(state.statusCode));
-        statusCodeDescription.setText(Response.Status.fromStatusCode(state.statusCode).getReasonPhrase());
+        statusCode.setText(Integer.toString(state.responseCode));
+        statusCodeDescription.setText(Response.Status.fromStatusCode(state.responseCode).getReasonPhrase());
         responseTime.setText(Long.toString(state.responseTime) + " ms");
         responseSize.setText(Integer.toString(state.responseSize) + " B");
         responseHeadersViewer.populate(state.responseHeaders);
     }
 
     private void prettifyResponseBody(String body, String contentType) {
-        displayLayer(ResponseLayer.RESPONSE);
+        showLayer(ResponseLayer.RESPONSE);
         visualizerTab.setDisable(true);
         visualizer.clear();
 
@@ -485,7 +485,7 @@ public class DashboardController implements Initializable {
         } catch (Exception e) {
             snackbar.show("Response could not be parsed.", 5000);
             Services.loggingService.logSevere("Response could not be parsed.", e, LocalDateTime.now());
-            errorLayer.setVisible(true);
+            showLayer(ResponseLayer.ERROR);
             errorTitle.setText("Parsing Error");
             errorDetails.setText("Everest could not parse the response.");
         }
@@ -509,7 +509,7 @@ public class DashboardController implements Initializable {
     private void clearResponseArea() {
         responseBox.getChildren().remove(0);
         responseArea.clear();
-        promptLayer.setVisible(true);
+        showLayer(ResponseLayer.PROMPT);
     }
 
     @FXML
@@ -619,38 +619,44 @@ public class DashboardController implements Initializable {
         composerState.params = getParamFieldStates();
 
         dashboardState.composer = composerState;
-        dashboardState.showResponse = responseLayer.isVisible();
+        dashboardState.visibleLayer = visibleLayer;
 
-        if (dashboardState.showResponse) {
-            dashboardState.responseHeaders = responseHeadersViewer.getHeaders();
-            dashboardState.statusCode = Integer.parseInt(statusCode.getText());
+        switch (visibleLayer) {
+            case RESPONSE:
+                dashboardState.responseHeaders = responseHeadersViewer.getHeaders();
+                dashboardState.responseCode = Integer.parseInt(statusCode.getText());
 
-            String temp = responseSize.getText();
-            temp = temp.substring(0, temp.length() - 2);
-            dashboardState.responseSize = Integer.parseInt(temp);
+                String temp = responseSize.getText();
+                temp = temp.substring(0, temp.length() - 2);
+                dashboardState.responseSize = Integer.parseInt(temp);
 
-            temp = responseTime.getText();
-            temp = temp.substring(0, temp.length() - 3);
-            dashboardState.responseTime = Integer.parseInt(temp);
+                temp = responseTime.getText();
+                temp = temp.substring(0, temp.length() - 3);
+                dashboardState.responseTime = Integer.parseInt(temp);
 
-            dashboardState.responseBody = responseArea.getText();
+                dashboardState.responseBody = responseArea.getText();
 
-            String contentType;
-            switch (responseTypeBox.getValue()) {
-                case "JSON":
-                    contentType = MediaType.APPLICATION_JSON;
-                    break;
-                case "XML":
-                    contentType = MediaType.APPLICATION_XML;
-                    break;
-                case "HTML":
-                    contentType = MediaType.TEXT_HTML;
-                    break;
-                default:
-                    contentType = MediaType.TEXT_PLAIN;
-            }
+                String contentType;
+                switch (responseTypeBox.getValue()) {
+                    case "JSON":
+                        contentType = MediaType.APPLICATION_JSON;
+                        break;
+                    case "XML":
+                        contentType = MediaType.APPLICATION_XML;
+                        break;
+                    case "HTML":
+                        contentType = MediaType.TEXT_HTML;
+                        break;
+                    default:
+                        contentType = MediaType.TEXT_PLAIN;
+                }
 
-            dashboardState.responseType = contentType;
+                dashboardState.responseType = contentType;
+                break;
+            case ERROR:
+                dashboardState.errorTitle = errorTitle.getText();
+                dashboardState.errorDetails = errorDetails.getText();
+                break;
         }
 
         return dashboardState;
@@ -665,8 +671,22 @@ public class DashboardController implements Initializable {
         if (state == null)
             return;
 
-        if (state.showResponse)
-            displayResponse(state);
+        if (state.visibleLayer != null) {
+            switch (state.visibleLayer) {
+                case RESPONSE:
+                    showResponse(state);
+                    break;
+                case ERROR:
+                    errorTitle.setText(state.errorTitle);
+                    errorDetails.setText(state.errorDetails);
+                    showLayer(ResponseLayer.ERROR);
+                    break;
+            }
+            if (state.visibleLayer.equals(ResponseLayer.RESPONSE))
+                showResponse(state);
+            else
+                showLayer(state.visibleLayer);
+        }
 
         if (state.composer == null)
             return;
@@ -718,7 +738,7 @@ public class DashboardController implements Initializable {
         clearParams();
         bodyTabController.reset();
         responseArea.clear();
-        displayLayer(ResponseLayer.PROMPT);
+        showLayer(ResponseLayer.PROMPT);
         responseTabPane.getSelectionModel().select(0);
     }
 

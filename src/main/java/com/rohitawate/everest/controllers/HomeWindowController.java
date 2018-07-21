@@ -24,6 +24,7 @@ import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -94,28 +95,22 @@ public class HomeWindowController implements Initializable {
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
 
-        initAddressReflection();
+        addressProperty.addListener(this::onTargetChanged);
     }
 
-    private void initAddressReflection() {
-        addressProperty.addListener(((observable, oldValue, newValue) -> {
-            Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
-            if (activeTab != null) {
-                if (newValue.equals(""))
-                    activeTab.setText("New Tab");
-                else
-                    activeTab.setText(newValue);
-            }
-        }));
+    /**
+     * Sets up the reflection of the address in the selected tab.
+     * Displays the current target if it is not empty, "New Tab" otherwise.
+     */
+    private void onTargetChanged(Observable observable, String oldValue, String newValue) {
+        Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
+        if (activeTab == null)
+            return;
 
-        // Initialize the text of tabs loaded by the state recovery logic
-        tabPane.getTabs().forEach(tab -> {
-            String target = tabStateMap.get(tab).composer.target;
-            if (target.equals(""))
-                tab.setText("New Tab");
-            else
-                tab.setText(target);
-        });
+        if (newValue.equals(""))
+            activeTab.setText("New Tab");
+        else
+            activeTab.setText(newValue);
     }
 
     /**
@@ -162,7 +157,16 @@ public class HomeWindowController implements Initializable {
      */
     private void addTab(ComposerState composerState) {
         Tab newTab = new Tab();
-        newTab.setText("New Tab");
+
+        /*
+            Initializing the tab text based on the target in the ComposerState.
+            Further handling of the tab text is done by onTargetChanged().
+          */
+        String target = composerState.target;
+        if (target == null || target.equals(""))
+            newTab.setText("New Tab");
+        else
+            newTab.setText(target);
 
         DashboardState newState = new DashboardState(composerState);
         tabStateMap.put(newTab, newState);

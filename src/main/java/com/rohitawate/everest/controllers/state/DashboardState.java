@@ -51,9 +51,9 @@ public class DashboardState {
 
     // ResponseLayer parameters
     private RequestManager requestManager;
-
     public void setRequestManager(RequestManager manager) {
         this.requestManager = manager;
+        requestManager.removeEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, requestManager.getOnRunning());
         requestManager.removeEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, requestManager.getOnSucceeded());
         requestManager.removeEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, requestManager.getOnFailed());
 
@@ -76,13 +76,6 @@ public class DashboardState {
             responseHeaders.clear();
 
         response.getHeaders().forEach((key, value) -> responseHeaders.put(key, value.get(0)));
-    }
-
-    public DashboardState() {
-    }
-
-    public DashboardState(ComposerState composer) {
-        this.composer = composer;
     }
 
     private void onRequestFailed(Event e) {
@@ -123,5 +116,12 @@ public class DashboardState {
         }
 
         requestManager.reset();
+    }
+
+    public DashboardState() {
+    }
+
+    public DashboardState(ComposerState composer) {
+        this.composer = composer;
     }
 }

@@ -202,11 +202,6 @@ public class DashboardController implements Initializable {
 
     @FXML
     void sendRequest() {
-        if (requestManager != null && requestManager.isRunning()) {
-            snackbar.show("Please wait while the current request is processed.", 5000);
-            return;
-        }
-
         if (responseBox.getChildren().size() == 2) {
             responseBox.getChildren().remove(0);
             responseArea.clear();
@@ -504,7 +499,6 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void clearResponseArea() {
-        responseBox.getChildren().remove(0);
         responseArea.clear();
         showLayer(ResponseLayer.PROMPT);
     }

@@ -186,7 +186,8 @@ public class HomeWindowController implements Initializable {
         onTabSwitched(prevState, prevTab, newTab);
 
         newTab.setOnCloseRequest(e -> {
-            tabStateMap.remove(newTab);
+            DashboardState closedState = tabStateMap.remove(newTab);
+            closedState = null;
             tabPane.getTabs().remove(newTab);
 
             // Closes the application if the last tab is closed

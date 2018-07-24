@@ -110,6 +110,14 @@ public class DashboardController implements Initializable {
         PROMPT, LOADING, RESPONSE, ERROR
     }
 
+    public enum ResponseTab {
+        BODY, VISUALIZER, HEADERS
+    }
+
+    public enum ComposerTab {
+        PARAMS, AUTH, HEADERS, BODY
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
@@ -426,6 +434,22 @@ public class DashboardController implements Initializable {
         responseTime.setText(Long.toString(state.responseTime) + " ms");
         responseSize.setText(Integer.toString(state.responseSize) + " B");
         responseHeadersViewer.populate(state.responseHeaders);
+
+        if (state.visibleResponseTab != null) {
+            int tab;
+            switch (state.visibleResponseTab) {
+                case VISUALIZER:
+                    tab = 1;
+                    break;
+                case HEADERS:
+                    tab = 2;
+                    break;
+                default:
+                    tab = 0;
+            }
+
+            responseTabPane.getSelectionModel().select(tab);
+        }
     }
 
     private void prettifyResponseBody(String body, String contentType) {
@@ -501,6 +525,7 @@ public class DashboardController implements Initializable {
     private void clearResponseArea() {
         responseArea.clear();
         showLayer(ResponseLayer.PROMPT);
+        addressField.requestFocus();
     }
 
     @FXML
@@ -586,6 +611,33 @@ public class DashboardController implements Initializable {
         }
     }
 
+    public ComposerTab getVisibleComposerTab() {
+        int visibleTab = requestOptionsTab.getSelectionModel().getSelectedIndex();
+        switch (visibleTab) {
+            case 1:
+                return ComposerTab.AUTH;
+            case 2:
+                return ComposerTab.HEADERS;
+            case 3:
+                return ComposerTab.BODY;
+            default:
+                return ComposerTab.PARAMS;
+        }
+    }
+
+
+    private ResponseTab getVisibleResponseTab() {
+        int visibleTab = responseTabPane.getSelectionModel().getSelectedIndex();
+        switch (visibleTab) {
+            case 1:
+                return ResponseTab.VISUALIZER;
+            case 2:
+                return ResponseTab.HEADERS;
+            default:
+                return ResponseTab.BODY;
+        }
+    }
+
     /**
      * @return Current state of the Dashboard.
      */
@@ -610,10 +662,12 @@ public class DashboardController implements Initializable {
         composerState.params = getParamFieldStates();
 
         dashboardState.composer = composerState;
-        dashboardState.visibleLayer = visibleLayer;
+        dashboardState.visibleResponseLayer = visibleLayer;
+        dashboardState.visibleComposerTab = getVisibleComposerTab();
 
         switch (visibleLayer) {
             case RESPONSE:
+                dashboardState.visibleResponseTab = getVisibleResponseTab();
                 dashboardState.responseHeaders = responseHeadersViewer.getHeaders();
                 dashboardState.responseCode = Integer.parseInt(statusCode.getText());
 
@@ -665,8 +719,27 @@ public class DashboardController implements Initializable {
         if (state == null)
             return;
 
-        if (state.visibleLayer != null) {
-            switch (state.visibleLayer) {
+        if (state.visibleComposerTab != null) {
+            int tab;
+            switch (state.visibleComposerTab) {
+                case AUTH:
+                    tab = 1;
+                    break;
+                case HEADERS:
+                    tab = 2;
+                    break;
+                case BODY:
+                    tab = 3;
+                    break;
+                default:
+                    tab = 0;
+            }
+
+            requestOptionsTab.getSelectionModel().select(tab);
+        }
+
+        if (state.visibleResponseLayer != null) {
+            switch (state.visibleResponseLayer) {
                 case RESPONSE:
                     showResponse(state);
                     break;
@@ -676,10 +749,10 @@ public class DashboardController implements Initializable {
                     showLayer(ResponseLayer.ERROR);
                     break;
             }
-            if (state.visibleLayer.equals(ResponseLayer.RESPONSE))
+            if (state.visibleResponseLayer.equals(ResponseLayer.RESPONSE))
                 showResponse(state);
             else
-                showLayer(state.visibleLayer);
+                showLayer(state.visibleResponseLayer);
         }
 
         if (state.composer == null)

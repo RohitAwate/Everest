@@ -16,7 +16,9 @@
 
 package com.rohitawate.everest.controllers.state;
 
+import com.rohitawate.everest.controllers.DashboardController.ComposerTab;
 import com.rohitawate.everest.controllers.DashboardController.ResponseLayer;
+import com.rohitawate.everest.controllers.DashboardController.ResponseTab;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.misc.Services;
@@ -35,7 +37,9 @@ import java.util.HashMap;
 
 public class DashboardState {
     public ComposerState composer;
-    public ResponseLayer visibleLayer;
+    public ResponseLayer visibleResponseLayer;
+    public ResponseTab visibleResponseTab;
+    public ComposerTab visibleComposerTab;
 
     // ResponseLayer parameters
     public int responseCode;
@@ -62,7 +66,7 @@ public class DashboardState {
     }
 
     private void onRequestSucceeded(Event e) {
-        this.visibleLayer = ResponseLayer.RESPONSE;
+        this.visibleResponseLayer = ResponseLayer.RESPONSE;
         EverestResponse response = requestManager.getValue();
         responseCode = response.getStatusCode();
         responseType = response.getMediaType().toString();
@@ -79,7 +83,7 @@ public class DashboardState {
     }
 
     private void onRequestFailed(Event e) {
-        this.visibleLayer = ResponseLayer.ERROR;
+        this.visibleResponseLayer = ResponseLayer.ERROR;
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
         Services.loggingService.logWarning(this.composer.httpMethod + " request could not be processed.", exception, LocalDateTime.now());

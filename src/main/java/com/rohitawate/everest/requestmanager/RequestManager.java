@@ -68,6 +68,10 @@ public abstract class RequestManager extends Service<EverestResponse> {
         appendHeaders();
     }
 
+    public EverestRequest getRequest() {
+        return this.request;
+    }
+
     private void appendHeaders() {
         HashMap<String, String> headers = request.getHeaders();
         Map.Entry<String, String> mapEntry;

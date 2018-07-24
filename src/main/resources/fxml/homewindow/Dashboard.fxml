@@ -145,12 +145,12 @@
                 </AnchorPane>
                 <AnchorPane>
                     <children>
-                        <VBox fx:id="responseBox" alignment="CENTER" AnchorPane.bottomAnchor="0.0"
-                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox fx:id="responseBox" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
                                 <StackPane VBox.vgrow="ALWAYS">
                                     <children>
-                                        <VBox fx:id="responseLayer">
+                                        <VBox fx:id="responseLayer" visible="false">
                                             <children>
                                                 <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0"
                                                       minHeight="50.0" spacing="30.0" VBox.vgrow="ALWAYS">
@@ -236,7 +236,7 @@
                                                 </TabPane>
                                             </children>
                                         </VBox>
-                                        <VBox fx:id="loadingLayer" alignment="CENTER" spacing="10.0">
+                                        <VBox fx:id="loadingLayer" alignment="CENTER" spacing="10.0" visible="false">
                                             <children>
                                                 <Label text="LOADING" textFill="WHITE">
                                                     <font>
@@ -256,7 +256,7 @@
                                                 </JFXButton>
                                             </children>
                                         </VBox>
-                                        <VBox fx:id="promptLayer" alignment="CENTER" visible="false">
+                                        <VBox fx:id="promptLayer" alignment="CENTER">
                                             <children>
                                                 <Label text="Enter an address, select a method and hit send."
                                                        textFill="WHITE">
@@ -275,13 +275,15 @@
                                                         <Image url="@../../assets/Explosion.png"/>
                                                     </image>
                                                 </ImageView>
-                                                <Label fx:id="errorTitle" text="Error title" textFill="WHITE">
+                                                <Label fx:id="errorTitle" text="Oops... That's embarrassing!"
+                                                       textFill="WHITE">
                                                     <font>
                                                         <Font name="System Bold" size="32.0"/>
                                                     </font>
                                                 </Label>
-                                                <Label fx:id="errorDetails" text="Error details" textAlignment="CENTER"
-                                                       textFill="#c3c3c3">
+                                                <Label fx:id="errorDetails"
+                                                       text="Something went wrong. Try to make another request.Restart Everest if that doesn't work."
+                                                       textAlignment="CENTER" textFill="#c3c3c3">
                                                     <font>
                                                         <Font size="22.0"/>
                                                     </font>

@@ -188,9 +188,6 @@ public class DashboardController implements Initializable {
             responseArea.setMode(mode);
         });
 
-        errorTitle.setText("Oops... That's embarrassing!");
-        errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
-
         visualizer = new Visualizer();
         visualizerTab.setContent(visualizer);
 
@@ -656,6 +653,9 @@ public class DashboardController implements Initializable {
             case ERROR:
                 dashboardState.errorTitle = errorTitle.getText();
                 dashboardState.errorDetails = errorDetails.getText();
+                break;
+            case LOADING:
+                dashboardState.setRequestManager(requestManager);
                 break;
         }
 

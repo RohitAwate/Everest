@@ -26,7 +26,6 @@ import com.rohitawate.everest.models.requests.EverestRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.requestmanager.DataDispatchRequestManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.Event;
 
 import javax.ws.rs.ProcessingException;
@@ -55,21 +54,39 @@ public class DashboardState {
 
     // ResponseLayer parameters
     private RequestManager requestManager;
-    public void setRequestManager(RequestManager manager) {
-        this.requestManager = manager;
-        requestManager.removeEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, requestManager.getOnRunning());
-        requestManager.removeEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, requestManager.getOnSucceeded());
-        requestManager.removeEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, requestManager.getOnFailed());
 
-        requestManager.setOnFailed(this::onRequestFailed);
-        requestManager.setOnSucceeded(this::onRequestSucceeded);
+    /**
+     * Accepts a RequestManager from the DashboardController
+     * which is in the RUNNING state and switches its handlers.
+     * <p>
+     * The new handlers make changes to the DashboardState object
+     * rather than the Dashboard.
+     * <p>
+     * If we switch back to the tab with DashboardState while
+     * the manager is running, it is handed back over to the Dashboard.
+     */
+    public void handOverRequest(RequestManager requestManager) {
+        this.requestManager = requestManager;
+        this.requestManager.removeHandlers();
+
+        this.requestManager.setOnFailed(this::onRequestFailed);
+        this.requestManager.setOnSucceeded(this::onRequestSucceeded);
+        this.requestManager.setOnCancelled(this::onRequestCancelled);
     }
 
-    private void onRequestSucceeded(Event e) {
-        this.visibleResponseLayer = ResponseLayer.RESPONSE;
+    private void onRequestCancelled(Event event) {
+        this.visibleResponseLayer = ResponseLayer.PROMPT;
+        requestManager.reset();
+    }
+
+    private void onRequestSucceeded(Event event) {
+        visibleResponseLayer = ResponseLayer.RESPONSE;
         EverestResponse response = requestManager.getValue();
         responseCode = response.getStatusCode();
-        responseType = response.getMediaType().toString();
+        if (response.getMediaType() != null)
+            responseType = response.getMediaType().toString();
+        else
+            responseType = "";
         responseTime = (int) response.getTime();
         responseSize = response.getSize();
         responseBody = response.getBody();
@@ -82,7 +99,8 @@ public class DashboardState {
         response.getHeaders().forEach((key, value) -> responseHeaders.put(key, value.get(0)));
     }
 
-    private void onRequestFailed(Event e) {
+    // TODO: Clean this method
+    private void onRequestFailed(Event event) {
         this.visibleResponseLayer = ResponseLayer.ERROR;
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
@@ -93,20 +111,24 @@ public class DashboardState {
             errorTitle = URE.getExceptionTitle();
             errorDetails = URE.getExceptionDetails();
         } else if (throwable.getClass() == ProcessingException.class) {
+            System.out.println(throwable.getCause().toString());
             errorTitle = "Everest couldn't connect.";
             errorDetails = "Either you are not connected to the Internet or the server is offline.";
         } else if (throwable.getClass() == RedirectException.class) {
             RedirectException redirect = (RedirectException) throwable;
             this.composer.target = redirect.getNewLocation();
             EverestRequest request = requestManager.getRequest();
+
             try {
                 request.setTarget(redirect.getNewLocation());
                 requestManager.restart();
+                return;
             } catch (MalformedURLException MURLE) {
                 Services.loggingService.logInfo("Invalid URL: " + this.composer.target, LocalDateTime.now());
             }
-
-            return;
+        } else {
+            errorTitle = "Oops... That's embarrassing!";
+            errorDetails = "Something went wrong. Try to make another request.Restart Everest if that doesn't work.";
         }
 
         if (requestManager.getClass() == DataDispatchRequestManager.class) {
@@ -120,6 +142,10 @@ public class DashboardState {
         }
 
         requestManager.reset();
+    }
+
+    public RequestManager getRequestManager() {
+        return this.requestManager;
     }
 
     public DashboardState() {

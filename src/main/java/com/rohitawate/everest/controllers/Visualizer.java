@@ -29,12 +29,12 @@ class Visualizer extends ScrollPane {
     private TreeView<HBox> visualizer;
 
     Visualizer() {
-        this.visualizer = new TreeView<>();
-        this.visualizer.setShowRoot(false);
-        this.setContent(this.visualizer);
+        visualizer = new TreeView<>();
+        visualizer.setShowRoot(false);
+        setContent(this.visualizer);
 
-        this.setFitToHeight(true);
-        this.setFitToWidth(true);
+        setFitToHeight(true);
+        setFitToWidth(true);
     }
 
     void populate(JsonNode node) {

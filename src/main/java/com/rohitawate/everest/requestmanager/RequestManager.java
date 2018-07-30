@@ -21,6 +21,8 @@ import com.rohitawate.everest.models.requests.EverestRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.settings.Settings;
 import javafx.concurrent.Service;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -29,8 +31,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class RequestManager extends Service<EverestResponse> {
     private final Client client;
@@ -73,23 +73,17 @@ public abstract class RequestManager extends Service<EverestResponse> {
     }
 
     private void appendHeaders() {
-        HashMap<String, String> headers = request.getHeaders();
-        Map.Entry<String, String> mapEntry;
-
-        for (Map.Entry entry : headers.entrySet()) {
-            mapEntry = (Map.Entry) entry;
-            requestBuilder.header(mapEntry.getKey(), mapEntry.getValue());
-        }
+        request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
     }
 
     void processServerResponse(Response serverResponse)
             throws UnreliableResponseException, RedirectException {
-        if (serverResponse == null)
+        if (serverResponse == null) {
             throw new UnreliableResponseException("The server did not respond.",
                     "Like that crush from high school..");
-        else if (serverResponse.getStatus() == 301) {
-            String newLocation = serverResponse.getHeaderString("location");
-            throw new RedirectException(newLocation);
+        } else if (serverResponse.getStatus() == 301) {
+            throw new RedirectException(
+                    serverResponse.getHeaderString("location"));
         }
 
         String responseBody = serverResponse.readEntity(String.class);
@@ -101,5 +95,22 @@ public abstract class RequestManager extends Service<EverestResponse> {
         response.setMediaType(serverResponse.getMediaType());
         response.setStatusCode(serverResponse.getStatus());
         response.setSize(responseBody.length());
+    }
+
+    public void addHandlers(EventHandler<WorkerStateEvent> running,
+                            EventHandler<WorkerStateEvent> succeeded,
+                            EventHandler<WorkerStateEvent> failed,
+                            EventHandler<WorkerStateEvent> cancelled) {
+        setOnRunning(running);
+        setOnSucceeded(succeeded);
+        setOnFailed(failed);
+        setOnCancelled(cancelled);
+    }
+
+    public void removeHandlers() {
+        removeEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, getOnRunning());
+        removeEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, getOnSucceeded());
+        removeEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, getOnFailed());
+        removeEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, getOnCancelled());
     }
 }

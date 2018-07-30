@@ -50,6 +50,7 @@ public class RequestManagersPool {
         GETRequestManager newManager = new GETRequestManager();
         getManagers.add(newManager);
 
+        System.out.println(getManagers.size());
         return newManager;
     }
 

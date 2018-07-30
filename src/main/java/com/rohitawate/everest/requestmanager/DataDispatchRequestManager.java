@@ -22,6 +22,7 @@ import javafx.concurrent.Task;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Form;
@@ -46,7 +47,7 @@ public class DataDispatchRequestManager extends RequestManager {
     }
 
     @Override
-    protected Task<EverestResponse> createTask() {
+    protected Task<EverestResponse> createTask() throws ProcessingException {
         return new Task<EverestResponse>() {
             @Override
             protected EverestResponse call() throws Exception {

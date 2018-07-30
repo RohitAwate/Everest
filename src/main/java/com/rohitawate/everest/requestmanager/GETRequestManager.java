@@ -19,6 +19,7 @@ package com.rohitawate.everest.requestmanager;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import javafx.concurrent.Task;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
 public class GETRequestManager extends RequestManager {
@@ -28,7 +29,7 @@ public class GETRequestManager extends RequestManager {
     }
 
     @Override
-    protected Task<EverestResponse> createTask() {
+    protected Task<EverestResponse> createTask() throws ProcessingException {
         return new Task<EverestResponse>() {
             @Override
             protected EverestResponse call() throws Exception {

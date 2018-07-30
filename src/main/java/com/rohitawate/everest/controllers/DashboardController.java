@@ -39,6 +39,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -243,10 +244,6 @@ public class DashboardController implements Initializable {
 
                     requestManager = Services.pool.get();
                     requestManager.setRequest(getRequest);
-
-                    cancelButton.setOnAction(e -> requestManager.cancel());
-                    configureRequestManager();
-                    requestManager.start();
                     break;
                 case "POST":
                 case "PUT":
@@ -292,10 +289,6 @@ public class DashboardController implements Initializable {
 
                     requestManager = Services.pool.data();
                     requestManager.setRequest(dataRequest);
-
-                    cancelButton.setOnAction(e -> requestManager.cancel());
-                    configureRequestManager();
-                    requestManager.start();
                     break;
                 case "DELETE":
                     if (deleteRequest == null)
@@ -306,14 +299,13 @@ public class DashboardController implements Initializable {
 
                     requestManager = Services.pool.delete();
                     requestManager.setRequest(deleteRequest);
-
-                    cancelButton.setOnAction(e -> requestManager.cancel());
-                    configureRequestManager();
-                    requestManager.start();
                     break;
                 default:
                     showLayer(ResponseLayer.PROMPT);
             }
+            cancelButton.setOnAction(e -> requestManager.cancel());
+            requestManager.addHandlers(this::whileRunning, this::onSucceeded, this::onFailed, this::onCancelled);
+            requestManager.start();
             Services.historyManager.saveHistory(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
@@ -326,15 +318,8 @@ public class DashboardController implements Initializable {
         }
     }
 
-    private void configureRequestManager() {
-        progressBar.progressProperty().bind(requestManager.progressProperty());
-        requestManager.setOnRunning(e -> whileRunning());
-        requestManager.setOnSucceeded(e -> onSucceeded());
-        requestManager.setOnCancelled(e -> onCancelled());
-        requestManager.setOnFailed(e -> onFailed());
-    }
-
-    private void onFailed() {
+    // TODO: Clean this method
+    private void onFailed(Event event) {
         showLayer(ResponseLayer.ERROR);
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
@@ -369,19 +354,20 @@ public class DashboardController implements Initializable {
         requestManager.reset();
     }
 
-    private void onCancelled() {
+    private void onCancelled(Event event) {
         showLayer(ResponseLayer.PROMPT);
         snackbar.show("Request canceled.", 2000);
         requestManager.reset();
+        addressField.requestFocus();
     }
 
-    private void onSucceeded() {
+    private void onSucceeded(Event event) {
         showResponse(requestManager.getValue());
         showLayer(ResponseLayer.RESPONSE);
         requestManager.reset();
     }
 
-    private void whileRunning() {
+    private void whileRunning(Event event) {
         responseArea.clear();
         showLayer(ResponseLayer.LOADING);
     }
@@ -681,6 +667,7 @@ public class DashboardController implements Initializable {
 
                 dashboardState.responseBody = responseArea.getText();
 
+                // TODO: Get rid of similar switches
                 String contentType;
                 switch (responseTypeBox.getValue()) {
                     case "JSON":
@@ -703,7 +690,7 @@ public class DashboardController implements Initializable {
                 dashboardState.errorDetails = errorDetails.getText();
                 break;
             case LOADING:
-                dashboardState.setRequestManager(requestManager);
+                dashboardState.handOverRequest(requestManager);
                 break;
         }
 
@@ -748,11 +735,23 @@ public class DashboardController implements Initializable {
                     errorDetails.setText(state.errorDetails);
                     showLayer(ResponseLayer.ERROR);
                     break;
+                case LOADING:
+                    /*
+                        Accepts a RequestManager which is in the RUNNING state
+                        and switches its handlers.
+                        The handlers affect the Dashboard directly rather than the DashboardState.
+                     */
+                    requestManager = state.getRequestManager();
+                    requestManager.removeHandlers();
+                    requestManager.addHandlers(this::whileRunning, this::onSucceeded, this::onFailed, this::onCancelled);
+                    showLayer(ResponseLayer.LOADING);
+                    break;
+                default:
+                    showLayer(ResponseLayer.PROMPT);
+                    break;
             }
-            if (state.visibleResponseLayer.equals(ResponseLayer.RESPONSE))
-                showResponse(state);
-            else
-                showLayer(state.visibleResponseLayer);
+        } else {
+            showLayer(ResponseLayer.PROMPT);
         }
 
         if (state.composer == null)

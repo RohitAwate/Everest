@@ -147,6 +147,7 @@ public class HomeWindowController implements Initializable {
         dashboard.setState(newState);
     }
 
+    @FXML
     private void addTab() {
         addTab(new ComposerState());
     }

@@ -142,6 +142,14 @@
     -fx-faint-focus-color: transparent;
 }
 
+#newTabButton {
+    -fx-background-color: #6a6a6a;
+}
+
+#newTabButton:hover {
+    -fx-background-color: limegreen;
+}
+
 .tab-pane:top .tab-header-area .headers-region .tab:top {
     -fx-background-color: #6a6a6a;
 }
@@ -149,6 +157,10 @@
 /* Tab titles */
 .tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
     -fx-fill: white;
+}
+
+.tab:selected .tab-close-button:hover {
+    -fx-background-color: #282828;
 }
 
 /* Request options (Headers, Authorization, etc) tab */

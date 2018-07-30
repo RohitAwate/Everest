@@ -142,6 +142,7 @@ public class URLTabController implements Initializable {
             controllers.clear();
 
         fieldsBox.getChildren().clear();
+        controllersCount.set(0);
         addField();
     }
 }

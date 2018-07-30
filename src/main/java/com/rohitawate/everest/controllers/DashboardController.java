@@ -147,7 +147,7 @@ public class DashboardController implements Initializable {
         httpMethodBox.getSelectionModel().select("GET");
 
         paramsControllers = new ArrayList<>();
-        paramsCountProperty = new SimpleIntegerProperty(paramsControllers.size());
+        paramsCountProperty = new SimpleIntegerProperty(0);
 
         appendedParams = new ArrayList<>();
         addParamField(); // Adds a blank param field
@@ -811,6 +811,7 @@ public class DashboardController implements Initializable {
             paramsControllers.clear();
 
         paramsBox.getChildren().clear();
+        paramsCountProperty.set(0);
         addParamField();
     }
 }

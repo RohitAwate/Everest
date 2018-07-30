@@ -51,10 +51,10 @@ public class FormDataTabController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         stringControllers = new ArrayList<>();
-        stringControllersCount = new SimpleIntegerProperty(stringControllers.size());
+        stringControllersCount = new SimpleIntegerProperty(0);
 
         fileControllers = new ArrayList<>();
-        fileControllersCount = new SimpleIntegerProperty(fileControllers.size());
+        fileControllersCount = new SimpleIntegerProperty(0);
 
         addFileField();
         addStringField();
@@ -236,6 +236,10 @@ public class FormDataTabController implements Initializable {
             fileControllers.clear();
 
         fieldsBox.getChildren().clear();
+
+        stringControllersCount.set(0);
+        fileControllersCount.set(0);
+
         addStringField();
         addFileField();
     }

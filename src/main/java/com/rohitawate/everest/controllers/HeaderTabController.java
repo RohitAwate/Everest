@@ -49,7 +49,7 @@ public class HeaderTabController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         controllers = new ArrayList<>();
-        controllersCount = new SimpleIntegerProperty(controllers.size());
+        controllersCount = new SimpleIntegerProperty(0);
         addHeader();
     }
 
@@ -141,6 +141,7 @@ public class HeaderTabController implements Initializable {
             controllers.clear();
 
         headersBox.getChildren().clear();
+        controllersCount.set(0);
         addHeader();
     }
 }

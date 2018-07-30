@@ -74,6 +74,7 @@ public abstract class RequestManager extends Service<EverestResponse> {
 
     private void appendHeaders() {
         request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
+        requestBuilder.header("User-Agent", "Everest");
     }
 
     void processServerResponse(Response serverResponse)
@@ -81,7 +82,7 @@ public abstract class RequestManager extends Service<EverestResponse> {
         if (serverResponse == null) {
             throw new UnreliableResponseException("The server did not respond.",
                     "Like that crush from high school..");
-        } else if (serverResponse.getStatus() == 301) {
+        } else if (serverResponse.getStatus() == 301 || serverResponse.getStatus() == 302) {
             throw new RedirectException(
                     serverResponse.getHeaderString("location"));
         }

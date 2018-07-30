@@ -99,7 +99,7 @@ public class HistoryItemController implements Initializable, Searchable<Composer
         }
 
         if (state.httpMethod.equals("POST") || state.httpMethod.equals("PUT")) {
-            switch (state.contentType) {
+            switch (state.rawBodyContentType) {
                 case MediaType.TEXT_PLAIN:
                 case MediaType.APPLICATION_JSON:
                 case MediaType.APPLICATION_XML:

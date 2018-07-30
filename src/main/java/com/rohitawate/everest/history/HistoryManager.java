@@ -142,7 +142,7 @@ public class HistoryManager {
                     if (RS.next())
                         contentType = RS.getString("ContentType");
 
-                    state.contentType = contentType;
+                    state.rawBodyContentType = contentType;
 
                     // Retrieves body from corresponding table
                     switch (contentType) {
@@ -282,10 +282,10 @@ public class HistoryManager {
                 if (RS.next())
                     previousContentType = RS.getString("ContentType");
 
-                if (!newState.contentType.equals(previousContentType))
+                if (!newState.rawBodyContentType.equals(previousContentType))
                     return false;
 
-                switch (newState.contentType) {
+                switch (newState.rawBodyContentType) {
                     case MediaType.TEXT_PLAIN:
                     case MediaType.APPLICATION_JSON:
                     case MediaType.APPLICATION_XML:
@@ -391,12 +391,12 @@ public class HistoryManager {
                     // Maps the request to its ContentType for faster retrieval
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequestContentPair").toString()));
                     statement.setInt(1, requestID);
-                    statement.setString(2, state.contentType);
+                    statement.setString(2, state.rawBodyContentType);
 
                     statement.executeUpdate();
 
                     // Determines where to fetch the body from, based on the ContentType
-                    switch (state.contentType) {
+                    switch (state.rawBodyContentType) {
                         case MediaType.TEXT_PLAIN:
                         case MediaType.APPLICATION_JSON:
                         case MediaType.APPLICATION_XML:

@@ -20,7 +20,6 @@ import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
-import com.rohitawate.everest.format.FormatterFactory;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.fxml.FXML;
@@ -29,6 +28,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -54,11 +54,17 @@ public class BodyTabController implements Initializable {
     @FXML
     TextField filePathField;
     @FXML
+    private TabPane bodyTabPane;
+    @FXML
     private VBox rawVBox;
 
     EverestCodeArea rawInputArea;
     FormDataTabController formDataTabController;
     URLTabController urlTabController;
+
+    public enum BodyTab {
+        FORM, URL, RAW, BINARY
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -74,14 +80,7 @@ public class BodyTabController implements Initializable {
             String type = rawInputTypeBox.getValue();
 
             if (type.equals("JSON")) {
-                try {
-                    rawInputArea.setText(rawInputArea.getText(),
-                            FormatterFactory.getHighlighter(type),
-                            HighlighterFactory.getHighlighter(type));
-                } catch (IOException e) {
-                    Services.loggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
-                }
-
+                rawInputArea.setHighlighter(HighlighterFactory.getHighlighter(type));
                 return;
             }
 
@@ -122,33 +121,34 @@ public class BodyTabController implements Initializable {
     public ComposerState getState() {
         ComposerState state = new ComposerState();
 
-        state.rawBodyType = rawInputTypeBox.getValue();
-        state.rawBody = rawInputArea.getText();
         state.urlStringTuples = urlTabController.getFieldStates();
         state.formStringTuples = formDataTabController.getStringFieldStates();
         state.formFileTuples = formDataTabController.getFileFieldStates();
         state.binaryFilePath = filePathField.getText();
 
+        state.rawBody = rawInputArea.getText();
+        switch (rawInputTypeBox.getValue()) {
+            case "JSON":
+                state.rawBodyContentType = MediaType.APPLICATION_JSON;
+                break;
+            case "XML":
+                state.rawBodyContentType = MediaType.APPLICATION_XML;
+                break;
+            case "HTML":
+                state.rawBodyContentType = MediaType.TEXT_HTML;
+                break;
+            default:
+                state.rawBodyContentType = MediaType.TEXT_PLAIN;
+        }
+
         if (rawTab.isSelected()) {
-            switch (rawInputTypeBox.getValue()) {
-                case "JSON":
-                    state.contentType = MediaType.APPLICATION_JSON;
-                    break;
-                case "XML":
-                    state.contentType = MediaType.APPLICATION_XML;
-                    break;
-                case "HTML":
-                    state.contentType = MediaType.TEXT_HTML;
-                    break;
-                default:
-                    state.contentType = MediaType.TEXT_PLAIN;
-            }
+            state.visibleBodyTab = BodyTab.RAW;
         } else if (formTab.isSelected()) {
-            state.contentType = MediaType.MULTIPART_FORM_DATA;
+            state.visibleBodyTab = BodyTab.FORM;
         } else if (urlTab.isSelected()) {
-            state.contentType = MediaType.APPLICATION_FORM_URLENCODED;
+            state.visibleBodyTab = BodyTab.URL;
         } else {
-            state.contentType = MediaType.APPLICATION_OCTET_STREAM;
+            state.visibleBodyTab = BodyTab.BINARY;
         }
 
         return state;
@@ -174,6 +174,26 @@ public class BodyTabController implements Initializable {
 
         setRawTab(state);
         filePathField.setText(state.binaryFilePath);
+
+        int tab;
+        if (state.visibleBodyTab != null) {
+            switch (state.visibleBodyTab) {
+                case BINARY:
+                    tab = 3;
+                    break;
+                case URL:
+                    tab = 1;
+                    break;
+                case RAW:
+                    tab = 2;
+                    break;
+                default:
+                    tab = 0;
+            }
+        } else {
+            tab = 0;
+        }
+        bodyTabPane.getSelectionModel().select(tab);
     }
 
     void reset() {
@@ -185,9 +205,26 @@ public class BodyTabController implements Initializable {
     }
 
     private void setRawTab(ComposerState state) {
-        if (state.rawBodyType != null && state.rawBody != null) {
-            rawInputArea.setText(state.rawBody, HighlighterFactory.getHighlighter(state.rawBodyType));
+        if (state.rawBodyContentType != null && state.rawBody != null) {
+            // TODO: Remove this conversion
+            String simplifiedContentType;
+            switch (state.rawBodyContentType) {
+                case MediaType.APPLICATION_JSON:
+                    simplifiedContentType = "JSON";
+                    break;
+                case MediaType.APPLICATION_XML:
+                    simplifiedContentType = "XML";
+                    break;
+                case MediaType.TEXT_HTML:
+                    simplifiedContentType = "HTML";
+                    break;
+                default:
+                    simplifiedContentType = "PLAIN TEXT";
+            }
+            rawInputTypeBox.setValue(simplifiedContentType);
+            rawInputArea.setText(state.rawBody, HighlighterFactory.getHighlighter(simplifiedContentType));
         } else {
+            rawInputTypeBox.setValue("PLAIN TEXT");
             rawInputArea.setHighlighter(HighlighterFactory.getHighlighter("PLAIN TEXT"));
         }
     }

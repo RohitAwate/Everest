@@ -16,24 +16,25 @@
 
 package com.rohitawate.everest.controllers.state;
 
+import com.rohitawate.everest.controllers.BodyTabController.BodyTab;
+
 import java.util.ArrayList;
 
 /**
  * Convenience class to abstract the state of the application.
  */
 public class ComposerState {
+    public BodyTab visibleBodyTab;
+
     public String target;
 
     public String httpMethod;
     public ArrayList<FieldState> params;
     public ArrayList<FieldState> headers;
 
-    // Determined from the active tab within the Body tab
-    public String contentType;
-
     // Body and content-type of requests with raw bodies
     public String rawBody;
-    public String rawBodyType;
+    public String rawBodyContentType;
 
     // Tuples of URL-encoded requests
     public ArrayList<FieldState> urlStringTuples;

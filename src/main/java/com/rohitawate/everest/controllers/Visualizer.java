@@ -17,9 +17,11 @@
 package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.rohitawate.everest.misc.EverestUtilities;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,8 +39,9 @@ class Visualizer extends ScrollPane {
         setFitToWidth(true);
     }
 
-    void populate(JsonNode node) {
-        this.populate(new TreeItem<>(), "root", node);
+    void populate(String body) throws IOException {
+        JsonNode tree = EverestUtilities.jsonMapper.readTree(body);
+        this.populate(new TreeItem<>(), "root", tree);
     }
 
     private void populate(TreeItem<HBox> rootItem, String rootName, JsonNode root) {

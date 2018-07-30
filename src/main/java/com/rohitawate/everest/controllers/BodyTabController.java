@@ -17,9 +17,10 @@
 package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
-import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
+import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
+import com.rohitawate.everest.format.FormatterFactory;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.fxml.FXML;
@@ -71,21 +72,20 @@ public class BodyTabController implements Initializable {
 
         rawInputTypeBox.valueProperty().addListener(change -> {
             String type = rawInputTypeBox.getValue();
-            HighlightMode mode;
-            switch (type) {
-                case "JSON":
-                    mode = HighlightMode.JSON;
-                    break;
-                case "XML":
-                    mode = HighlightMode.XML;
-                    break;
-                case "HTML":
-                    mode = HighlightMode.HTML;
-                    break;
-                default:
-                    mode = HighlightMode.PLAIN;
+
+            if (type.equals("JSON")) {
+                try {
+                    rawInputArea.setText(rawInputArea.getText(),
+                            FormatterFactory.getHighlighter(type),
+                            HighlighterFactory.getHighlighter(type));
+                } catch (IOException e) {
+                    Services.loggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
+                }
+
+                return;
             }
-            rawInputArea.setMode(mode);
+
+            rawInputArea.setHighlighter(HighlighterFactory.getHighlighter(type));
         });
 
         try {
@@ -185,25 +185,10 @@ public class BodyTabController implements Initializable {
     }
 
     private void setRawTab(ComposerState state) {
-        HighlightMode mode;
-
         if (state.rawBodyType != null && state.rawBody != null) {
-            switch (state.rawBodyType) {
-                case "JSON":
-                    mode = HighlightMode.JSON;
-                    break;
-                case "XML":
-                    mode = HighlightMode.XML;
-                    break;
-                case "HTML":
-                    mode = HighlightMode.HTML;
-                    break;
-                default:
-                    mode = HighlightMode.PLAIN;
-            }
-            rawInputArea.setText(state.rawBody, mode);
+            rawInputArea.setText(state.rawBody, HighlighterFactory.getHighlighter(state.rawBodyType));
         } else {
-            rawInputArea.setText("", HighlightMode.PLAIN);
+            rawInputArea.setHighlighter(HighlighterFactory.getHighlighter("PLAIN TEXT"));
         }
     }
 }

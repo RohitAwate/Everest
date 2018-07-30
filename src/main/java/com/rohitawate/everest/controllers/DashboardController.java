@@ -15,18 +15,17 @@
  */
 package com.rohitawate.everest.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
-import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
+import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.DashboardState;
 import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
-import com.rohitawate.everest.misc.EverestUtilities;
+import com.rohitawate.everest.format.FormatterFactory;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
@@ -175,26 +174,20 @@ public class DashboardController implements Initializable {
 
         responseTypeBox.valueProperty().addListener(change -> {
             String type = responseTypeBox.getValue();
-            HighlightMode mode;
-            switch (type) {
-                case "JSON":
-                    try {
-                        JsonNode node = EverestUtilities.jsonMapper.readTree(responseArea.getText());
-                        responseArea.setText(EverestUtilities.jsonMapper.writeValueAsString(node), HighlightMode.JSON);
-                    } catch (IOException e) {
-                        Services.loggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
-                    }
-                    return;
-                case "XML":
-                    mode = HighlightMode.XML;
-                    break;
-                case "HTML":
-                    mode = HighlightMode.XML;
-                    break;
-                default:
-                    mode = HighlightMode.PLAIN;
+
+            if (type.equals("JSON")) {
+                try {
+                    responseArea.setText(responseArea.getText(),
+                            FormatterFactory.getHighlighter(type),
+                            HighlighterFactory.getHighlighter(type));
+                } catch (IOException e) {
+                    Services.loggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
+                }
+
+                return;
             }
-            responseArea.setMode(mode);
+
+            responseArea.setHighlighter(HighlighterFactory.getHighlighter(type));
         });
 
         visualizer = new Visualizer();
@@ -444,25 +437,22 @@ public class DashboardController implements Initializable {
         visualizer.clear();
 
         try {
+            String simplifiedContentType;
             if (contentType != null) {
                 // Selects only the part preceding the ';', skipping the character encoding
                 contentType = contentType.split(";")[0];
 
                 switch (contentType.toLowerCase()) {
                     case "application/json":
-                        responseTypeBox.setValue("JSON");
-                        JsonNode node = EverestUtilities.jsonMapper.readTree(body);
-                        responseArea.setText(EverestUtilities.jsonMapper.writeValueAsString(node), HighlightMode.JSON);
+                        simplifiedContentType = "JSON";
                         visualizerTab.setDisable(false);
-                        visualizer.populate(node);
+                        visualizer.populate(body);
                         break;
                     case "application/xml":
-                        responseTypeBox.setValue("XML");
-                        responseArea.setText(body, HighlightMode.XML);
+                        simplifiedContentType = "XML";
                         break;
                     case "text/html":
-                        responseTypeBox.setValue("HTML");
-                        responseArea.setText(body, HighlightMode.HTML);
+                        simplifiedContentType = "HTML";
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                             snackbar.show("Open link in browser?", "YES", 5000, e -> {
                                 snackbar.close();
@@ -477,19 +467,24 @@ public class DashboardController implements Initializable {
                         }
                         break;
                     default:
-                        responseTypeBox.setValue("PLAIN TEXT");
-                        responseArea.setText(body, HighlightMode.PLAIN);
+                        simplifiedContentType = "PLAIN TEXT";
                 }
             } else {
-                responseTypeBox.setValue("PLAIN");
-                responseArea.setText("No body found in the response.", HighlightMode.PLAIN);
+                simplifiedContentType = "PLAIN TEXT";
             }
+
+            responseArea.setText(body,
+                    FormatterFactory.getHighlighter(simplifiedContentType),
+                    HighlighterFactory.getHighlighter(simplifiedContentType));
+
+            responseTypeBox.setValue(simplifiedContentType);
         } catch (Exception e) {
-            snackbar.show("Response could not be parsed.", 5000);
-            Services.loggingService.logSevere("Response could not be parsed.", e, LocalDateTime.now());
-            showLayer(ResponseLayer.ERROR);
+            String errorMessage = "Response could not be parsed.";
+            snackbar.show(errorMessage, 5000);
+            Services.loggingService.logSevere(errorMessage, e, LocalDateTime.now());
             errorTitle.setText("Parsing Error");
-            errorDetails.setText("Everest could not parse the response.");
+            errorDetails.setText(errorMessage);
+            showLayer(ResponseLayer.ERROR);
         }
     }
 

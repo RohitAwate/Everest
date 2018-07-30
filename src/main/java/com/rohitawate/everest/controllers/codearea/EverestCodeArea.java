@@ -17,25 +17,16 @@
 package com.rohitawate.everest.controllers.codearea;
 
 import com.rohitawate.everest.controllers.codearea.highlighters.Highlighter;
-import com.rohitawate.everest.controllers.codearea.highlighters.JSONHighlighter;
-import com.rohitawate.everest.controllers.codearea.highlighters.PlaintextHighlighter;
-import com.rohitawate.everest.controllers.codearea.highlighters.XMLHighlighter;
+import com.rohitawate.everest.format.Formatter;
 import com.rohitawate.everest.settings.Settings;
 import javafx.geometry.Insets;
 import org.fxmisc.richtext.CodeArea;
 
+import java.io.IOException;
 import java.time.Duration;
 
 public class EverestCodeArea extends CodeArea {
-    public enum HighlightMode {
-        JSON, XML, HTML, PLAIN
-    }
-
     private Highlighter highlighter;
-
-    private static JSONHighlighter jsonHighlighter;
-    private static XMLHighlighter xmlHighlighter;
-    private static PlaintextHighlighter plaintextHighlighter;
 
     public EverestCodeArea() {
         this.getStylesheets().add(getClass().getResource("/css/syntax/Moondust.css").toString());
@@ -43,37 +34,45 @@ public class EverestCodeArea extends CodeArea {
         this.setWrapText(Settings.editorWrapText);
         this.setPadding(new Insets(5));
 
-        jsonHighlighter = new JSONHighlighter();
-        xmlHighlighter = new XMLHighlighter();
-        plaintextHighlighter = new PlaintextHighlighter();
-
-        setMode(HighlightMode.PLAIN);
-
         this.multiPlainChanges()
                 .successionEnds(Duration.ofMillis(1))
-                .subscribe(ignore -> this.setStyleSpans(0, highlighter.computeHighlighting(getText())));
+                .subscribe(ignore -> highlight());
     }
 
-    public void setMode(HighlightMode mode) {
-        switch (mode) {
-            case JSON:
-                highlighter = jsonHighlighter;
-                break;
-            case XML:
-            case HTML:
-                highlighter = xmlHighlighter;
-                break;
-            default:
-                highlighter = plaintextHighlighter;
-        }
-
-        // Re-computes the highlighting for the new mode
+    private void highlight() {
         this.setStyleSpans(0, highlighter.computeHighlighting(getText()));
     }
 
-    public void setText(String text, HighlightMode mode) {
+    public void setHighlighter(Highlighter highlighter) {
+        this.highlighter = highlighter;
+
+        // Re-computes the highlighting using the new Highlighter
+        this.highlight();
+    }
+
+    /**
+     * Sets the text and then computes the highlighting.
+     */
+    public void setText(String text, Highlighter highlighter) {
         clear();
         appendText(text);
-        setMode(mode);
+        setHighlighter(highlighter);
+    }
+
+    /**
+     * Formats the text with the provided Formatter if it is not null,
+     * sets the text and then computes the highlighting.
+     *
+     * @throws IOException If the formatter fails to format the text given a syntactic error.
+     */
+    public void setText(String text, Formatter formatter, Highlighter highlighter) throws IOException {
+        clear();
+        String formattedText = text;
+
+        if (formatter != null)
+            formattedText = formatter.format(text);
+
+        appendText(formattedText);
+        setHighlighter(highlighter);
     }
 }

@@ -29,7 +29,7 @@
 			<items>
                 <VBox fx:id="tabDashboardBox" alignment="TOP_CENTER" SplitPane.resizableWithParent="false">
                     <children>
-                        <HBox VBox.vgrow="ALWAYS">
+                        <HBox VBox.vgrow="NEVER">
                             <children>
                                 <JFXButton fx:id="newTabButton" contentDisplay="CENTER" minHeight="35.0" minWidth="40.0"
                                            onAction="#addTab" HBox.hgrow="ALWAYS">

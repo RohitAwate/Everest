@@ -147,7 +147,7 @@
 }
 
 #newTabButton:hover {
-    -fx-background-color: limegreen;
+    -fx-background-color: cornflowerblue;
 }
 
 .tab-pane:top .tab-header-area .headers-region .tab:top {

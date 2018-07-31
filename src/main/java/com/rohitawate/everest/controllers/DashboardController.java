@@ -78,7 +78,7 @@ public class DashboardController implements Initializable {
     private Label statusCode, statusCodeDescription, responseTime,
             responseSize, errorTitle, errorDetails;
     @FXML
-    private JFXButton cancelButton, copyBodyButton;
+    private JFXButton sendButton, cancelButton, copyBodyButton;
     @FXML
     TabPane requestOptionsTab, responseTabPane;
     @FXML
@@ -204,6 +204,12 @@ public class DashboardController implements Initializable {
 
     @FXML
     void sendRequest() {
+        if (requestManager != null) {
+            while (requestManager.isRunning())
+                requestManager.cancel();
+            requestManager.reset();
+        }
+
         if (responseBox.getChildren().size() == 2) {
             responseBox.getChildren().remove(0);
             responseArea.clear();
@@ -349,18 +355,19 @@ public class DashboardController implements Initializable {
 
     private void onCancelled(Event event) {
         showLayer(ResponseLayer.PROMPT);
-        snackbar.show("Request canceled.", 2000);
         requestManager.reset();
         addressField.requestFocus();
     }
 
     private void onSucceeded(Event event) {
-        showResponse(requestManager.getValue());
         showLayer(ResponseLayer.RESPONSE);
+        showResponse(requestManager.getValue());
         requestManager.reset();
     }
 
     private void whileRunning(Event event) {
+        progressBar.requestLayout();
+        progressBar.progressProperty().bind(requestManager.progressProperty());
         responseArea.clear();
         showLayer(ResponseLayer.LOADING);
     }
@@ -398,6 +405,9 @@ public class DashboardController implements Initializable {
     }
 
     private void showResponse(EverestResponse response) {
+        if (response == null)
+            return;
+
         prettifyResponseBody(response);
         statusCode.setText(Integer.toString(response.getStatusCode()));
         statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
@@ -491,7 +501,6 @@ public class DashboardController implements Initializable {
 
     private void prettifyResponseBody(EverestResponse response) {
         String type;
-
         if (response.getMediaType() != null)
             type = response.getMediaType().toString();
         else

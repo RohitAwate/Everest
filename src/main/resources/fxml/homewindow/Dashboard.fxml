@@ -22,7 +22,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<VBox fx:id="dashboard" alignment="CENTER" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
+<VBox fx:id="dashboard" alignment="CENTER" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.DashboardController">
     <children>
         <HBox alignment="CENTER" maxHeight="100.0" minHeight="100.0" spacing="20.0" VBox.vgrow="ALWAYS">

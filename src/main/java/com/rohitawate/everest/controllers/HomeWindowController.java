@@ -251,7 +251,8 @@ public class HomeWindowController implements Initializable {
                 addTab();
             }
         } catch (IOException e) {
-            Services.loggingService.logWarning("Application state file is possibly corrupted. State recovery failed. Loading default state.", e, LocalDateTime.now());
+            Services.loggingService.logWarning("Application state file is either corrupted or outdated. State recovery failed. Loading default state.", e, LocalDateTime.now());
+            addTab();
         } finally {
             Services.loggingService.logInfo("Application loaded.", LocalDateTime.now());
         }

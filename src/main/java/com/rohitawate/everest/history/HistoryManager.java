@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.settings.Settings;
@@ -50,7 +51,7 @@ public class HistoryManager {
             initDatabase();
 
         } catch (Exception E) {
-            Services.loggingService.logSevere("Exception while initializing HistoryManager.", E, LocalDateTime.now());
+            LoggingService.logSevere("Exception while initializing HistoryManager.", E, LocalDateTime.now());
         } finally {
             System.out.println("Connected to database.");
         }
@@ -89,7 +90,7 @@ public class HistoryManager {
         statement.execute();
     }
 
-    // Method is made synchronized to allow only one database transaction at a time.
+    // Method is synchronized to allow only one database transaction at a time.
 
     /**
      * Saves the request to the database if it is not identical to one made exactly before it.
@@ -172,7 +173,7 @@ public class HistoryManager {
                 history.add(state);
             }
         } catch (SQLException e) {
-            Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
         }
         return history;
     }
@@ -196,7 +197,7 @@ public class HistoryManager {
                 headers.add(new FieldState(key, value, checked));
             }
         } catch (SQLException e) {
-            Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
         }
         return headers;
     }
@@ -229,7 +230,7 @@ public class HistoryManager {
                 tuples.add(new FieldState(key, value, checked));
             }
         } catch (SQLException e) {
-            Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
         }
 
         return tuples;
@@ -318,7 +319,7 @@ public class HistoryManager {
                 }
             }
         } catch (SQLException e) {
-            Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
         } catch (NullPointerException NPE) {
             /*
                 NPE is thrown by containsKey indicating that the key is not present in the database thereby
@@ -418,7 +419,7 @@ public class HistoryManager {
                     }
                 }
             } catch (SQLException e) {
-                Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+                LoggingService.logWarning("Database error.", e, LocalDateTime.now());
             }
         }
 
@@ -436,7 +437,7 @@ public class HistoryManager {
 
                             statement.executeUpdate();
                         } catch (SQLException e) {
-                            Services.loggingService.logWarning("Database error.", e, LocalDateTime.now());
+                            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
                         }
                     }
                 }

@@ -31,12 +31,12 @@ import java.util.ArrayList;
  * returned to the caller. If all the managers in the pool are running,
  * a new one is created, added to the pool, and returned.
  */
-public class RequestManagersPool {
-    private ArrayList<GETRequestManager> getManagers;
-    private ArrayList<DataDispatchRequestManager> dataManagers;
-    private ArrayList<DELETERequestManager> deleteManagers;
+public class RequestManagersFactory {
+    private static ArrayList<GETRequestManager> getManagers;
+    private static ArrayList<DataDispatchRequestManager> dataManagers;
+    private static ArrayList<DELETERequestManager> deleteManagers;
 
-    public GETRequestManager get() {
+    public static GETRequestManager get() {
         if (getManagers == null)
             getManagers = new ArrayList<>();
 
@@ -53,7 +53,7 @@ public class RequestManagersPool {
         return newManager;
     }
 
-    public DataDispatchRequestManager data() {
+    public static DataDispatchRequestManager data() {
         if (dataManagers == null)
             dataManagers = new ArrayList<>();
 
@@ -70,7 +70,7 @@ public class RequestManagersPool {
         return newManager;
     }
 
-    public DELETERequestManager delete() {
+    public static DELETERequestManager delete() {
         if (deleteManagers == null)
             deleteManagers = new ArrayList<>();
 

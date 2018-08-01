@@ -46,7 +46,7 @@ class Visualizer extends ScrollPane {
 
     private void populate(TreeItem<HBox> rootItem, String rootName, JsonNode root) {
         if (rootName.equals("root")) {
-            this.visualizer.setRoot(rootItem);
+            visualizer.setRoot(rootItem);
         }
 
         Label rootLabel = new Label(rootName);
@@ -117,6 +117,6 @@ class Visualizer extends ScrollPane {
     }
 
     public void clear() {
-        this.visualizer.setRoot(null);
+        visualizer.setRoot(null);
     }
 }

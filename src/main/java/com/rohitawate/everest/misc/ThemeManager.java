@@ -17,6 +17,7 @@
 package com.rohitawate.everest.misc;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.settings.Settings;
 import javafx.scene.Parent;
 
@@ -45,9 +46,9 @@ public class ThemeManager {
                     parent.getStylesheets().add(1, themePath);
                 }
 
-                Services.loggingService.logInfo("Theme changed to " + Settings.theme + ".", LocalDateTime.now());
+                LoggingService.logInfo("Theme changed to " + Settings.theme + ".", LocalDateTime.now());
             } else {
-                Services.loggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
+                LoggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
             }
         }
     }
@@ -58,7 +59,7 @@ public class ThemeManager {
                 parent.getStylesheets().add(themeFile.toURI().toString());
                 parentNodes.add(parent);
             } else {
-                Services.loggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
+                LoggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
             }
         }
     }
@@ -68,7 +69,7 @@ public class ThemeManager {
             if (syntaxThemeFile.exists()) {
                 everestCodeArea.getStylesheets().add(syntaxThemeFile.toURI().toString());
             } else {
-                Services.loggingService.logInfo(Settings.syntaxTheme + ": No such theme file found.", LocalDateTime.now());
+                LoggingService.logInfo(Settings.syntaxTheme + ": No such theme file found.", LocalDateTime.now());
             }
         }
     }

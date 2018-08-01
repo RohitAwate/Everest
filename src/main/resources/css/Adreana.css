@@ -322,13 +322,13 @@
 }
 
 .visualizerRootLabel {
-    -fx-font-size: 17px;
+    -fx-font-size: 16px;
     -fx-text-fill: #dedede;
     -fx-font-weight: bold;
 }
 
 .visualizerKeyLabel {
-    -fx-font-size: 17px;
+    -fx-font-size: 16px;
     -fx-text-fill: #bababa;
     -fx-font-weight: bold;
 }
@@ -363,7 +363,7 @@
 
 .tree-cell:selected,
 .tree-cell:focused {
-    -fx-background-color: cornflowerblue;
+    -fx-background-color: darkred;
 }
 
 .tree-cell:selected .label {

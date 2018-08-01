@@ -17,7 +17,7 @@
 package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.state.FieldState;
-import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
@@ -102,7 +102,7 @@ public class URLTabController implements Initializable {
             });
             fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not add string field.", e, LocalDateTime.now());
+            LoggingService.logSevere("Could not add string field.", e, LocalDateTime.now());
         }
     }
 

@@ -26,6 +26,7 @@ import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.format.FormatterFactory;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
@@ -34,6 +35,7 @@ import com.rohitawate.everest.models.requests.GETRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.requestmanager.DataDispatchRequestManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
+import com.rohitawate.everest.requestmanager.RequestManagersFactory;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -135,7 +137,7 @@ public class DashboardController implements Initializable {
             bodyTabController = bodyTabLoader.getController();
             bodyTab.setContent(bodyTabContent);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
+            LoggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
         }
 
         snackbar = new JFXSnackbar(dashboard);
@@ -181,7 +183,7 @@ public class DashboardController implements Initializable {
                             FormatterFactory.getHighlighter(type),
                             HighlighterFactory.getHighlighter(type));
                 } catch (IOException e) {
-                    Services.loggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
+                    LoggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
                 }
 
                 return;
@@ -241,7 +243,7 @@ public class DashboardController implements Initializable {
                     getRequest.setTarget(address);
                     getRequest.setHeaders(headerTabController.getHeaders());
 
-                    requestManager = Services.pool.get();
+                    requestManager = RequestManagersFactory.get();
                     requestManager.setRequest(getRequest);
                     break;
                 case "POST":
@@ -286,7 +288,7 @@ public class DashboardController implements Initializable {
                         dataRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
                     }
 
-                    requestManager = Services.pool.data();
+                    requestManager = RequestManagersFactory.data();
                     requestManager.setRequest(dataRequest);
                     break;
                 case "DELETE":
@@ -296,7 +298,7 @@ public class DashboardController implements Initializable {
                     deleteRequest.setTarget(address);
                     deleteRequest.setHeaders(headerTabController.getHeaders());
 
-                    requestManager = Services.pool.delete();
+                    requestManager = RequestManagersFactory.delete();
                     requestManager.setRequest(deleteRequest);
                     break;
                 default:
@@ -310,7 +312,7 @@ public class DashboardController implements Initializable {
             showLayer(ResponseLayer.PROMPT);
             snackbar.show("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
-            Services.loggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
+            LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
             showLayer(ResponseLayer.ERROR);
             errorTitle.setText("Oops... That's embarrassing!");
             errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
@@ -322,7 +324,7 @@ public class DashboardController implements Initializable {
         showLayer(ResponseLayer.ERROR);
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
-        Services.loggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
+        LoggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
 
         if (throwable.getClass() == UnreliableResponseException.class) {
             UnreliableResponseException URE = (UnreliableResponseException) throwable;
@@ -470,7 +472,7 @@ public class DashboardController implements Initializable {
                                     try {
                                         Desktop.getDesktop().browse(new URI(addressField.getText()));
                                     } catch (Exception ex) {
-                                        Services.loggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
+                                        LoggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
                                     }
                                 }).start();
                             });
@@ -491,7 +493,7 @@ public class DashboardController implements Initializable {
         } catch (Exception e) {
             String errorMessage = "Response could not be parsed.";
             snackbar.show(errorMessage, 5000);
-            Services.loggingService.logSevere(errorMessage, e, LocalDateTime.now());
+            LoggingService.logSevere(errorMessage, e, LocalDateTime.now());
             errorTitle.setText("Parsing Error");
             errorDetails.setText(errorMessage);
             showLayer(ResponseLayer.ERROR);
@@ -597,7 +599,7 @@ public class DashboardController implements Initializable {
             });
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
+            LoggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
         }
     }
 
@@ -778,7 +780,7 @@ public class DashboardController implements Initializable {
         }
 
         if (!validMethod) {
-            Services.loggingService.logInfo("Application state file was tampered with. State could not be recovered.", LocalDateTime.now());
+            LoggingService.logInfo("Application state file was tampered with. State could not be recovered.", LocalDateTime.now());
             return;
         }
 

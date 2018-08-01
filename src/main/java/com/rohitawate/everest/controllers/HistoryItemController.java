@@ -19,7 +19,7 @@ package com.rohitawate.everest.controllers;
 import com.rohitawate.everest.controllers.search.Searchable;
 import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
-import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.logging.LoggingService;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -76,7 +76,7 @@ public class HistoryItemController implements Initializable, Searchable<Composer
             if (comparisonString.contains(searchString))
                 return 9;
         } catch (MalformedURLException e) {
-            Services.loggingService.logInfo("Failed to parse URL while calculating relativity index.", LocalDateTime.now());
+            LoggingService.logInfo("Failed to parse URL while calculating relativity index.", LocalDateTime.now());
         }
 
         // Checks if matches with HTTP method

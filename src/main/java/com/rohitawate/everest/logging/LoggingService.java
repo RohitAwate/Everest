@@ -22,49 +22,49 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class LoggingService {
-    private Logger logger;
-    private DateTimeFormatter dateFormat;
-    private Log log;
+    private static final Logger logger;
+    private static final DateTimeFormatter dateFormat;
+    private static final Log log;
 
-    public LoggingService(Level writerLevel) {
-        this.log = new Log();
-        this.logger = new Logger(writerLevel);
-        this.dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    static {
+        log = new Log();
+        logger = new Logger(Level.INFO);
+        dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     }
 
-    public void logSevere(String message, Exception exception, LocalDateTime time) {
+    public static void logSevere(String message, Exception exception, LocalDateTime time) {
         setValues(message, exception, time);
         Services.singleExecutor.execute(severeLogger);
     }
 
-    public void logWarning(String message, Exception exception, LocalDateTime time) {
+    public static void logWarning(String message, Exception exception, LocalDateTime time) {
         setValues(message, exception, time);
         Services.singleExecutor.execute(warningLogger);
     }
 
-    public void logInfo(String message, LocalDateTime time) {
+    public static void logInfo(String message, LocalDateTime time) {
         setValues(message, null, time);
         Services.singleExecutor.execute(infoLogger);
     }
 
-    private void setValues(String message, Exception exception, LocalDateTime time) {
-        this.log.message = message;
-        this.log.exception = exception;
-        this.log.time = dateFormat.format(time);
+    private static void setValues(String message, Exception exception, LocalDateTime time) {
+        log.message = message;
+        log.exception = exception;
+        log.time = dateFormat.format(time);
     }
 
-    private Runnable severeLogger = () -> {
-        this.log.level = Level.SEVERE;
-        this.logger.log(this.log);
+    private static Runnable severeLogger = () -> {
+        log.level = Level.SEVERE;
+        logger.log(log);
     };
 
-    private Runnable warningLogger = () -> {
-        this.log.level = Level.WARNING;
-        this.logger.log(log);
+    private static Runnable warningLogger = () -> {
+        log.level = Level.WARNING;
+        logger.log(log);
     };
 
-    private Runnable infoLogger = () -> {
-        this.log.level = Level.INFO;
-        this.logger.log(log);
+    private static Runnable infoLogger = () -> {
+        log.level = Level.INFO;
+        logger.log(log);
     };
 }

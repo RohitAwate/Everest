@@ -33,20 +33,9 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
 public abstract class RequestManager extends Service<EverestResponse> {
-    private final Client client;
-    long initialTime;
-    long finalTime;
+    private static final Client client;
 
-    EverestRequest request;
-    EverestResponse response;
-    Builder requestBuilder;
-
-    RequestManager() {
-        this.client = initClient();
-    }
-
-    private Client initClient() {
-        Client client;
+    static {
         client = ClientBuilder.newBuilder()
                 .register(MultiPartFeature.class)
                 .build();
@@ -58,9 +47,14 @@ public abstract class RequestManager extends Service<EverestResponse> {
             client.property(ClientProperties.CONNECT_TIMEOUT, Settings.connectionTimeOut);
         if (Settings.connectionReadTimeOutEnable)
             client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
-
-        return client;
     }
+
+    long initialTime;
+    long finalTime;
+
+    EverestRequest request;
+    EverestResponse response;
+    Builder requestBuilder;
 
     public void setRequest(EverestRequest request) {
         this.request = request;

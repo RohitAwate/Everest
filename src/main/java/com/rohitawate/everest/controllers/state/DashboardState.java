@@ -21,7 +21,7 @@ import com.rohitawate.everest.controllers.DashboardController.ResponseLayer;
 import com.rohitawate.everest.controllers.DashboardController.ResponseTab;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
-import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.models.requests.EverestRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.requestmanager.DataDispatchRequestManager;
@@ -104,7 +104,7 @@ public class DashboardState {
         this.visibleResponseLayer = ResponseLayer.ERROR;
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
-        Services.loggingService.logWarning(this.composer.httpMethod + " request could not be processed.", exception, LocalDateTime.now());
+        LoggingService.logWarning(this.composer.httpMethod + " request could not be processed.", exception, LocalDateTime.now());
 
         if (throwable.getClass() == UnreliableResponseException.class) {
             UnreliableResponseException URE = (UnreliableResponseException) throwable;
@@ -124,7 +124,7 @@ public class DashboardState {
                 requestManager.restart();
                 return;
             } catch (MalformedURLException MURLE) {
-                Services.loggingService.logInfo("Invalid URL: " + this.composer.target, LocalDateTime.now());
+                LoggingService.logInfo("Invalid URL: " + this.composer.target, LocalDateTime.now());
             }
         } else {
             errorTitle = "Oops... That's embarrassing!";

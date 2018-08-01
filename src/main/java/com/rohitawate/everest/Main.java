@@ -30,9 +30,6 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Services.start();
-        Services.startServicesThread.join();
-
         SettingsLoader settingsLoader = new SettingsLoader();
         settingsLoader.settingsLoaderThread.join();
 

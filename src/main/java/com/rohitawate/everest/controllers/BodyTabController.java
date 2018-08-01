@@ -20,7 +20,7 @@ import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.FieldState;
-import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.ThemeManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -98,7 +98,7 @@ public class BodyTabController implements Initializable {
             urlTab.setContent(formTabContent);
             urlTabController = loader.getController();
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not load URL tab.", e, LocalDateTime.now());
+            LoggingService.logSevere("Could not load URL tab.", e, LocalDateTime.now());
         }
     }
 

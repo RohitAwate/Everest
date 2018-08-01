@@ -18,6 +18,7 @@ package com.rohitawate.everest.misc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.net.UrlEscapers;
 
 public class EverestUtilities {
     public static ObjectMapper jsonMapper;
@@ -35,5 +36,9 @@ public class EverestUtilities {
      */
     public static String trimString(String input) {
         return input.replaceAll("\"", "");
+    }
+
+    public static String encodeURL(String url) {
+        return UrlEscapers.urlFragmentEscaper().escape(url);
     }
 }

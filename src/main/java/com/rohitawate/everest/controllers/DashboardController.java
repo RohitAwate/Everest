@@ -27,6 +27,7 @@ import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.format.FormatterFactory;
 import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
@@ -93,7 +94,6 @@ public class DashboardController implements Initializable {
     private JFXSnackbar snackbar;
     private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
     private List<StringKeyValueFieldController> paramsControllers;
-    private List<String> appendedParams;
     private RequestManager requestManager;
     private HeaderTabController headerTabController;
     private BodyTabController bodyTabController;
@@ -151,7 +151,6 @@ public class DashboardController implements Initializable {
         paramsControllers = new ArrayList<>();
         paramsCountProperty = new SimpleIntegerProperty(0);
 
-        appendedParams = new ArrayList<>();
         addParamField(); // Adds a blank param field
 
         bodyTab.disableProperty().bind(
@@ -446,7 +445,6 @@ public class DashboardController implements Initializable {
     private void prettifyResponseBody(String body, String contentType) {
         showLayer(ResponseLayer.RESPONSE);
         visualizerTab.setDisable(true);
-        visualizer.clear();
 
         try {
             String simplifiedContentType;
@@ -522,18 +520,30 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void appendParams() {
-        String pair, key, value;
+        StringBuilder url = new StringBuilder();
+        url.append(addressField.getText().split("\\?")[0]);
+
+        boolean addedQuestionMark = false;
+        String key, value;
         for (StringKeyValueFieldController controller : paramsControllers) {
             if (controller.isChecked()) {
+                if (!addedQuestionMark) {
+                    url.append("?");
+                    addedQuestionMark = true;
+                } else {
+                    url.append("&");
+                }
+
                 key = controller.getHeader().getKey();
                 value = controller.getHeader().getValue();
-                pair = key + value;
-                if (!appendedParams.contains(pair)) {
-                    addressField.appendText("?" + key + "=" + value + "&");
-                    appendedParams.add(pair);
-                }
+                url.append(key);
+                url.append("=");
+                url.append(value);
             }
         }
+
+        addressField.clear();
+        addressField.setText(EverestUtilities.encodeURL(url.toString()));
     }
 
     /**

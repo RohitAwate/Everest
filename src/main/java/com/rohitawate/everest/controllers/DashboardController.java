@@ -23,6 +23,8 @@ import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFacto
 import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.controllers.state.DashboardState;
 import com.rohitawate.everest.controllers.state.FieldState;
+import com.rohitawate.everest.controllers.visualizers.TreeVisualizer;
+import com.rohitawate.everest.controllers.visualizers.Visualizer;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.format.FormatterFactory;
@@ -191,7 +193,7 @@ public class DashboardController implements Initializable {
             responseArea.setHighlighter(HighlighterFactory.getHighlighter(type));
         });
 
-        visualizer = new Visualizer();
+        visualizer = new TreeVisualizer();
         visualizerTab.setContent(visualizer);
 
         responseArea = new EverestCodeArea();

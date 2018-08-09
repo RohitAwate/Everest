@@ -14,50 +14,42 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.controllers;
+package com.rohitawate.everest.controllers.visualizers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.rohitawate.everest.misc.EverestUtilities;
-import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-class Visualizer extends ScrollPane {
-    private TreeView<HBox> visualizer;
+public class TreeVisualizer extends Visualizer {
+    private TreeView<String> visualizer;
 
-    Visualizer() {
+    public TreeVisualizer() {
         visualizer = new TreeView<>();
         visualizer.setShowRoot(false);
-        setContent(this.visualizer);
-
-        setFitToHeight(true);
-        setFitToWidth(true);
+        setContent(visualizer);
     }
 
-    void populate(String body) throws IOException {
+    public void populate(String body) throws IOException {
         JsonNode tree = EverestUtilities.jsonMapper.readTree(body);
         this.populate(new TreeItem<>(), "root", tree);
     }
 
-    private void populate(TreeItem<HBox> rootItem, String rootName, JsonNode root) {
+    private void populate(TreeItem<String> rootItem, String rootName, JsonNode root) {
         if (rootName.equals("root")) {
             visualizer.setRoot(rootItem);
         }
 
-        Label rootLabel = new Label(rootName);
-        rootLabel.getStyleClass().addAll("visualizerRootLabel", "visualizerLabel");
-        rootItem.setValue(new HBox(rootLabel));
+        rootItem.setValue(rootName);
 
         JsonNode currentNode;
-        Label valueLabel;
-        HBox valueContainer;
-        List<TreeItem<HBox>> items = new LinkedList<>();
-        Tooltip valueTooltip;
+        List<TreeItem<String>> items = new ArrayList<>();
 
         if (root.isArray()) {
             Iterator<JsonNode> iterator = root.elements();
@@ -67,16 +59,9 @@ class Visualizer extends ScrollPane {
                 currentNode = iterator.next();
 
                 if (currentNode.isValueNode()) {
-                    valueLabel = new Label(i++ + ": " + currentNode.toString());
-                    valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
-                    valueLabel.setWrapText(true);
-                    valueTooltip = new Tooltip(currentNode.toString());
-                    valueLabel.setTooltip(valueTooltip);
-
-                    valueContainer = new HBox(valueLabel);
-                    items.add(new TreeItem<>(valueContainer));
+                    items.add(new TreeItem<>(i++ + ": " + EverestUtilities.trimString(currentNode.toString())));
                 } else if (currentNode.isObject()) {
-                    TreeItem<HBox> newRoot = new TreeItem<>();
+                    TreeItem<String> newRoot = new TreeItem<>();
                     items.add(newRoot);
                     populate(newRoot, i++ + ": [Anonymous Object]", currentNode);
                 }
@@ -84,29 +69,16 @@ class Visualizer extends ScrollPane {
         } else {
             Iterator<Map.Entry<String, JsonNode>> iterator = root.fields();
             Map.Entry<String, JsonNode> currentEntry;
-            Label keyLabel;
-            Tooltip keyTooltip;
 
             while (iterator.hasNext()) {
                 currentEntry = iterator.next();
                 currentNode = currentEntry.getValue();
 
                 if (currentNode.isValueNode()) {
-                    keyLabel = new Label(currentEntry.getKey() + ": ");
-                    keyLabel.getStyleClass().addAll("visualizerKeyLabel", "visualizerLabel");
-                    keyTooltip = new Tooltip(currentEntry.getKey());
-                    keyLabel.setTooltip(keyTooltip);
-
-                    valueLabel = new Label(currentNode.toString());
-                    valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
-                    valueLabel.setWrapText(true);
-                    valueTooltip = new Tooltip(currentNode.toString());
-                    valueLabel.setTooltip(valueTooltip);
-
-                    valueContainer = new HBox(keyLabel, valueLabel);
-                    items.add(new TreeItem<>(valueContainer));
+                    items.add(new TreeItem<>(currentEntry.getKey() + ": "
+                            + EverestUtilities.trimString(currentNode.toString())));
                 } else if (currentNode.isArray() || currentNode.isObject()) {
-                    TreeItem<HBox> newRoot = new TreeItem<>();
+                    TreeItem<String> newRoot = new TreeItem<>();
                     items.add(newRoot);
                     populate(newRoot, currentEntry.getKey(), currentNode);
                 }

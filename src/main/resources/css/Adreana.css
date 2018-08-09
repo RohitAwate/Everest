@@ -294,7 +294,7 @@
     -fx-font-size: 15px;
 }
 
-/* Response Visualizer */
+/* ---------------------------- TreeVisualizer ------------------------- */
 #responseTabPane:bottom .tab-header-area .tab-header-background,
 #responseTabPane:bottom .tab-header-area .headers-region .tab:bottom {
     -fx-background-color: #282828;
@@ -338,8 +338,8 @@
     -fx-text-fill: #959595;
 }
 
-/* Visualizer tree */
 .tree-view {
+    -fx-padding: 5px;
     -fx-background-color: #353535;
 }
 
@@ -354,6 +354,9 @@
 
 .tree-cell {
     -fx-background-color: #282828;
+    -fx-text-fill: azure;
+    -fx-font-size: 15px;
+    -fx-font-family: "Liberation Mono", monospace;
     -fx-border-width: 0px;
 }
 
@@ -377,7 +380,7 @@
     -fx-padding: 0;
 }
 
-/* SnackBar */
+/* Snackbar */
 .jfx-snackbar-content {
     -fx-background-color: black;
 }

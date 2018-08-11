@@ -213,11 +213,6 @@ public class DashboardController implements Initializable {
             requestManager.reset();
         }
 
-        if (responseBox.getChildren().size() == 2) {
-            responseBox.getChildren().remove(0);
-            responseArea.clear();
-        }
-
         try {
             String address = addressField.getText().trim();
 
@@ -709,6 +704,7 @@ public class DashboardController implements Initializable {
                 break;
             case LOADING:
                 dashboardState.handOverRequest(requestManager);
+                requestManager = null;
                 break;
         }
 

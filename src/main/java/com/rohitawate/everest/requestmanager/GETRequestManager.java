@@ -24,10 +24,6 @@ import javax.ws.rs.core.Response;
 
 public class GETRequestManager extends RequestManager {
 
-    GETRequestManager() {
-
-    }
-
     @Override
     protected Task<EverestResponse> createTask() throws ProcessingException {
         return new Task<EverestResponse>() {

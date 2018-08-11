@@ -16,7 +16,7 @@
 
 package com.rohitawate.everest.requestmanager;
 
-import com.rohitawate.everest.models.requests.DataDispatchRequest;
+import com.rohitawate.everest.models.requests.DataRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import javafx.concurrent.Task;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -35,24 +35,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Processes DataDispatchRequest by automatically determining whether it
+ * Processes DataRequest by automatically determining whether it
  * is a POST, PUT or PATCH request.
  */
-public class DataDispatchRequestManager extends RequestManager {
-    private DataDispatchRequest dataDispatchRequest;
+public class DataRequestManager extends RequestManager {
+    private DataRequest dataRequest;
     private String requestType;
-
-    DataDispatchRequestManager() {
-
-    }
 
     @Override
     protected Task<EverestResponse> createTask() throws ProcessingException {
         return new Task<EverestResponse>() {
             @Override
             protected EverestResponse call() throws Exception {
-                dataDispatchRequest = (DataDispatchRequest) request;
-                requestType = dataDispatchRequest.getRequestType();
+                dataRequest = (DataRequest) request;
+                requestType = dataRequest.getRequestType();
 
                 Invocation invocation = appendBody();
                 initialTime = System.currentTimeMillis();
@@ -81,12 +77,12 @@ public class DataDispatchRequestManager extends RequestManager {
         Invocation invocation = null;
         Map.Entry<String, String> mapEntry;
 
-        switch (dataDispatchRequest.getContentType()) {
+        switch (dataRequest.getContentType()) {
             case MediaType.MULTIPART_FORM_DATA:
                 FormDataMultiPart formData = new FormDataMultiPart();
 
                 // Adding the string tuples to the request
-                HashMap<String, String> pairs = dataDispatchRequest.getStringTuples();
+                HashMap<String, String> pairs = dataRequest.getStringTuples();
                 for (Map.Entry entry : pairs.entrySet()) {
                     mapEntry = (Map.Entry) entry;
                     formData.field(mapEntry.getKey(), mapEntry.getValue());
@@ -96,7 +92,7 @@ public class DataDispatchRequestManager extends RequestManager {
                 File file;
                 boolean fileException = false;
                 String fileExceptionMessage = null;
-                pairs = dataDispatchRequest.getFileTuples();
+                pairs = dataRequest.getFileTuples();
 
                 // Adding the file tuples to the request
                 for (Map.Entry entry : pairs.entrySet()) {
@@ -128,7 +124,7 @@ public class DataDispatchRequestManager extends RequestManager {
             case MediaType.APPLICATION_OCTET_STREAM:
                 if (overriddenContentType == null)
                     overriddenContentType = MediaType.APPLICATION_OCTET_STREAM;
-                filePath = dataDispatchRequest.getBody();
+                filePath = dataRequest.getBody();
 
                 File check = new File(filePath);
 
@@ -149,7 +145,7 @@ public class DataDispatchRequestManager extends RequestManager {
 
                 Form form = new Form();
 
-                for (Map.Entry entry : dataDispatchRequest.getStringTuples().entrySet()) {
+                for (Map.Entry entry : dataRequest.getStringTuples().entrySet()) {
                     mapEntry = (Map.Entry) entry;
                     form.param(mapEntry.getKey(), mapEntry.getValue());
                 }
@@ -161,21 +157,21 @@ public class DataDispatchRequestManager extends RequestManager {
                 break;
             default:
                 // Handles raw data types (JSON, Plain text, XML, HTML)
-                String originalContentType = dataDispatchRequest.getContentType();
+                String originalContentType = dataRequest.getContentType();
                 if (overriddenContentType == null)
                     overriddenContentType = originalContentType;
                 switch (requestType) {
                     case "POST":
                         invocation = requestBuilder
-                                .buildPost(Entity.entity(dataDispatchRequest.getBody(), overriddenContentType));
+                                .buildPost(Entity.entity(dataRequest.getBody(), overriddenContentType));
                         break;
                     case "PUT":
                         invocation = requestBuilder
-                                .buildPut(Entity.entity(dataDispatchRequest.getBody(), overriddenContentType));
+                                .buildPut(Entity.entity(dataRequest.getBody(), overriddenContentType));
                         break;
                     case "PATCH":
                         invocation = requestBuilder
-                                .build("PATCH", Entity.entity(dataDispatchRequest.getBody(), overriddenContentType));
+                                .build("PATCH", Entity.entity(dataRequest.getBody(), overriddenContentType));
                         break;
                 }
         }

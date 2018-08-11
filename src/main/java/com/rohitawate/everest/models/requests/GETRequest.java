@@ -16,18 +16,9 @@
 
 package com.rohitawate.everest.models.requests;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+/**
+ * Convenience class to represent an HTTP request which uses the HTTP GET method.
+ */
 public class GETRequest extends EverestRequest {
-    public GETRequest() {
-    }
 
-    public GETRequest(URL target) {
-        super(target);
-    }
-
-    public GETRequest(String target) throws MalformedURLException {
-        super(target);
-    }
 }

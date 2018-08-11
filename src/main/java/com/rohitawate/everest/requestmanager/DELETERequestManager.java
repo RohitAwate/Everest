@@ -25,10 +25,6 @@ import javax.ws.rs.core.Response;
 
 public class DELETERequestManager extends RequestManager {
 
-    DELETERequestManager() {
-
-    }
-
     @Override
     protected Task<EverestResponse> createTask() throws ProcessingException {
         return new Task<EverestResponse>() {

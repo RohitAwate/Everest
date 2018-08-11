@@ -24,7 +24,7 @@ import com.rohitawate.everest.exceptions.UnreliableResponseException;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.models.requests.EverestRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
-import com.rohitawate.everest.requestmanager.DataDispatchRequestManager;
+import com.rohitawate.everest.requestmanager.DataRequestManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import javafx.event.Event;
 
@@ -131,7 +131,7 @@ public class DashboardState {
             errorDetails = "Something went wrong. Try to make another request.Restart Everest if that doesn't work.";
         }
 
-        if (requestManager.getClass() == DataDispatchRequestManager.class) {
+        if (requestManager.getClass() == DataRequestManager.class) {
             if (throwable.getCause() != null && throwable.getCause().getClass() == IllegalArgumentException.class) {
                 errorTitle = "Did you forget something?";
                 errorDetails = "Please specify a body for your " + this.composer.httpMethod + " request.";

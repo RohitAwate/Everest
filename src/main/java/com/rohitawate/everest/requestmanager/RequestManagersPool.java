@@ -31,9 +31,9 @@ import java.util.ArrayList;
  * returned to the caller. If all the managers in the pool are running,
  * a new one is created, added to the pool, and returned.
  */
-public class RequestManagersFactory {
+public class RequestManagersPool {
     private static ArrayList<GETRequestManager> getManagers;
-    private static ArrayList<DataDispatchRequestManager> dataManagers;
+    private static ArrayList<DataRequestManager> dataManagers;
     private static ArrayList<DELETERequestManager> deleteManagers;
 
     public static GETRequestManager get() {
@@ -53,18 +53,18 @@ public class RequestManagersFactory {
         return newManager;
     }
 
-    public static DataDispatchRequestManager data() {
+    public static DataRequestManager data() {
         if (dataManagers == null)
             dataManagers = new ArrayList<>();
 
-        for (DataDispatchRequestManager dataManager : dataManagers) {
+        for (DataRequestManager dataManager : dataManagers) {
             if (!dataManager.isRunning()) {
                 dataManager.reset();
                 return dataManager;
             }
         }
 
-        DataDispatchRequestManager newManager = new DataDispatchRequestManager();
+        DataRequestManager newManager = new DataRequestManager();
         dataManagers.add(newManager);
 
         return newManager;

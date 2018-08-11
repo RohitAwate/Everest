@@ -16,25 +16,17 @@
 
 package com.rohitawate.everest.models.requests;
 
-import java.io.Serializable;
 import java.util.HashMap;
 
 /**
- * Represents HTTP requests which contain data viz. POST and PUT.
+ * Represents HTTP requests which use the HTTP POST, PUT and PATCH methods.
  */
-public class DataDispatchRequest extends EverestRequest implements Serializable {
+public class DataRequest extends EverestRequest {
     private String requestType;
     private String body;
     private String contentType;
     private HashMap<String, String> stringTuples;
     private HashMap<String, String> fileTuples;
-
-    public DataDispatchRequest() {
-    }
-
-    public DataDispatchRequest(String requestType) {
-        this.requestType = requestType;
-    }
 
     public String getBody() {
         return body;

@@ -33,12 +33,12 @@ import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
-import com.rohitawate.everest.models.requests.DataDispatchRequest;
+import com.rohitawate.everest.models.requests.DataRequest;
 import com.rohitawate.everest.models.requests.GETRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
-import com.rohitawate.everest.requestmanager.DataDispatchRequestManager;
+import com.rohitawate.everest.requestmanager.DataRequestManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
-import com.rohitawate.everest.requestmanager.RequestManagersFactory;
+import com.rohitawate.everest.requestmanager.RequestManagersPool;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -104,7 +104,7 @@ public class DashboardController implements Initializable {
     private ResponseHeadersViewer responseHeadersViewer;
 
     private GETRequest getRequest;
-    private DataDispatchRequest dataRequest;
+    private DataRequest dataRequest;
     private DELETERequest deleteRequest;
     private HashMap<String, String> params;
     private EverestCodeArea responseArea;
@@ -239,14 +239,14 @@ public class DashboardController implements Initializable {
                     getRequest.setTarget(address);
                     getRequest.setHeaders(headerTabController.getHeaders());
 
-                    requestManager = RequestManagersFactory.get();
+                    requestManager = RequestManagersPool.get();
                     requestManager.setRequest(getRequest);
                     break;
                 case "POST":
                 case "PUT":
                 case "PATCH":
                     if (dataRequest == null)
-                        dataRequest = new DataDispatchRequest();
+                        dataRequest = new DataRequest();
 
                     dataRequest.setRequestType(httpMethodBox.getValue());
                     dataRequest.setTarget(address);
@@ -284,7 +284,7 @@ public class DashboardController implements Initializable {
                         dataRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
                     }
 
-                    requestManager = RequestManagersFactory.data();
+                    requestManager = RequestManagersPool.data();
                     requestManager.setRequest(dataRequest);
                     break;
                 case "DELETE":
@@ -294,7 +294,7 @@ public class DashboardController implements Initializable {
                     deleteRequest.setTarget(address);
                     deleteRequest.setHeaders(headerTabController.getHeaders());
 
-                    requestManager = RequestManagersFactory.delete();
+                    requestManager = RequestManagersPool.delete();
                     requestManager.setRequest(deleteRequest);
                     break;
                 default:
@@ -338,7 +338,7 @@ public class DashboardController implements Initializable {
             return;
         }
 
-        if (requestManager.getClass() == DataDispatchRequestManager.class) {
+        if (requestManager.getClass() == DataRequestManager.class) {
             if (throwable.getCause() != null && throwable.getCause().getClass() == IllegalArgumentException.class) {
                 errorTitle.setText("Did you forget something?");
                 errorDetails.setText("Please specify a body for your " + httpMethodBox.getValue() + " request.");

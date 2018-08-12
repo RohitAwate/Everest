@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.controllers.state;
+package com.rohitawate.everest.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

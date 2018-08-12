@@ -16,9 +16,9 @@
 
 package com.rohitawate.everest.controllers;
 
-import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.ThemeManager;
+import com.rohitawate.everest.state.FieldState;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;

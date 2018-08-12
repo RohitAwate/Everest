@@ -25,9 +25,13 @@ import javafx.scene.layout.VBox;
 
 import java.util.HashMap;
 
-class ResponseHeadersViewer extends ScrollPane {
+public class ResponseHeadersViewer extends ScrollPane {
     private VBox container;
     private HashMap<String, String> map;
+
+    private static final String responseHeaderLabel = "response-header-label";
+    private static final String keyLabelStyleClass = "response-header-key-label";
+    private static final String valueLabelStyleClass = "response-header-value-label";
 
     ResponseHeadersViewer() {
         this.container = new VBox();
@@ -57,10 +61,10 @@ class ResponseHeadersViewer extends ScrollPane {
 
         map.forEach((key, value) -> {
             Label keyLabel = new Label(key + ": ");
-            keyLabel.getStyleClass().addAll("visualizerKeyLabel", "visualizerLabel");
+            keyLabel.getStyleClass().addAll(keyLabelStyleClass, responseHeaderLabel);
 
             Label valueLabel = new Label(value);
-            valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
+            valueLabel.getStyleClass().addAll(valueLabelStyleClass, responseHeaderLabel);
 
             container.getChildren().add(new HBox(keyLabel, valueLabel));
         });

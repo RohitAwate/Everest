@@ -17,9 +17,9 @@
 package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.search.Searchable;
-import com.rohitawate.everest.controllers.state.ComposerState;
-import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.state.FieldState;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;

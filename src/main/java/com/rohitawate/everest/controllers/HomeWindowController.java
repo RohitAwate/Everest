@@ -17,12 +17,12 @@
 package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.rohitawate.everest.controllers.state.ComposerState;
-import com.rohitawate.everest.controllers.state.DashboardState;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.ThemeManager;
+import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.state.DashboardState;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.StringProperty;

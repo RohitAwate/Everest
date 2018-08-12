@@ -18,12 +18,12 @@ package com.rohitawate.everest.history;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rohitawate.everest.controllers.state.ComposerState;
-import com.rohitawate.everest.controllers.state.FieldState;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.settings.Settings;
+import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.state.FieldState;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;

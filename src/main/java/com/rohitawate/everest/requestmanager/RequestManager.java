@@ -15,8 +15,8 @@
  */
 package com.rohitawate.everest.requestmanager;
 
-import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.NullResponseException;
+import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.models.requests.DELETERequest;
 import com.rohitawate.everest.models.requests.DataRequest;
 import com.rohitawate.everest.models.requests.EverestRequest;
@@ -50,19 +50,19 @@ import java.util.Map;
 
 /**
  * Manages all the requests made through Everest.
- * Converts EverestRequests into JAX-RS Invocations are then processed by Jersey.
- * Also, parses the response and returns EverestResponses.
+ * Converts EverestRequests into JAX-RS Invocations, which are then processed by Jersey.
+ * Also parses the ServerResponse and returns an EverestResponse.
  *
- * Previously, Everest used separate managers for GET, Data (POST, PUT and PATCH) and DELETE
- * requests. However, RequestManager extends JavaFX's Service class which is expensive to create objects of.
- * This made the creation of separate pools for every kind of RequestManager too expensive memory-wise.
- * Thus, now a single class manages all kinds of Requests thus requiring only a single kind of pool.
- * Also, this enables us to re-use inactive RequestManagers for all kinds of Requests. For example, previously,
- * if a GETRequestManager was requested, and all GETRequestManagers were running, a new one would be created even
- * if a DELETERequestManager was idle.
+ * Previously, Everest used separate managers for GET, Data (POST, PUT and PATCH) and DELETE requests.
+ * However, RequestManager extends JavaFX's Service class, which is expensive to create objects of.
+ * This made the creation of separate pools for every kind of RequestManager too expensive, memory-wise.
+ * Thus, now a single class manages all kinds of Requests thereby requiring only a single kind of pool.
+ * Also, this enables us to re-use inactive RequestManagers for all kinds of requests.
+ * For example, previously, if a GETRequestManager was requested by Everest, and all GETRequestManagers were running,
+ * a new one would be created even if a DELETERequestManager was idle.
  *
  * TLDR: At the cost of some reduced semantic clarity, the old, separate-for-every-type-of-request RequestManagers
- * are now replaced by this single works-for-all one to save some serious amount of memory and for better re-use.
+ * are now replaced by this single works-for-all one to save some serious amount of memory and to facilitate better re-use.
  */
 public class RequestManager extends Service<EverestResponse> {
     private static final Client client;

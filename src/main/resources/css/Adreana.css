@@ -317,27 +317,23 @@
     -fx-background-color: #2a2a2a;
 }
 
-.visualizerLabel {
+/* Response Headers Viewer */
+.response-header-label {
     -fx-font-family: "Liberation Mono", "Consolas", "Courier New", "Monaco", "DejaVu Sans Mono", monospace;
 }
 
-.visualizerRootLabel {
-    -fx-font-size: 16px;
-    -fx-text-fill: #dedede;
-    -fx-font-weight: bold;
-}
-
-.visualizerKeyLabel {
+.response-header-key-label {
     -fx-font-size: 16px;
     -fx-text-fill: #bababa;
     -fx-font-weight: bold;
 }
 
-.visualizerValueLabel {
+.response-header-value-label {
     -fx-font-size: 16px;
     -fx-text-fill: #959595;
 }
 
+/* Tree Visualizer */
 .tree-view {
     -fx-padding: 5px;
     -fx-background-color: #353535;

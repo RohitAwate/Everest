@@ -18,7 +18,7 @@ package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
-import com.rohitawate.everest.controllers.state.FieldState;
+import com.rohitawate.everest.state.FieldState;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

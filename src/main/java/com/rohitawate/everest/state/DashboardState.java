@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.controllers.state;
+package com.rohitawate.everest.state;
 
 import com.rohitawate.everest.controllers.DashboardController.ComposerTab;
 import com.rohitawate.everest.controllers.DashboardController.ResponseLayer;
 import com.rohitawate.everest.controllers.DashboardController.ResponseTab;
-import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.exceptions.NullResponseException;
+import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.models.requests.DataRequest;
 import com.rohitawate.everest.models.requests.EverestRequest;
@@ -34,6 +34,9 @@ import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
+/**
+ * Represents the state of Everest's Dashboard.
+ */
 public class DashboardState {
     public ComposerState composer;
     public ResponseLayer visibleResponseLayer;

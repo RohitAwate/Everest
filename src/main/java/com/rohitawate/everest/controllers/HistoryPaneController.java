@@ -17,8 +17,8 @@
 package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.search.SearchablePaneController;
-import com.rohitawate.everest.controllers.state.ComposerState;
 import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.state.ComposerState;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseButton;

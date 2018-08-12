@@ -78,7 +78,7 @@ public class HomeWindowController implements Initializable {
             e.printStackTrace();
         }
 
-        // Using LinkedHashMap because they retain order
+        // Using LinkedHashMap because it retains order
         tabStateMap = new LinkedHashMap<>();
         recoverState();
 
@@ -199,9 +199,10 @@ public class HomeWindowController implements Initializable {
     }
 
     private void removeTab(Tab newTab) {
-        DashboardState closedState = tabStateMap.remove(newTab);
-        closedState = null;
+        DashboardState state = tabStateMap.remove(newTab);
+        state = null;
         tabPane.getTabs().remove(newTab);
+        newTab.setOnCloseRequest(null);
         newTab = null;
     }
 

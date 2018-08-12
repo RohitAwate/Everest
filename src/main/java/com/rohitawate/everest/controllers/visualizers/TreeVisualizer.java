@@ -33,6 +33,7 @@ public class TreeVisualizer extends Visualizer {
     public TreeVisualizer() {
         visualizer = new TreeView<>();
         visualizer.setShowRoot(false);
+        visualizer.setCache(true);
         setContent(visualizer);
     }
 
@@ -62,6 +63,7 @@ public class TreeVisualizer extends Visualizer {
                     items.add(new TreeItem<>(i++ + ": " + EverestUtilities.trimString(currentNode.toString())));
                 } else if (currentNode.isObject()) {
                     TreeItem<String> newRoot = new TreeItem<>();
+                    newRoot.setExpanded(true);
                     items.add(newRoot);
                     populate(newRoot, i++ + ": [Anonymous Object]", currentNode);
                 }
@@ -79,6 +81,7 @@ public class TreeVisualizer extends Visualizer {
                             + EverestUtilities.trimString(currentNode.toString())));
                 } else if (currentNode.isArray() || currentNode.isObject()) {
                     TreeItem<String> newRoot = new TreeItem<>();
+                    newRoot.setExpanded(true);
                     items.add(newRoot);
                     populate(newRoot, currentEntry.getKey(), currentNode);
                 }
@@ -90,5 +93,6 @@ public class TreeVisualizer extends Visualizer {
 
     public void clear() {
         visualizer.setRoot(null);
+        System.gc();
     }
 }

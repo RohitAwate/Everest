@@ -21,11 +21,11 @@ package com.rohitawate.everest.exceptions;
  * <p>
  * Used by DashboardController to display ErrorLayer.
  */
-public class UnreliableResponseException extends Exception {
+public class NullResponseException extends Exception {
     private String exceptionTitle;
     private String exceptionDetails;
 
-    public UnreliableResponseException(String exceptionTitle, String exceptionDetails) {
+    public NullResponseException(String exceptionTitle, String exceptionDetails) {
         this.exceptionTitle = exceptionTitle;
         this.exceptionDetails = exceptionDetails;
     }

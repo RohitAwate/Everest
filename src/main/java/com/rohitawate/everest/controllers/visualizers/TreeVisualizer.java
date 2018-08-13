@@ -29,9 +29,12 @@ import java.util.Map;
 
 public class TreeVisualizer extends Visualizer {
     private TreeView<String> visualizer;
+    private ArrayList<TreeItem<String>> recycledNodes;
+    private int lastNodeIndex;
 
     public TreeVisualizer() {
         visualizer = new TreeView<>();
+        recycledNodes = new ArrayList<>();
         visualizer.setShowRoot(false);
         visualizer.setCache(true);
         setContent(visualizer);
@@ -39,7 +42,7 @@ public class TreeVisualizer extends Visualizer {
 
     public void populate(String body) throws IOException {
         JsonNode tree = EverestUtilities.jsonMapper.readTree(body);
-        this.populate(new TreeItem<>(), "root", tree);
+        this.populate(getTreeNode(null), "root", tree);
     }
 
     private void populate(TreeItem<String> rootItem, String rootName, JsonNode root) {
@@ -60,9 +63,9 @@ public class TreeVisualizer extends Visualizer {
                 currentNode = iterator.next();
 
                 if (currentNode.isValueNode()) {
-                    items.add(new TreeItem<>(i++ + ": " + EverestUtilities.trimString(currentNode.toString())));
+                    items.add(getTreeNode(i++ + ": " + EverestUtilities.trimString(currentNode.toString())));
                 } else if (currentNode.isObject()) {
-                    TreeItem<String> newRoot = new TreeItem<>();
+                    TreeItem<String> newRoot = getTreeNode(null);
                     newRoot.setExpanded(true);
                     items.add(newRoot);
                     populate(newRoot, i++ + ": [Anonymous Object]", currentNode);
@@ -77,10 +80,10 @@ public class TreeVisualizer extends Visualizer {
                 currentNode = currentEntry.getValue();
 
                 if (currentNode.isValueNode()) {
-                    items.add(new TreeItem<>(currentEntry.getKey() + ": "
+                    items.add(getTreeNode(currentEntry.getKey() + ": "
                             + EverestUtilities.trimString(currentNode.toString())));
                 } else if (currentNode.isArray() || currentNode.isObject()) {
-                    TreeItem<String> newRoot = new TreeItem<>();
+                    TreeItem<String> newRoot = getTreeNode(null);
                     newRoot.setExpanded(true);
                     items.add(newRoot);
                     populate(newRoot, currentEntry.getKey(), currentNode);
@@ -91,7 +94,23 @@ public class TreeVisualizer extends Visualizer {
         rootItem.getChildren().addAll(items);
     }
 
+    private TreeItem<String> getTreeNode(String value) {
+        TreeItem<String> node;
+
+        if (recycledNodes.size() > 0) {
+            node = recycledNodes.get(lastNodeIndex);
+            recycledNodes.remove(lastNodeIndex--);
+        } else {
+            node = new TreeItem<>();
+        }
+
+        node.setValue(value);
+        node.getChildren().clear();
+        return node;
+    }
+
     public void clear() {
+        recycledNodes.addAll(visualizer.getRoot().getChildren());
         visualizer.setRoot(null);
         System.gc();
     }

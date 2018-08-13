@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.settings.Settings;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.FieldState;
@@ -132,7 +133,7 @@ public class HistoryManager {
                 state.params = getTuples(requestID, "Param");
                 state.httpMethod = resultSet.getString("Type");
 
-                if (!(state.httpMethod.equals("GET") || state.httpMethod.equals("DELETE"))) {
+                if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                     // Retrieves request body ContentType for querying corresponding table
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestContentType").toString()));
                     statement.setInt(1, requestID);
@@ -143,31 +144,19 @@ public class HistoryManager {
                     if (RS.next())
                         contentType = RS.getString("ContentType");
 
-                    state.rawBodyContentType = contentType;
+                    state.contentType = contentType;
 
-                    // Retrieves body from corresponding table
-                    switch (contentType) {
-                        case MediaType.TEXT_PLAIN:
-                        case MediaType.APPLICATION_JSON:
-                        case MediaType.APPLICATION_XML:
-                        case MediaType.TEXT_HTML:
-                        case MediaType.APPLICATION_OCTET_STREAM:
-                            statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestBody").toString()));
-                            statement.setInt(1, requestID);
+                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestBody").toString()));
+                    statement.setInt(1, requestID);
 
-                            RS = statement.executeQuery();
+                    RS = statement.executeQuery();
 
-                            if (RS.next())
-                                state.rawBody = RS.getString("Body");
-                            break;
-                        case MediaType.APPLICATION_FORM_URLENCODED:
-                            state.urlStringTuples = getTuples(requestID, "String");
-                            break;
-                        case MediaType.MULTIPART_FORM_DATA:
-                            state.formStringTuples = getTuples(requestID, "String");
-                            state.formFileTuples = getTuples(requestID, "File");
-                            break;
-                    }
+                    if (RS.next())
+                        state.rawBody = RS.getString("Body");
+
+                    state.urlStringTuples = getTuples(requestID, "String");
+                    state.formStringTuples = getTuples(requestID, "String");
+                    state.formFileTuples = getTuples(requestID, "File");
                 }
 
                 history.add(state);
@@ -273,7 +262,7 @@ public class HistoryManager {
             if (!areListsEqual(states, newState.params))
                 return false;
 
-            if (!(newState.httpMethod.equals("GET") || newState.httpMethod.equals("DELETE"))) {
+            if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
                 statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestContentType").toString()));
                 statement.setInt(1, lastRequestID);
 
@@ -283,10 +272,10 @@ public class HistoryManager {
                 if (RS.next())
                     previousContentType = RS.getString("ContentType");
 
-                if (!newState.rawBodyContentType.equals(previousContentType))
+                if (!newState.contentType.equals(previousContentType))
                     return false;
 
-                switch (newState.rawBodyContentType) {
+                switch (newState.contentType) {
                     case MediaType.TEXT_PLAIN:
                     case MediaType.APPLICATION_JSON:
                     case MediaType.APPLICATION_XML:
@@ -388,35 +377,22 @@ public class HistoryManager {
                 // Saves request parameters
                 saveTuple(state.params, "Param", requestID);
 
-                if (!(state.httpMethod.equals("GET") || state.httpMethod.equals("DELETE"))) {
+                if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                     // Maps the request to its ContentType for faster retrieval
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequestContentPair").toString()));
                     statement.setInt(1, requestID);
-                    statement.setString(2, state.rawBodyContentType);
+                    statement.setString(2, state.contentType);
 
                     statement.executeUpdate();
 
-                    // Determines where to fetch the body from, based on the ContentType
-                    switch (state.rawBodyContentType) {
-                        case MediaType.TEXT_PLAIN:
-                        case MediaType.APPLICATION_JSON:
-                        case MediaType.APPLICATION_XML:
-                        case MediaType.TEXT_HTML:
-                        case MediaType.APPLICATION_OCTET_STREAM:
-                            // Saves the body in case of raw content, or the file location in case of binary
-                            statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveBody").toString()));
-                            statement.setInt(1, requestID);
-                            statement.setString(2, state.rawBody);
-                            statement.executeUpdate();
-                            break;
-                        case MediaType.APPLICATION_FORM_URLENCODED:
-                            saveTuple(state.urlStringTuples, "String", requestID);
-                            break;
-                        case MediaType.MULTIPART_FORM_DATA:
-                            saveTuple(state.formStringTuples, "String", requestID);
-                            saveTuple(state.formFileTuples, "File", requestID);
-                            break;
-                    }
+                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveBody").toString()));
+                    statement.setInt(1, requestID);
+                    statement.setString(2, state.rawBody);
+                    statement.executeUpdate();
+
+                    saveTuple(state.urlStringTuples, "String", requestID);
+                    saveTuple(state.formStringTuples, "String", requestID);
+                    saveTuple(state.formFileTuples, "File", requestID);
                 }
             } catch (SQLException e) {
                 LoggingService.logWarning("Database error.", e, LocalDateTime.now());

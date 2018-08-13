@@ -17,10 +17,7 @@ package com.rohitawate.everest.requestmanager;
 
 import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
-import com.rohitawate.everest.models.requests.DELETERequest;
-import com.rohitawate.everest.models.requests.DataRequest;
-import com.rohitawate.everest.models.requests.EverestRequest;
-import com.rohitawate.everest.models.requests.GETRequest;
+import com.rohitawate.everest.models.requests.*;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.settings.Settings;
 import javafx.concurrent.Service;
@@ -52,7 +49,7 @@ import java.util.Map;
  * Manages all the requests made through Everest.
  * Converts EverestRequests into JAX-RS Invocations, which are then processed by Jersey.
  * Also parses the ServerResponse and returns an EverestResponse.
- *
+ * <p>
  * Previously, Everest used separate managers for GET, Data (POST, PUT and PATCH) and DELETE requests.
  * However, RequestManager extends JavaFX's Service class, which is expensive to create objects of.
  * This made the creation of separate pools for every kind of RequestManager too expensive, memory-wise.
@@ -60,7 +57,7 @@ import java.util.Map;
  * Also, this enables us to re-use inactive RequestManagers for all kinds of requests.
  * For example, previously, if a GETRequestManager was requested by Everest, and all GETRequestManagers were running,
  * a new one would be created even if a DELETERequestManager was idle.
- *
+ * <p>
  * TLDR: At the cost of some reduced semantic clarity, the old, separate-for-every-type-of-request RequestManagers
  * are now replaced by this single works-for-all one to save some serious amount of memory and to facilitate better re-use.
  */
@@ -234,10 +231,7 @@ public class RequestManager extends Service<EverestResponse> {
 
                 formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
 
-                if (requestType.equals("POST"))
-                    invocation = requestBuilder.buildPost(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
-                else
-                    invocation = requestBuilder.buildPut(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+                invocation = getInvocation(MediaType.MULTIPART_FORM_DATA, requestType, formData, requestBuilder);
                 break;
             case MediaType.APPLICATION_OCTET_STREAM:
                 if (overriddenContentType == null)
@@ -252,10 +246,7 @@ public class RequestManager extends Service<EverestResponse> {
 
                 FileInputStream stream = new FileInputStream(filePath);
 
-                if (requestType.equals("POST"))
-                    invocation = requestBuilder.buildPost(Entity.entity(stream, overriddenContentType));
-                else
-                    invocation = requestBuilder.buildPut(Entity.entity(stream, overriddenContentType));
+                invocation = getInvocation(overriddenContentType, requestType, stream, requestBuilder);
                 break;
             case MediaType.APPLICATION_FORM_URLENCODED:
                 if (overriddenContentType == null)
@@ -268,10 +259,7 @@ public class RequestManager extends Service<EverestResponse> {
                     form.param(mapEntry.getKey(), mapEntry.getValue());
                 }
 
-                if (requestType.equals("POST"))
-                    invocation = requestBuilder.buildPost(Entity.entity(form, overriddenContentType));
-                else
-                    invocation = requestBuilder.buildPut(Entity.entity(form, overriddenContentType));
+                invocation = getInvocation(overriddenContentType, requestType, form, requestBuilder);
                 break;
             default:
                 // Handles raw data types (JSON, Plain text, XML, HTML)
@@ -279,21 +267,37 @@ public class RequestManager extends Service<EverestResponse> {
                 if (overriddenContentType == null)
                     overriddenContentType = originalContentType;
                 switch (requestType) {
-                    case "POST":
+                    case HTTPConstants.POST:
                         invocation = requestBuilder
                                 .buildPost(Entity.entity(dataRequest.getBody(), overriddenContentType));
                         break;
-                    case "PUT":
+                    case HTTPConstants.PUT:
                         invocation = requestBuilder
                                 .buildPut(Entity.entity(dataRequest.getBody(), overriddenContentType));
                         break;
-                    case "PATCH":
+                    case HTTPConstants.PATCH:
                         invocation = requestBuilder
-                                .build("PATCH", Entity.entity(dataRequest.getBody(), overriddenContentType));
+                                .build(HTTPConstants.PATCH, Entity.entity(dataRequest.getBody(), overriddenContentType));
                         break;
                 }
         }
 
+        return invocation;
+    }
+
+    private static Invocation getInvocation(String overriddenContentType, String requestType, Object entity, Builder requestBuilder) {
+        Invocation invocation;
+        switch (requestType) {
+            case HTTPConstants.POST:
+                invocation = requestBuilder.buildPost(Entity.entity(entity, overriddenContentType));
+                break;
+            case HTTPConstants.PUT:
+                invocation = requestBuilder.buildPut(Entity.entity(entity, overriddenContentType));
+                break;
+            default:
+                invocation = requestBuilder.build(HTTPConstants.PATCH, Entity.entity(entity, overriddenContentType));
+                break;
+        }
         return invocation;
     }
 }

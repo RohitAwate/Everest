@@ -18,6 +18,7 @@ package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.search.Searchable;
 import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.FieldState;
 import javafx.fxml.FXML;
@@ -55,13 +56,14 @@ public class HistoryItemController implements Initializable, Searchable<Composer
     }
 
     public int getRelativityIndex(String searchString) {
+        int index = 0;
         searchString = searchString.toLowerCase();
         String comparisonString;
 
         // Checks if matches with target
         comparisonString = state.target.toLowerCase();
         if (comparisonString.contains(searchString))
-            return 10;
+            index += 10;
 
         try {
             URL url = new URL(state.target);
@@ -69,12 +71,12 @@ public class HistoryItemController implements Initializable, Searchable<Composer
             // Checks if matches with target's hostname
             comparisonString = url.getHost().toLowerCase();
             if (comparisonString.contains(searchString))
-                return 10;
+                index += 10;
 
             // Checks if matches with target's path
             comparisonString = url.getPath().toLowerCase();
             if (comparisonString.contains(searchString))
-                return 9;
+                index += 9;
         } catch (MalformedURLException e) {
             LoggingService.logInfo("Failed to parse URL while calculating relativity index.", LocalDateTime.now());
         }
@@ -82,24 +84,24 @@ public class HistoryItemController implements Initializable, Searchable<Composer
         // Checks if matches with HTTP method
         comparisonString = state.httpMethod.toLowerCase();
         if (comparisonString.contains(searchString))
-            return 7;
+            index += 7;
 
         // Checks for a match in the params
         for (FieldState state : state.params) {
             if (state.key.toLowerCase().contains(searchString) ||
                     state.value.toLowerCase().contains(searchString))
-                return 5;
+                index += 5;
         }
 
         // Checks for a match in the headers
         for (FieldState state : state.headers) {
             if (state.key.toLowerCase().contains(searchString) ||
                     state.value.toLowerCase().contains(searchString))
-                return 6;
+                index += 6;
         }
 
-        if (state.httpMethod.equals("POST") || state.httpMethod.equals("PUT")) {
-            switch (state.rawBodyContentType) {
+        if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
+            switch (state.contentType) {
                 case MediaType.TEXT_PLAIN:
                 case MediaType.APPLICATION_JSON:
                 case MediaType.APPLICATION_XML:
@@ -108,14 +110,14 @@ public class HistoryItemController implements Initializable, Searchable<Composer
                     // Checks for match in rawBody of the request
                     comparisonString = state.rawBody.toLowerCase();
                     if (comparisonString.contains(searchString))
-                        return 8;
+                        index += 8;
                     break;
                 case MediaType.APPLICATION_FORM_URLENCODED:
                     // Checks for match in string tuples
                     for (FieldState state : state.urlStringTuples) {
                         if (state.key.toLowerCase().contains(searchString) ||
                                 state.value.toLowerCase().contains(searchString))
-                            return 8;
+                            index += 8;
                     }
                     break;
                 case MediaType.MULTIPART_FORM_DATA:
@@ -123,17 +125,17 @@ public class HistoryItemController implements Initializable, Searchable<Composer
                     for (FieldState state : state.formStringTuples) {
                         if (state.key.toLowerCase().contains(searchString) ||
                                 state.value.toLowerCase().contains(searchString))
-                            return 8;
+                            index += 8;
                     }
 
                     for (FieldState state : state.formFileTuples) {
                         if (state.key.toLowerCase().contains(searchString) ||
                                 state.value.toLowerCase().contains(searchString))
-                            return 8;
+                            index += 8;
                     }
                     break;
             }
         }
-        return 0;
+        return index;
     }
 }

@@ -17,6 +17,7 @@
 package com.rohitawate.everest.state;
 
 import com.rohitawate.everest.controllers.BodyTabController.BodyTab;
+import com.rohitawate.everest.models.requests.HTTPConstants;
 
 import java.util.ArrayList;
 
@@ -27,14 +28,15 @@ public class ComposerState {
     public BodyTab visibleBodyTab;
 
     public String target;
-
     public String httpMethod;
+
     public ArrayList<FieldState> params;
     public ArrayList<FieldState> headers;
+    public String contentType;
 
     // Body and content-type of requests with raw bodies
     public String rawBody;
-    public String rawBodyContentType;
+    public String rawBodyBoxValue;
 
     // Tuples of URL-encoded requests
     public ArrayList<FieldState> urlStringTuples;
@@ -47,6 +49,6 @@ public class ComposerState {
     public String binaryFilePath;
 
     public ComposerState() {
-        this.httpMethod = "GET";
+        this.httpMethod = HTTPConstants.GET;
     }
 }

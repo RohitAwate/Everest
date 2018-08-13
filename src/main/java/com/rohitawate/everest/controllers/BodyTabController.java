@@ -20,6 +20,7 @@ import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.ThemeManager;
+import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.FieldState;
 import javafx.fxml.FXML;
@@ -68,7 +69,12 @@ public class BodyTabController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        rawInputTypeBox.getItems().addAll("PLAIN TEXT", "JSON", "XML", "HTML");
+        rawInputTypeBox.getItems().addAll(
+                HTTPConstants.JSON,
+                HTTPConstants.XML,
+                HTTPConstants.HTML,
+                HTTPConstants.PLAIN_TEXT
+        );
         rawInputTypeBox.getSelectionModel().select(0);
 
         rawInputArea = new EverestCodeArea();
@@ -79,7 +85,7 @@ public class BodyTabController implements Initializable {
         rawInputTypeBox.valueProperty().addListener(change -> {
             String type = rawInputTypeBox.getValue();
 
-            if (type.equals("JSON")) {
+            if (type.equals(HTTPConstants.PLAIN_TEXT)) {
                 rawInputArea.setHighlighter(HighlighterFactory.getHighlighter(type));
                 return;
             }
@@ -128,27 +134,31 @@ public class BodyTabController implements Initializable {
 
         state.rawBody = rawInputArea.getText();
         switch (rawInputTypeBox.getValue()) {
-            case "JSON":
-                state.rawBodyContentType = MediaType.APPLICATION_JSON;
+            case HTTPConstants.JSON:
+                state.rawBodyBoxValue = MediaType.APPLICATION_JSON;
                 break;
-            case "XML":
-                state.rawBodyContentType = MediaType.APPLICATION_XML;
+            case HTTPConstants.XML:
+                state.rawBodyBoxValue = MediaType.APPLICATION_XML;
                 break;
-            case "HTML":
-                state.rawBodyContentType = MediaType.TEXT_HTML;
+            case HTTPConstants.HTML:
+                state.rawBodyBoxValue = MediaType.TEXT_HTML;
                 break;
             default:
-                state.rawBodyContentType = MediaType.TEXT_PLAIN;
+                state.rawBodyBoxValue = MediaType.TEXT_PLAIN;
         }
 
         if (rawTab.isSelected()) {
             state.visibleBodyTab = BodyTab.RAW;
+            state.contentType = state.rawBodyBoxValue;
         } else if (formTab.isSelected()) {
             state.visibleBodyTab = BodyTab.FORM;
+            state.contentType = MediaType.MULTIPART_FORM_DATA;
         } else if (urlTab.isSelected()) {
             state.visibleBodyTab = BodyTab.URL;
+            state.contentType = MediaType.APPLICATION_FORM_URLENCODED;
         } else {
             state.visibleBodyTab = BodyTab.BINARY;
+            state.contentType = MediaType.APPLICATION_OCTET_STREAM;
         }
 
         return state;
@@ -200,32 +210,32 @@ public class BodyTabController implements Initializable {
         urlTabController.clear();
         formDataTabController.clear();
         rawInputArea.clear();
-        rawInputTypeBox.setValue("PLAIN TEXT");
+        rawInputTypeBox.setValue(HTTPConstants.PLAIN_TEXT);
         filePathField.clear();
     }
 
     private void setRawTab(ComposerState state) {
-        if (state.rawBodyContentType != null && state.rawBody != null) {
+        if (state.rawBodyBoxValue != null && state.rawBody != null) {
             // TODO: Remove this conversion
             String simplifiedContentType;
-            switch (state.rawBodyContentType) {
+            switch (state.rawBodyBoxValue) {
                 case MediaType.APPLICATION_JSON:
-                    simplifiedContentType = "JSON";
+                    simplifiedContentType = HTTPConstants.JSON;
                     break;
                 case MediaType.APPLICATION_XML:
-                    simplifiedContentType = "XML";
+                    simplifiedContentType = HTTPConstants.XML;
                     break;
                 case MediaType.TEXT_HTML:
-                    simplifiedContentType = "HTML";
+                    simplifiedContentType = HTTPConstants.HTML;
                     break;
                 default:
-                    simplifiedContentType = "PLAIN TEXT";
+                    simplifiedContentType = HTTPConstants.PLAIN_TEXT;
             }
             rawInputTypeBox.setValue(simplifiedContentType);
             rawInputArea.setText(state.rawBody, HighlighterFactory.getHighlighter(simplifiedContentType));
         } else {
-            rawInputTypeBox.setValue("PLAIN TEXT");
-            rawInputArea.setHighlighter(HighlighterFactory.getHighlighter("PLAIN TEXT"));
+            rawInputTypeBox.setValue(HTTPConstants.PLAIN_TEXT);
+            rawInputArea.setHighlighter(HighlighterFactory.getHighlighter(HTTPConstants.PLAIN_TEXT));
         }
     }
 }

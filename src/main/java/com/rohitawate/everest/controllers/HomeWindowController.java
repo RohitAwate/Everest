@@ -21,6 +21,7 @@ import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.ThemeManager;
+import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.DashboardState;
 import javafx.application.Platform;
@@ -302,7 +303,7 @@ public class HomeWindowController implements Initializable {
                     dashboard.requestOptionsTab.getSelectionModel().select(dashboard.headersTab);
                 } else if (KeyMap.focusBody.match(e)) {
                     String httpMethod = dashboard.httpMethodBox.getValue();
-                    if (!httpMethod.equals("GET") && !httpMethod.equals("DELETE")) {
+                    if (!httpMethod.equals(HTTPConstants.GET) && !httpMethod.equals(HTTPConstants.DELETE)) {
                         dashboard.requestOptionsTab.getSelectionModel().select(dashboard.bodyTab);
                     }
                 } else if (KeyMap.refreshTheme.match(e)) {

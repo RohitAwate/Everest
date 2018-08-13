@@ -32,6 +32,7 @@ import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
 import com.rohitawate.everest.models.requests.DataRequest;
 import com.rohitawate.everest.models.requests.GETRequest;
+import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import com.rohitawate.everest.requestmanager.RequestManagersPool;
@@ -93,7 +94,6 @@ public class DashboardController implements Initializable {
     private JFXProgressBar progressBar;
 
     private JFXSnackbar snackbar;
-    private final String[] httpMethods = {"GET", "POST", "PUT", "DELETE", "PATCH"};
     private List<StringKeyValueFieldController> paramsControllers;
     private RequestManager requestManager;
     private HeaderTabController headerTabController;
@@ -144,10 +144,15 @@ public class DashboardController implements Initializable {
         snackbar = new JFXSnackbar(dashboard);
 
         showLayer(ResponseLayer.PROMPT);
-        httpMethodBox.getItems().addAll(httpMethods);
+        httpMethodBox.getItems().addAll(
+                HTTPConstants.GET,
+                HTTPConstants.POST,
+                HTTPConstants.PUT,
+                HTTPConstants.PATCH,
+                HTTPConstants.DELETE);
 
         // Select GET by default
-        httpMethodBox.getSelectionModel().select("GET");
+        httpMethodBox.getSelectionModel().select(HTTPConstants.GET);
 
         paramsControllers = new ArrayList<>();
         paramsCountProperty = new SimpleIntegerProperty(0);
@@ -155,8 +160,8 @@ public class DashboardController implements Initializable {
         addParamField(); // Adds a blank param field
 
         bodyTab.disableProperty().bind(
-                Bindings.or(httpMethodBox.valueProperty().isEqualTo("GET"),
-                        httpMethodBox.valueProperty().isEqualTo("DELETE")));
+                Bindings.or(httpMethodBox.valueProperty().isEqualTo(HTTPConstants.GET),
+                        httpMethodBox.valueProperty().isEqualTo(HTTPConstants.DELETE)));
 
         // Disabling Ctrl+Tab navigation
         requestOptionsTab.setOnKeyPressed(e -> {
@@ -172,7 +177,11 @@ public class DashboardController implements Initializable {
             snackbar.show("Response body copied to clipboard.", 5000);
         });
 
-        responseTypeBox.getItems().addAll("JSON", "XML", "HTML", "PLAIN TEXT");
+        responseTypeBox.getItems().addAll(
+                HTTPConstants.JSON,
+                HTTPConstants.XML,
+                HTTPConstants.HTML,
+                HTTPConstants.PLAIN_TEXT);
 
         responseTypeBox.valueProperty().addListener(change -> {
             String type = responseTypeBox.getValue();
@@ -231,7 +240,7 @@ public class DashboardController implements Initializable {
             addressField.setText(address);
 
             switch (httpMethodBox.getValue()) {
-                case "GET":
+                case HTTPConstants.GET:
                     if (getRequest == null)
                         getRequest = new GETRequest();
 
@@ -241,9 +250,9 @@ public class DashboardController implements Initializable {
                     requestManager = RequestManagersPool.manager();
                     requestManager.setRequest(getRequest);
                     break;
-                case "POST":
-                case "PUT":
-                case "PATCH":
+                case HTTPConstants.POST:
+                case HTTPConstants.PUT:
+                case HTTPConstants.PATCH:
                     if (dataRequest == null)
                         dataRequest = new DataRequest();
 
@@ -286,7 +295,7 @@ public class DashboardController implements Initializable {
                     requestManager = RequestManagersPool.manager();
                     requestManager.setRequest(dataRequest);
                     break;
-                case "DELETE":
+                case HTTPConstants.DELETE:
                     if (deleteRequest == null)
                         deleteRequest = new DELETERequest();
 
@@ -644,9 +653,9 @@ public class DashboardController implements Initializable {
         ComposerState composerState;
 
         switch (httpMethodBox.getValue()) {
-            case "POST":
-            case "PUT":
-            case "PATCH":
+            case HTTPConstants.POST:
+            case HTTPConstants.PUT:
+            case HTTPConstants.PATCH:
                 composerState = bodyTabController.getState();
                 break;
             default:
@@ -781,6 +790,8 @@ public class DashboardController implements Initializable {
              This is an extreme case, but still something to be taken care of.
          */
         boolean validMethod = false;
+        String[] httpMethods =
+                {HTTPConstants.GET, HTTPConstants.POST, HTTPConstants.PUT, HTTPConstants.PATCH, HTTPConstants.DELETE};
         for (String method : httpMethods) {
             if (method.equals(state.composer.httpMethod))
                 validMethod = true;
@@ -806,12 +817,12 @@ public class DashboardController implements Initializable {
                 addParamField(fieldState);
         }
 
-        if (!(httpMethodBox.getValue().equals("GET") || httpMethodBox.getValue().equals("DELETE")))
+        if (!(state.composer.httpMethod.equals(HTTPConstants.GET) || state.composer.httpMethod.equals(HTTPConstants.DELETE)))
             bodyTabController.setState(state.composer);
     }
 
     void reset() {
-        httpMethodBox.setValue("GET");
+        httpMethodBox.setValue(HTTPConstants.GET);
         addressField.clear();
         headerTabController.clear();
         clearParams();

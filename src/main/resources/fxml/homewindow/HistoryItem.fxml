@@ -22,24 +22,21 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 <HBox fx:id="historyItemBox" alignment="CENTER_LEFT" maxHeight="35.0" maxWidth="300.0" minHeight="35.0" minWidth="250.0"
-      spacing="10.0" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
+      spacing="10.0" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.HistoryItemController">
-   <children>
-       <Label fx:id="requestType" minWidth="50.0">
-           <font>
-               <Font name="Liberation Mono Bold" size="13.0"/>
-           </font>
-       </Label>
-       <Label fx:id="address" textFill="#bababa" textOverrun="WORD_ELLIPSIS" HBox.hgrow="ALWAYS">
-         <font>
-             <Font size="13.0"/>
-         </font>
-          <tooltip>
-              <Tooltip fx:id="tooltip" text="tooltip"/>
-          </tooltip>
-      </Label>
-   </children>
-   <padding>
-       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-   </padding>
+    <children>
+        <Label fx:id="methodLabel" minWidth="50.0">
+        </Label>
+        <Label fx:id="address" textFill="#bababa" textOverrun="WORD_ELLIPSIS" HBox.hgrow="ALWAYS">
+            <font>
+                <Font size="13.0"/>
+            </font>
+            <tooltip>
+                <Tooltip fx:id="tooltip" text="tooltip"/>
+            </tooltip>
+        </Label>
+    </children>
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+    </padding>
 </HBox>

@@ -34,9 +34,15 @@ import java.util.ResourceBundle;
 
 public class HistoryItemController implements Initializable, Searchable<ComposerState> {
     @FXML
-    private Label requestType, address;
+    private Label methodLabel, address;
     @FXML
     private Tooltip tooltip;
+
+    private static final String GETStyle = "-fx-text-fill: orangered";
+    private static final String POSTStyle = "-fx-text-fill: cornflowerblue";
+    private static final String PUTStyle = "-fx-text-fill: deeppink";
+    private static final String PATCHStyle = "-fx-text-fill: teal";
+    private static final String DELETEStyle = "-fx-text-fill: limegreen";
 
     private ComposerState state;
 
@@ -51,22 +57,22 @@ public class HistoryItemController implements Initializable, Searchable<Composer
 
     public void setState(ComposerState state) {
         this.state = state;
-        this.requestType.setText(state.httpMethod);
+        this.methodLabel.setText(state.httpMethod);
         switch (state.httpMethod) {
             case HTTPConstants.GET:
-                requestType.setStyle("-fx-text-fill: deeppink");
+                methodLabel.setStyle(GETStyle);
                 break;
             case HTTPConstants.POST:
-                requestType.setStyle("-fx-text-fill: cornflowerblue");
+                methodLabel.setStyle(POSTStyle);
                 break;
             case HTTPConstants.PUT:
-                requestType.setStyle("-fx-text-fill: crimson");
+                methodLabel.setStyle(PUTStyle);
                 break;
             case HTTPConstants.PATCH:
-                requestType.setStyle("-fx-text-fill: teal");
+                methodLabel.setStyle(PATCHStyle);
                 break;
             case HTTPConstants.DELETE:
-                requestType.setStyle("-fx-text-fill: limegreen");
+                methodLabel.setStyle(DELETEStyle);
                 break;
         }
         this.address.setText(state.target);

@@ -290,6 +290,12 @@
 }
 
 /* History item */
+#methodLabel {
+    -fx-font-family: sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
 #historyItemBox {
     -fx-background-color: #353535;
 }
@@ -360,7 +366,6 @@
 
 /* Tree Visualizer */
 .tree-view {
-    -fx-padding: 5px;
     -fx-background-color: #353535;
 }
 
@@ -377,7 +382,7 @@
     -fx-background-color: #282828;
     -fx-text-fill: azure;
     -fx-font-size: 14px;
-    -fx-font-family: "Liberation Mono", monospace;
+    -fx-font-family: "Liberation Mono", "Consolas", "Courier New", "Monaco", "DejaVu Sans Mono", monospace;
     -fx-border-width: 0px;
 }
 

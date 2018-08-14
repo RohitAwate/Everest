@@ -147,7 +147,8 @@
                                                             </children>
                                                         </HBox>
                                                         <ComboBox fx:id="responseTypeBox" maxHeight="25.0"
-                                                                  minHeight="25.0" prefWidth="100.0"/>
+                                                                  minHeight="25.0" prefWidth="120.0"
+                                                                  styleClass="content-type-combo-box"/>
                                                         <Label fx:id="responseTime" text="151 ms" textFill="WHITE"
                                                                HBox.hgrow="ALWAYS">
                                                             <HBox.margin>

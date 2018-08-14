@@ -325,8 +325,21 @@
     -fx-background-color: #2a2a2a;
 }
 
+#rawInputTypeBox,
+#responseTypeBox {
+    -fx-background-color: #505050;
+}
+
+#rawInputTypeBox .list-cell,
 #responseTypeBox .list-cell {
+    -fx-text-fill: azure;
     -fx-font-size: 13px;
+    -fx-background-color: #505050;
+}
+
+#rawInputTypeBox .list-cell:hover,
+#responseTypeBox .list-cell:hover {
+    -fx-background-color: cornflowerblue;
 }
 
 /* Response Headers Viewer */

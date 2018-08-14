@@ -33,7 +33,8 @@
             <content>
                 <VBox fx:id="rawVBox">
                     <children>
-                        <ComboBox fx:id="rawInputTypeBox" maxHeight="30.0" visibleRowCount="5" VBox.vgrow="SOMETIMES">
+                        <ComboBox fx:id="rawInputTypeBox" maxHeight="25.0" minHeight="25.0" visibleRowCount="5"
+                                  VBox.vgrow="SOMETIMES">
                             <VBox.margin>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </VBox.margin>

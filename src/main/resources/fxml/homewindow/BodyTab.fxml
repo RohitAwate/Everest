@@ -46,7 +46,7 @@
             <content>
                 <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="15.0">
                     <children>
-                        <Label text="SELECT A FILE TO ADD TO THE REQUEST" textFill="#9a9a9a">
+                        <Label text="Select a file to add to the request" textFill="#9a9a9a">
                             <font>
                                 <Font size="14.0"/>
                             </font>

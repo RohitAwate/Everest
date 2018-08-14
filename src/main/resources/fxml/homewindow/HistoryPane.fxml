@@ -87,7 +87,7 @@
 				</StackPane>
 				<StackPane fx:id="searchLayer">
 					<children>
-						<VBox alignment="TOP_CENTER">
+                        <VBox alignment="TOP_CENTER" visible="false">
 							<children>
                                 <Label graphicTextGap="10.0" text="SEARCH RESULTS" textFill="#199F6F">
 									<VBox.margin>

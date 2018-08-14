@@ -2,6 +2,7 @@ package com.rohitawate.everest.format;
 
 import com.rohitawate.everest.exceptions.DuplicateFormatterException;
 import com.rohitawate.everest.exceptions.DuplicateHighlighterException;
+import com.rohitawate.everest.models.requests.HTTPConstants;
 
 import java.util.HashMap;
 
@@ -15,7 +16,7 @@ public class FormatterFactory {
 
     static {
         formatters = new HashMap<>();
-        formatters.put("JSON", new JSONFormatter());
+        formatters.put(HTTPConstants.JSON, new JSONFormatter());
     }
 
     public static Formatter getHighlighter(String type) {

@@ -25,49 +25,58 @@
 <VBox fx:id="dashboard" alignment="CENTER" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.DashboardController">
     <children>
-        <HBox alignment="CENTER" maxHeight="100.0" minHeight="100.0" spacing="20.0" VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER" maxHeight="70.0" minHeight="70.0" spacing="20.0" VBox.vgrow="ALWAYS">
             <children>
-                <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true"
+                <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true"
                            HBox.hgrow="ALWAYS">
                     <image>
                         <Image url="@../../assets/Logo.png"/>
                     </image>
                 </ImageView>
-                <HBox fx:id="addressSection" alignment="CENTER" maxHeight="40.0" HBox.hgrow="ALWAYS">
+                <HBox fx:id="addressSection" alignment="CENTER" maxHeight="30.0" maxWidth="800.0" HBox.hgrow="ALWAYS">
                     <children>
-                        <StackPane fx:id="comboContainer" minHeight="40.0" minWidth="130.0">
+                        <StackPane fx:id="comboContainer" maxHeight="35.0" minHeight="35.0" minWidth="100.0">
                             <children>
-                                <ComboBox fx:id="httpMethodBox" minHeight="40.0" minWidth="130.0"
+                                <ComboBox fx:id="httpMethodBox" minHeight="35.0" minWidth="100.0"
                                           StackPane.alignment="CENTER"/>
                             </children>
                         </StackPane>
-                        <TextField fx:id="addressField" promptText="URL" HBox.hgrow="ALWAYS">
+                        <TextField fx:id="addressField" maxHeight="35.0" minHeight="35.0" promptText="URL"
+                                   HBox.hgrow="ALWAYS">
                             <font>
-                                <Font size="18.0"/>
+                                <Font size="15.0"/>
                             </font>
                         </TextField>
+                        <StackPane fx:id="sendButtonPane" maxHeight="35.0" HBox.hgrow="SOMETIMES">
+                            <HBox.margin>
+                                <Insets/>
+                            </HBox.margin>
+                            <children>
+                                <JFXButton fx:id="sendButton" defaultButton="true" graphicTextGap="10.0" minWidth="80.0"
+                                           onAction="#sendRequest" prefHeight="30.0" ripplerFill="WHITE" text="SEND"
+                                           textAlignment="CENTER" textFill="WHITE">
+                                    <padding>
+                                        <Insets bottom="5.0" left="15.0" right="15.0" top="5.0"/>
+                                    </padding>
+                                    <font>
+                                        <Font size="15.0"/>
+                                    </font>
+                                    <graphic>
+                                        <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true"
+                                                   preserveRatio="true">
+                                            <image>
+                                                <Image url="@../../assets/Send.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                    <StackPane.margin>
+                                        <Insets bottom="1.0" left="1.0" right="1.0" top="1.0"/>
+                                    </StackPane.margin>
+                                </JFXButton>
+                            </children>
+                        </StackPane>
                     </children>
                 </HBox>
-                <JFXButton fx:id="sendButton" buttonType="RAISED" defaultButton="true" minWidth="110.0"
-                           onAction="#sendRequest" prefHeight="39.0" ripplerFill="WHITE" text=" SEND"
-                           textAlignment="CENTER" textFill="WHITE" HBox.hgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="5.0" left="15.0" right="15.0" top="5.0"/>
-                    </padding>
-                    <font>
-                        <Font size="18.0"/>
-                    </font>
-                    <HBox.margin>
-                        <Insets/>
-                    </HBox.margin>
-                    <graphic>
-                        <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@../../assets/Send.png"/>
-                            </image>
-                        </ImageView>
-                    </graphic>
-                </JFXButton>
             </children>
             <padding>
                 <Insets left="20.0" right="20.0"/>
@@ -85,51 +94,14 @@
                                     <content>
                                         <VBox>
                                             <children>
-                                                <HBox alignment="CENTER" maxHeight="0.0" spacing="20.0"
-                                                      VBox.vgrow="ALWAYS">
-                                                    <VBox.margin>
-                                                        <Insets/>
-                                                    </VBox.margin>
-                                                    <children>
-                                                        <JFXButton fx:id="newParamButton" onAction="#addParamField"
-                                                                   text=" NEW PARAM" textFill="WHITE"
-                                                                   HBox.hgrow="ALWAYS">
-                                                            <graphic>
-                                                                <ImageView fitHeight="15.0" fitWidth="15.0"
-                                                                           pickOnBounds="true" preserveRatio="true">
-                                                                    <image>
-                                                                        <Image url="@../../assets/Plus.png"/>
-                                                                    </image>
-                                                                </ImageView>
-                                                            </graphic>
-                                                            <HBox.margin>
-                                                                <Insets/>
-                                                            </HBox.margin>
-                                                        </JFXButton>
-                                                        <JFXButton fx:id="appendParamsButton" onAction="#appendParams"
-                                                                   ripplerFill="WHITE" text=" APPEND PARAMS"
-                                                                   textFill="WHITE" HBox.hgrow="ALWAYS">
-                                                            <graphic>
-                                                                <ImageView fitHeight="15.0" fitWidth="15.0"
-                                                                           pickOnBounds="true" preserveRatio="true">
-                                                                    <image>
-                                                                        <Image url="@../../assets/CheckMark.png"/>
-                                                                    </image>
-                                                                </ImageView>
-                                                            </graphic>
-                                                            <HBox.margin>
-                                                                <Insets/>
-                                                            </HBox.margin>
-                                                        </JFXButton>
-                                                    </children>
-                                                    <padding>
-                                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
-                                                    </padding>
-                                                </HBox>
                                                 <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER"
                                                             VBox.vgrow="ALWAYS">
                                                     <content>
-                                                        <VBox fx:id="paramsBox" alignment="TOP_CENTER"/>
+                                                        <VBox fx:id="paramsBox" alignment="TOP_CENTER">
+                                                            <padding>
+                                                                <Insets bottom="10.0" top="10.0"/>
+                                                            </padding>
+                                                        </VBox>
                                                     </content>
                                                 </ScrollPane>
                                             </children>
@@ -150,17 +122,17 @@
                             <children>
                                 <StackPane VBox.vgrow="ALWAYS">
                                     <children>
-                                        <VBox fx:id="responseLayer" visible="false">
+                                        <VBox fx:id="responseLayer">
                                             <children>
-                                                <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="50.0"
-                                                      minHeight="50.0" spacing="30.0" VBox.vgrow="ALWAYS">
+                                                <HBox fx:id="responseDetails" alignment="CENTER_RIGHT" maxHeight="40.0"
+                                                      minHeight="40.0" spacing="30.0" VBox.vgrow="ALWAYS">
                                                     <children>
                                                         <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                                                             <children>
                                                                 <Label fx:id="statusCode" text="404" textFill="WHITE"
                                                                        HBox.hgrow="ALWAYS">
                                                                     <font>
-                                                                        <Font name="System Bold" size="35.0"/>
+                                                                        <Font name="System Bold" size="22.0"/>
                                                                     </font>
                                                                     <HBox.margin>
                                                                         <Insets right="10.0"/>
@@ -169,32 +141,33 @@
                                                                 <Label fx:id="statusCodeDescription" text="Not Found"
                                                                        textFill="WHITE" HBox.hgrow="ALWAYS">
                                                                     <font>
-                                                                        <Font size="30.0"/>
+                                                                        <Font size="18.0"/>
                                                                     </font>
                                                                 </Label>
                                                             </children>
                                                         </HBox>
-                                                        <ComboBox fx:id="responseTypeBox" minHeight="30.0"
-                                                                  prefWidth="100.0"/>
+                                                        <ComboBox fx:id="responseTypeBox" maxHeight="25.0"
+                                                                  minHeight="25.0" prefWidth="100.0"/>
                                                         <Label fx:id="responseTime" text="151 ms" textFill="WHITE"
                                                                HBox.hgrow="ALWAYS">
                                                             <HBox.margin>
                                                                 <Insets/>
                                                             </HBox.margin>
                                                             <font>
-                                                                <Font name="Liberation Mono" size="17.0"/>
+                                                                <Font name="Liberation Mono" size="15.0"/>
                                                             </font>
                                                         </Label>
                                                         <Label fx:id="responseSize" layoutX="1187.0" layoutY="23.0"
                                                                text="1998 B" textFill="WHITE" HBox.hgrow="ALWAYS">
                                                             <font>
-                                                                <Font name="Liberation Mono" size="17.0"/>
+                                                                <Font name="Liberation Mono" size="15.0"/>
                                                             </font>
                                                             <HBox.margin>
                                                                 <Insets/>
                                                             </HBox.margin>
                                                         </Label>
-                                                        <JFXButton fx:id="copyBodyButton" textFill="WHITE">
+                                                        <JFXButton fx:id="copyBodyButton" textFill="WHITE"
+                                                                   HBox.hgrow="ALWAYS">
                                                             <graphic>
                                                                 <ImageView fitHeight="20.0" fitWidth="20.0"
                                                                            pickOnBounds="true" preserveRatio="true">
@@ -203,10 +176,14 @@
                                                                     </image>
                                                                 </ImageView>
                                                             </graphic>
+                                                            <font>
+                                                                <Font size="12.0"/>
+                                                            </font>
                                                         </JFXButton>
                                                         <JFXButton fx:id="clearResponseAreaButton" buttonType="RAISED"
-                                                                   onAction="#clearResponseArea" ripplerFill="WHITE"
-                                                                   text=" CLEAR" textFill="WHITE" HBox.hgrow="ALWAYS">
+                                                                   maxHeight="20.0" onAction="#clearResponseArea"
+                                                                   ripplerFill="WHITE" text=" CLEAR" textFill="WHITE"
+                                                                   HBox.hgrow="ALWAYS">
                                                             <graphic>
                                                                 <ImageView fitHeight="15.0" fitWidth="15.0"
                                                                            pickOnBounds="true" preserveRatio="true">
@@ -219,6 +196,9 @@
                                                                 <Tooltip autoHide="true"
                                                                          text="Clears this bar and the response body below."/>
                                                             </tooltip>
+                                                            <font>
+                                                                <Font size="12.0"/>
+                                                            </font>
                                                         </JFXButton>
                                                     </children>
                                                     <padding>
@@ -256,7 +236,7 @@
                                                 </JFXButton>
                                             </children>
                                         </VBox>
-                                        <VBox fx:id="promptLayer" alignment="CENTER">
+                                        <VBox fx:id="promptLayer" alignment="CENTER" visible="false">
                                             <children>
                                                 <Label text="Enter an address, select a method and hit send."
                                                        textFill="WHITE">

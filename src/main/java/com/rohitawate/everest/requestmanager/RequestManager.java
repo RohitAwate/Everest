@@ -238,6 +238,10 @@ public class RequestManager extends Service<EverestResponse> {
                     overriddenContentType = MediaType.APPLICATION_OCTET_STREAM;
                 filePath = dataRequest.getBody();
 
+                if (filePath.equals("")) {
+                    throw new FileNotFoundException("No file selected");
+                }
+
                 File check = new File(filePath);
 
                 if (!check.exists()) {

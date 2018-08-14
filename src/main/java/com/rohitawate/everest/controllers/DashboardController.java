@@ -42,7 +42,6 @@ import com.rohitawate.everest.state.FieldState;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -186,7 +185,7 @@ public class DashboardController implements Initializable {
         responseTypeBox.valueProperty().addListener(change -> {
             String type = responseTypeBox.getValue();
 
-            if (type.equals("JSON")) {
+            if (type.equals(HTTPConstants.JSON)) {
                 try {
                     responseArea.setText(responseArea.getText(),
                             FormatterFactory.getHighlighter(type),
@@ -263,16 +262,16 @@ public class DashboardController implements Initializable {
                     if (bodyTabController.rawTab.isSelected()) {
                         String contentType;
                         switch (bodyTabController.rawInputTypeBox.getValue()) {
-                            case "PLAIN TEXT":
+                            case HTTPConstants.PLAIN_TEXT:
                                 contentType = MediaType.TEXT_PLAIN;
                                 break;
-                            case "JSON":
+                            case HTTPConstants.JSON:
                                 contentType = MediaType.APPLICATION_JSON;
                                 break;
-                            case "XML":
+                            case HTTPConstants.XML:
                                 contentType = MediaType.APPLICATION_XML;
                                 break;
-                            case "HTML":
+                            case HTTPConstants.HTML:
                                 contentType = MediaType.TEXT_HTML;
                                 break;
                             default:
@@ -459,15 +458,15 @@ public class DashboardController implements Initializable {
 
                 switch (contentType.toLowerCase()) {
                     case "application/json":
-                        simplifiedContentType = "JSON";
+                        simplifiedContentType = HTTPConstants.JSON;
                         visualizerTab.setDisable(false);
                         visualizer.populate(body);
                         break;
                     case "application/xml":
-                        simplifiedContentType = "XML";
+                        simplifiedContentType = HTTPConstants.XML;
                         break;
                     case "text/html":
-                        simplifiedContentType = "HTML";
+                        simplifiedContentType = HTTPConstants.HTML;
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                             snackbar.show("Open link in browser?", "YES", 5000, e -> {
                                 snackbar.close();
@@ -482,10 +481,10 @@ public class DashboardController implements Initializable {
                         }
                         break;
                     default:
-                        simplifiedContentType = "PLAIN TEXT";
+                        simplifiedContentType = HTTPConstants.PLAIN_TEXT;
                 }
             } else {
-                simplifiedContentType = "PLAIN TEXT";
+                simplifiedContentType = HTTPConstants.PLAIN_TEXT;
             }
 
             responseArea.setText(body,
@@ -564,35 +563,38 @@ public class DashboardController implements Initializable {
     }
 
     private void addParamField() {
-        addParamField("", "", null, false);
+        addParamField("", "", false);
     }
 
     private void addParamField(FieldState state) {
-        addParamField(state.key, state.value, null, state.checked);
-    }
-
-    @FXML
-    private void addParamField(ActionEvent event) {
-        addParamField("", "", event, false);
+        addParamField(state.key, state.value, state.checked);
     }
 
     /**
      * Adds a new URL-parameter field
      */
-    private void addParamField(String key, String value, ActionEvent event, boolean checked) {
+    private void addParamField(String key, String value, boolean checked) {
         /*
             Re-uses previous field if it is empty, else loads a new one.
             A value of null for the 'event' parameter indicates that the method call
             came from code and not from the user. This call is made while recovering
             the application state.
          */
-        if (paramsControllers.size() > 0 && event == null) {
+        if (paramsControllers.size() > 0) {
             StringKeyValueFieldController previousController = paramsControllers.get(paramsControllers.size() - 1);
 
             if (previousController.isKeyFieldEmpty() &&
                     previousController.isValueFieldEmpty()) {
                 previousController.setKeyField(key);
                 previousController.setValueField(value);
+
+                /*
+                    For when the last field is loaded from setState.
+                    This makes sure an extra blank field is always present.
+                */
+                if (!(key.equals("") && value.equals("")))
+                    addParamField();
+
                 return;
             }
         }
@@ -611,7 +613,12 @@ public class DashboardController implements Initializable {
                 paramsBox.getChildren().remove(headerField);
                 paramsControllers.remove(controller);
                 paramsCountProperty.set(paramsCountProperty.get() - 1);
+                appendParams();
             });
+            controller.setKeyHandler(keyEvent -> addParamField());
+            controller.getSelectedProperty().addListener(e -> appendParams());
+            controller.getKeyProperty().addListener(e -> appendParams());
+            controller.getValueProperty().addListener(e -> appendParams());
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {
             LoggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
@@ -691,13 +698,13 @@ public class DashboardController implements Initializable {
                 // TODO: Get rid of similar switches
                 String contentType;
                 switch (responseTypeBox.getValue()) {
-                    case "JSON":
+                    case HTTPConstants.JSON:
                         contentType = MediaType.APPLICATION_JSON;
                         break;
-                    case "XML":
+                    case HTTPConstants.XML:
                         contentType = MediaType.APPLICATION_XML;
                         break;
-                    case "HTML":
+                    case HTTPConstants.HTML:
                         contentType = MediaType.TEXT_HTML;
                         break;
                     default:
@@ -815,6 +822,7 @@ public class DashboardController implements Initializable {
         if (state.composer.params != null) {
             for (FieldState fieldState : state.composer.params)
                 addParamField(fieldState);
+            appendParams();
         }
 
         if (!(state.composer.httpMethod.equals(HTTPConstants.GET) || state.composer.httpMethod.equals(HTTPConstants.DELETE)))

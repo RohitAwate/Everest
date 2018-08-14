@@ -61,32 +61,35 @@ public class FormDataTabController implements Initializable {
     }
 
     public void addFileField(FieldState state) {
-        addFileField(state.key, state.value, null, state.checked);
-    }
-
-    @FXML
-    private void addFileField(ActionEvent event) {
-        addFileField("", "", event, false);
+        addFileField(state.key, state.value, state.checked);
     }
 
     private void addFileField() {
-        addFileField("", "", null, false);
+        addFileField("", "", false);
     }
 
-    private void addFileField(String key, String value, ActionEvent event, boolean checked) {
+    private void addFileField(String key, String value, boolean checked) {
         /*
             Re-uses previous field if it is empty, else loads a new one.
             A value of null for the 'event' parameter indicates that the method call
             came from code and not from the user. This call is made while recovering
             the application state.
          */
-        if (fileControllers.size() > 0 && event == null) {
+        if (fileControllers.size() > 0) {
             FileKeyValueFieldController previousController = fileControllers.get(fileControllers.size() - 1);
 
             if (previousController.isFileKeyFieldEmpty() &&
                     previousController.isFileValueFieldEmpty()) {
                 previousController.setFileKeyField(key);
                 previousController.setFileValueField(value);
+
+                /*
+                    For when the last field is loaded from setState.
+                    This makes sure an extra blank field is always present.
+                */
+                if (!key.equals("") && !value.equals(""))
+                    addFileField();
+
                 return;
             }
         }
@@ -107,6 +110,7 @@ public class FormDataTabController implements Initializable {
                 fileControllers.remove(controller);
                 fileControllersCount.set(fileControllersCount.get() - 1);
             });
+            controller.setKeyHandler(keyEvent -> addFileField());
             fieldsBox.getChildren().add(fileField);
         } catch (IOException e) {
             LoggingService.logSevere("Could not add file field.", e, LocalDateTime.now());
@@ -115,11 +119,6 @@ public class FormDataTabController implements Initializable {
 
     public void addStringField(FieldState state) {
         addStringField(state.key, state.value, null, state.checked);
-    }
-
-    @FXML
-    private void addStringField(ActionEvent event) {
-        addStringField("", "", event, false);
     }
 
     private void addStringField() {
@@ -140,6 +139,14 @@ public class FormDataTabController implements Initializable {
                     previousController.isValueFieldEmpty()) {
                 previousController.setKeyField(key);
                 previousController.setValueField(value);
+
+                /*
+                    For when the last field is loaded from setState.
+                    This makes sure an extra blank field is always present.
+                */
+                if (!key.equals("") && !value.equals(""))
+                    addStringField();
+
                 return;
             }
         }
@@ -159,6 +166,7 @@ public class FormDataTabController implements Initializable {
                 stringControllers.remove(controller);
                 stringControllersCount.set(stringControllersCount.get() - 1);
             });
+            controller.setKeyHandler(keyEvent -> addStringField());
             fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {
             LoggingService.logSevere("Could not add string field.", e, LocalDateTime.now());

@@ -52,6 +52,23 @@ public class HistoryItemController implements Initializable, Searchable<Composer
     public void setState(ComposerState state) {
         this.state = state;
         this.requestType.setText(state.httpMethod);
+        switch (state.httpMethod) {
+            case HTTPConstants.GET:
+                requestType.setStyle("-fx-text-fill: deeppink");
+                break;
+            case HTTPConstants.POST:
+                requestType.setStyle("-fx-text-fill: cornflowerblue");
+                break;
+            case HTTPConstants.PUT:
+                requestType.setStyle("-fx-text-fill: crimson");
+                break;
+            case HTTPConstants.PATCH:
+                requestType.setStyle("-fx-text-fill: teal");
+                break;
+            case HTTPConstants.DELETE:
+                requestType.setStyle("-fx-text-fill: limegreen");
+                break;
+        }
         this.address.setText(state.target);
     }
 

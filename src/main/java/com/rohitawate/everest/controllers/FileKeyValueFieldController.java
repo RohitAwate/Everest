@@ -20,9 +20,11 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.rohitawate.everest.state.FieldState;
 import javafx.beans.binding.Bindings;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Pair;
@@ -75,7 +77,7 @@ public class FileKeyValueFieldController implements Initializable {
     @FXML
     private void browseFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose a binary file to add to request...");
+        fileChooser.setTitle("Choose a binary file to add to the request");
         Window dashboardWindow = fileValueField.getScene().getWindow();
         String filePath;
         try {
@@ -116,5 +118,10 @@ public class FileKeyValueFieldController implements Initializable {
 
     public void setChecked(boolean checked) {
         checkBox.setSelected(checked);
+    }
+
+    public void setKeyHandler(EventHandler<KeyEvent> handler) {
+        fileKeyField.setOnKeyPressed(handler);
+        fileValueField.setOnKeyPressed(handler);
     }
 }

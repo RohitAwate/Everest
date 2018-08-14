@@ -23,7 +23,7 @@
 }
 
 #addressField {
-	-fx-background-color: #6e6e6e;
+    -fx-background-color: #707070;
 	-fx-text-fill: white;
 }
 
@@ -34,8 +34,8 @@
 
 .combo-box .list-cell {
     -fx-background-color: #282828;
-    -fx-pref-height: 40px;
-    -fx-font-size: 15px;
+    -fx-pref-height: 35px;
+    -fx-font-size: 14px;
     -fx-text-fill: #d4d4d4;
     -fx-padding: 0 0 0 10px;
 }
@@ -63,8 +63,9 @@
     -fx-background-color: transparent;
 }
 
-#sendButton {
-	-fx-background-color: #c45015;
+#sendButton,
+#sendButtonPane {
+    -fx-background-color: #282828;
 }
 
 #responseDetails {
@@ -209,7 +210,14 @@
     -fx-padding: 0px;
 }
 
-#keyField, #valueField, #filePathField {
+#keyField, #valueField {
+    -fx-prompt-text-fill: #919191;
+    -fx-background-color: #303030;
+    -fx-text-fill: white;
+}
+
+/* Binary tab */
+#filePathBox, #filePathField {
     -fx-prompt-text-fill: #919191;
     -fx-background-color: #303030;
     -fx-text-fill: white;
@@ -238,7 +246,7 @@
 }
 
 #browseButton {
-    -fx-background-color: #a2a2a2;
+    -fx-background-color: #bababa;
 }
 
 #browseButton:hover {
@@ -317,6 +325,10 @@
     -fx-background-color: #2a2a2a;
 }
 
+#responseTypeBox .list-cell {
+    -fx-font-size: 13px;
+}
+
 /* Response Headers Viewer */
 .response-header-label {
     -fx-font-family: "Liberation Mono", "Consolas", "Courier New", "Monaco", "DejaVu Sans Mono", monospace;
@@ -351,7 +363,7 @@
 .tree-cell {
     -fx-background-color: #282828;
     -fx-text-fill: azure;
-    -fx-font-size: 15px;
+    -fx-font-size: 14px;
     -fx-font-family: "Liberation Mono", monospace;
     -fx-border-width: 0px;
 }

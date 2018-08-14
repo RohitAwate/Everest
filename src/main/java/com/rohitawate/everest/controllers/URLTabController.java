@@ -22,7 +22,6 @@ import com.rohitawate.everest.state.FieldState;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -54,32 +53,35 @@ public class URLTabController implements Initializable {
 
 
     public void addField(FieldState state) {
-        addField(state.key, state.value, null, state.checked);
+        addField(state.key, state.value, state.checked);
     }
 
     private void addField() {
-        addField("", "", null, false);
+        addField("", "", false);
     }
 
-    @FXML
-    private void addField(ActionEvent event) {
-        addField("", "", event, false);
-    }
-
-    private void addField(String key, String value, ActionEvent event, boolean checked) {
+    private void addField(String key, String value, boolean checked) {
         /*
             Re-uses previous field if it is empty, else loads a new one.
             A value of null for the 'event' parameter indicates that the method call
             came from code and not from the user. This call is made while recovering
             the application state.
          */
-        if (controllers.size() > 0 && event == null) {
+        if (controllers.size() > 0) {
             StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
 
             if (previousController.isKeyFieldEmpty() &&
                     previousController.isValueFieldEmpty()) {
                 previousController.setKeyField(key);
                 previousController.setValueField(value);
+
+                /*
+                    For when the last field is loaded from setState.
+                    This makes sure an extra blank field is always present.
+                */
+                if (!key.equals("") && !value.equals(""))
+                    addField();
+
                 return;
             }
         }
@@ -98,8 +100,9 @@ public class URLTabController implements Initializable {
             controller.deleteButton.setOnAction(e -> {
                 fieldsBox.getChildren().remove(stringField);
                 controllers.remove(controller);
-                controllersCount.set(controllersCount.get() + 1);
+                controllersCount.set(controllersCount.get() - 1);
             });
+            controller.setKeyHandler(keyEvent -> addField());
             fieldsBox.getChildren().add(stringField);
         } catch (IOException e) {
             LoggingService.logSevere("Could not add string field.", e, LocalDateTime.now());

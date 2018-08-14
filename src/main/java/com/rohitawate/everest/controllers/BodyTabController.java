@@ -111,7 +111,7 @@ public class BodyTabController implements Initializable {
     @FXML
     private void browseFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose a binary file to add to request...");
+        fileChooser.setTitle("Choose a binary file to add to the request");
         Window dashboardWindow = filePathField.getScene().getWindow();
         String filePath;
 
@@ -122,6 +122,11 @@ public class BodyTabController implements Initializable {
         }
 
         filePathField.setText(filePath);
+    }
+
+    @FXML
+    private void clearFilePath() {
+        filePathField.clear();
     }
 
     public ComposerState getState() {

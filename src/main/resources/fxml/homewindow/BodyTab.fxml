@@ -19,9 +19,12 @@
 <?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
 <TabPane fx:id="bodyTabPane" stylesheets="@../../css/Adreana.css" tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0"
-         xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
          fx:controller="com.rohitawate.everest.controllers.BodyTabController">
     <tabs>
         <Tab fx:id="formTab" text="FORM"/>
@@ -41,13 +44,55 @@
         </Tab>
         <Tab fx:id="binaryTab" text="BINARY">
             <content>
-                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
+                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="15.0">
                     <children>
-                        <TextField fx:id="filePathField" maxWidth="700.0" promptText="FILE PATH" HBox.hgrow="ALWAYS"/>
-                        <JFXButton fx:id="browseButton" buttonType="RAISED" onAction="#browseFile" ripplerFill="WHITE"
-                                   text="BROWSE" HBox.hgrow="ALWAYS"/>
+                        <Label text="SELECT A FILE TO ADD TO THE REQUEST" textFill="#9a9a9a">
+                            <font>
+                                <Font size="14.0"/>
+                            </font>
+                        </Label>
+                        <HBox alignment="CENTER" maxWidth="700.0" spacing="20.0">
+                            <children>
+                                <HBox fx:id="filePathBox" alignment="CENTER" maxHeight="35.0" minHeight="30.0"
+                                      HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <TextField fx:id="filePathField" maxWidth="700.0" promptText="FILE PATH"
+                                                   HBox.hgrow="ALWAYS"/>
+                                        <JFXButton fx:id="clearFilePathButton" contentDisplay="CENTER"
+                                                   graphicTextGap="0.0" maxHeight="35.0" onAction="#clearFilePath"
+                                                   ripplerFill="#ffffff00" textFill="WHITE">
+                                            <graphic>
+                                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true"
+                                                           preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../../assets/BackspaceArrow.png"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </JFXButton>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </padding>
+                                </HBox>
+                                <JFXButton fx:id="browseButton" buttonType="RAISED" graphicTextGap="10.0"
+                                           minWidth="80.0" onAction="#browseFile" ripplerFill="BLACK" text="BROWSE">
+                                    <graphic>
+                                        <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true"
+                                                   preserveRatio="true">
+                                            <image>
+                                                <Image url="@../../assets/File.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                    <font>
+                                        <Font size="12.0"/>
+                                    </font>
+                                </JFXButton>
+                            </children>
+                        </HBox>
                     </children>
-                </HBox>
+                </VBox>
             </content>
         </Tab>
     </tabs>

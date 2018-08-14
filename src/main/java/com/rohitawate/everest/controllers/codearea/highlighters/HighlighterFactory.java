@@ -1,6 +1,7 @@
 package com.rohitawate.everest.controllers.codearea.highlighters;
 
 import com.rohitawate.everest.exceptions.DuplicateHighlighterException;
+import com.rohitawate.everest.models.requests.HTTPConstants;
 
 import java.util.HashMap;
 
@@ -15,13 +16,13 @@ public class HighlighterFactory {
 
     static {
         highlighters = new HashMap<>();
-        highlighters.put("JSON", new JSONHighlighter());
+        highlighters.put(HTTPConstants.JSON, new JSONHighlighter());
 
         XMLHighlighter xmlHighlighter = new XMLHighlighter();
-        highlighters.put("XML", xmlHighlighter);
-        highlighters.put("HTML", xmlHighlighter);
+        highlighters.put(HTTPConstants.XML, xmlHighlighter);
+        highlighters.put(HTTPConstants.HTML, xmlHighlighter);
 
-        highlighters.put("PLAIN TEXT", new PlaintextHighlighter());
+        highlighters.put(HTTPConstants.PLAIN_TEXT, new PlaintextHighlighter());
     }
 
     public static Highlighter getHighlighter(String name) {

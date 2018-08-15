@@ -16,17 +16,14 @@
 
 package com.rohitawate.everest.state;
 
-import com.rohitawate.everest.controllers.BodyTabController.BodyTab;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 
 import java.util.ArrayList;
 
 /**
- * Convenience class to abstract the state of the application.
+ * Represents the state of the Composer.
  */
 public class ComposerState {
-    public BodyTab visibleBodyTab;
-
     public String target;
     public String httpMethod;
 

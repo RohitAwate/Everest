@@ -63,10 +63,6 @@ public class BodyTabController implements Initializable {
     FormDataTabController formDataTabController;
     URLTabController urlTabController;
 
-    public enum BodyTab {
-        FORM, URL, RAW, BINARY
-    }
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         rawInputTypeBox.getItems().addAll(
@@ -152,18 +148,18 @@ public class BodyTabController implements Initializable {
                 state.rawBodyBoxValue = MediaType.TEXT_PLAIN;
         }
 
-        if (rawTab.isSelected()) {
-            state.visibleBodyTab = BodyTab.RAW;
-            state.contentType = state.rawBodyBoxValue;
-        } else if (formTab.isSelected()) {
-            state.visibleBodyTab = BodyTab.FORM;
-            state.contentType = MediaType.MULTIPART_FORM_DATA;
-        } else if (urlTab.isSelected()) {
-            state.visibleBodyTab = BodyTab.URL;
-            state.contentType = MediaType.APPLICATION_FORM_URLENCODED;
-        } else {
-            state.visibleBodyTab = BodyTab.BINARY;
-            state.contentType = MediaType.APPLICATION_OCTET_STREAM;
+        switch (bodyTabPane.getSelectionModel().getSelectedIndex()) {
+            case 1:
+                state.contentType = MediaType.APPLICATION_FORM_URLENCODED;
+                break;
+            case 2:
+                state.contentType = state.rawBodyBoxValue;
+                break;
+            case 3:
+                state.contentType = MediaType.APPLICATION_OCTET_STREAM;
+                break;
+            default:
+                state.contentType = MediaType.MULTIPART_FORM_DATA;
         }
 
         return state;
@@ -190,24 +186,26 @@ public class BodyTabController implements Initializable {
         setRawTab(state);
         filePathField.setText(state.binaryFilePath);
 
-        int tab;
-        if (state.visibleBodyTab != null) {
-            switch (state.visibleBodyTab) {
-                case BINARY:
+        int tab = 0;
+        if (state.contentType != null) {
+            switch (state.contentType) {
+                case MediaType.APPLICATION_OCTET_STREAM:
                     tab = 3;
                     break;
-                case URL:
+                case MediaType.APPLICATION_FORM_URLENCODED:
                     tab = 1;
                     break;
-                case RAW:
+                case MediaType.APPLICATION_JSON:
+                case MediaType.APPLICATION_XML:
+                case MediaType.TEXT_HTML:
+                case MediaType.TEXT_PLAIN:
                     tab = 2;
                     break;
                 default:
                     tab = 0;
             }
-        } else {
-            tab = 0;
         }
+
         bodyTabPane.getSelectionModel().select(tab);
     }
 

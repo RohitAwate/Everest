@@ -75,10 +75,6 @@ public class HistoryManager {
         statement.execute();
 
         statement =
-                conn.prepareStatement(EverestUtilities.trimString(queries.get("createHeadersTable").toString()));
-        statement.execute();
-
-        statement =
                 conn.prepareStatement(EverestUtilities.trimString(queries.get("createRequestContentMapTable").toString()));
         statement.execute();
 
@@ -89,12 +85,15 @@ public class HistoryManager {
         statement =
                 conn.prepareStatement(EverestUtilities.trimString(queries.get("createTuplesTable").toString()));
         statement.execute();
-    }
 
-    // Method is synchronized to allow only one database transaction at a time.
+        statement =
+                conn.prepareStatement(EverestUtilities.trimString(queries.get("createFilePathsTable").toString()));
+        statement.execute();
+    }
 
     /**
      * Saves the request to the database if it is not identical to one made exactly before it.
+     * Method is synchronized to allow only one database transaction at a time.
      *
      * @param state - The state of the Dashboard while making the request.
      */
@@ -129,33 +128,36 @@ public class HistoryManager {
                 state.target = resultSet.getString("Target");
 
                 int requestID = resultSet.getInt("ID");
-                state.headers = getRequestHeaders(requestID);
+                state.headers = getTuples(requestID, "Header");
                 state.params = getTuples(requestID, "Param");
                 state.httpMethod = resultSet.getString("Type");
 
                 if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                     // Retrieves request body ContentType for querying corresponding table
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestContentType").toString()));
-                    statement.setInt(1, requestID);
-
-                    ResultSet RS = statement.executeQuery();
-
-                    String contentType = "";
-                    if (RS.next())
-                        contentType = RS.getString("ContentType");
+                    String contentType = getRequestContentType(requestID);
 
                     state.contentType = contentType;
 
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestBody").toString()));
                     statement.setInt(1, requestID);
 
+                    ResultSet RS = statement.executeQuery();
+
+                    if (RS.next()) {
+                        state.rawBody = RS.getString("Body");
+                        state.rawBodyBoxValue = RS.getString("Type");
+                    }
+
+                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectFilePath").toString()));
+                    statement.setInt(1, requestID);
+
                     RS = statement.executeQuery();
 
                     if (RS.next())
-                        state.rawBody = RS.getString("Body");
+                        state.binaryFilePath = RS.getString("Path");
 
-                    state.urlStringTuples = getTuples(requestID, "String");
-                    state.formStringTuples = getTuples(requestID, "String");
+                    state.urlStringTuples = getTuples(requestID, "URLString");
+                    state.formStringTuples = getTuples(requestID, "FormString");
                     state.formFileTuples = getTuples(requestID, "File");
                 }
 
@@ -164,31 +166,22 @@ public class HistoryManager {
         } catch (SQLException e) {
             LoggingService.logWarning("Database error.", e, LocalDateTime.now());
         }
+
         return history;
     }
 
-    private ArrayList<FieldState> getRequestHeaders(int requestID) {
-        ArrayList<FieldState> headers = new ArrayList<>();
+    private String getRequestContentType(int requestID) throws SQLException {
+        String contentType = null;
 
-        try {
-            PreparedStatement statement =
-                    conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestHeaders").toString()));
-            statement.setInt(1, requestID);
+        statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestContentType").toString()));
+        statement.setInt(1, requestID);
 
-            ResultSet RS = statement.executeQuery();
+        ResultSet RS = statement.executeQuery();
 
-            String key, value;
-            boolean checked;
-            while (RS.next()) {
-                key = RS.getString("Key");
-                value = RS.getString("Value");
-                checked = RS.getBoolean("Checked");
-                headers.add(new FieldState(key, value, checked));
-            }
-        } catch (SQLException e) {
-            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
-        }
-        return headers;
+        if (RS.next())
+            contentType = RS.getString("ContentType");
+
+        return contentType;
     }
 
     /**
@@ -197,14 +190,15 @@ public class HistoryManager {
      * @return tuples - Map of tuples of corresponding type
      */
     private ArrayList<FieldState> getTuples(int requestID, String type) {
-        if (!(type.equals("String") || type.equals("File") || type.equals("Param")))
+        if (!(type.equals("FormString") || type.equals("URLString") ||
+                type.equals("File") || type.equals("Param") || type.equals("Header")))
             return null;
 
         ArrayList<FieldState> tuples = new ArrayList<>();
 
         try {
             PreparedStatement statement =
-                    conn.prepareStatement(EverestUtilities.trimString(queries.get("selectTuples").toString()));
+                    conn.prepareStatement(EverestUtilities.trimString(queries.get("selectTuplesByType").toString()));
             statement.setInt(1, requestID);
             statement.setString(2, type);
 
@@ -253,7 +247,7 @@ public class HistoryManager {
             ArrayList<FieldState> states;
 
             // Checks for new or modified headers
-            states = getRequestHeaders(lastRequestID);
+            states = getTuples(lastRequestID, "Header");
             if (!areListsEqual(states, newState.headers))
                 return false;
 
@@ -286,18 +280,23 @@ public class HistoryManager {
 
                         RS = statement.executeQuery();
 
-                        if (RS.next())
-                            if (!RS.getString("Body").equals(newState.rawBody))
+                        while (RS.next()) {
+                            if (!(RS.getString("Type").equals("Raw") &&
+                                    RS.getString("Body").equals(newState.rawBody)))
                                 return false;
+                            else if (!(RS.getString("Type").equals("FilePath") &&
+                                    RS.getString("Body").equals(newState.binaryFilePath)))
+                                return false;
+                        }
 
                         break;
                     case MediaType.APPLICATION_FORM_URLENCODED:
                         // Checks for new or modified string tuples
-                        states = getTuples(lastRequestID, "String");
+                        states = getTuples(lastRequestID, "URLString");
                         return areListsEqual(states, newState.urlStringTuples);
                     case MediaType.MULTIPART_FORM_DATA:
                         // Checks for new or modified string tuples
-                        states = getTuples(lastRequestID, "String");
+                        states = getTuples(lastRequestID, "FormString");
                         boolean stringComparison = areListsEqual(states, newState.formStringTuples);
 
                         // Checks for new or modified file tuples
@@ -320,12 +319,11 @@ public class HistoryManager {
     }
 
     private static boolean areListsEqual(ArrayList<FieldState> firstList, ArrayList<FieldState> secondList) {
-        if (firstList == null && secondList == null)
-            return true;
+        if (firstList == null && secondList == null) return true;
 
-        if ((firstList == null && secondList != null) ||
-                (firstList != null && secondList == null))
-            return false;
+        if ((firstList == null && secondList != null) || (firstList != null && secondList == null)) return false;
+
+        if (firstList.size() != secondList.size()) return false;
 
         for (FieldState state : secondList) {
             if (!state.isEmpty() && state.checked && !firstList.contains(state))
@@ -347,7 +345,6 @@ public class HistoryManager {
                 statement.setString(1, state.httpMethod);
                 statement.setString(2, state.target);
                 statement.setString(3, LocalDate.now().toString());
-
                 statement.executeUpdate();
 
                 // Get latest RequestID to insert into Headers table
@@ -358,23 +355,7 @@ public class HistoryManager {
                 if (RS.next())
                     requestID = RS.getInt("MaxID");
 
-                if (state.headers.size() > 0) {
-                    // Saves request headers
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveHeader").toString()));
-
-                    for (FieldState fieldState : state.headers) {
-                        if (!fieldState.isEmpty() && fieldState.checked) {
-                            statement.setInt(1, requestID);
-                            statement.setString(2, fieldState.key);
-                            statement.setString(3, fieldState.value);
-                            statement.setInt(4, fieldState.checked ? 1 : 0);
-
-                            statement.executeUpdate();
-                        }
-                    }
-                }
-
-                // Saves request parameters
+                saveTuple(state.headers, "Header", requestID);
                 saveTuple(state.params, "Param", requestID);
 
                 if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
@@ -382,16 +363,21 @@ public class HistoryManager {
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequestContentPair").toString()));
                     statement.setInt(1, requestID);
                     statement.setString(2, state.contentType);
-
                     statement.executeUpdate();
 
                     statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveBody").toString()));
                     statement.setInt(1, requestID);
                     statement.setString(2, state.rawBody);
+                    statement.setString(3, state.rawBodyBoxValue);
                     statement.executeUpdate();
 
-                    saveTuple(state.urlStringTuples, "String", requestID);
-                    saveTuple(state.formStringTuples, "String", requestID);
+                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveFilePath").toString()));
+                    statement.setInt(1, requestID);
+                    statement.setString(2, state.binaryFilePath);
+                    statement.executeUpdate();
+
+                    saveTuple(state.urlStringTuples, "URLString", requestID);
+                    saveTuple(state.formStringTuples, "FormString", requestID);
                     saveTuple(state.formFileTuples, "File", requestID);
                 }
             } catch (SQLException e) {
@@ -401,21 +387,21 @@ public class HistoryManager {
 
         private void saveTuple(ArrayList<FieldState> tuples, String tupleType, int requestID) {
             if (tuples.size() > 0) {
-                for (FieldState fieldState : tuples) {
-                    if (!fieldState.isEmpty() && fieldState.checked) {
-                        try {
+                try {
+                    for (FieldState fieldState : tuples) {
+                        if (!fieldState.isEmpty() && fieldState.checked) {
                             statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
                             statement.setInt(1, requestID);
                             statement.setString(2, tupleType);
                             statement.setString(3, fieldState.key);
                             statement.setString(4, fieldState.value);
                             statement.setInt(5, fieldState.checked ? 1 : 0);
-
-                            statement.executeUpdate();
-                        } catch (SQLException e) {
-                            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
+                            statement.addBatch();
                         }
                     }
+                    statement.executeBatch();
+                } catch (SQLException e) {
+                    LoggingService.logSevere("Database error.", e, LocalDateTime.now());
                 }
             }
         }

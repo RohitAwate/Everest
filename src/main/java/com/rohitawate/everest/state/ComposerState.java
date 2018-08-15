@@ -18,8 +18,7 @@ package com.rohitawate.everest.state;
 
 import com.rohitawate.everest.models.requests.HTTPConstants;
 
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.List;
 
 /**
  * Represents the state of the Composer.
@@ -28,8 +27,8 @@ public class ComposerState {
     public String target;
     public String httpMethod;
 
-    public ArrayList<FieldState> params;
-    public ArrayList<FieldState> headers;
+    public List<FieldState> params;
+    public List<FieldState> headers;
     public String contentType;
 
     // Body and content-type of requests with raw bodies
@@ -37,11 +36,11 @@ public class ComposerState {
     public String rawBodyBoxValue;
 
     // Tuples of URL-encoded requests
-    public ArrayList<FieldState> urlStringTuples;
+    public List<FieldState> urlStringTuples;
 
     // String and file tuples of multipart-form requests
-    public ArrayList<FieldState> formStringTuples;
-    public ArrayList<FieldState> formFileTuples;
+    public List<FieldState> formStringTuples;
+    public List<FieldState> formFileTuples;
 
     // File path of application/octet-stream requests
     public String binaryFilePath;

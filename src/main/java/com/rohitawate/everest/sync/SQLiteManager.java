@@ -208,15 +208,15 @@ class SQLiteManager implements DataManager {
 
     /**
      * @param requestID Database ID of the request whose tuples are needed.
-     * @param type      Type of tuples needed ('String', 'File' or 'Param')
-     * @return tuples - Map of tuples of corresponding type
+     * @param type      Type of tuples needed ('URLString', 'FormString', 'File', 'Header' or 'Param')
+     * @return fieldStates - List of FieldStates for the tuples
      */
-    private ArrayList<FieldState> getTuples(int requestID, String type) throws SQLException {
+    private List<FieldState> getTuples(int requestID, String type) throws SQLException {
         if (!(type.equals("FormString") || type.equals("URLString") ||
                 type.equals("File") || type.equals("Param") || type.equals("Header")))
             return null;
 
-        ArrayList<FieldState> tuples = new ArrayList<>();
+        ArrayList<FieldState> fieldStates = new ArrayList<>();
 
         PreparedStatement statement = conn.prepareStatement(Queries.selectTuplesByType);
         statement.setInt(1, requestID);
@@ -230,10 +230,10 @@ class SQLiteManager implements DataManager {
             key = RS.getString("Key");
             value = RS.getString("Value");
             checked = RS.getBoolean("Checked");
-            tuples.add(new FieldState(key, value, checked));
+            fieldStates.add(new FieldState(key, value, checked));
         }
 
-        return tuples;
+        return fieldStates;
     }
 
     private ComposerState getLastRequest() {
@@ -297,7 +297,7 @@ class SQLiteManager implements DataManager {
             return null;
     }
 
-    private void saveTuple(ArrayList<FieldState> tuples, String tupleType, int requestID) {
+    private void saveTuple(List<FieldState> tuples, String tupleType, int requestID) {
         if (tuples.size() > 0) {
             try {
                 for (FieldState fieldState : tuples) {

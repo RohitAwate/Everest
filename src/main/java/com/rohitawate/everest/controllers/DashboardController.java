@@ -346,10 +346,7 @@ public class DashboardController implements Initializable {
         }
 
         if (requestManager.getRequest().getClass().equals(DataRequest.class)) {
-            if (throwable.getCause() != null && throwable.getCause().getClass() == IllegalArgumentException.class) {
-                errorTitle.setText("Did you forget something?");
-                errorDetails.setText("Please specify a body for your " + httpMethodBox.getValue() + " request.");
-            } else if (throwable.getClass() == FileNotFoundException.class) {
+            if (throwable.getClass() == FileNotFoundException.class) {
                 errorTitle.setText("File(s) not found:");
                 errorDetails.setText(throwable.getMessage());
             }

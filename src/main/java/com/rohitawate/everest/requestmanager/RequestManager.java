@@ -189,18 +189,22 @@ public class RequestManager extends Service<EverestResponse> {
          */
         String overriddenContentType = request.getHeaders().get("Content-Type");
         Invocation invocation = null;
-        Map.Entry<String, String> mapEntry;
         String requestType = dataRequest.getRequestType();
 
         switch (dataRequest.getContentType()) {
             case MediaType.MULTIPART_FORM_DATA:
+                // This enables Everest to make requests with an empty body.
+                if (dataRequest.getStringTuples().size() == 0 && dataRequest.getFileTuples().size() == 0) {
+                    invocation = getInvocation(MediaType.MULTIPART_FORM_DATA, requestType, null, requestBuilder);
+                    break;
+                }
+
                 FormDataMultiPart formData = new FormDataMultiPart();
 
                 // Adding the string tuples to the request
                 HashMap<String, String> pairs = dataRequest.getStringTuples();
                 for (Map.Entry<String, String> entry : pairs.entrySet()) {
-                    mapEntry = entry;
-                    formData.field(mapEntry.getKey(), mapEntry.getValue());
+                    formData.field(entry.getKey(), entry.getValue());
                 }
 
                 String filePath;
@@ -211,12 +215,11 @@ public class RequestManager extends Service<EverestResponse> {
 
                 // Adding the file tuples to the request
                 for (Map.Entry<String, String> entry : pairs.entrySet()) {
-                    mapEntry = entry;
-                    filePath = mapEntry.getValue();
+                    filePath = entry.getValue();
                     file = new File(filePath);
 
                     if (file.exists())
-                        formData.bodyPart(new FileDataBodyPart(mapEntry.getKey(),
+                        formData.bodyPart(new FileDataBodyPart(entry.getKey(),
                                 file, MediaType.APPLICATION_OCTET_STREAM_TYPE));
                     else {
                         fileException = true;
@@ -238,8 +241,10 @@ public class RequestManager extends Service<EverestResponse> {
                     overriddenContentType = MediaType.APPLICATION_OCTET_STREAM;
                 filePath = dataRequest.getBody();
 
+                // This enables Everest to make requests with empty bodies.
                 if (filePath.equals("")) {
-                    throw new FileNotFoundException("No file selected");
+                    invocation = getInvocation(overriddenContentType, requestType, null, requestBuilder);
+                    break;
                 }
 
                 File check = new File(filePath);
@@ -259,8 +264,7 @@ public class RequestManager extends Service<EverestResponse> {
                 Form form = new Form();
 
                 for (Map.Entry<String, String> entry : dataRequest.getStringTuples().entrySet()) {
-                    mapEntry = entry;
-                    form.param(mapEntry.getKey(), mapEntry.getValue());
+                    form.param(entry.getKey(), entry.getValue());
                 }
 
                 invocation = getInvocation(overriddenContentType, requestType, form, requestBuilder);

@@ -131,8 +131,10 @@ public class HeaderTabController implements Initializable {
     public ArrayList<FieldState> getFieldStates() {
         ArrayList<FieldState> states = new ArrayList<>();
 
-        for (StringKeyValueFieldController controller : controllers)
-            states.add(controller.getState());
+        for (StringKeyValueFieldController controller : controllers) {
+            if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
+                states.add(controller.getState());
+        }
 
         return states;
     }

@@ -26,7 +26,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 
-import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -113,52 +112,51 @@ public class HistoryItemController implements Initializable, Searchable<Composer
         for (FieldState state : state.params) {
             if (state.key.toLowerCase().contains(searchString) ||
                     state.value.toLowerCase().contains(searchString))
-                index += 5;
+                index += 7;
         }
 
         // Checks for a match in the headers
         for (FieldState state : state.headers) {
             if (state.key.toLowerCase().contains(searchString) ||
                     state.value.toLowerCase().contains(searchString))
-                index += 6;
+                index += 7;
         }
 
         if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
-            switch (state.contentType) {
-                case MediaType.TEXT_PLAIN:
-                case MediaType.APPLICATION_JSON:
-                case MediaType.APPLICATION_XML:
-                case MediaType.TEXT_HTML:
-                case MediaType.APPLICATION_OCTET_STREAM:
-                    // Checks for match in rawBody of the request
-                    comparisonString = state.rawBody.toLowerCase();
-                    if (comparisonString.contains(searchString))
-                        index += 8;
-                    break;
-                case MediaType.APPLICATION_FORM_URLENCODED:
-                    // Checks for match in string tuples
-                    for (FieldState state : state.urlStringTuples) {
-                        if (state.key.toLowerCase().contains(searchString) ||
-                                state.value.toLowerCase().contains(searchString))
-                            index += 8;
-                    }
-                    break;
-                case MediaType.MULTIPART_FORM_DATA:
-                    // Checks for match in string and file tuples
-                    for (FieldState state : state.formStringTuples) {
-                        if (state.key.toLowerCase().contains(searchString) ||
-                                state.value.toLowerCase().contains(searchString))
-                            index += 8;
-                    }
+            // Checks for match in body of the request
+            comparisonString = state.rawBody.toLowerCase();
+            if (comparisonString.contains(searchString))
+                index += 8;
 
-                    for (FieldState state : state.formFileTuples) {
-                        if (state.key.toLowerCase().contains(searchString) ||
-                                state.value.toLowerCase().contains(searchString))
-                            index += 8;
-                    }
-                    break;
+            comparisonString = state.rawBodyBoxValue.toLowerCase();
+            if (comparisonString.contains(searchString))
+                index += 6;
+
+            comparisonString = state.binaryFilePath.toLowerCase();
+            if (comparisonString.contains(searchString))
+                index += 8;
+
+            // Checks for match in string tuples
+            for (FieldState state : state.urlStringTuples) {
+                if (state.key.toLowerCase().contains(searchString) ||
+                        state.value.toLowerCase().contains(searchString))
+                    index += 8;
+            }
+
+            // Checks for match in string and file tuples
+            for (FieldState state : state.formStringTuples) {
+                if (state.key.toLowerCase().contains(searchString) ||
+                        state.value.toLowerCase().contains(searchString))
+                    index += 8;
+            }
+
+            for (FieldState state : state.formFileTuples) {
+                if (state.key.toLowerCase().contains(searchString) ||
+                        state.value.toLowerCase().contains(searchString))
+                    index += 8;
             }
         }
+
         return index;
     }
 }

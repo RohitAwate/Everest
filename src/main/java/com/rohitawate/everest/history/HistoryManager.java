@@ -24,7 +24,6 @@ import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.FieldState;
 import javafx.util.Pair;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.sql.*;
 import java.time.LocalDate;
@@ -91,9 +90,6 @@ public class HistoryManager {
      * @param newState - The state of the Dashboard while making the request.
      */
     public synchronized void saveHistory(ComposerState newState) {
-//        if (isDuplicate(state))
-//            return;
-
         ComposerState lastState = getLastRequest();
         if (newState.equals(lastState))
             return;
@@ -133,23 +129,14 @@ public class HistoryManager {
                     // Retrieves request body ContentType for querying corresponding table
                     state.contentType = getRequestContentType(requestID);
 
-                    statement = conn.prepareStatement(Queries.selectRequestBody);
-                    statement.setInt(1, requestID);
+                    Pair<String, String> rawBodyAndType = getRequestBody(requestID);
 
-                    ResultSet RS = statement.executeQuery();
-
-                    if (RS.next()) {
-                        state.rawBody = RS.getString("Body");
-                        state.rawBodyBoxValue = RS.getString("Type");
+                    if (rawBodyAndType != null) {
+                        state.rawBody = rawBodyAndType.getKey();
+                        state.rawBodyBoxValue = rawBodyAndType.getValue();
                     }
 
-                    statement = conn.prepareStatement(Queries.selectFilePath);
-                    statement.setInt(1, requestID);
-
-                    RS = statement.executeQuery();
-
-                    if (RS.next())
-                        state.binaryFilePath = RS.getString("Path");
+                    state.binaryFilePath = getFilePath(requestID);
 
                     state.urlStringTuples = getTuples(requestID, "URLString");
                     state.formStringTuples = getTuples(requestID, "FormString");
@@ -191,8 +178,7 @@ public class HistoryManager {
 
         ArrayList<FieldState> tuples = new ArrayList<>();
 
-        PreparedStatement statement =
-                conn.prepareStatement(Queries.selectTuplesByType);
+        PreparedStatement statement = conn.prepareStatement(Queries.selectTuplesByType);
         statement.setInt(1, requestID);
         statement.setString(2, type);
 
@@ -271,120 +257,6 @@ public class HistoryManager {
             return null;
     }
 
-    /**
-     * Performs a comprehensive comparison of the new request with the one added last to the database.
-     *
-     * @param newState The new request.
-     * @return true, if request is same as the last one in the database. false, otherwise.
-     */
-    private boolean isDuplicate(ComposerState newState) {
-        try {
-            statement = conn.prepareStatement(Queries.selectMostRecentRequest);
-            ResultSet RS = statement.executeQuery();
-
-            int lastRequestID = -1;
-            if (RS.next()) {
-                if (!(newState.httpMethod.equals(RS.getString("Type"))) ||
-                        !(newState.target.equals(RS.getString("Target"))) ||
-                        !(LocalDate.now().equals(LocalDate.parse(RS.getString("Date")))))
-                    return false;
-                else
-                    lastRequestID = RS.getInt("ID");
-            }
-
-            // This condition is observed when the database is empty
-            if (lastRequestID == -1)
-                return false;
-
-            ArrayList<FieldState> states;
-
-            // Checks for new or modified headers
-            states = getTuples(lastRequestID, "Header");
-            if (!areListsEqual(states, newState.headers))
-                return false;
-
-            // Checks for new or modified params
-            states = getTuples(lastRequestID, "Param");
-            if (!areListsEqual(states, newState.params))
-                return false;
-
-            if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
-                statement = conn.prepareStatement(Queries.selectRequestContentType);
-                statement.setInt(1, lastRequestID);
-
-                RS = statement.executeQuery();
-
-                String previousContentType = "";
-                if (RS.next())
-                    previousContentType = RS.getString("ContentType");
-
-                if (!newState.contentType.equals(previousContentType))
-                    return false;
-
-                switch (newState.contentType) {
-                    case MediaType.TEXT_PLAIN:
-                    case MediaType.APPLICATION_JSON:
-                    case MediaType.APPLICATION_XML:
-                    case MediaType.TEXT_HTML:
-                    case MediaType.APPLICATION_OCTET_STREAM:
-                        statement = conn.prepareStatement(Queries.selectRequestBody);
-                        statement.setInt(1, lastRequestID);
-
-                        RS = statement.executeQuery();
-
-                        while (RS.next()) {
-                            if (!(RS.getString("Type").equals("Raw") &&
-                                    RS.getString("Body").equals(newState.rawBody)))
-                                return false;
-                            else if (!(RS.getString("Type").equals("FilePath") &&
-                                    RS.getString("Body").equals(newState.binaryFilePath)))
-                                return false;
-                        }
-
-                        break;
-                    case MediaType.APPLICATION_FORM_URLENCODED:
-                        // Checks for new or modified string tuples
-                        states = getTuples(lastRequestID, "URLString");
-                        return areListsEqual(states, newState.urlStringTuples);
-                    case MediaType.MULTIPART_FORM_DATA:
-                        // Checks for new or modified string tuples
-                        states = getTuples(lastRequestID, "FormString");
-                        boolean stringComparison = areListsEqual(states, newState.formStringTuples);
-
-                        // Checks for new or modified file tuples
-                        states = getTuples(lastRequestID, "File");
-                        boolean fileComparison = areListsEqual(states, newState.formFileTuples);
-
-                        return stringComparison && fileComparison;
-                }
-            }
-        } catch (SQLException e) {
-            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
-        } catch (NullPointerException NPE) {
-            /*
-                NPE is thrown by containsKey indicating that the key is not present in the database thereby
-                classifying it as a non-duplicate request.
-             */
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean areListsEqual(ArrayList<FieldState> firstList, ArrayList<FieldState> secondList) {
-        if (firstList == null && secondList == null) return true;
-
-        if ((firstList == null && secondList != null) || (firstList != null && secondList == null)) return false;
-
-        if (firstList.size() != secondList.size()) return false;
-
-        for (FieldState state : secondList) {
-            if (!state.isEmpty() && state.checked && !firstList.contains(state))
-                return false;
-        }
-
-        return true;
-    }
-
     private class HistorySaver implements Runnable {
         private ComposerState state;
 
@@ -441,15 +313,13 @@ public class HistoryManager {
             if (tuples.size() > 0) {
                 try {
                     for (FieldState fieldState : tuples) {
-                        if (!fieldState.isEmpty() && fieldState.checked) {
-                            statement = conn.prepareStatement(Queries.saveTuple);
-                            statement.setInt(1, requestID);
-                            statement.setString(2, tupleType);
-                            statement.setString(3, fieldState.key);
-                            statement.setString(4, fieldState.value);
-                            statement.setInt(5, fieldState.checked ? 1 : 0);
-                            statement.addBatch();
-                        }
+                        statement = conn.prepareStatement(Queries.saveTuple);
+                        statement.setInt(1, requestID);
+                        statement.setString(2, tupleType);
+                        statement.setString(3, fieldState.key);
+                        statement.setString(4, fieldState.value);
+                        statement.setInt(5, fieldState.checked ? 1 : 0);
+                        statement.addBatch();
                     }
                     statement.executeBatch();
                 } catch (SQLException e) {

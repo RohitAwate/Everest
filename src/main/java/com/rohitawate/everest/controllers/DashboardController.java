@@ -556,8 +556,10 @@ public class DashboardController implements Initializable {
     public ArrayList<FieldState> getParamFieldStates() {
         ArrayList<FieldState> states = new ArrayList<>();
 
-        for (StringKeyValueFieldController controller : paramsControllers)
-            states.add(controller.getState());
+        for (StringKeyValueFieldController controller : paramsControllers) {
+            if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
+                states.add(controller.getState());
+        }
 
         return states;
     }

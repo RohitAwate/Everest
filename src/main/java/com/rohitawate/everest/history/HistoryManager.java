@@ -16,20 +16,16 @@
 
 package com.rohitawate.everest.history;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rohitawate.everest.logging.LoggingService;
-import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.settings.Settings;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.FieldState;
+import javafx.util.Pair;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,9 +34,30 @@ import java.util.List;
 
 public class HistoryManager {
     private Connection conn;
-    private JsonNode queries;
     private PreparedStatement statement;
     private HistorySaver historySaver = new HistorySaver();
+
+    private static class Queries {
+        private static final String[] createQueries = {
+                "CREATE TABLE IF NOT EXISTS Requests(ID INTEGER PRIMARY KEY, Type TEXT NOT NULL, Target TEXT NOT NULL, Date TEXT NOT NULL)",
+                "CREATE TABLE IF NOT EXISTS RequestContentMap(RequestID INTEGER, ContentType TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
+                "CREATE TABLE IF NOT EXISTS Bodies(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('application/json', 'application/xml', 'text/html', 'text/plain')), Body TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
+                "CREATE TABLE IF NOT EXISTS FilePaths(RequestID INTEGER, Path TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
+                "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
+        };
+
+        private static final String saveRequest = "INSERT INTO Requests(Type, Target, Date) VALUES(?, ?, ?)";
+        private static final String saveRequestContentPair = "INSERT INTO RequestContentMap(RequestID, ContentType) VALUES(?, ?)";
+        private static final String saveBody = "INSERT INTO Bodies(RequestID, Body, Type) VALUES(?, ?, ?)";
+        private static final String saveFilePath = "INSERT INTO FilePaths(RequestID, Path) VALUES(?, ?)";
+        private static final String saveTuple = "INSERT INTO Tuples(RequestID, Type, Key, Value, Checked) VALUES(?, ?, ?, ?, ?)";
+        private static final String selectRecentRequests = "SELECT * FROM Requests WHERE Requests.Date > ?";
+        private static final String selectRequestContentType = "SELECT ContentType FROM RequestContentMap WHERE RequestID == ?";
+        private static final String selectRequestBody = "SELECT Body, Type FROM Bodies WHERE RequestID == ?";
+        private static final String selectFilePath = "SELECT Path FROM FilePaths WHERE RequestID == ?";
+        private static final String selectTuplesByType = "SELECT * FROM Tuples WHERE RequestID == ? AND Type == ?";
+        private static final String selectMostRecentRequest = "SELECT * FROM Requests ORDER BY ID DESC LIMIT 1";
+    }
 
     public HistoryManager() {
         try {
@@ -49,8 +66,7 @@ public class HistoryManager {
                 configFolder.mkdirs();
 
             conn = DriverManager.getConnection("jdbc:sqlite:Everest/config/history.sqlite");
-            initDatabase();
-
+            createDatabase();
         } catch (Exception E) {
             LoggingService.logSevere("Exception while initializing HistoryManager.", E, LocalDateTime.now());
         } finally {
@@ -60,52 +76,33 @@ public class HistoryManager {
 
     /**
      * Creates and initializes the database with necessary tables if not already done.
-     *
-     * @throws IOException  - If unable to establish a connection to the database.
-     * @throws SQLException - If invalid statement is executed on the database.
      */
-    private void initDatabase() throws IOException, SQLException {
-        // Read all queries from Queries.json
-        InputStream queriesFile = getClass().getResourceAsStream("/sql/Queries.json");
-        ObjectMapper mapper = new ObjectMapper();
-        queries = mapper.readTree(queriesFile);
-
-        statement =
-                conn.prepareStatement(EverestUtilities.trimString(queries.get("createRequestsTable").toString()));
-        statement.execute();
-
-        statement =
-                conn.prepareStatement(EverestUtilities.trimString(queries.get("createRequestContentMapTable").toString()));
-        statement.execute();
-
-        statement =
-                conn.prepareStatement(EverestUtilities.trimString(queries.get("createBodiesTable").toString()));
-        statement.execute();
-
-        statement =
-                conn.prepareStatement(EverestUtilities.trimString(queries.get("createTuplesTable").toString()));
-        statement.execute();
-
-        statement =
-                conn.prepareStatement(EverestUtilities.trimString(queries.get("createFilePathsTable").toString()));
-        statement.execute();
+    private void createDatabase() throws SQLException {
+        for (String query : Queries.createQueries) {
+            statement = conn.prepareStatement(query);
+            statement.execute();
+        }
     }
 
     /**
      * Saves the request to the database if it is not identical to one made exactly before it.
      * Method is synchronized to allow only one database transaction at a time.
      *
-     * @param state - The state of the Dashboard while making the request.
+     * @param newState - The state of the Dashboard while making the request.
      */
-    public synchronized void saveHistory(ComposerState state) {
-        if (isDuplicate(state))
+    public synchronized void saveHistory(ComposerState newState) {
+//        if (isDuplicate(state))
+//            return;
+
+        ComposerState lastState = getLastRequest();
+        if (newState.equals(lastState))
             return;
 
-        historySaver.state = state;
+        historySaver.state = newState;
         Services.singleExecutor.execute(historySaver);
 
         // Appends this history item to the HistoryTab
-        Services.homeWindowController.addHistoryItem(state);
+        Services.homeWindowController.addHistoryItem(newState);
     }
 
     /**
@@ -115,7 +112,7 @@ public class HistoryManager {
         List<ComposerState> history = new ArrayList<>();
         try {
             // Loads the requests from the last x number of days, x being Settings.showHistoryRange
-            statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRecentRequests").toString()));
+            statement = conn.prepareStatement(Queries.selectRecentRequests);
             String historyStartDate = LocalDate.now().minusDays(Settings.showHistoryRange).toString();
             statement.setString(1, historyStartDate);
 
@@ -134,11 +131,9 @@ public class HistoryManager {
 
                 if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                     // Retrieves request body ContentType for querying corresponding table
-                    String contentType = getRequestContentType(requestID);
+                    state.contentType = getRequestContentType(requestID);
 
-                    state.contentType = contentType;
-
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestBody").toString()));
+                    statement = conn.prepareStatement(Queries.selectRequestBody);
                     statement.setInt(1, requestID);
 
                     ResultSet RS = statement.executeQuery();
@@ -148,7 +143,7 @@ public class HistoryManager {
                         state.rawBodyBoxValue = RS.getString("Type");
                     }
 
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectFilePath").toString()));
+                    statement = conn.prepareStatement(Queries.selectFilePath);
                     statement.setInt(1, requestID);
 
                     RS = statement.executeQuery();
@@ -173,7 +168,7 @@ public class HistoryManager {
     private String getRequestContentType(int requestID) throws SQLException {
         String contentType = null;
 
-        statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestContentType").toString()));
+        statement = conn.prepareStatement(Queries.selectRequestContentType);
         statement.setInt(1, requestID);
 
         ResultSet RS = statement.executeQuery();
@@ -189,34 +184,91 @@ public class HistoryManager {
      * @param type      Type of tuples needed ('String', 'File' or 'Param')
      * @return tuples - Map of tuples of corresponding type
      */
-    private ArrayList<FieldState> getTuples(int requestID, String type) {
+    private ArrayList<FieldState> getTuples(int requestID, String type) throws SQLException {
         if (!(type.equals("FormString") || type.equals("URLString") ||
                 type.equals("File") || type.equals("Param") || type.equals("Header")))
             return null;
 
         ArrayList<FieldState> tuples = new ArrayList<>();
 
-        try {
-            PreparedStatement statement =
-                    conn.prepareStatement(EverestUtilities.trimString(queries.get("selectTuplesByType").toString()));
-            statement.setInt(1, requestID);
-            statement.setString(2, type);
+        PreparedStatement statement =
+                conn.prepareStatement(Queries.selectTuplesByType);
+        statement.setInt(1, requestID);
+        statement.setString(2, type);
 
-            ResultSet RS = statement.executeQuery();
+        ResultSet RS = statement.executeQuery();
 
-            String key, value;
-            boolean checked;
-            while (RS.next()) {
-                key = RS.getString("Key");
-                value = RS.getString("Value");
-                checked = RS.getBoolean("Checked");
-                tuples.add(new FieldState(key, value, checked));
-            }
-        } catch (SQLException e) {
-            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
+        String key, value;
+        boolean checked;
+        while (RS.next()) {
+            key = RS.getString("Key");
+            value = RS.getString("Value");
+            checked = RS.getBoolean("Checked");
+            tuples.add(new FieldState(key, value, checked));
         }
 
         return tuples;
+    }
+
+    private ComposerState getLastRequest() {
+        ComposerState lastRequest = new ComposerState();
+        try {
+            statement = conn.prepareStatement(Queries.selectMostRecentRequest);
+            ResultSet RS = statement.executeQuery();
+
+            int requestID = -1;
+            if (RS.next()) {
+                requestID = RS.getInt("ID");
+                lastRequest.target = RS.getString("Target");
+                lastRequest.httpMethod = RS.getString("Type");
+            }
+
+            lastRequest.headers = getTuples(requestID, "Header");
+            lastRequest.params = getTuples(requestID, "Param");
+            lastRequest.urlStringTuples = getTuples(requestID, "URLString");
+            lastRequest.formStringTuples = getTuples(requestID, "FormString");
+            lastRequest.formFileTuples = getTuples(requestID, "File");
+
+            lastRequest.contentType = getRequestContentType(requestID);
+
+            lastRequest.binaryFilePath = getFilePath(requestID);
+
+            Pair<String, String> rawBodyAndType = getRequestBody(requestID);
+
+            if (rawBodyAndType != null) {
+                lastRequest.rawBody = rawBodyAndType.getKey();
+                lastRequest.rawBodyBoxValue = rawBodyAndType.getValue();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lastRequest;
+    }
+
+    private Pair<String, String> getRequestBody(int requestID) throws SQLException {
+        statement = conn.prepareStatement(Queries.selectRequestBody);
+        statement.setInt(1, requestID);
+
+        ResultSet RS = statement.executeQuery();
+
+        if (RS.next()) {
+            return new Pair<>(RS.getString("Body"), RS.getString("Type"));
+        } else {
+            return null;
+        }
+    }
+
+    private String getFilePath(int requestID) throws SQLException {
+        statement = conn.prepareStatement(Queries.selectFilePath);
+        statement.setInt(1, requestID);
+
+        ResultSet RS = statement.executeQuery();
+
+        if (RS.next())
+            return RS.getString("Path");
+        else
+            return null;
     }
 
     /**
@@ -227,7 +279,7 @@ public class HistoryManager {
      */
     private boolean isDuplicate(ComposerState newState) {
         try {
-            statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectMostRecentRequest").toString()));
+            statement = conn.prepareStatement(Queries.selectMostRecentRequest);
             ResultSet RS = statement.executeQuery();
 
             int lastRequestID = -1;
@@ -257,7 +309,7 @@ public class HistoryManager {
                 return false;
 
             if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
-                statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestContentType").toString()));
+                statement = conn.prepareStatement(Queries.selectRequestContentType);
                 statement.setInt(1, lastRequestID);
 
                 RS = statement.executeQuery();
@@ -275,7 +327,7 @@ public class HistoryManager {
                     case MediaType.APPLICATION_XML:
                     case MediaType.TEXT_HTML:
                     case MediaType.APPLICATION_OCTET_STREAM:
-                        statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("selectRequestBody").toString()));
+                        statement = conn.prepareStatement(Queries.selectRequestBody);
                         statement.setInt(1, lastRequestID);
 
                         RS = statement.executeQuery();
@@ -340,7 +392,7 @@ public class HistoryManager {
         public void run() {
             try {
                 statement =
-                        conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequest").toString()));
+                        conn.prepareStatement(Queries.saveRequest);
 
                 statement.setString(1, state.httpMethod);
                 statement.setString(2, state.target);
@@ -360,18 +412,18 @@ public class HistoryManager {
 
                 if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                     // Maps the request to its ContentType for faster retrieval
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveRequestContentPair").toString()));
+                    statement = conn.prepareStatement(Queries.saveRequestContentPair);
                     statement.setInt(1, requestID);
                     statement.setString(2, state.contentType);
                     statement.executeUpdate();
 
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveBody").toString()));
+                    statement = conn.prepareStatement(Queries.saveBody);
                     statement.setInt(1, requestID);
                     statement.setString(2, state.rawBody);
                     statement.setString(3, state.rawBodyBoxValue);
                     statement.executeUpdate();
 
-                    statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveFilePath").toString()));
+                    statement = conn.prepareStatement(Queries.saveFilePath);
                     statement.setInt(1, requestID);
                     statement.setString(2, state.binaryFilePath);
                     statement.executeUpdate();
@@ -390,7 +442,7 @@ public class HistoryManager {
                 try {
                     for (FieldState fieldState : tuples) {
                         if (!fieldState.isEmpty() && fieldState.checked) {
-                            statement = conn.prepareStatement(EverestUtilities.trimString(queries.get("saveTuple").toString()));
+                            statement = conn.prepareStatement(Queries.saveTuple);
                             statement.setInt(1, requestID);
                             statement.setString(2, tupleType);
                             statement.setString(3, fieldState.key);

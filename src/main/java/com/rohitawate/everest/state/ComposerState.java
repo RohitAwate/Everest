@@ -19,6 +19,7 @@ package com.rohitawate.everest.state;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Represents the state of the Composer.
@@ -47,5 +48,26 @@ public class ComposerState {
 
     public ComposerState() {
         this.httpMethod = HTTPConstants.GET;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ComposerState state = (ComposerState) o;
+        if (!target.equals(state.target)) return false;
+        if (!httpMethod.equals(state.httpMethod)) return false;
+        if (!contentType.equals(state.contentType)) return false;
+        if (!rawBody.equals(state.rawBody)) return false;
+        if (!rawBodyBoxValue.equals(state.rawBodyBoxValue)) return false;
+        if (!binaryFilePath.equals(state.binaryFilePath)) return false;
+        if (!params.equals(state.params)) return false;
+        if (!headers.equals(state.headers)) return false;
+        if (!urlStringTuples.equals(state.urlStringTuples)) return false;
+        if (!formStringTuples.equals(state.formStringTuples)) return false;
+        if (!formFileTuples.equals(state.formFileTuples)) return false;
+
+        return true;
     }
 }

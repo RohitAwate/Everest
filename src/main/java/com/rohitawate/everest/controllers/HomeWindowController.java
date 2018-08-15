@@ -24,6 +24,7 @@ import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.DashboardState;
+import com.rohitawate.everest.sync.SyncManager;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.StringProperty;
@@ -63,6 +64,8 @@ public class HomeWindowController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        new SyncManager(this);
+
         try {
             FXMLLoader historyLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryPane.fxml"));
             Parent historyFXML = historyLoader.load();

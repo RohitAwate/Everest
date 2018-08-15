@@ -27,7 +27,6 @@ import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.format.FormatterFactory;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
-import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
 import com.rohitawate.everest.models.requests.DataRequest;
@@ -39,6 +38,7 @@ import com.rohitawate.everest.requestmanager.RequestManagersPool;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.DashboardState;
 import com.rohitawate.everest.state.FieldState;
+import com.rohitawate.everest.sync.SyncManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -310,7 +310,7 @@ public class DashboardController implements Initializable {
             cancelButton.setOnAction(e -> requestManager.cancel());
             requestManager.addHandlers(this::whileRunning, this::onSucceeded, this::onFailed, this::onCancelled);
             requestManager.start();
-            Services.historyManager.saveHistory(getState().composer);
+            SyncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
             snackbar.show("Invalid address. Please verify and try again.", 3000);
@@ -589,6 +589,7 @@ public class DashboardController implements Initializable {
                     previousController.isValueFieldEmpty()) {
                 previousController.setKeyField(key);
                 previousController.setValueField(value);
+                previousController.setChecked(checked);
 
                 /*
                     For when the last field is loaded from setState.

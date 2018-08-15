@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.history;
+package com.rohitawate.everest.sync;
 
 import com.rohitawate.everest.logging.LoggingService;
-import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.settings.Settings;
 import com.rohitawate.everest.state.ComposerState;
@@ -31,10 +30,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HistoryManager {
+class SQLiteManager implements DataManager {
     private Connection conn;
     private PreparedStatement statement;
-    private HistorySaver historySaver = new HistorySaver();
 
     private static class Queries {
         private static final String[] createQueries = {
@@ -58,7 +56,7 @@ public class HistoryManager {
         private static final String selectMostRecentRequest = "SELECT * FROM Requests ORDER BY ID DESC LIMIT 1";
     }
 
-    public HistoryManager() {
+    public SQLiteManager() {
         try {
             File configFolder = new File("Everest/config/");
             if (!configFolder.exists())
@@ -67,7 +65,7 @@ public class HistoryManager {
             conn = DriverManager.getConnection("jdbc:sqlite:Everest/config/history.sqlite");
             createDatabase();
         } catch (Exception E) {
-            LoggingService.logSevere("Exception while initializing HistoryManager.", E, LocalDateTime.now());
+            LoggingService.logSevere("Exception while initializing DataManager.", E, LocalDateTime.now());
         } finally {
             System.out.println("Connected to database.");
         }
@@ -89,21 +87,63 @@ public class HistoryManager {
      *
      * @param newState - The state of the Dashboard while making the request.
      */
-    public synchronized void saveHistory(ComposerState newState) {
+    @Override
+    public synchronized void saveState(ComposerState newState) {
         ComposerState lastState = getLastRequest();
         if (newState.equals(lastState))
             return;
 
-        historySaver.state = newState;
-        Services.singleExecutor.execute(historySaver);
+        try {
+            statement =
+                    conn.prepareStatement(Queries.saveRequest);
 
-        // Appends this history item to the HistoryTab
-        Services.homeWindowController.addHistoryItem(newState);
+            statement.setString(1, newState.httpMethod);
+            statement.setString(2, newState.target);
+            statement.setString(3, LocalDate.now().toString());
+            statement.executeUpdate();
+
+            // Get latest RequestID to insert into Headers table
+            statement = conn.prepareStatement("SELECT MAX(ID) AS MaxID FROM Requests");
+
+            ResultSet RS = statement.executeQuery();
+            int requestID = -1;
+            if (RS.next())
+                requestID = RS.getInt("MaxID");
+
+            saveTuple(newState.headers, "Header", requestID);
+            saveTuple(newState.params, "Param", requestID);
+
+            if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
+                // Maps the request to its ContentType for faster retrieval
+                statement = conn.prepareStatement(Queries.saveRequestContentPair);
+                statement.setInt(1, requestID);
+                statement.setString(2, newState.contentType);
+                statement.executeUpdate();
+
+                statement = conn.prepareStatement(Queries.saveBody);
+                statement.setInt(1, requestID);
+                statement.setString(2, newState.rawBody);
+                statement.setString(3, newState.rawBodyBoxValue);
+                statement.executeUpdate();
+
+                statement = conn.prepareStatement(Queries.saveFilePath);
+                statement.setInt(1, requestID);
+                statement.setString(2, newState.binaryFilePath);
+                statement.executeUpdate();
+
+                saveTuple(newState.urlStringTuples, "URLString", requestID);
+                saveTuple(newState.formStringTuples, "FormString", requestID);
+                saveTuple(newState.formFileTuples, "File", requestID);
+            }
+        } catch (SQLException e) {
+            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
+        }
     }
 
     /**
      * Returns a list of all the recent requests.
      */
+    @Override
     public synchronized List<ComposerState> getHistory() {
         List<ComposerState> history = new ArrayList<>();
         try {
@@ -257,75 +297,27 @@ public class HistoryManager {
             return null;
     }
 
-    private class HistorySaver implements Runnable {
-        private ComposerState state;
-
-        @Override
-        public void run() {
+    private void saveTuple(ArrayList<FieldState> tuples, String tupleType, int requestID) {
+        if (tuples.size() > 0) {
             try {
-                statement =
-                        conn.prepareStatement(Queries.saveRequest);
-
-                statement.setString(1, state.httpMethod);
-                statement.setString(2, state.target);
-                statement.setString(3, LocalDate.now().toString());
-                statement.executeUpdate();
-
-                // Get latest RequestID to insert into Headers table
-                statement = conn.prepareStatement("SELECT MAX(ID) AS MaxID FROM Requests");
-
-                ResultSet RS = statement.executeQuery();
-                int requestID = -1;
-                if (RS.next())
-                    requestID = RS.getInt("MaxID");
-
-                saveTuple(state.headers, "Header", requestID);
-                saveTuple(state.params, "Param", requestID);
-
-                if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
-                    // Maps the request to its ContentType for faster retrieval
-                    statement = conn.prepareStatement(Queries.saveRequestContentPair);
+                for (FieldState fieldState : tuples) {
+                    statement = conn.prepareStatement(Queries.saveTuple);
                     statement.setInt(1, requestID);
-                    statement.setString(2, state.contentType);
-                    statement.executeUpdate();
-
-                    statement = conn.prepareStatement(Queries.saveBody);
-                    statement.setInt(1, requestID);
-                    statement.setString(2, state.rawBody);
-                    statement.setString(3, state.rawBodyBoxValue);
-                    statement.executeUpdate();
-
-                    statement = conn.prepareStatement(Queries.saveFilePath);
-                    statement.setInt(1, requestID);
-                    statement.setString(2, state.binaryFilePath);
-                    statement.executeUpdate();
-
-                    saveTuple(state.urlStringTuples, "URLString", requestID);
-                    saveTuple(state.formStringTuples, "FormString", requestID);
-                    saveTuple(state.formFileTuples, "File", requestID);
+                    statement.setString(2, tupleType);
+                    statement.setString(3, fieldState.key);
+                    statement.setString(4, fieldState.value);
+                    statement.setInt(5, fieldState.checked ? 1 : 0);
+                    statement.addBatch();
                 }
+                statement.executeBatch();
             } catch (SQLException e) {
-                LoggingService.logWarning("Database error.", e, LocalDateTime.now());
+                LoggingService.logSevere("Database error.", e, LocalDateTime.now());
             }
         }
+    }
 
-        private void saveTuple(ArrayList<FieldState> tuples, String tupleType, int requestID) {
-            if (tuples.size() > 0) {
-                try {
-                    for (FieldState fieldState : tuples) {
-                        statement = conn.prepareStatement(Queries.saveTuple);
-                        statement.setInt(1, requestID);
-                        statement.setString(2, tupleType);
-                        statement.setString(3, fieldState.key);
-                        statement.setString(4, fieldState.value);
-                        statement.setInt(5, fieldState.checked ? 1 : 0);
-                        statement.addBatch();
-                    }
-                    statement.executeBatch();
-                } catch (SQLException e) {
-                    LoggingService.logSevere("Database error.", e, LocalDateTime.now());
-                }
-            }
-        }
+    @Override
+    public String getIdentifier() {
+        return "SQLite";
     }
 }

@@ -17,8 +17,8 @@
 package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.search.SearchablePaneController;
-import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.sync.SyncManager;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseButton;
@@ -34,7 +34,7 @@ public class HistoryPaneController extends SearchablePaneController<ComposerStat
 
 	@Override
     protected List<ComposerState> loadInitialEntries() {
-		return Services.historyManager.getHistory();
+        return SyncManager.getHistory();
 	}
 
     protected SearchEntry<ComposerState> createEntryFromState(ComposerState state) throws IOException {

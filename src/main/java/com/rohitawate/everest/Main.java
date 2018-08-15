@@ -15,7 +15,6 @@
  */
 package com.rohitawate.everest;
 
-import com.rohitawate.everest.misc.Services;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.settings.SettingsLoader;
 import javafx.application.Application;
@@ -35,7 +34,6 @@ public class Main extends Application {
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
         Parent homeWindow = loader.load();
-        Services.homeWindowController = loader.getController();
         Stage dashboardStage = new Stage();
         ThemeManager.setTheme(homeWindow);
 

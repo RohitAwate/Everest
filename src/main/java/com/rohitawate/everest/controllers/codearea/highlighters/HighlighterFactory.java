@@ -1,6 +1,6 @@
 package com.rohitawate.everest.controllers.codearea.highlighters;
 
-import com.rohitawate.everest.exceptions.DuplicateHighlighterException;
+import com.rohitawate.everest.exceptions.DuplicateException;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 
 import java.util.HashMap;
@@ -35,12 +35,12 @@ public class HighlighterFactory {
      *
      * @param name        The display name for the Highlighter.
      * @param highlighter The Highlighter object
-     * @throws DuplicateHighlighterException If a Highlighter is already loaded by Everest with the same name.
+     * @throws DuplicateException If a Highlighter is already loaded by Everest with the same name.
      */
     public static void addHighlighter(String name, Highlighter highlighter)
-            throws DuplicateHighlighterException {
+            throws DuplicateException {
         if (highlighters.containsKey(name)) {
-            throw new DuplicateHighlighterException("Highlighter already exists for the following type: " + name);
+            throw new DuplicateException("Highlighter already exists for the following type: " + name);
         }
 
         highlighters.put(name, highlighter);

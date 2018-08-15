@@ -1,7 +1,6 @@
 package com.rohitawate.everest.format;
 
-import com.rohitawate.everest.exceptions.DuplicateFormatterException;
-import com.rohitawate.everest.exceptions.DuplicateHighlighterException;
+import com.rohitawate.everest.exceptions.DuplicateException;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 
 import java.util.HashMap;
@@ -30,12 +29,12 @@ public class FormatterFactory {
      *
      * @param name      The display name for the Formatter.
      * @param formatter The Formatter object.
-     * @throws DuplicateHighlighterException If a Formatter is already loaded by Everest with the same name.
+     * @throws DuplicateException If a Formatter is already loaded by Everest with the same name.
      */
     public static void addFormatter(String name, Formatter formatter)
-            throws DuplicateFormatterException {
+            throws DuplicateException {
         if (formatters.containsKey(name)) {
-            throw new DuplicateFormatterException("Formatter already exists for the following type: " + name);
+            throw new DuplicateException("Formatter already exists for the following type: " + name);
         }
 
         formatters.put(name, formatter);

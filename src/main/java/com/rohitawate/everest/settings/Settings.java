@@ -32,4 +32,6 @@ public class Settings {
     public static int showHistoryRange = 7;
 
     public static boolean editorWrapText = true;
+
+    public static String fetchSource = "SQLite";
 }

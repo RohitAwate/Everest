@@ -74,6 +74,7 @@ public class URLTabController implements Initializable {
                     previousController.isValueFieldEmpty()) {
                 previousController.setKeyField(key);
                 previousController.setValueField(value);
+                previousController.setChecked(checked);
 
                 /*
                     For when the last field is loaded from setState.

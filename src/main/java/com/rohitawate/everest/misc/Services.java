@@ -17,18 +17,13 @@
 package com.rohitawate.everest.misc;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.rohitawate.everest.controllers.HomeWindowController;
-import com.rohitawate.everest.history.HistoryManager;
 
 import java.util.concurrent.Executor;
 
 public class Services {
-    public static HistoryManager historyManager;
-    public static HomeWindowController homeWindowController;
     public static Executor singleExecutor;
 
     static {
-        historyManager = new HistoryManager();
         singleExecutor = MoreExecutors.directExecutor();
     }
 }

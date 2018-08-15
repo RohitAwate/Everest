@@ -185,7 +185,7 @@ public class RequestManager extends Service<EverestResponse> {
     private Invocation appendBody(DataRequest dataRequest) throws Exception {
         /*
             Checks if a custom mime-type is mentioned in the headers.
-            If present, it will override the logical Content-Type.
+            If present, it will override the auto-determined one.
          */
         String overriddenContentType = request.getHeaders().get("Content-Type");
         Invocation invocation = null;
@@ -198,8 +198,8 @@ public class RequestManager extends Service<EverestResponse> {
 
                 // Adding the string tuples to the request
                 HashMap<String, String> pairs = dataRequest.getStringTuples();
-                for (Map.Entry entry : pairs.entrySet()) {
-                    mapEntry = (Map.Entry) entry;
+                for (Map.Entry<String, String> entry : pairs.entrySet()) {
+                    mapEntry = entry;
                     formData.field(mapEntry.getKey(), mapEntry.getValue());
                 }
 
@@ -210,8 +210,8 @@ public class RequestManager extends Service<EverestResponse> {
                 pairs = dataRequest.getFileTuples();
 
                 // Adding the file tuples to the request
-                for (Map.Entry entry : pairs.entrySet()) {
-                    mapEntry = (Map.Entry) entry;
+                for (Map.Entry<String, String> entry : pairs.entrySet()) {
+                    mapEntry = entry;
                     filePath = mapEntry.getValue();
                     file = new File(filePath);
 
@@ -258,8 +258,8 @@ public class RequestManager extends Service<EverestResponse> {
 
                 Form form = new Form();
 
-                for (Map.Entry entry : dataRequest.getStringTuples().entrySet()) {
-                    mapEntry = (Map.Entry) entry;
+                for (Map.Entry<String, String> entry : dataRequest.getStringTuples().entrySet()) {
+                    mapEntry = entry;
                     form.param(mapEntry.getKey(), mapEntry.getValue());
                 }
 

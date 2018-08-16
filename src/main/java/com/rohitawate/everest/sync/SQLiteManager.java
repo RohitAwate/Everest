@@ -58,9 +58,12 @@ class SQLiteManager implements DataManager {
 
     public SQLiteManager() {
         try {
-            File configFolder = new File("Everest/config/");
-            if (!configFolder.exists())
-                configFolder.mkdirs();
+            String configPath = "Everest/config/";
+            File configFolder = new File(configPath);
+            if (!configFolder.exists()) {
+                if (configFolder.mkdirs())
+                    LoggingService.logSevere("Unable to create directory: " + configPath, null, LocalDateTime.now());
+            }
 
             conn = DriverManager.getConnection("jdbc:sqlite:Everest/config/history.sqlite");
             createDatabase();

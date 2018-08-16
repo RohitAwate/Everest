@@ -260,24 +260,7 @@ public class DashboardController implements Initializable {
                     dataRequest.setHeaders(headerTabController.getHeaders());
 
                     if (bodyTabController.rawTab.isSelected()) {
-                        String contentType;
-                        switch (bodyTabController.rawInputTypeBox.getValue()) {
-                            case HTTPConstants.PLAIN_TEXT:
-                                contentType = MediaType.TEXT_PLAIN;
-                                break;
-                            case HTTPConstants.JSON:
-                                contentType = MediaType.APPLICATION_JSON;
-                                break;
-                            case HTTPConstants.XML:
-                                contentType = MediaType.APPLICATION_XML;
-                                break;
-                            case HTTPConstants.HTML:
-                                contentType = MediaType.TEXT_HTML;
-                                break;
-                            default:
-                                contentType = MediaType.TEXT_PLAIN;
-                        }
-                        dataRequest.setContentType(contentType);
+                        dataRequest.setContentType(HTTPConstants.getComplexContentType(bodyTabController.rawInputTypeBox.getValue()));
                         dataRequest.setBody(bodyTabController.rawInputArea.getText());
                     } else if (bodyTabController.formTab.isSelected()) {
                         dataRequest.setStringTuples(bodyTabController.formDataTabController.getStringTuples());
@@ -316,9 +299,9 @@ public class DashboardController implements Initializable {
             snackbar.show("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
             LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
-            showLayer(ResponseLayer.ERROR);
             errorTitle.setText("Oops... That's embarrassing!");
             errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
+            showLayer(ResponseLayer.ERROR);
         }
     }
 
@@ -450,7 +433,10 @@ public class DashboardController implements Initializable {
         try {
             String simplifiedContentType;
             if (contentType != null) {
-                // Selects only the part preceding the ';', skipping the character encoding
+                /*
+                    Selects only the part preceding the ';', skipping the character encoding.
+                    For example, "application/json; charset=utf-8" becomes "application/json"
+                  */
                 contentType = contentType.split(";")[0];
 
                 switch (contentType.toLowerCase()) {
@@ -483,6 +469,9 @@ public class DashboardController implements Initializable {
             } else {
                 simplifiedContentType = HTTPConstants.PLAIN_TEXT;
             }
+
+            if (body == null || body.equals(""))
+                body = "No body returned in the response.";
 
             responseArea.setText(body,
                     FormatterFactory.getHighlighter(simplifiedContentType),
@@ -694,24 +683,7 @@ public class DashboardController implements Initializable {
                 dashboardState.responseTime = Integer.parseInt(temp);
 
                 dashboardState.responseBody = responseArea.getText();
-
-                // TODO: Get rid of similar switches
-                String contentType;
-                switch (responseTypeBox.getValue()) {
-                    case HTTPConstants.JSON:
-                        contentType = MediaType.APPLICATION_JSON;
-                        break;
-                    case HTTPConstants.XML:
-                        contentType = MediaType.APPLICATION_XML;
-                        break;
-                    case HTTPConstants.HTML:
-                        contentType = MediaType.TEXT_HTML;
-                        break;
-                    default:
-                        contentType = MediaType.TEXT_PLAIN;
-                }
-
-                dashboardState.responseType = contentType;
+                dashboardState.responseType = HTTPConstants.getComplexContentType(responseTypeBox.getValue());
                 break;
             case ERROR:
                 dashboardState.errorTitle = errorTitle.getText();

@@ -134,19 +134,7 @@ public class BodyTabController implements Initializable {
         state.binaryFilePath = filePathField.getText();
 
         state.rawBody = rawInputArea.getText();
-        switch (rawInputTypeBox.getValue()) {
-            case HTTPConstants.JSON:
-                state.rawBodyBoxValue = MediaType.APPLICATION_JSON;
-                break;
-            case HTTPConstants.XML:
-                state.rawBodyBoxValue = MediaType.APPLICATION_XML;
-                break;
-            case HTTPConstants.HTML:
-                state.rawBodyBoxValue = MediaType.TEXT_HTML;
-                break;
-            default:
-                state.rawBodyBoxValue = MediaType.TEXT_PLAIN;
-        }
+        state.rawBodyBoxValue = HTTPConstants.getComplexContentType(rawInputTypeBox.getValue());
 
         switch (bodyTabPane.getSelectionModel().getSelectedIndex()) {
             case 1:
@@ -219,21 +207,7 @@ public class BodyTabController implements Initializable {
 
     private void setRawTab(ComposerState state) {
         if (state.rawBodyBoxValue != null && state.rawBody != null) {
-            // TODO: Remove this conversion
-            String simplifiedContentType;
-            switch (state.rawBodyBoxValue) {
-                case MediaType.APPLICATION_JSON:
-                    simplifiedContentType = HTTPConstants.JSON;
-                    break;
-                case MediaType.APPLICATION_XML:
-                    simplifiedContentType = HTTPConstants.XML;
-                    break;
-                case MediaType.TEXT_HTML:
-                    simplifiedContentType = HTTPConstants.HTML;
-                    break;
-                default:
-                    simplifiedContentType = HTTPConstants.PLAIN_TEXT;
-            }
+            String simplifiedContentType = HTTPConstants.getSimpleContentType(state.rawBodyBoxValue);
             rawInputTypeBox.setValue(simplifiedContentType);
             rawInputArea.setText(state.rawBody, HighlighterFactory.getHighlighter(simplifiedContentType));
         } else {

@@ -61,21 +61,24 @@ public class HomeWindowController implements Initializable {
     private HistoryPaneController historyController;
     private DashboardController dashboard;
     private StringProperty addressProperty;
+    private SyncManager syncManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        new SyncManager(this);
+        syncManager = new SyncManager(this);
 
         try {
             FXMLLoader historyLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryPane.fxml"));
             Parent historyFXML = historyLoader.load();
             splitPane.getItems().add(0, historyFXML);
             historyController = historyLoader.getController();
+            historyController.setSyncManager(syncManager);
             historyController.addItemClickHandler(this::addTab);
 
             FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
             Parent dashboardFXML = dashboardLoader.load();
             dashboard = dashboardLoader.getController();
+            dashboard.setSyncManager(syncManager);
             dashboardContainer.getChildren().add(dashboardFXML);
             addressProperty = dashboard.addressField.textProperty();
         } catch (IOException e) {

@@ -57,12 +57,16 @@ public class ComposerState {
         ComposerState state = (ComposerState) o;
         if (!target.equals(state.target)) return false;
         if (!httpMethod.equals(state.httpMethod)) return false;
+        if (!params.equals(state.params)) return false;
+        if (!headers.equals(state.headers)) return false;
+
+        if (state.httpMethod.equals(HTTPConstants.GET)
+                || state.httpMethod.equals(HTTPConstants.DELETE)) return true;
+
         if (!contentType.equals(state.contentType)) return false;
         if (!rawBody.equals(state.rawBody)) return false;
         if (!rawBodyBoxValue.equals(state.rawBodyBoxValue)) return false;
         if (!binaryFilePath.equals(state.binaryFilePath)) return false;
-        if (!params.equals(state.params)) return false;
-        if (!headers.equals(state.headers)) return false;
         if (!urlStringTuples.equals(state.urlStringTuples)) return false;
         if (!formStringTuples.equals(state.formStringTuples)) return false;
         if (!formFileTuples.equals(state.formFileTuples)) return false;

@@ -11,14 +11,21 @@ public interface DataManager {
     /**
      * Saves the state of the Composer when the request was made.
      */
-    void saveState(ComposerState newState);
+    void saveState(ComposerState newState) throws Exception;
 
     /**
      * Fetches all the states of the Composer when the previous requests were made.
      *
      * @return A list of the states.
      */
-    List<ComposerState> getHistory();
+    List<ComposerState> getHistory() throws Exception;
+
+    /**
+     * Returns the state of the Composer when the last request was made.
+     * If this DataManager is the primary fetching source, SyncManager uses
+     * calls this method before attempting to save a new state.
+     */
+    ComposerState getLastAdded();
 
     /**
      * Returns the identifier for the DataManager. Preferably, use the source as the identifier.

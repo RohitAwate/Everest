@@ -129,7 +129,7 @@ public class HeaderTabController implements Initializable {
     /**
      * Return a list of the state of all the fields in the Headers tab.
      */
-    public ArrayList<FieldState> getFieldStates() {
+    public List<FieldState> getFieldStates() {
         ArrayList<FieldState> states = new ArrayList<>();
 
         for (StringKeyValueFieldController controller : controllers) {

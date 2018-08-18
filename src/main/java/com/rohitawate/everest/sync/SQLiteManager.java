@@ -91,55 +91,46 @@ class SQLiteManager implements DataManager {
      * @param newState - The state of the Dashboard while making the request.
      */
     @Override
-    public synchronized void saveState(ComposerState newState) {
-        ComposerState lastState = getLastRequest();
-        if (newState.equals(lastState))
-            return;
+    public synchronized void saveState(ComposerState newState) throws SQLException {
+        statement = conn.prepareStatement(Queries.saveRequest);
 
-        try {
-            statement =
-                    conn.prepareStatement(Queries.saveRequest);
+        statement.setString(1, newState.httpMethod);
+        statement.setString(2, newState.target);
+        statement.setString(3, LocalDate.now().toString());
+        statement.executeUpdate();
 
-            statement.setString(1, newState.httpMethod);
-            statement.setString(2, newState.target);
-            statement.setString(3, LocalDate.now().toString());
+        // Get latest RequestID to insert into Headers table
+        statement = conn.prepareStatement("SELECT MAX(ID) AS MaxID FROM Requests");
+
+        ResultSet RS = statement.executeQuery();
+        int requestID = -1;
+        if (RS.next())
+            requestID = RS.getInt("MaxID");
+
+        saveTuple(newState.headers, "Header", requestID);
+        saveTuple(newState.params, "Param", requestID);
+
+        if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
+            // Maps the request to its ContentType for faster retrieval
+            statement = conn.prepareStatement(Queries.saveRequestContentPair);
+            statement.setInt(1, requestID);
+            statement.setString(2, newState.contentType);
             statement.executeUpdate();
 
-            // Get latest RequestID to insert into Headers table
-            statement = conn.prepareStatement("SELECT MAX(ID) AS MaxID FROM Requests");
+            statement = conn.prepareStatement(Queries.saveBody);
+            statement.setInt(1, requestID);
+            statement.setString(2, newState.rawBody);
+            statement.setString(3, newState.rawBodyBoxValue);
+            statement.executeUpdate();
 
-            ResultSet RS = statement.executeQuery();
-            int requestID = -1;
-            if (RS.next())
-                requestID = RS.getInt("MaxID");
+            statement = conn.prepareStatement(Queries.saveFilePath);
+            statement.setInt(1, requestID);
+            statement.setString(2, newState.binaryFilePath);
+            statement.executeUpdate();
 
-            saveTuple(newState.headers, "Header", requestID);
-            saveTuple(newState.params, "Param", requestID);
-
-            if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
-                // Maps the request to its ContentType for faster retrieval
-                statement = conn.prepareStatement(Queries.saveRequestContentPair);
-                statement.setInt(1, requestID);
-                statement.setString(2, newState.contentType);
-                statement.executeUpdate();
-
-                statement = conn.prepareStatement(Queries.saveBody);
-                statement.setInt(1, requestID);
-                statement.setString(2, newState.rawBody);
-                statement.setString(3, newState.rawBodyBoxValue);
-                statement.executeUpdate();
-
-                statement = conn.prepareStatement(Queries.saveFilePath);
-                statement.setInt(1, requestID);
-                statement.setString(2, newState.binaryFilePath);
-                statement.executeUpdate();
-
-                saveTuple(newState.urlStringTuples, "URLString", requestID);
-                saveTuple(newState.formStringTuples, "FormString", requestID);
-                saveTuple(newState.formFileTuples, "File", requestID);
-            }
-        } catch (SQLException e) {
-            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
+            saveTuple(newState.urlStringTuples, "URLString", requestID);
+            saveTuple(newState.formStringTuples, "FormString", requestID);
+            saveTuple(newState.formFileTuples, "File", requestID);
         }
     }
 
@@ -147,49 +138,45 @@ class SQLiteManager implements DataManager {
      * Returns a list of all the recent requests.
      */
     @Override
-    public synchronized List<ComposerState> getHistory() {
+    public synchronized List<ComposerState> getHistory() throws SQLException {
         List<ComposerState> history = new ArrayList<>();
-        try {
-            // Loads the requests from the last x number of days, x being Settings.showHistoryRange
-            statement = conn.prepareStatement(Queries.selectRecentRequests);
-            String historyStartDate = LocalDate.now().minusDays(Settings.showHistoryRange).toString();
-            statement.setString(1, historyStartDate);
+        // Loads the requests from the last x number of days, x being Settings.showHistoryRange
+        statement = conn.prepareStatement(Queries.selectRecentRequests);
+        String historyStartDate = LocalDate.now().minusDays(Settings.showHistoryRange).toString();
+        statement.setString(1, historyStartDate);
 
-            ResultSet resultSet = statement.executeQuery();
+        ResultSet resultSet = statement.executeQuery();
 
-            ComposerState state;
-            while (resultSet.next()) {
-                state = new ComposerState();
+        ComposerState state;
+        while (resultSet.next()) {
+            state = new ComposerState();
 
-                state.target = resultSet.getString("Target");
+            state.target = resultSet.getString("Target");
 
-                int requestID = resultSet.getInt("ID");
-                state.headers = getTuples(requestID, "Header");
-                state.params = getTuples(requestID, "Param");
-                state.httpMethod = resultSet.getString("Type");
+            int requestID = resultSet.getInt("ID");
+            state.headers = getTuples(requestID, "Header");
+            state.params = getTuples(requestID, "Param");
+            state.httpMethod = resultSet.getString("Type");
 
-                if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
-                    // Retrieves request body ContentType for querying corresponding table
-                    state.contentType = getRequestContentType(requestID);
+            if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
+                // Retrieves request body ContentType for querying corresponding table
+                state.contentType = getRequestContentType(requestID);
 
-                    Pair<String, String> rawBodyAndType = getRequestBody(requestID);
+                Pair<String, String> rawBodyAndType = getRequestBody(requestID);
 
-                    if (rawBodyAndType != null) {
-                        state.rawBody = rawBodyAndType.getKey();
-                        state.rawBodyBoxValue = rawBodyAndType.getValue();
-                    }
-
-                    state.binaryFilePath = getFilePath(requestID);
-
-                    state.urlStringTuples = getTuples(requestID, "URLString");
-                    state.formStringTuples = getTuples(requestID, "FormString");
-                    state.formFileTuples = getTuples(requestID, "File");
+                if (rawBodyAndType != null) {
+                    state.rawBody = rawBodyAndType.getKey();
+                    state.rawBodyBoxValue = rawBodyAndType.getValue();
                 }
 
-                history.add(state);
+                state.binaryFilePath = getFilePath(requestID);
+
+                state.urlStringTuples = getTuples(requestID, "URLString");
+                state.formStringTuples = getTuples(requestID, "FormString");
+                state.formFileTuples = getTuples(requestID, "File");
             }
-        } catch (SQLException e) {
-            LoggingService.logWarning("Database error.", e, LocalDateTime.now());
+
+            history.add(state);
         }
 
         return history;
@@ -239,7 +226,8 @@ class SQLiteManager implements DataManager {
         return fieldStates;
     }
 
-    private ComposerState getLastRequest() {
+    @Override
+    public ComposerState getLastAdded() {
         ComposerState lastRequest = new ComposerState();
         try {
             statement = conn.prepareStatement(Queries.selectMostRecentRequest);

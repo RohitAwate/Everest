@@ -100,6 +100,7 @@ public class DashboardController implements Initializable {
     private IntegerProperty paramsCountProperty;
     private Visualizer visualizer;
     private ResponseHeadersViewer responseHeadersViewer;
+    private SyncManager syncManager;
 
     private GETRequest getRequest;
     private DataRequest dataRequest;
@@ -293,7 +294,7 @@ public class DashboardController implements Initializable {
             cancelButton.setOnAction(e -> requestManager.cancel());
             requestManager.addHandlers(this::whileRunning, this::onSucceeded, this::onFailed, this::onCancelled);
             requestManager.start();
-            SyncManager.saveState(getState().composer);
+            syncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
             snackbar.show("Invalid address. Please verify and try again.", 3000);
@@ -614,6 +615,10 @@ public class DashboardController implements Initializable {
         }
     }
 
+    public void setSyncManager(SyncManager syncManager) {
+        this.syncManager = syncManager;
+    }
+
     public ComposerTab getVisibleComposerTab() {
         int visibleTab = requestOptionsTab.getSelectionModel().getSelectedIndex();
         switch (visibleTab) {
@@ -627,7 +632,6 @@ public class DashboardController implements Initializable {
                 return ComposerTab.PARAMS;
         }
     }
-
 
     private ResponseTab getVisibleResponseTab() {
         int visibleTab = responseTabPane.getSelectionModel().getSelectedIndex();

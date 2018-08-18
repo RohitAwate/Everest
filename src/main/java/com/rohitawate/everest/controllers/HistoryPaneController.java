@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class HistoryPaneController extends SearchablePaneController<ComposerState> {
-
     private List<Consumer<ComposerState>> stateClickHandler = new LinkedList<>();
+	private SyncManager syncManager;
 
 	@Override
     protected List<ComposerState> loadInitialEntries() {
-        return SyncManager.getHistory();
+		return syncManager.getHistory();
 	}
 
     protected SearchEntry<ComposerState> createEntryFromState(ComposerState state) throws IOException {
@@ -61,5 +61,9 @@ public class HistoryPaneController extends SearchablePaneController<ComposerStat
 
     public void addItemClickHandler(Consumer<ComposerState> handler) {
 		stateClickHandler.add(handler);
+	}
+
+	public void setSyncManager(SyncManager syncManager) {
+		this.syncManager = syncManager;
 	}
 }

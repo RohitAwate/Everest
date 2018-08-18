@@ -41,7 +41,10 @@ public class SyncManager {
     /**
      * Asynchronously saves the new state by invoking all the registered DataManagers.
      */
-    public static void saveState(ComposerState newState) {
+    public void saveState(ComposerState newState) {
+        if (newState.equals(managers.get(Settings.fetchSource).getLastAdded()))
+            return;
+
         historySaver.newState = newState;
         executor.execute(historySaver);
 
@@ -53,20 +56,27 @@ public class SyncManager {
      *
      * @return A list of all the requests
      */
-    public static List<ComposerState> getHistory() {
-        if (managers.get(Settings.fetchSource) == null) {
-            LoggingService.logSevere("No such source found: " + Settings.fetchSource, null, LocalDateTime.now());
-            return managers.get("SQLite").getHistory();
-        } else {
-            return managers.get(Settings.fetchSource).getHistory();
+    public List<ComposerState> getHistory() {
+        List<ComposerState> history = null;
+        try {
+            if (managers.get(Settings.fetchSource) == null) {
+                LoggingService.logSevere("No such source found: " + Settings.fetchSource, null, LocalDateTime.now());
+                history = managers.get("SQLite").getHistory();
+            } else {
+                history = managers.get(Settings.fetchSource).getHistory();
+            }
+        } catch (Exception e) {
+            LoggingService.logSevere("History could not be fetched.", e, LocalDateTime.now());
         }
+
+        return history;
     }
 
     /**
      * Registers a new DataManager to be used for syncing Everest's data
      * at various sources.
      */
-    public static void registerManager(DataManager newManager) throws DuplicateException {
+    public void registerManager(DataManager newManager) throws DuplicateException {
         if (managers.containsKey(newManager.getIdentifier()))
             throw new DuplicateException(
                     "Duplicate DataManager: Manager with identifier \'" + newManager.getIdentifier() + "\' already exists.");
@@ -79,8 +89,12 @@ public class SyncManager {
 
         @Override
         public void run() {
-            for (DataManager manager : managers.values())
-                manager.saveState(newState);
+            try {
+                for (DataManager manager : managers.values())
+                    manager.saveState(newState);
+            } catch (Exception e) {
+                LoggingService.logSevere("Could not save history.", e, LocalDateTime.now());
+            }
         }
     }
 }

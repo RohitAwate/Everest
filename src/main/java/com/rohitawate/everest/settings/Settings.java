@@ -31,5 +31,7 @@ public class Settings {
     public static String syntaxTheme = "Moondust";
     public static int showHistoryRange = 7;
 
-    public static boolean editorWrapText = false;
+    public static boolean editorWrapText = true;
+
+    public static String fetchSource = "SQLite";
 }

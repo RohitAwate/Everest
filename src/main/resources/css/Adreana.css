@@ -23,7 +23,7 @@
 }
 
 #addressField {
-	-fx-background-color: #6e6e6e;
+    -fx-background-color: #707070;
 	-fx-text-fill: white;
 }
 
@@ -34,8 +34,8 @@
 
 .combo-box .list-cell {
     -fx-background-color: #282828;
-    -fx-pref-height: 40px;
-    -fx-font-size: 15px;
+    -fx-pref-height: 35px;
+    -fx-font-size: 14px;
     -fx-text-fill: #d4d4d4;
     -fx-padding: 0 0 0 10px;
 }
@@ -63,8 +63,9 @@
     -fx-background-color: transparent;
 }
 
-#sendButton {
-	-fx-background-color: #c45015;
+#sendButton,
+#sendButtonPane {
+    -fx-background-color: #282828;
 }
 
 #responseDetails {
@@ -96,15 +97,15 @@
 }
 
 /* Home window tab */
-#homeWindowTabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
+#tabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
     -fx-background-color: white;
 }
 
-#homeWindowTabPane:top .tab-header-area .headers-region .tab:hover:top {
+#tabPane:top .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: orangered;
 }
 
-#homeWindowTabPane:top .tab-header-area .headers-region .tab:selected:top {
+#tabPane:top .tab-header-area .headers-region .tab:selected:top {
     -fx-background-color: #505050;
 }
 
@@ -142,6 +143,14 @@
     -fx-faint-focus-color: transparent;
 }
 
+#newTabButton {
+    -fx-background-color: #6a6a6a;
+}
+
+#newTabButton:hover {
+    -fx-background-color: cornflowerblue;
+}
+
 .tab-pane:top .tab-header-area .headers-region .tab:top {
     -fx-background-color: #6a6a6a;
 }
@@ -149,6 +158,10 @@
 /* Tab titles */
 .tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
     -fx-fill: white;
+}
+
+.tab:selected .tab-close-button:hover {
+    -fx-background-color: #282828;
 }
 
 /* Request options (Headers, Authorization, etc) tab */
@@ -197,7 +210,14 @@
     -fx-padding: 0px;
 }
 
-#keyField, #valueField, #filePathField {
+#keyField, #valueField {
+    -fx-prompt-text-fill: #919191;
+    -fx-background-color: #303030;
+    -fx-text-fill: white;
+}
+
+/* Binary tab */
+#filePathBox, #filePathField {
     -fx-prompt-text-fill: #919191;
     -fx-background-color: #303030;
     -fx-text-fill: white;
@@ -226,7 +246,7 @@
 }
 
 #browseButton {
-    -fx-background-color: #a2a2a2;
+    -fx-background-color: #bababa;
 }
 
 #browseButton:hover {
@@ -270,6 +290,12 @@
 }
 
 /* History item */
+#methodLabel {
+    -fx-font-family: sans-serif;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
 #historyItemBox {
     -fx-background-color: #353535;
 }
@@ -282,7 +308,7 @@
     -fx-font-size: 15px;
 }
 
-/* Response Visualizer */
+/* ---------------------------- TreeVisualizer ------------------------- */
 #responseTabPane:bottom .tab-header-area .tab-header-background,
 #responseTabPane:bottom .tab-header-area .headers-region .tab:bottom {
     -fx-background-color: #282828;
@@ -305,28 +331,40 @@
     -fx-background-color: #2a2a2a;
 }
 
-.visualizerLabel {
+#rawInputTypeBox,
+#responseTypeBox {
+    -fx-background-color: #505050;
+}
+
+#rawInputTypeBox .list-cell,
+#responseTypeBox .list-cell {
+    -fx-text-fill: azure;
+    -fx-font-size: 13px;
+    -fx-background-color: #505050;
+}
+
+#rawInputTypeBox .list-cell:hover,
+#responseTypeBox .list-cell:hover {
+    -fx-background-color: cornflowerblue;
+}
+
+/* Response Headers Viewer */
+.response-header-label {
     -fx-font-family: "Liberation Mono", "Consolas", "Courier New", "Monaco", "DejaVu Sans Mono", monospace;
 }
 
-.visualizerRootLabel {
-    -fx-font-size: 17px;
-    -fx-text-fill: #dedede;
-    -fx-font-weight: bold;
-}
-
-.visualizerKeyLabel {
-    -fx-font-size: 17px;
+.response-header-key-label {
+    -fx-font-size: 16px;
     -fx-text-fill: #bababa;
     -fx-font-weight: bold;
 }
 
-.visualizerValueLabel {
+.response-header-value-label {
     -fx-font-size: 16px;
     -fx-text-fill: #959595;
 }
 
-/* Visualizer tree */
+/* Tree Visualizer */
 .tree-view {
     -fx-background-color: #353535;
 }
@@ -342,6 +380,9 @@
 
 .tree-cell {
     -fx-background-color: #282828;
+    -fx-text-fill: azure;
+    -fx-font-size: 14px;
+    -fx-font-family: "Liberation Mono", "Consolas", "Courier New", "Monaco", "DejaVu Sans Mono", monospace;
     -fx-border-width: 0px;
 }
 
@@ -351,7 +392,7 @@
 
 .tree-cell:selected,
 .tree-cell:focused {
-    -fx-background-color: cornflowerblue;
+    -fx-background-color: darkred;
 }
 
 .tree-cell:selected .label {
@@ -365,7 +406,7 @@
     -fx-padding: 0;
 }
 
-/* SnackBar */
+/* Snackbar */
 .jfx-snackbar-content {
     -fx-background-color: black;
 }

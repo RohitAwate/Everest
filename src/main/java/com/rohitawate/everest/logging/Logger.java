@@ -79,8 +79,6 @@ class Logger {
             } else {
                 builder.append("Stack trace unavailable.");
             }
-        } else {
-            builder.append("");
         }
 
         logEntry = logEntry.replace("%% StackTrace %%", builder.toString());

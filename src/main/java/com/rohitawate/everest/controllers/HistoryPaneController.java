@@ -17,8 +17,8 @@
 package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.search.SearchablePaneController;
-import com.rohitawate.everest.controllers.state.DashboardState;
-import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.sync.SyncManager;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseButton;
@@ -28,16 +28,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class HistoryPaneController extends SearchablePaneController<DashboardState> {
-
-	private List<Consumer<DashboardState>> stateClickHandler = new LinkedList<>();
+public class HistoryPaneController extends SearchablePaneController<ComposerState> {
+    private List<Consumer<ComposerState>> stateClickHandler = new LinkedList<>();
+	private SyncManager syncManager;
 
 	@Override
-	protected List<DashboardState> loadInitialEntries() {
-		return Services.historyManager.getHistory();
+    protected List<ComposerState> loadInitialEntries() {
+		return syncManager.getHistory();
 	}
 
-	protected SearchEntry<DashboardState> createEntryFromState(DashboardState state) throws IOException {
+    protected SearchEntry<ComposerState> createEntryFromState(ComposerState state) throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryItem.fxml"));
 		Parent historyItem = loader.load();
 
@@ -53,13 +53,17 @@ public class HistoryPaneController extends SearchablePaneController<DashboardSta
 		return new SearchEntry<>(historyItem, controller);
 	}
 
-	private void handleClick(DashboardState state) {
-		for (Consumer<DashboardState> consumer : stateClickHandler) {
+    private void handleClick(ComposerState state) {
+        for (Consumer<ComposerState> consumer : stateClickHandler) {
 			consumer.accept(state);
 		}
 	}
 
-	public void addItemClickHandler(Consumer<DashboardState> handler) {
+    public void addItemClickHandler(Consumer<ComposerState> handler) {
 		stateClickHandler.add(handler);
+	}
+
+	public void setSyncManager(SyncManager syncManager) {
+		this.syncManager = syncManager;
 	}
 }

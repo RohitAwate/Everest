@@ -23,7 +23,7 @@
 .everest-code-area .text {
     -fx-fill: #ababab;
     -fx-font-family: "Liberation Mono", "Consolas", "Courier New", "Monaco", "DejaVu Sans Mono", monospace;
-    -fx-font-size: 17px;
+    -fx-font-size: 15px;
 }
 
 .everest-code-area .caret {

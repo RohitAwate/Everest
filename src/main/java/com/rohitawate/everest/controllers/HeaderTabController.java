@@ -16,13 +16,12 @@
 
 package com.rohitawate.everest.controllers;
 
-import com.rohitawate.everest.controllers.state.FieldState;
-import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.ThemeManager;
+import com.rohitawate.everest.state.FieldState;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -49,37 +48,41 @@ public class HeaderTabController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         controllers = new ArrayList<>();
-        controllersCount = new SimpleIntegerProperty(controllers.size());
+        controllersCount = new SimpleIntegerProperty(0);
         addHeader();
     }
 
     public void addHeader(FieldState state) {
-        addHeader(state.key, state.value, null, state.checked);
+        addHeader(state.key, state.value, state.checked);
     }
 
     private void addHeader() {
-        addHeader("", "", null, false);
+        addHeader("", "", false);
     }
 
-    @FXML
-    private void addHeader(ActionEvent event) {
-        addHeader("", "", event, false);
-    }
-
-    private void addHeader(String key, String value, ActionEvent event, boolean checked) {
+    private void addHeader(String key, String value, boolean checked) {
         /*
             Re-uses previous field if it is empty, else loads a new one.
             A value of null for the 'event' parameter indicates that the method call
             came from code and not from the user. This call is made while recovering
             the application state.
          */
-        if (controllers.size() > 0 && event == null) {
+        if (controllers.size() > 0) {
             StringKeyValueFieldController previousController = controllers.get(controllers.size() - 1);
 
             if (previousController.isKeyFieldEmpty() &&
                     previousController.isValueFieldEmpty()) {
                 previousController.setKeyField(key);
                 previousController.setValueField(value);
+                previousController.setChecked(checked);
+
+                /*
+                    For when the last field is loaded from setState.
+                    This makes sure an extra blank field is always present.
+                */
+                if (!key.equals("") && !value.equals(""))
+                    addHeader();
+
                 return;
             }
         }
@@ -100,9 +103,10 @@ public class HeaderTabController implements Initializable {
                 controllers.remove(controller);
                 controllersCount.set(controllersCount.get() - 1);
             });
+            controller.setKeyHandler(keyEvent -> addHeader());
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not add string field.", e, LocalDateTime.now());
+            LoggingService.logSevere("Could not add string field.", e, LocalDateTime.now());
         }
     }
 
@@ -123,15 +127,27 @@ public class HeaderTabController implements Initializable {
     }
 
     /**
-     * Return a list of the state of all the non-empty fields in the Headers tab.
+     * Return a list of the state of all the fields in the Headers tab.
      */
-    public ArrayList<FieldState> getFieldStates() {
+    public List<FieldState> getFieldStates() {
         ArrayList<FieldState> states = new ArrayList<>();
 
-        for (StringKeyValueFieldController controller : controllers)
+        for (StringKeyValueFieldController controller : controllers) {
             if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
                 states.add(controller.getState());
+        }
 
         return states;
+    }
+
+    void clear() {
+        if (headers != null)
+            headers.clear();
+        if (controllers != null)
+            controllers.clear();
+
+        headersBox.getChildren().clear();
+        controllersCount.set(0);
+        addHeader();
     }
 }

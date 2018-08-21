@@ -25,27 +25,12 @@ public abstract class EverestRequest implements Serializable {
     private URL target;
     private HashMap<String, String> headers;
 
-    EverestRequest() {
-    }
-
-    EverestRequest(String target) throws MalformedURLException {
-        this.target = new URL(target);
-    }
-
-    EverestRequest(URL target) {
-        this.target = target;
-    }
-
     public void setTarget(String target) throws MalformedURLException {
         this.target = new URL(target);
     }
 
     public URL getTarget() {
         return this.target;
-    }
-
-    public void addHeader(String key, String value) {
-        headers.put(key, value);
     }
 
     public void setHeaders(HashMap<String, String> headers) {

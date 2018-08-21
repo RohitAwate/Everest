@@ -16,23 +16,40 @@
   ~ limitations under the License.
   -->
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.layout.StackPane?>
-
-<StackPane fx:id="homeWindowSP"
-		   stylesheets="@../../css/Adreana.css"
-		   xmlns="http://javafx.com/javafx/8.0.141"
-		   xmlns:fx="http://javafx.com/fxml/1"
-		   fx:controller="com.rohitawate.everest.controllers.HomeWindowController">
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<StackPane fx:id="homeWindowSP" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
+           xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.HomeWindowController">
 	<children>
-		<SplitPane fx:id="splitPane" dividerPositions="0.3">
+        <SplitPane fx:id="splitPane">
 			<items>
-				<fx:include fx:id="historyPane" source="HistoryPane.fxml" />
-				<TabPane fx:id="homeWindowTabPane"
-					tabClosingPolicy="ALL_TABS" tabMaxHeight="30.0" tabMaxWidth="200.0"
-					tabMinHeight="30.0" tabMinWidth="200.0"
-					SplitPane.resizableWithParent="false" />
+                <VBox fx:id="tabDashboardBox" alignment="TOP_CENTER" SplitPane.resizableWithParent="false">
+                    <children>
+                        <HBox VBox.vgrow="NEVER">
+                            <children>
+                                <JFXButton fx:id="newTabButton" contentDisplay="CENTER" minHeight="35.0" minWidth="40.0"
+                                           onAction="#addTab" ripplerFill="WHITE" HBox.hgrow="ALWAYS">
+                                    <graphic>
+                                        <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true"
+                                                   preserveRatio="true">
+                                            <image>
+                                                <Image url="@../../assets/NewTabPlus.png"/>
+                                            </image>
+                                        </ImageView>
+                                    </graphic>
+                                </JFXButton>
+                                <TabPane fx:id="tabPane" maxHeight="35.0" minHeight="35.0" minWidth="220.0"
+                                         tabClosingPolicy="ALL_TABS" tabMaxHeight="35.0" tabMaxWidth="200.0"
+                                         tabMinHeight="35.0" tabMinWidth="200.0" HBox.hgrow="ALWAYS"/>
+                            </children>
+                        </HBox>
+                        <StackPane fx:id="dashboardContainer" VBox.vgrow="ALWAYS"/>
+                    </children>
+                </VBox>
 			</items>
 		</SplitPane>
 	</children>

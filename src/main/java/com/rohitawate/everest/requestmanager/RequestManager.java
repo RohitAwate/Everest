@@ -15,38 +15,56 @@
  */
 package com.rohitawate.everest.requestmanager;
 
+import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
-import com.rohitawate.everest.exceptions.UnreliableResponseException;
-import com.rohitawate.everest.models.requests.EverestRequest;
+import com.rohitawate.everest.models.requests.*;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.settings.Settings;
 import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class RequestManager extends Service<EverestResponse> {
-    private final Client client;
-    long initialTime;
-    long finalTime;
+/**
+ * Manages all the requests made through Everest.
+ * Converts EverestRequests into JAX-RS Invocations, which are then processed by Jersey.
+ * Also parses the ServerResponse and returns an EverestResponse.
+ * <p>
+ * Previously, Everest used separate managers for GET, Data (POST, PUT and PATCH) and DELETE requests.
+ * However, RequestManager extends JavaFX's Service class, which is expensive to create objects of.
+ * This made the creation of separate pools for every kind of RequestManager too expensive, memory-wise.
+ * Thus, now a single class manages all kinds of Requests thereby requiring only a single kind of pool.
+ * Also, this enables us to re-use inactive RequestManagers for all kinds of requests.
+ * For example, previously, if a GETRequestManager was requested by Everest, and all GETRequestManagers were running,
+ * a new one would be created even if a DELETERequestManager was idle.
+ * <p>
+ * TLDR: At the cost of some reduced semantic clarity, the old, separate-for-every-type-of-request RequestManagers
+ * are now replaced by this single works-for-all one to save some serious amount of memory and to facilitate better re-use.
+ */
+public class RequestManager extends Service<EverestResponse> {
+    private static final Client client;
 
-    EverestRequest request;
-    EverestResponse response;
-    Builder requestBuilder;
-
-    RequestManager() {
-        this.client = initClient();
-    }
-
-    private Client initClient() {
-        Client client;
+    static {
         client = ClientBuilder.newBuilder()
                 .register(MultiPartFeature.class)
                 .build();
@@ -58,8 +76,47 @@ public abstract class RequestManager extends Service<EverestResponse> {
             client.property(ClientProperties.CONNECT_TIMEOUT, Settings.connectionTimeOut);
         if (Settings.connectionReadTimeOutEnable)
             client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
+    }
 
-        return client;
+    private long initialTime;
+    private long finalTime;
+
+    private EverestRequest request;
+    private EverestResponse response;
+    private Builder requestBuilder;
+
+    /**
+     * Creates a JavaFX Task for processing the required kind of request.
+     */
+    @Override
+    protected Task<EverestResponse> createTask() throws ProcessingException {
+        return new Task<EverestResponse>() {
+            @Override
+            protected EverestResponse call() throws Exception {
+                Response serverResponse = null;
+
+                if (request.getClass().equals(GETRequest.class)) {
+                    initialTime = System.currentTimeMillis();
+                    serverResponse = requestBuilder.get();
+                    finalTime = System.currentTimeMillis();
+                } else if (request.getClass().equals(DataRequest.class)) {
+                    DataRequest dataRequest = (DataRequest) request;
+
+                    Invocation invocation = appendBody(dataRequest);
+                    initialTime = System.currentTimeMillis();
+                    serverResponse = invocation.invoke();
+                    finalTime = System.currentTimeMillis();
+                } else if (request.getClass().equals(DELETERequest.class)) {
+                    initialTime = System.currentTimeMillis();
+                    serverResponse = requestBuilder.delete();
+                    finalTime = System.currentTimeMillis();
+                }
+
+                processServerResponse(serverResponse);
+
+                return response;
+            }
+        };
     }
 
     public void setRequest(EverestRequest request) {
@@ -68,24 +125,27 @@ public abstract class RequestManager extends Service<EverestResponse> {
         appendHeaders();
     }
 
-    private void appendHeaders() {
-        HashMap<String, String> headers = request.getHeaders();
-        Map.Entry<String, String> mapEntry;
-
-        for (Map.Entry entry : headers.entrySet()) {
-            mapEntry = (Map.Entry) entry;
-            requestBuilder.header(mapEntry.getKey(), mapEntry.getValue());
-        }
+    public EverestRequest getRequest() {
+        return this.request;
     }
 
-    void processServerResponse(Response serverResponse)
-            throws UnreliableResponseException, RedirectException {
-        if (serverResponse == null)
-            throw new UnreliableResponseException("The server did not respond.",
+    private void appendHeaders() {
+        request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
+        requestBuilder.header("User-Agent", "Everest");
+    }
+
+    /**
+     * Takes a ServerResponse and extracts all the headers, the body, the response time and other details
+     * into a EverestResponse.
+     */
+    private void processServerResponse(Response serverResponse)
+            throws NullResponseException, RedirectException {
+        if (serverResponse == null) {
+            throw new NullResponseException("The server did not respond.",
                     "Like that crush from high school..");
-        else if (serverResponse.getStatus() == 301) {
-            String newLocation = serverResponse.getHeaderString("location");
-            throw new RedirectException(newLocation);
+        } else if (serverResponse.getStatus() == 301 || serverResponse.getStatus() == 302) {
+            throw new RedirectException(
+                    serverResponse.getHeaderString("location"));
         }
 
         String responseBody = serverResponse.readEntity(String.class);
@@ -97,5 +157,155 @@ public abstract class RequestManager extends Service<EverestResponse> {
         response.setMediaType(serverResponse.getMediaType());
         response.setStatusCode(serverResponse.getStatus());
         response.setSize(responseBody.length());
+    }
+
+    public void addHandlers(EventHandler<WorkerStateEvent> running,
+                            EventHandler<WorkerStateEvent> succeeded,
+                            EventHandler<WorkerStateEvent> failed,
+                            EventHandler<WorkerStateEvent> cancelled) {
+        setOnRunning(running);
+        setOnSucceeded(succeeded);
+        setOnFailed(failed);
+        setOnCancelled(cancelled);
+    }
+
+    public void removeHandlers() {
+        removeEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, getOnRunning());
+        removeEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, getOnSucceeded());
+        removeEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, getOnFailed());
+        removeEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, getOnCancelled());
+    }
+
+    /**
+     * Adds the request body based on the content type and generates an invocation.
+     * Used for DataRequests.
+     *
+     * @return invocation object
+     */
+    private Invocation appendBody(DataRequest dataRequest) throws Exception {
+        /*
+            Checks if a custom mime-type is mentioned in the headers.
+            If present, it will override the auto-determined one.
+         */
+        String overriddenContentType = request.getHeaders().get("Content-Type");
+        Invocation invocation = null;
+        String requestType = dataRequest.getRequestType();
+
+        switch (dataRequest.getContentType()) {
+            case MediaType.MULTIPART_FORM_DATA:
+                // This enables Everest to make requests with an empty body.
+                if (dataRequest.getStringTuples().size() == 0 && dataRequest.getFileTuples().size() == 0) {
+                    invocation = getInvocation(MediaType.MULTIPART_FORM_DATA, requestType, null, requestBuilder);
+                    break;
+                }
+
+                FormDataMultiPart formData = new FormDataMultiPart();
+
+                // Adding the string tuples to the request
+                HashMap<String, String> pairs = dataRequest.getStringTuples();
+                for (Map.Entry<String, String> entry : pairs.entrySet()) {
+                    formData.field(entry.getKey(), entry.getValue());
+                }
+
+                String filePath;
+                File file;
+                boolean fileException = false;
+                String fileExceptionMessage = null;
+                pairs = dataRequest.getFileTuples();
+
+                // Adding the file tuples to the request
+                for (Map.Entry<String, String> entry : pairs.entrySet()) {
+                    filePath = entry.getValue();
+                    file = new File(filePath);
+
+                    if (file.exists())
+                        formData.bodyPart(new FileDataBodyPart(entry.getKey(),
+                                file, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+                    else {
+                        fileException = true;
+                        // For pretty-printing FileNotFoundException to the UI
+                        fileExceptionMessage = " - " + filePath + "\n";
+                    }
+                }
+
+                if (fileException) {
+                    throw new FileNotFoundException(fileExceptionMessage);
+                }
+
+                formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+
+                invocation = getInvocation(MediaType.MULTIPART_FORM_DATA, requestType, formData, requestBuilder);
+                break;
+            case MediaType.APPLICATION_OCTET_STREAM:
+                if (overriddenContentType == null)
+                    overriddenContentType = MediaType.APPLICATION_OCTET_STREAM;
+                filePath = dataRequest.getBody();
+
+                // This enables Everest to make requests with empty bodies.
+                if (filePath.equals("")) {
+                    invocation = getInvocation(overriddenContentType, requestType, null, requestBuilder);
+                    break;
+                }
+
+                File check = new File(filePath);
+
+                if (!check.exists()) {
+                    throw new FileNotFoundException(filePath);
+                }
+
+                FileInputStream stream = new FileInputStream(filePath);
+
+                invocation = getInvocation(overriddenContentType, requestType, stream, requestBuilder);
+                break;
+            case MediaType.APPLICATION_FORM_URLENCODED:
+                if (overriddenContentType == null)
+                    overriddenContentType = MediaType.APPLICATION_FORM_URLENCODED;
+
+                Form form = new Form();
+
+                for (Map.Entry<String, String> entry : dataRequest.getStringTuples().entrySet()) {
+                    form.param(entry.getKey(), entry.getValue());
+                }
+
+                invocation = getInvocation(overriddenContentType, requestType, form, requestBuilder);
+                break;
+            default:
+                // Handles raw data types (JSON, Plain text, XML, HTML)
+                String originalContentType = dataRequest.getContentType();
+                if (overriddenContentType == null)
+                    overriddenContentType = originalContentType;
+                switch (requestType) {
+                    case HTTPConstants.POST:
+                        invocation = requestBuilder
+                                .buildPost(Entity.entity(dataRequest.getBody(), overriddenContentType));
+                        break;
+                    case HTTPConstants.PUT:
+                        invocation = requestBuilder
+                                .buildPut(Entity.entity(dataRequest.getBody(), overriddenContentType));
+                        break;
+                    case HTTPConstants.PATCH:
+                        invocation = requestBuilder
+                                .build(HTTPConstants.PATCH, Entity.entity(dataRequest.getBody(), overriddenContentType));
+                        break;
+                }
+        }
+
+        return invocation;
+    }
+
+    private static Invocation getInvocation(String overriddenContentType, String requestType, Object entity, Builder requestBuilder) {
+        Invocation invocation;
+        switch (requestType) {
+            case HTTPConstants.POST:
+                invocation = requestBuilder.buildPost(Entity.entity(entity, overriddenContentType));
+                break;
+            case HTTPConstants.PUT:
+                invocation = requestBuilder.buildPut(Entity.entity(entity, overriddenContentType));
+                break;
+            default:
+                invocation = requestBuilder.build(HTTPConstants.PATCH, Entity.entity(entity, overriddenContentType));
+                break;
+        }
+        return invocation;
     }
 }

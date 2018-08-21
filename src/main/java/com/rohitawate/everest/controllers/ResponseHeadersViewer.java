@@ -23,8 +23,15 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-class ResponseHeadersViewer extends ScrollPane {
+import java.util.HashMap;
+
+public class ResponseHeadersViewer extends ScrollPane {
     private VBox container;
+    private HashMap<String, String> map;
+
+    private static final String responseHeaderLabel = "response-header-label";
+    private static final String keyLabelStyleClass = "response-header-key-label";
+    private static final String valueLabelStyleClass = "response-header-value-label";
 
     ResponseHeadersViewer() {
         this.container = new VBox();
@@ -33,19 +40,38 @@ class ResponseHeadersViewer extends ScrollPane {
 
         this.setFitToHeight(true);
         this.setFitToWidth(true);
+
+        map = new HashMap<>();
+    }
+
+    void populate(HashMap<String, String> headers) {
+        map.clear();
+        headers.forEach((key, value) -> map.put(key, value));
+        populate();
     }
 
     void populate(EverestResponse response) {
+        map.clear();
+        response.getHeaders().forEach((key, value) -> map.put(key, value.get(0)));
+        populate();
+    }
+
+    private void populate() {
         container.getChildren().clear();
 
-        response.getHeaders().forEach((key, value) -> {
+        map.forEach((key, value) -> {
             Label keyLabel = new Label(key + ": ");
-            keyLabel.getStyleClass().addAll("visualizerKeyLabel", "visualizerLabel");
+            keyLabel.getStyleClass().addAll(keyLabelStyleClass, responseHeaderLabel);
 
-            Label valueLabel = new Label(value.get(0));
-            valueLabel.getStyleClass().addAll("visualizerValueLabel", "visualizerLabel");
+            Label valueLabel = new Label(value);
+            valueLabel.getStyleClass().addAll(valueLabelStyleClass, responseHeaderLabel);
 
             container.getChildren().add(new HBox(keyLabel, valueLabel));
         });
+
+    }
+
+    public HashMap<String, String> getHeaders() {
+        return new HashMap<>(map);
     }
 }

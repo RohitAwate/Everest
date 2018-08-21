@@ -17,17 +17,19 @@
 package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
-import com.rohitawate.everest.controllers.codearea.EverestCodeArea.HighlightMode;
-import com.rohitawate.everest.controllers.state.DashboardState;
-import com.rohitawate.everest.controllers.state.FieldState;
-import com.rohitawate.everest.misc.Services;
+import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.ThemeManager;
+import com.rohitawate.everest.models.requests.HTTPConstants;
+import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.state.FieldState;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -53,6 +55,8 @@ public class BodyTabController implements Initializable {
     @FXML
     TextField filePathField;
     @FXML
+    private TabPane bodyTabPane;
+    @FXML
     private VBox rawVBox;
 
     EverestCodeArea rawInputArea;
@@ -61,7 +65,12 @@ public class BodyTabController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        rawInputTypeBox.getItems().addAll("PLAIN TEXT", "JSON", "XML", "HTML");
+        rawInputTypeBox.getItems().addAll(
+                HTTPConstants.JSON,
+                HTTPConstants.XML,
+                HTTPConstants.HTML,
+                HTTPConstants.PLAIN_TEXT
+        );
         rawInputTypeBox.getSelectionModel().select(0);
 
         rawInputArea = new EverestCodeArea();
@@ -71,21 +80,13 @@ public class BodyTabController implements Initializable {
 
         rawInputTypeBox.valueProperty().addListener(change -> {
             String type = rawInputTypeBox.getValue();
-            HighlightMode mode;
-            switch (type) {
-                case "JSON":
-                    mode = HighlightMode.JSON;
-                    break;
-                case "XML":
-                    mode = HighlightMode.XML;
-                    break;
-                case "HTML":
-                    mode = HighlightMode.HTML;
-                    break;
-                default:
-                    mode = HighlightMode.PLAIN;
+
+            if (type.equals(HTTPConstants.PLAIN_TEXT)) {
+                rawInputArea.setHighlighter(HighlighterFactory.getHighlighter(type));
+                return;
             }
-            rawInputArea.setMode(mode);
+
+            rawInputArea.setHighlighter(HighlighterFactory.getHighlighter(type));
         });
 
         try {
@@ -99,14 +100,14 @@ public class BodyTabController implements Initializable {
             urlTab.setContent(formTabContent);
             urlTabController = loader.getController();
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not load URL tab.", e, LocalDateTime.now());
+            LoggingService.logSevere("Could not load URL tab.", e, LocalDateTime.now());
         }
     }
 
     @FXML
     private void browseFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choose a binary file to add to request...");
+        fileChooser.setTitle("Choose a binary file to add to the request");
         Window dashboardWindow = filePathField.getScene().getWindow();
         String filePath;
 
@@ -119,51 +120,51 @@ public class BodyTabController implements Initializable {
         filePathField.setText(filePath);
     }
 
-    public DashboardState getState() {
-        DashboardState state = new DashboardState();
+    @FXML
+    private void clearFilePath() {
+        filePathField.clear();
+    }
 
-        state.rawBodyType = rawInputTypeBox.getValue();
-        state.rawBody = rawInputArea.getText();
+    public ComposerState getState() {
+        ComposerState state = new ComposerState();
+
         state.urlStringTuples = urlTabController.getFieldStates();
         state.formStringTuples = formDataTabController.getStringFieldStates();
         state.formFileTuples = formDataTabController.getFileFieldStates();
         state.binaryFilePath = filePathField.getText();
 
-        if (rawTab.isSelected()) {
-            switch (rawInputTypeBox.getValue()) {
-                case "JSON":
-                    state.contentType = MediaType.APPLICATION_JSON;
-                    break;
-                case "XML":
-                    state.contentType = MediaType.APPLICATION_XML;
-                    break;
-                case "HTML":
-                    state.contentType = MediaType.TEXT_HTML;
-                    break;
-                default:
-                    state.contentType = MediaType.TEXT_PLAIN;
-            }
-        } else if (formTab.isSelected()) {
-            state.contentType = MediaType.MULTIPART_FORM_DATA;
-        } else if (urlTab.isSelected()) {
-            state.contentType = MediaType.APPLICATION_FORM_URLENCODED;
-        } else {
-            state.contentType = MediaType.APPLICATION_OCTET_STREAM;
+        state.rawBody = rawInputArea.getText();
+        state.rawBodyBoxValue = HTTPConstants.getComplexContentType(rawInputTypeBox.getValue());
+
+        switch (bodyTabPane.getSelectionModel().getSelectedIndex()) {
+            case 1:
+                state.contentType = MediaType.APPLICATION_FORM_URLENCODED;
+                break;
+            case 2:
+                state.contentType = state.rawBodyBoxValue;
+                break;
+            case 3:
+                state.contentType = MediaType.APPLICATION_OCTET_STREAM;
+                break;
+            default:
+                state.contentType = MediaType.MULTIPART_FORM_DATA;
         }
 
         return state;
     }
 
-    public void setState(DashboardState state) {
+    public void setState(ComposerState state) {
         // Adding URL tab's tuples
-        if (state.urlStringTuples != null)
+        if (state.urlStringTuples != null) {
             for (FieldState fieldState : state.urlStringTuples)
                 urlTabController.addField(fieldState);
+        }
 
         // Adding Form tab's string tuples
-        if (state.formStringTuples != null)
+        if (state.formStringTuples != null) {
             for (FieldState fieldState : state.formStringTuples)
                 formDataTabController.addStringField(fieldState);
+        }
 
         // Adding Form tab's file tuples
         if (state.formFileTuples != null)
@@ -171,30 +172,47 @@ public class BodyTabController implements Initializable {
                 formDataTabController.addFileField(fieldState);
 
         setRawTab(state);
-
         filePathField.setText(state.binaryFilePath);
-    }
 
-    private void setRawTab(DashboardState state) {
-        HighlightMode mode;
-
-        if (state.rawBodyType != null && state.rawBody != null) {
-            switch (state.rawBodyType) {
-                case "JSON":
-                    mode = HighlightMode.JSON;
+        int tab = 0;
+        if (state.contentType != null) {
+            switch (state.contentType) {
+                case MediaType.APPLICATION_OCTET_STREAM:
+                    tab = 3;
                     break;
-                case "XML":
-                    mode = HighlightMode.XML;
+                case MediaType.APPLICATION_FORM_URLENCODED:
+                    tab = 1;
                     break;
-                case "HTML":
-                    mode = HighlightMode.HTML;
+                case MediaType.APPLICATION_JSON:
+                case MediaType.APPLICATION_XML:
+                case MediaType.TEXT_HTML:
+                case MediaType.TEXT_PLAIN:
+                    tab = 2;
                     break;
                 default:
-                    mode = HighlightMode.PLAIN;
+                    tab = 0;
             }
-            rawInputArea.setText(state.rawBody, mode);
+        }
+
+        bodyTabPane.getSelectionModel().select(tab);
+    }
+
+    void reset() {
+        urlTabController.clear();
+        formDataTabController.clear();
+        rawInputArea.clear();
+        rawInputTypeBox.setValue(HTTPConstants.PLAIN_TEXT);
+        filePathField.clear();
+    }
+
+    private void setRawTab(ComposerState state) {
+        if (state.rawBodyBoxValue != null && state.rawBody != null) {
+            String simplifiedContentType = HTTPConstants.getSimpleContentType(state.rawBodyBoxValue);
+            rawInputTypeBox.setValue(simplifiedContentType);
+            rawInputArea.setText(state.rawBody, HighlighterFactory.getHighlighter(simplifiedContentType));
         } else {
-            rawInputArea.setText("", HighlightMode.PLAIN);
+            rawInputTypeBox.setValue(HTTPConstants.PLAIN_TEXT);
+            rawInputArea.setHighlighter(HighlighterFactory.getHighlighter(HTTPConstants.PLAIN_TEXT));
         }
     }
 }

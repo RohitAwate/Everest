@@ -16,18 +16,9 @@
 
 package com.rohitawate.everest.models.requests;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+/**
+ * Convenience class to represent an HTTP request which uses the HTTP DELETE method.
+ */
 public class DELETERequest extends EverestRequest {
-    public DELETERequest() {
-    }
 
-    public DELETERequest(String target) throws MalformedURLException {
-        super(target);
-    }
-
-    public DELETERequest(URL target) {
-        super(target);
-    }
 }

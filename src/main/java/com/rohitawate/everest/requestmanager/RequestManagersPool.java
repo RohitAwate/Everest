@@ -19,70 +19,26 @@ package com.rohitawate.everest.requestmanager;
 import java.util.ArrayList;
 
 /**
- * Provides the various RequestManagers employed by Everest.
+ * Provides a dynamically-growing pool RequestManagers used by Everest.
  * <p>
- * Pools are created as needed i.e. the first DELETE request
- * will create the pool of DELETERequestManagers. If a DELETE
- * request is never made, the pool won't be created. Same applies
- * for all other types of requests.
- * <p>
- * When demanding a RequestManager, the pool is checked linearly.
+ * The manager() method when invoked, searches the pool linearly.
  * The first RequestManager which is not currently running will be
  * returned to the caller. If all the managers in the pool are running,
- * a new one is created, added to the pool, and returned.
+ * a new one will be created, added to the pool, and returned.
  */
 public class RequestManagersPool {
-    private ArrayList<GETRequestManager> getManagers;
-    private ArrayList<DataDispatchRequestManager> dataManagers;
-    private ArrayList<DELETERequestManager> deleteManagers;
+    private static ArrayList<RequestManager> pool = new ArrayList<>();
 
-    public GETRequestManager get() {
-        if (getManagers == null)
-            getManagers = new ArrayList<>();
-
-        for (GETRequestManager getManager : getManagers) {
-            if (!getManager.isRunning()) {
-                getManager.reset();
-                return getManager;
+    public static RequestManager manager() {
+        for (RequestManager manager: pool) {
+            if (!manager.isRunning()) {
+                manager.reset();
+                return manager;
             }
         }
 
-        GETRequestManager newManager = new GETRequestManager();
-        getManagers.add(newManager);
-
-        return newManager;
-    }
-
-    public DataDispatchRequestManager data() {
-        if (dataManagers == null)
-            dataManagers = new ArrayList<>();
-
-        for (DataDispatchRequestManager dataManager : dataManagers) {
-            if (!dataManager.isRunning()) {
-                dataManager.reset();
-                return dataManager;
-            }
-        }
-
-        DataDispatchRequestManager newManager = new DataDispatchRequestManager();
-        dataManagers.add(newManager);
-
-        return newManager;
-    }
-
-    public DELETERequestManager delete() {
-        if (deleteManagers == null)
-            deleteManagers = new ArrayList<>();
-
-        for (DELETERequestManager deleteManager : deleteManagers) {
-            if (!deleteManager.isRunning()) {
-                deleteManager.reset();
-                return deleteManager;
-            }
-        }
-
-        DELETERequestManager newManager = new DELETERequestManager();
-        deleteManagers.add(newManager);
+        RequestManager newManager = new RequestManager();
+        pool.add(newManager);
 
         return newManager;
     }

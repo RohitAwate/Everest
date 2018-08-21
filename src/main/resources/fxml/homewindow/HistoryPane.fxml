@@ -22,34 +22,33 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-
-<VBox fx:id="searchPane" xmlns="http://javafx.com/javafx/8.0.141"
-           xmlns:fx="http://javafx.com/fxml/1" alignment="TOP_CENTER" maxWidth="450.0"
-	minWidth="400.0" SplitPane.resizableWithParent="false" fx:controller="com.rohitawate.everest.controllers.HistoryPaneController">
+<VBox fx:id="searchPane" alignment="TOP_CENTER" maxWidth="310.0" minWidth="310.0" stylesheets="@../../css/Adreana.css"
+      SplitPane.resizableWithParent="false" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rohitawate.everest.controllers.HistoryPaneController">
 	<children>
-		<HBox fx:id="historySearchFieldBox" alignment="CENTER"
-			fillHeight="false">
+        <HBox fx:id="historySearchFieldBox" alignment="CENTER" fillHeight="false">
 			<VBox.margin>
 				<Insets />
 			</VBox.margin>
 			<children>
-				<ImageView fitHeight="20.0" fitWidth="20.0"
-					pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
+                <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true"
+                           HBox.hgrow="ALWAYS">
 					<image>
 						<Image url="@../../assets/Search.png" />
 					</image>
 				</ImageView>
-				<TextField fx:id="searchTextField" styleClass="searchTextField" promptText="SEARCH HISTORY"
-					HBox.hgrow="ALWAYS">
+                <TextField fx:id="searchTextField" promptText="SEARCH HISTORY" styleClass="searchTextField"
+                           HBox.hgrow="ALWAYS">
 					<padding>
 						<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
 					</padding>
+                    <font>
+                        <Font size="13.0"/>
+                    </font>
 				</TextField>
-				<JFXButton fx:id="clearSearchFieldButton"
-					ripplerFill="WHITE" HBox.hgrow="ALWAYS">
+                <JFXButton fx:id="clearSearchFieldButton" ripplerFill="WHITE" HBox.hgrow="ALWAYS">
 					<graphic>
-						<ImageView fitHeight="20.0" fitWidth="20.0"
-							pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
 							<image>
 								<Image url="@../../assets/BackspaceArrow.png" />
 							</image>
@@ -58,29 +57,26 @@
 				</JFXButton>
 			</children>
 			<padding>
-				<Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                <Insets bottom="5.0" left="20.0" right="10.0" top="5.0"/>
 			</padding>
 		</HBox>
 		<StackPane VBox.vgrow="ALWAYS">
 			<children>
 				<StackPane>
 					<children>
-						<ScrollPane fx:id="historyScrollPane"
-							fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
+                        <ScrollPane fx:id="historyScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
 							<content>
-								<VBox fx:id="searchTab" alignment="TOP_CENTER"
-									spacing="5.0">
+                                <VBox fx:id="searchTab" alignment="TOP_CENTER" spacing="5.0">
 									<padding>
-										<Insets bottom="20.0" left="20.0" right="20.0"
-											top="20.0" />
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
 									</padding>
 								</VBox>
 							</content>
 						</ScrollPane>
 						<StackPane fx:id="searchPromptLayer">
 							<children>
-								<Label text="YOUR REQUESTS HISTORY WILL APPEAR HERE"
-									textAlignment="CENTER" textFill="#575757" wrapText="true">
+                                <Label text="YOUR REQUESTS HISTORY WILL APPEAR HERE" textAlignment="CENTER"
+                                       textFill="#575757" wrapText="true">
 									<font>
 										<Font size="25.0" />
 									</font>
@@ -94,44 +90,40 @@
 				</StackPane>
 				<StackPane fx:id="searchLayer">
 					<children>
-						<VBox alignment="TOP_CENTER">
+                        <VBox alignment="TOP_CENTER">
 							<children>
-								<Label graphicTextGap="10.0" text="SEARCH RESULTS"
-									textFill="#199F6F">
+                                <Label graphicTextGap="10.0" text="SEARCH RESULTS" textFill="#4ab98e">
 									<VBox.margin>
-										<Insets bottom="10.0" left="10.0" right="10.0"
-											top="10.0" />
+                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
 									</VBox.margin>
 									<font>
 										<Font size="19.0" />
 									</font>
 								</Label>
-								<ScrollPane fx:id="searchScrollPane"
-									fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER">
+                                <ScrollPane fx:id="searchScrollPane" fitToHeight="true" fitToWidth="true"
+                                            hbarPolicy="NEVER">
 									<content>
-										<VBox fx:id="searchBox" alignment="TOP_CENTER"
-											spacing="5.0">
+                                        <VBox fx:id="searchBox" alignment="TOP_CENTER" spacing="5.0">
 											<padding>
-												<Insets bottom="20.0" left="20.0" right="20.0"
-													top="20.0" />
+                                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
 											</padding>
 										</VBox>
 									</content>
 								</ScrollPane>
 							</children>
 						</VBox>
-						<StackPane fx:id="searchFailedLayer">
+                        <StackPane fx:id="searchFailedLayer" visible="false">
 							<children>
 								<VBox alignment="CENTER">
 									<children>
-										<ImageView fitHeight="100.0" fitWidth="100.0"
-											opacity="0.51" pickOnBounds="true" preserveRatio="true">
+                                        <ImageView fitHeight="100.0" fitWidth="100.0" opacity="0.51" pickOnBounds="true"
+                                                   preserveRatio="true">
 											<image>
 												<Image url="@../../assets/Explosion.png" />
 											</image>
 										</ImageView>
-										<Label text="NO RESULTS" textAlignment="CENTER"
-											textFill="#bfbfbf" wrapText="true" VBox.vgrow="ALWAYS">
+                                        <Label text="NO RESULTS" textAlignment="CENTER" textFill="#bfbfbf"
+                                               wrapText="true" VBox.vgrow="ALWAYS">
 											<font>
 												<Font size="25.0" />
 											</font>

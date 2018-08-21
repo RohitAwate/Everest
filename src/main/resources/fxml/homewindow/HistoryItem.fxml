@@ -20,31 +20,23 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
-<HBox fx:id="historyItemBox" alignment="CENTER_LEFT" maxHeight="40.0" minHeight="40.0" minWidth="300.0" spacing="20.0"
-      stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.rohitawate.everest.controllers.HistoryItemController">
-   <children>
-      <StackPane maxWidth="80.0" minWidth="80.0" HBox.hgrow="ALWAYS">
-         <children>
-            <Label fx:id="requestType" textFill="ORANGERED" textOverrun="WORD_ELLIPSIS">
-               <font>
-                   <Font name="Liberation Mono Bold" size="18.0"/>
-               </font>
-            </Label>
-         </children>
-      </StackPane>
-      <Label fx:id="address" textFill="WHITE" HBox.hgrow="ALWAYS">
-         <font>
-            <Font size="15.0" />
-         </font>
-          <tooltip>
-              <Tooltip fx:id="tooltip" text="tooltip"/>
-          </tooltip>
-      </Label>
-   </children>
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
+<HBox fx:id="historyItemBox" alignment="CENTER_LEFT" maxHeight="35.0" maxWidth="300.0" minHeight="35.0" minWidth="250.0"
+      spacing="10.0" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.HistoryItemController">
+    <children>
+        <Label fx:id="methodLabel" minWidth="50.0">
+        </Label>
+        <Label fx:id="address" textFill="#bababa" textOverrun="WORD_ELLIPSIS" HBox.hgrow="ALWAYS">
+            <font>
+                <Font size="13.0"/>
+            </font>
+            <tooltip>
+                <Tooltip fx:id="tooltip" text="tooltip"/>
+            </tooltip>
+        </Label>
+    </children>
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+    </padding>
 </HBox>

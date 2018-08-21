@@ -17,6 +17,7 @@
 package com.rohitawate.everest.controllers.search;
 
 import com.jfoenix.controls.JFXButton;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.Services;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -116,12 +117,12 @@ public abstract class SearchablePaneController<T> implements Initializable {
                 for (T state : entries)
                     addHistoryItem(state);
             } catch (InterruptedException | ExecutionException E) {
-                Services.loggingService.logSevere("Task thread interrupted while populating HistoryTab.", E,
+                LoggingService.logSevere("Task thread interrupted while populating HistoryTab.", E,
                         LocalDateTime.now());
             }
         });
 
-        entryLoader.setOnFailed(e -> Services.loggingService.logWarning("Failed to load history.",
+        entryLoader.setOnFailed(e -> LoggingService.logWarning("Failed to load history.",
                 (Exception) entryLoader.getException(), LocalDateTime.now()));
 
         Services.singleExecutor.execute(entryLoader);
@@ -149,7 +150,7 @@ public abstract class SearchablePaneController<T> implements Initializable {
 
             return searchEntry.getSearchable();
         } catch (IOException e) {
-            Services.loggingService.logSevere("Could not append HistoryItem to list.", e, LocalDateTime.now());
+            LoggingService.logSevere("Could not append HistoryItem to list.", e, LocalDateTime.now());
         }
 
         return null;

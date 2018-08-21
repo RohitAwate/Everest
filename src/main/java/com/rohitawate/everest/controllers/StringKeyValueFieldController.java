@@ -18,11 +18,15 @@ package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
-import com.rohitawate.everest.controllers.state.FieldState;
+import com.rohitawate.everest.state.FieldState;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.StringProperty;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Pair;
 
 import java.net.URL;
@@ -99,5 +103,22 @@ public class StringKeyValueFieldController implements Initializable {
 
     public void setChecked(boolean checked) {
         checkBox.setSelected(checked);
+    }
+
+    public void setKeyHandler(EventHandler<KeyEvent> handler) {
+        keyField.setOnKeyPressed(handler);
+        valueField.setOnKeyPressed(handler);
+    }
+
+    public BooleanProperty getSelectedProperty() {
+        return checkBox.selectedProperty();
+    }
+
+    public StringProperty getKeyProperty() {
+        return keyField.textProperty();
+    }
+
+    public StringProperty getValueProperty() {
+        return valueField.textProperty();
     }
 }

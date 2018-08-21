@@ -17,30 +17,13 @@
 package com.rohitawate.everest.misc;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.rohitawate.everest.controllers.HomeWindowController;
-import com.rohitawate.everest.history.HistoryManager;
-import com.rohitawate.everest.logging.Level;
-import com.rohitawate.everest.logging.LoggingService;
-import com.rohitawate.everest.requestmanager.RequestManagersPool;
 
 import java.util.concurrent.Executor;
 
 public class Services {
-    public static Thread startServicesThread;
-    public static HistoryManager historyManager;
-    public static LoggingService loggingService;
-    public static HomeWindowController homeWindowController;
     public static Executor singleExecutor;
-    public static RequestManagersPool pool;
 
-    public static void start() {
-        startServicesThread = new Thread(() -> {
-            loggingService = new LoggingService(Level.INFO);
-            historyManager = new HistoryManager();
-            singleExecutor = MoreExecutors.directExecutor();
-            pool = new RequestManagersPool();
-        });
-
-        startServicesThread.start();
+    static {
+        singleExecutor = MoreExecutors.directExecutor();
     }
 }

@@ -16,42 +16,20 @@
   ~ limitations under the License.
   -->
 
-<?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.VBox?>
 <VBox fx:id="headerTabContent" alignment="CENTER" stylesheets="@../../css/Adreana.css"
-      xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.rohitawate.everest.controllers.HeaderTabController">
     <children>
-        <HBox alignment="CENTER" VBox.vgrow="NEVER">
-            <VBox.margin>
-                <Insets/>
-            </VBox.margin>
-            <children>
-                <JFXButton fx:id="addHeaderButton" buttonType="RAISED" onAction="#addHeader" text=" NEW HEADER"
-                           textFill="WHITE" HBox.hgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="5.0" left="10.0" right="10.0" top="5.0"/>
-                    </padding>
-                    <graphic>
-                        <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@../../assets/Plus.png"/>
-                            </image>
-                        </ImageView>
-                    </graphic>
-                </JFXButton>
-            </children>
-            <padding>
-                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
-            </padding>
-        </HBox>
         <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
             <content>
-                <VBox fx:id="headersBox" alignment="TOP_CENTER"/>
+                <VBox fx:id="headersBox" alignment="TOP_CENTER">
+                    <padding>
+                        <Insets bottom="10.0" top="10.0"/>
+                    </padding>
+                </VBox>
             </content>
         </ScrollPane>
     </children>

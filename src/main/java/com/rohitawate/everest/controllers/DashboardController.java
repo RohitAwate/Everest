@@ -56,7 +56,6 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -187,13 +186,9 @@ public class DashboardController implements Initializable {
             String type = responseTypeBox.getValue();
 
             if (type.equals(HTTPConstants.JSON)) {
-                try {
-                    responseArea.setText(responseArea.getText(),
-                            FormatterFactory.getHighlighter(type),
-                            HighlighterFactory.getHighlighter(type));
-                } catch (IOException e) {
-                    LoggingService.logWarning("Response could not be parsed.", e, LocalDateTime.now());
-                }
+                responseArea.setText(responseArea.getText(),
+                        FormatterFactory.getHighlighter(type),
+                        HighlighterFactory.getHighlighter(type));
 
                 return;
             }
@@ -396,7 +391,7 @@ public class DashboardController implements Initializable {
 
         prettifyResponseBody(response);
         statusCode.setText(Integer.toString(response.getStatusCode()));
-        statusCodeDescription.setText(Response.Status.fromStatusCode(response.getStatusCode()).getReasonPhrase());
+        statusCodeDescription.setText(EverestResponse.getReasonPhrase(response.getStatusCode()));
         responseTime.setText(Long.toString(response.getTime()) + " ms");
         responseSize.setText(Integer.toString(response.getSize()) + " B");
         responseHeadersViewer.populate(response);
@@ -404,8 +399,8 @@ public class DashboardController implements Initializable {
 
     private void showResponse(DashboardState state) {
         prettifyResponseBody(state.responseBody, state.responseType);
-        statusCode.setText(Integer.toString(state.responseCode));
-        statusCodeDescription.setText(Response.Status.fromStatusCode(state.responseCode).getReasonPhrase());
+        statusCode.setText(Integer.toString(state.statusCode));
+        statusCodeDescription.setText(EverestResponse.getReasonPhrase(state.statusCode));
         responseTime.setText(Long.toString(state.responseTime) + " ms");
         responseSize.setText(Integer.toString(state.responseSize) + " B");
         responseHeadersViewer.populate(state.responseHeaders);
@@ -676,7 +671,7 @@ public class DashboardController implements Initializable {
             case RESPONSE:
                 dashboardState.visibleResponseTab = getVisibleResponseTab();
                 dashboardState.responseHeaders = responseHeadersViewer.getHeaders();
-                dashboardState.responseCode = Integer.parseInt(statusCode.getText());
+                dashboardState.statusCode = Integer.parseInt(statusCode.getText());
 
                 String temp = responseSize.getText();
                 temp = temp.substring(0, temp.length() - 2);

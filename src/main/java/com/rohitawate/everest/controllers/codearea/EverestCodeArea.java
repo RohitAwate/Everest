@@ -63,14 +63,20 @@ public class EverestCodeArea extends CodeArea {
      * Formats the text with the provided Formatter if it is not null,
      * sets the text and then computes the highlighting.
      *
-     * @throws IOException If the formatter fails to format the text given a syntactic error.
      */
-    public void setText(String text, Formatter formatter, Highlighter highlighter) throws IOException {
+    public void setText(String text, Formatter formatter, Highlighter highlighter) {
         clear();
         String formattedText = text;
 
-        if (formatter != null)
-            formattedText = formatter.format(text);
+        if (formatter != null) {
+            try {
+                formattedText = formatter.format(text);
+            } catch (IOException e) {
+                clear();
+                appendText(text);
+                return;
+            }
+        }
 
         appendText(formattedText);
         setHighlighter(highlighter);

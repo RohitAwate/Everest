@@ -44,7 +44,7 @@ public class DashboardState {
     public ComposerTab visibleComposerTab;
 
     // ResponseLayer parameters
-    public int responseCode;
+    public int statusCode;
     public String responseType;
     public String responseBody;
     public int responseTime;
@@ -85,7 +85,7 @@ public class DashboardState {
     private void onRequestSucceeded(Event event) {
         visibleResponseLayer = ResponseLayer.RESPONSE;
         EverestResponse response = requestManager.getValue();
-        responseCode = response.getStatusCode();
+        statusCode = response.getStatusCode();
         if (response.getMediaType() != null)
             responseType = response.getMediaType().toString();
         else

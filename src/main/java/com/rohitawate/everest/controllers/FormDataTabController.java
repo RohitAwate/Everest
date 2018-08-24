@@ -214,7 +214,7 @@ public class FormDataTabController implements Initializable {
         ArrayList<FieldState> states = new ArrayList<>();
 
         for (StringKeyValueFieldController controller : stringControllers) {
-            if (!controller.isKeyFieldEmpty() && !controller.isValueFieldEmpty())
+            if (!(controller.isKeyFieldEmpty() && controller.isValueFieldEmpty()))
                 states.add(controller.getState());
         }
 
@@ -229,7 +229,7 @@ public class FormDataTabController implements Initializable {
         ArrayList<FieldState> states = new ArrayList<>();
 
         for (FileKeyValueFieldController controller : fileControllers) {
-            if (!controller.isFileKeyFieldEmpty() && !controller.isFileValueFieldEmpty())
+            if (!(controller.isFileKeyFieldEmpty() && controller.isFileValueFieldEmpty()))
                 states.add(controller.getState());
         }
 

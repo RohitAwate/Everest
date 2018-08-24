@@ -67,10 +67,9 @@ class SQLiteManager implements DataManager {
 
             conn = DriverManager.getConnection("jdbc:sqlite:Everest/config/history.sqlite");
             createDatabase();
+            LoggingService.logInfo("Connected to database", LocalDateTime.now());
         } catch (Exception E) {
             LoggingService.logSevere("Exception while initializing DataManager.", E, LocalDateTime.now());
-        } finally {
-            System.out.println("Connected to database.");
         }
     }
 

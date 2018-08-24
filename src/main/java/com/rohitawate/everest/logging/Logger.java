@@ -36,14 +36,18 @@ class Logger {
     /**
      * Appends the log to the respective day's log file.
      *
-     * @param log - The log to be written to file.
      */
-    synchronized void log(Log log) {
-        System.out.println(log.message);
-        if (log.level.greaterThanEqualTo(this.writerLevel)) {
+    synchronized void log() {
+        if (LoggingService.log.level.equals(Level.INFO)) {
+            System.out.println(LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message);
+        } else {
+            System.err.println(LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message);
+        }
+
+        if (LoggingService.log.level.greaterThanEqualTo(this.writerLevel)) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath, true))) {
                 writer.flush();
-                writer.append(getLogEntry(log));
+                writer.append(getLogEntry(LoggingService.log));
             } catch (IOException e) {
                 e.printStackTrace();
             }

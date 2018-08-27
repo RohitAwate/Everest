@@ -67,6 +67,9 @@ public class HomeWindowController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         syncManager = new SyncManager(this);
 
+        // Using LinkedHashMap because it retains order
+        tabStateMap = new LinkedHashMap<>();
+
         try {
             FXMLLoader historyLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryPane.fxml"));
             Parent historyFXML = historyLoader.load();
@@ -79,14 +82,14 @@ public class HomeWindowController implements Initializable {
             Parent dashboardFXML = dashboardLoader.load();
             dashboard = dashboardLoader.getController();
             dashboard.setSyncManager(syncManager);
+            dashboard.setTabPane(tabPane);
+            dashboard.setTabStateMap(tabStateMap);
             dashboardContainer.getChildren().add(dashboardFXML);
             addressProperty = dashboard.addressField.textProperty();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // Using LinkedHashMap because it retains order
-        tabStateMap = new LinkedHashMap<>();
         recoverState();
 
         homeWindowSP.setFocusTraversable(true);

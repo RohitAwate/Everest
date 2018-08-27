@@ -76,12 +76,12 @@ public class DashboardController implements Initializable {
     @FXML
     ComboBox<String> httpMethodBox, responseTypeBox;
     @FXML
-    private VBox responseBox, responseLayer, loadingLayer, promptLayer, errorLayer, paramsBox;
+    private VBox responseLayer, loadingLayer, promptLayer, errorLayer, paramsBox;
     @FXML
     private Label statusCode, statusCodeDescription, responseTime,
             responseSize, errorTitle, errorDetails;
     @FXML
-    private JFXButton sendButton, cancelButton, copyBodyButton;
+    private JFXButton cancelButton, copyBodyButton;
     @FXML
     TabPane requestOptionsTab, responseTabPane;
     @FXML
@@ -104,9 +104,10 @@ public class DashboardController implements Initializable {
     private GETRequest getRequest;
     private DataRequest dataRequest;
     private DELETERequest deleteRequest;
-    private HashMap<String, String> params;
     private EverestCodeArea responseArea;
     private ResponseLayer visibleLayer;
+    private HashMap<Tab, DashboardState> tabStateMap;
+    private TabPane tabPane;
 
     public enum ResponseLayer {
         PROMPT, LOADING, RESPONSE, ERROR
@@ -706,6 +707,21 @@ public class DashboardController implements Initializable {
         if (state == null)
             return;
 
+        /*
+            Sanity check to ensure that the state being applied belongs to the active tab.
+            Everest works perfectly almost every time despite the 4 lines that follow this comment,
+            but some moronic testers like me might obliterate their Ctrl + Tab key combo.
+            While switching between tabs at such speeds that approach that of light,
+            Everest might apply the state to some other tab.
+
+            This may happen when a RequestManager that was handed over
+            to a DashboardState were to change its state during a tab shift.
+         */
+        Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
+        DashboardState activeState = tabStateMap.get(activeTab);
+        if (state != activeState)
+            state = activeState;
+
         if (state.visibleComposerTab != null) {
             int tab;
             switch (state.visibleComposerTab) {
@@ -812,14 +828,19 @@ public class DashboardController implements Initializable {
     }
 
     void clearParams() {
-        if (params != null)
-            params.clear();
-
         if (paramsControllers != null)
             paramsControllers.clear();
 
         paramsBox.getChildren().clear();
         paramsCountProperty.set(0);
         addParamField();
+    }
+
+    void setTabStateMap(HashMap<Tab, DashboardState> tabStateMap) {
+        this.tabStateMap = tabStateMap;
+    }
+
+    void setTabPane(TabPane tabPane) {
+        this.tabPane = tabPane;
     }
 }

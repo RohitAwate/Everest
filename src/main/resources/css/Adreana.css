@@ -174,6 +174,8 @@
 }
 
 /* Body tab pane */
+#authTabPane:top .tab-header-area .tab-header-background,
+#authTabPane:top .tab-header-area .headers-region .tab:top,
 #bodyTabPane:top .tab-header-area .tab-header-background,
 #bodyTabPane:top .tab-header-area .headers-region .tab:top {
     -fx-background-color: #545454;
@@ -184,10 +186,12 @@
     -fx-background-color: #3d3d3d;
 }
 
+#authTabPane:top .tab-header-area .headers-region .tab:hover:top,
 #bodyTabPane:top .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: #4e848f;
 }
 
+#authTabPane:top .tab-header-area .headers-region .tab:selected:top,
 #bodyTabPane:top .tab-header-area .headers-region .tab:selected:top {
     -fx-background-color: #3d3d3d;
 }
@@ -210,7 +214,7 @@
     -fx-padding: 0px;
 }
 
-#keyField, #valueField {
+.KVField {
     -fx-prompt-text-fill: #919191;
     -fx-background-color: #303030;
     -fx-text-fill: white;

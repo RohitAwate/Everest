@@ -42,6 +42,7 @@ public class SyncManager {
      * Asynchronously saves the new state by invoking all the registered DataManagers.
      */
     public void saveState(ComposerState newState) {
+        // Compares new state with the last added state from the primary fetch source
         if (newState.equals(managers.get(Settings.fetchSource).getLastAdded()))
             return;
 

@@ -18,6 +18,7 @@ package com.rohitawate.everest.controllers;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.everest.controllers.auth.AuthTabController;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.controllers.visualizers.TreeVisualizer;
@@ -94,6 +95,7 @@ public class DashboardController implements Initializable {
     private JFXSnackbar snackbar;
     private List<StringKeyValueFieldController> paramsControllers;
     private RequestManager requestManager;
+    private AuthTabController authTabController;
     private HeaderTabController headerTabController;
     private BodyTabController bodyTabController;
     private IntegerProperty paramsCountProperty;
@@ -125,18 +127,25 @@ public class DashboardController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         try {
             // Loading the headers tab
+            FXMLLoader authTabLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/AuthTab.fxml"));
+            Parent authTabFXML = authTabLoader.load();
+            ThemeManager.setTheme(authTabFXML);
+            authTabController = authTabLoader.getController();
+            authTab.setContent(authTabFXML);
+
+            // Loading the headers tab
             FXMLLoader headerTabLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HeaderTab.fxml"));
-            Parent headerTabContent = headerTabLoader.load();
-            ThemeManager.setTheme(headerTabContent);
+            Parent headerTabFXML = headerTabLoader.load();
+            ThemeManager.setTheme(headerTabFXML);
             headerTabController = headerTabLoader.getController();
-            headersTab.setContent(headerTabContent);
+            headersTab.setContent(headerTabFXML);
 
             // Loading the body tab
             FXMLLoader bodyTabLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/BodyTab.fxml"));
-            Parent bodyTabContent = bodyTabLoader.load();
-            ThemeManager.setTheme(bodyTabContent);
+            Parent bodyTabFXML = bodyTabLoader.load();
+            ThemeManager.setTheme(bodyTabFXML);
             bodyTabController = bodyTabLoader.getController();
-            bodyTab.setContent(bodyTabContent);
+            bodyTab.setContent(bodyTabFXML);
         } catch (IOException e) {
             LoggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
         }
@@ -241,6 +250,7 @@ public class DashboardController implements Initializable {
                         getRequest = new GETRequest();
 
                     getRequest.setTarget(address);
+                    getRequest.setAuthProvider(authTabController.getAuthProvider());
                     getRequest.setHeaders(headerTabController.getHeaders());
 
                     requestManager = RequestManagersPool.manager();
@@ -254,6 +264,7 @@ public class DashboardController implements Initializable {
 
                     dataRequest.setRequestType(httpMethodBox.getValue());
                     dataRequest.setTarget(address);
+                    dataRequest.setAuthProvider(authTabController.getAuthProvider());
                     dataRequest.setHeaders(headerTabController.getHeaders());
 
                     if (bodyTabController.rawTab.isSelected()) {
@@ -279,6 +290,7 @@ public class DashboardController implements Initializable {
                         deleteRequest = new DELETERequest();
 
                     deleteRequest.setTarget(address);
+                    deleteRequest.setAuthProvider(authTabController.getAuthProvider());
                     deleteRequest.setHeaders(headerTabController.getHeaders());
 
                     requestManager = RequestManagersPool.manager();
@@ -663,6 +675,7 @@ public class DashboardController implements Initializable {
         composerState.httpMethod = httpMethodBox.getValue();
         composerState.headers = headerTabController.getFieldStates();
         composerState.params = getParamFieldStates();
+        authTabController.getState(composerState);
 
         dashboardState.composer = composerState;
         dashboardState.visibleResponseLayer = visibleLayer;
@@ -814,6 +827,8 @@ public class DashboardController implements Initializable {
 
         if (!(state.composer.httpMethod.equals(HTTPConstants.GET) || state.composer.httpMethod.equals(HTTPConstants.DELETE)))
             bodyTabController.setState(state.composer);
+
+        authTabController.setState(state.composer);
     }
 
     void reset() {

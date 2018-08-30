@@ -40,7 +40,8 @@ class SQLiteManager implements DataManager {
                 "CREATE TABLE IF NOT EXISTS RequestContentMap(RequestID INTEGER, ContentType TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS Bodies(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('application/json', 'application/xml', 'text/html', 'text/plain')), Body TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS FilePaths(RequestID INTEGER, Path TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
-                "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
+                "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
+                "CREATE TABLE IF NOT EXISTS BasicAuthCredentials(RequestID INTEGER, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
         };
 
         private static final String saveRequest = "INSERT INTO Requests(Type, Target, Date) VALUES(?, ?, ?)";
@@ -48,10 +49,12 @@ class SQLiteManager implements DataManager {
         private static final String saveBody = "INSERT INTO Bodies(RequestID, Body, Type) VALUES(?, ?, ?)";
         private static final String saveFilePath = "INSERT INTO FilePaths(RequestID, Path) VALUES(?, ?)";
         private static final String saveTuple = "INSERT INTO Tuples(RequestID, Type, Key, Value, Checked) VALUES(?, ?, ?, ?, ?)";
+        private static final String saveBasicAuthCredentials = "INSERT INTO BasicAuthCredentials(RequestID, Username, Password, Enabled) VALUES(?, ?, ?, ?)";
         private static final String selectRecentRequests = "SELECT * FROM Requests WHERE Requests.Date > ?";
         private static final String selectRequestContentType = "SELECT ContentType FROM RequestContentMap WHERE RequestID == ?";
         private static final String selectRequestBody = "SELECT Body, Type FROM Bodies WHERE RequestID == ?";
         private static final String selectFilePath = "SELECT Path FROM FilePaths WHERE RequestID == ?";
+        private static final String selectBasicAuthCredentials = "SELECT * FROM BasicAuthCredentials WHERE RequestID == ?";
         private static final String selectTuplesByType = "SELECT * FROM Tuples WHERE RequestID == ? AND Type == ?";
         private static final String selectMostRecentRequest = "SELECT * FROM Requests ORDER BY ID DESC LIMIT 1";
     }
@@ -109,6 +112,8 @@ class SQLiteManager implements DataManager {
         saveTuple(newState.headers, "Header", requestID);
         saveTuple(newState.params, "Param", requestID);
 
+        saveBasicAuthCredentials(requestID, newState.basicUsername, newState.basicPassword, newState.basicAuthEnabled);
+
         if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
             // Maps the request to its ContentType for faster retrieval
             statement = conn.prepareStatement(Queries.saveRequestContentPair);
@@ -131,6 +136,19 @@ class SQLiteManager implements DataManager {
             saveTuple(newState.formStringTuples, "FormString", requestID);
             saveTuple(newState.formFileTuples, "File", requestID);
         }
+    }
+
+    private void saveBasicAuthCredentials(int requestID, String username, String password, boolean enabled) throws SQLException {
+        if (username == null || password == null)
+            return;
+
+        statement = conn.prepareStatement(Queries.saveBasicAuthCredentials);
+        statement.setInt(1, requestID);
+        statement.setString(2, username);
+        statement.setString(3, password);
+        statement.setInt(4, enabled ? 1 : 0);
+
+        statement.executeUpdate();
     }
 
     /**
@@ -156,6 +174,7 @@ class SQLiteManager implements DataManager {
             state.headers = getTuples(requestID, "Header");
             state.params = getTuples(requestID, "Param");
             state.httpMethod = resultSet.getString("Type");
+            getBasicAuthCredentials(state, requestID);
 
             if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                 // Retrieves request body ContentType for querying corresponding table
@@ -179,6 +198,19 @@ class SQLiteManager implements DataManager {
         }
 
         return history;
+    }
+
+    private void getBasicAuthCredentials(ComposerState state, int requestID) throws SQLException {
+        statement = conn.prepareStatement(Queries.selectBasicAuthCredentials);
+        statement.setInt(1, requestID);
+
+        ResultSet RS = statement.executeQuery();
+
+        if (RS.next()) {
+            state.basicUsername = RS.getString("Username");
+            state.basicPassword = RS.getString("Password");
+            state.basicAuthEnabled = RS.getInt("Enabled") == 1;
+        }
     }
 
     private String getRequestContentType(int requestID) throws SQLException {
@@ -238,6 +270,8 @@ class SQLiteManager implements DataManager {
                 lastRequest.target = RS.getString("Target");
                 lastRequest.httpMethod = RS.getString("Type");
             }
+
+            getBasicAuthCredentials(lastRequest, requestID);
 
             lastRequest.headers = getTuples(requestID, "Header");
             lastRequest.params = getTuples(requestID, "Param");

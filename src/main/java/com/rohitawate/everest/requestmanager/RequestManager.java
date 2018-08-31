@@ -15,6 +15,7 @@
  */
 package com.rohitawate.everest.requestmanager;
 
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.models.requests.*;
@@ -95,6 +96,8 @@ public class RequestManager extends Service<EverestResponse> {
             protected EverestResponse call() throws Exception {
                 Response serverResponse = null;
 
+                addAuthHeader();
+
                 if (request.getClass().equals(GETRequest.class)) {
                     initialTime = System.currentTimeMillis();
                     serverResponse = requestBuilder.get();
@@ -129,13 +132,15 @@ public class RequestManager extends Service<EverestResponse> {
         return this.request;
     }
 
-    private void appendHeaders() {
-        request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
-        requestBuilder.header("User-Agent", "Everest");
-
+    private void addAuthHeader() {
         if (request.getAuthProvider() != null && request.getAuthProvider().isEnabled()) {
             requestBuilder.header("Authorization", request.getAuthProvider().getAuthHeader());
         }
+    }
+
+    private void appendHeaders() {
+        request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
+        requestBuilder.header("User-Agent", Main.APP_NAME);
     }
 
     /**

@@ -2,6 +2,8 @@ package com.rohitawate.everest.controllers.auth;
 
 import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.auth.BasicAuthProvider;
+import com.rohitawate.everest.auth.DigestAuthProvider;
+import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.state.ComposerState;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,15 +22,26 @@ public class AuthTabController implements Initializable {
     @FXML
     private Tab basicTab, digestTab;
 
-    private BasicAuthController basicController;
+    private SimpleAuthController basicController, digestController;
+
+    private DashboardController dashboard;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/BasicAuth.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/SimpleAuth.fxml"));
             Parent basicFXML = loader.load();
             basicTab.setContent(basicFXML);
             basicController = loader.getController();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/SimpleAuth.fxml"));
+            Parent digestFXML = loader.load();
+            digestTab.setContent(digestFXML);
+            digestController = loader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -38,7 +51,18 @@ public class AuthTabController implements Initializable {
         switch (authTabPane.getSelectionModel().getSelectedIndex()) {
             case 0:
                 return new BasicAuthProvider(
-                        basicController.getUsername(), basicController.getPassword(), basicController.isSelected());
+                        basicController.getUsername(),
+                        basicController.getPassword(),
+                        basicController.isSelected()
+                );
+            case 1:
+                return new DigestAuthProvider(
+                        dashboard.getAddress(),
+                        dashboard.getHttpMethod(),
+                        digestController.getUsername(),
+                        digestController.getPassword(),
+                        digestController.isSelected()
+                );
             default:
                 return null;
         }
@@ -47,10 +71,19 @@ public class AuthTabController implements Initializable {
     public void getState(ComposerState state) {
         state.basicUsername = basicController.getUsername();
         state.basicPassword = basicController.getPassword();
-        state.basicAuthEnabled = basicController.isSelected();
+        state.basicEnabled = basicController.isSelected();
+
+        state.digestUsername = digestController.getUsername();
+        state.digestPassword = digestController.getPassword();
+        state.digestEnabled = digestController.isSelected();
     }
 
     public void setState(ComposerState state) {
-        basicController.setState(state.basicUsername, state.basicPassword, state.basicAuthEnabled);
+        basicController.setState(state.basicUsername, state.basicPassword, state.basicEnabled);
+        digestController.setState(state.digestUsername, state.digestPassword, state.digestEnabled);
+    }
+
+    public void setDashboard(DashboardController dashboard) {
+        this.dashboard = dashboard;
     }
 }

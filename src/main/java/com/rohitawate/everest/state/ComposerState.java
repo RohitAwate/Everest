@@ -37,7 +37,11 @@ public class ComposerState {
 
     public String basicUsername;
     public String basicPassword;
-    public boolean basicAuthEnabled;
+    public boolean basicEnabled;
+
+    public String digestUsername;
+    public String digestPassword;
+    public boolean digestEnabled;
 
     // Tuples of URL-encoded requests
     public List<FieldState> urlStringTuples;
@@ -65,7 +69,10 @@ public class ComposerState {
         if (!headers.equals(state.headers)) return false;
         if (!basicUsername.equals(state.basicUsername)) return false;
         if (!basicPassword.equals(state.basicPassword)) return false;
-        if (basicAuthEnabled != state.basicAuthEnabled) return false;
+        if (basicEnabled != state.basicEnabled) return false;
+        if (!digestUsername.equals(state.digestUsername)) return false;
+        if (!digestPassword.equals(state.digestPassword)) return false;
+        if (digestEnabled != state.digestEnabled) return false;
 
         if (state.httpMethod.equals(HTTPConstants.GET)
                 || state.httpMethod.equals(HTTPConstants.DELETE)) return true;

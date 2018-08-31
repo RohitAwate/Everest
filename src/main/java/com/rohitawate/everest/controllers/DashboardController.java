@@ -126,11 +126,12 @@ public class DashboardController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            // Loading the headers tab
+            // Loading the auth tab
             FXMLLoader authTabLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/AuthTab.fxml"));
             Parent authTabFXML = authTabLoader.load();
             ThemeManager.setTheme(authTabFXML);
             authTabController = authTabLoader.getController();
+            authTabController.setDashboard(this);
             authTab.setContent(authTabFXML);
 
             // Loading the headers tab
@@ -172,7 +173,7 @@ public class DashboardController implements Initializable {
                 Bindings.or(httpMethodBox.valueProperty().isEqualTo(HTTPConstants.GET),
                         httpMethodBox.valueProperty().isEqualTo(HTTPConstants.DELETE)));
 
-        // Disabling Ctrl+Tab navigation
+        // Disabling Ctrl + Tab navigation
         requestOptionsTab.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.TAB) {
                 e.consume();
@@ -858,4 +859,13 @@ public class DashboardController implements Initializable {
     void setTabPane(TabPane tabPane) {
         this.tabPane = tabPane;
     }
+
+    public String getAddress() {
+        return addressField.getText();
+    }
+
+    public String getHttpMethod() {
+        return httpMethodBox.getValue();
+    }
+
 }

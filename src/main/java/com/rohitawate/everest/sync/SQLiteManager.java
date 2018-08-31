@@ -35,29 +35,38 @@ class SQLiteManager implements DataManager {
     private PreparedStatement statement;
 
     private static class Queries {
-        private static final String[] createQueries = {
+        private static final String[] CREATE_QUERIES = {
                 "CREATE TABLE IF NOT EXISTS Requests(ID INTEGER PRIMARY KEY, Type TEXT NOT NULL, Target TEXT NOT NULL, Date TEXT NOT NULL)",
                 "CREATE TABLE IF NOT EXISTS RequestContentMap(RequestID INTEGER, ContentType TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS Bodies(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('application/json', 'application/xml', 'text/html', 'text/plain')), Body TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS FilePaths(RequestID INTEGER, Path TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
-                "CREATE TABLE IF NOT EXISTS BasicAuthCredentials(RequestID INTEGER, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
+                "CREATE TABLE IF NOT EXISTS SimpleAuthCredentials(RequestID INTEGER, Type TEXT NOT NULL, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
         };
 
-        private static final String saveRequest = "INSERT INTO Requests(Type, Target, Date) VALUES(?, ?, ?)";
-        private static final String saveRequestContentPair = "INSERT INTO RequestContentMap(RequestID, ContentType) VALUES(?, ?)";
-        private static final String saveBody = "INSERT INTO Bodies(RequestID, Body, Type) VALUES(?, ?, ?)";
-        private static final String saveFilePath = "INSERT INTO FilePaths(RequestID, Path) VALUES(?, ?)";
-        private static final String saveTuple = "INSERT INTO Tuples(RequestID, Type, Key, Value, Checked) VALUES(?, ?, ?, ?, ?)";
-        private static final String saveBasicAuthCredentials = "INSERT INTO BasicAuthCredentials(RequestID, Username, Password, Enabled) VALUES(?, ?, ?, ?)";
-        private static final String selectRecentRequests = "SELECT * FROM Requests WHERE Requests.Date > ?";
-        private static final String selectRequestContentType = "SELECT ContentType FROM RequestContentMap WHERE RequestID == ?";
-        private static final String selectRequestBody = "SELECT Body, Type FROM Bodies WHERE RequestID == ?";
-        private static final String selectFilePath = "SELECT Path FROM FilePaths WHERE RequestID == ?";
-        private static final String selectBasicAuthCredentials = "SELECT * FROM BasicAuthCredentials WHERE RequestID == ?";
-        private static final String selectTuplesByType = "SELECT * FROM Tuples WHERE RequestID == ? AND Type == ?";
-        private static final String selectMostRecentRequest = "SELECT * FROM Requests ORDER BY ID DESC LIMIT 1";
+        private static final String SAVE_REQUEST = "INSERT INTO Requests(Type, Target, Date) VALUES(?, ?, ?)";
+        private static final String SAVE_REQUEST_CONTENT_PAIR = "INSERT INTO RequestContentMap(RequestID, ContentType) VALUES(?, ?)";
+        private static final String SAVE_BODY = "INSERT INTO Bodies(RequestID, Body, Type) VALUES(?, ?, ?)";
+        private static final String SAVE_FILE_PATH = "INSERT INTO FilePaths(RequestID, Path) VALUES(?, ?)";
+        private static final String SAVE_TUPLE = "INSERT INTO Tuples(RequestID, Type, Key, Value, Checked) VALUES(?, ?, ?, ?, ?)";
+        private static final String SAVE_SIMPLE_AUTH_CREDENTIALS = "INSERT INTO SimpleAuthCredentials(RequestID, Type, Username, Password, Enabled) VALUES(?, ?, ?, ?, ?)";
+        private static final String SELECT_RECENT_REQUESTS = "SELECT * FROM Requests WHERE Requests.Date > ?";
+        private static final String SELECT_REQUEST_CONTENT_TYPE = "SELECT ContentType FROM RequestContentMap WHERE RequestID == ?";
+        private static final String SELECT_REQUEST_BODY = "SELECT Body, Type FROM Bodies WHERE RequestID == ?";
+        private static final String SELECT_FILE_PATH = "SELECT Path FROM FilePaths WHERE RequestID == ?";
+        private static final String SELECT_SIMPLE_AUTH_CREDENTIALS = "SELECT * FROM SimpleAuthCredentials WHERE RequestID == ? AND Type == ?";
+        private static final String SELECT_TUPLES_BY_TYPE = "SELECT * FROM Tuples WHERE RequestID == ? AND Type == ?";
+        private static final String SELECT_MOST_RECENT_REQUEST = "SELECT * FROM Requests ORDER BY ID DESC LIMIT 1";
     }
+
+    private static final String ID = "ID";
+    private static final String HEADER = "Header";
+    private static final String PARAM = "Param";
+    private static final String URL_STRING = "URLString";
+    private static final String FORM_STRING = "FormString";
+    private static final String FILE = "File";
+    private static final String BASIC = "Basic";
+    private static final String DIGEST = "Digest";
 
     public SQLiteManager() {
         try {
@@ -70,9 +79,9 @@ class SQLiteManager implements DataManager {
 
             conn = DriverManager.getConnection("jdbc:sqlite:Everest/config/history.sqlite");
             createDatabase();
-            LoggingService.logInfo("Connected to database", LocalDateTime.now());
+            LoggingService.logInfo("Connected to database.", LocalDateTime.now());
         } catch (Exception E) {
-            LoggingService.logSevere("Exception while initializing DataManager.", E, LocalDateTime.now());
+            LoggingService.logSevere("Exception while initializing SQLiteManager.", E, LocalDateTime.now());
         }
     }
 
@@ -80,7 +89,7 @@ class SQLiteManager implements DataManager {
      * Creates and initializes the database with necessary tables if not already done.
      */
     private void createDatabase() throws SQLException {
-        for (String query : Queries.createQueries) {
+        for (String query : Queries.CREATE_QUERIES) {
             statement = conn.prepareStatement(query);
             statement.execute();
         }
@@ -94,7 +103,7 @@ class SQLiteManager implements DataManager {
      */
     @Override
     public synchronized void saveState(ComposerState newState) throws SQLException {
-        statement = conn.prepareStatement(Queries.saveRequest);
+        statement = conn.prepareStatement(Queries.SAVE_REQUEST);
 
         statement.setString(1, newState.httpMethod);
         statement.setString(2, newState.target);
@@ -109,44 +118,50 @@ class SQLiteManager implements DataManager {
         if (RS.next())
             requestID = RS.getInt("MaxID");
 
-        saveTuple(newState.headers, "Header", requestID);
-        saveTuple(newState.params, "Param", requestID);
+        saveTuple(newState.headers, HEADER, requestID);
+        saveTuple(newState.params, PARAM, requestID);
 
-        saveBasicAuthCredentials(requestID, newState.basicUsername, newState.basicPassword, newState.basicAuthEnabled);
+        saveSimpleAuthCredentials(requestID, BASIC, newState.basicUsername, newState.basicPassword, newState.basicEnabled);
+        saveSimpleAuthCredentials(requestID, DIGEST, newState.digestUsername, newState.digestPassword, newState.digestEnabled);
 
         if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
             // Maps the request to its ContentType for faster retrieval
-            statement = conn.prepareStatement(Queries.saveRequestContentPair);
+            statement = conn.prepareStatement(Queries.SAVE_REQUEST_CONTENT_PAIR);
             statement.setInt(1, requestID);
             statement.setString(2, newState.contentType);
             statement.executeUpdate();
 
-            statement = conn.prepareStatement(Queries.saveBody);
+            statement = conn.prepareStatement(Queries.SAVE_BODY);
             statement.setInt(1, requestID);
             statement.setString(2, newState.rawBody);
             statement.setString(3, newState.rawBodyBoxValue);
             statement.executeUpdate();
 
-            statement = conn.prepareStatement(Queries.saveFilePath);
+            statement = conn.prepareStatement(Queries.SAVE_FILE_PATH);
             statement.setInt(1, requestID);
             statement.setString(2, newState.binaryFilePath);
             statement.executeUpdate();
 
-            saveTuple(newState.urlStringTuples, "URLString", requestID);
-            saveTuple(newState.formStringTuples, "FormString", requestID);
-            saveTuple(newState.formFileTuples, "File", requestID);
+            saveTuple(newState.urlStringTuples, URL_STRING, requestID);
+            saveTuple(newState.formStringTuples, FORM_STRING, requestID);
+            saveTuple(newState.formFileTuples, FILE, requestID);
         }
     }
 
-    private void saveBasicAuthCredentials(int requestID, String username, String password, boolean enabled) throws SQLException {
-        if (username == null || password == null)
+    private void saveSimpleAuthCredentials(int requestID,
+                                           String type,
+                                           String username,
+                                           String password,
+                                           boolean enabled) throws SQLException {
+        if (username == null || username.isEmpty() || password == null || password.isEmpty())
             return;
 
-        statement = conn.prepareStatement(Queries.saveBasicAuthCredentials);
+        statement = conn.prepareStatement(Queries.SAVE_SIMPLE_AUTH_CREDENTIALS);
         statement.setInt(1, requestID);
-        statement.setString(2, username);
-        statement.setString(3, password);
-        statement.setInt(4, enabled ? 1 : 0);
+        statement.setString(2, type);
+        statement.setString(3, username);
+        statement.setString(4, password);
+        statement.setInt(5, enabled ? 1 : 0);
 
         statement.executeUpdate();
     }
@@ -158,7 +173,7 @@ class SQLiteManager implements DataManager {
     public synchronized List<ComposerState> getHistory() throws SQLException {
         List<ComposerState> history = new ArrayList<>();
         // Loads the requests from the last x number of days, x being Settings.showHistoryRange
-        statement = conn.prepareStatement(Queries.selectRecentRequests);
+        statement = conn.prepareStatement(Queries.SELECT_RECENT_REQUESTS);
         String historyStartDate = LocalDate.now().minusDays(Settings.showHistoryRange).toString();
         statement.setString(1, historyStartDate);
 
@@ -170,11 +185,12 @@ class SQLiteManager implements DataManager {
 
             state.target = resultSet.getString("Target");
 
-            int requestID = resultSet.getInt("ID");
-            state.headers = getTuples(requestID, "Header");
-            state.params = getTuples(requestID, "Param");
+            int requestID = resultSet.getInt(ID);
+            state.headers = getTuples(requestID, HEADER);
+            state.params = getTuples(requestID, PARAM);
             state.httpMethod = resultSet.getString("Type");
-            getBasicAuthCredentials(state, requestID);
+            getSimpleAuthCredentials(state, requestID, BASIC);
+            getSimpleAuthCredentials(state, requestID, DIGEST);
 
             if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                 // Retrieves request body ContentType for querying corresponding table
@@ -189,9 +205,9 @@ class SQLiteManager implements DataManager {
 
                 state.binaryFilePath = getFilePath(requestID);
 
-                state.urlStringTuples = getTuples(requestID, "URLString");
-                state.formStringTuples = getTuples(requestID, "FormString");
-                state.formFileTuples = getTuples(requestID, "File");
+                state.urlStringTuples = getTuples(requestID, URL_STRING);
+                state.formStringTuples = getTuples(requestID, FORM_STRING);
+                state.formFileTuples = getTuples(requestID, FILE);
             }
 
             history.add(state);
@@ -200,23 +216,42 @@ class SQLiteManager implements DataManager {
         return history;
     }
 
-    private void getBasicAuthCredentials(ComposerState state, int requestID) throws SQLException {
-        statement = conn.prepareStatement(Queries.selectBasicAuthCredentials);
+    private void getSimpleAuthCredentials(ComposerState state, int requestID, String type) throws SQLException {
+        if (!(type.equals(BASIC) || type.equals(DIGEST)))
+            return;
+
+        statement = conn.prepareStatement(Queries.SELECT_SIMPLE_AUTH_CREDENTIALS);
         statement.setInt(1, requestID);
+        statement.setString(2, type);
 
         ResultSet RS = statement.executeQuery();
 
         if (RS.next()) {
-            state.basicUsername = RS.getString("Username");
-            state.basicPassword = RS.getString("Password");
-            state.basicAuthEnabled = RS.getInt("Enabled") == 1;
+            if (type.equals(BASIC)) {
+                state.basicUsername = RS.getString("Username");
+                state.basicPassword = RS.getString("Password");
+                state.basicEnabled = RS.getInt("Enabled") == 1;
+            } else if (type.equals(DIGEST)) {
+                state.digestUsername = RS.getString("Username");
+                state.digestPassword = RS.getString("Password");
+                state.digestEnabled = RS.getInt("Enabled") == 1;
+            }
+        } else {
+            String empty = "";
+            state.basicUsername = empty;
+            state.basicPassword = empty;
+            state.basicEnabled = false;
+
+            state.digestUsername = empty;
+            state.digestPassword = empty;
+            state.digestEnabled = false;
         }
     }
 
     private String getRequestContentType(int requestID) throws SQLException {
         String contentType = null;
 
-        statement = conn.prepareStatement(Queries.selectRequestContentType);
+        statement = conn.prepareStatement(Queries.SELECT_REQUEST_CONTENT_TYPE);
         statement.setInt(1, requestID);
 
         ResultSet RS = statement.executeQuery();
@@ -233,13 +268,13 @@ class SQLiteManager implements DataManager {
      * @return fieldStates - List of FieldStates for the tuples
      */
     private List<FieldState> getTuples(int requestID, String type) throws SQLException {
-        if (!(type.equals("FormString") || type.equals("URLString") ||
-                type.equals("File") || type.equals("Param") || type.equals("Header")))
+        if (!(type.equals(FORM_STRING) || type.equals(URL_STRING) ||
+                type.equals(FILE) || type.equals(PARAM) || type.equals(HEADER)))
             return null;
 
         ArrayList<FieldState> fieldStates = new ArrayList<>();
 
-        PreparedStatement statement = conn.prepareStatement(Queries.selectTuplesByType);
+        PreparedStatement statement = conn.prepareStatement(Queries.SELECT_TUPLES_BY_TYPE);
         statement.setInt(1, requestID);
         statement.setString(2, type);
 
@@ -261,23 +296,24 @@ class SQLiteManager implements DataManager {
     public ComposerState getLastAdded() {
         ComposerState lastRequest = new ComposerState();
         try {
-            statement = conn.prepareStatement(Queries.selectMostRecentRequest);
+            statement = conn.prepareStatement(Queries.SELECT_MOST_RECENT_REQUEST);
             ResultSet RS = statement.executeQuery();
 
             int requestID = -1;
             if (RS.next()) {
-                requestID = RS.getInt("ID");
+                requestID = RS.getInt(ID);
                 lastRequest.target = RS.getString("Target");
                 lastRequest.httpMethod = RS.getString("Type");
             }
 
-            getBasicAuthCredentials(lastRequest, requestID);
+            getSimpleAuthCredentials(lastRequest, requestID, BASIC);
+            getSimpleAuthCredentials(lastRequest, requestID, DIGEST);
 
-            lastRequest.headers = getTuples(requestID, "Header");
-            lastRequest.params = getTuples(requestID, "Param");
-            lastRequest.urlStringTuples = getTuples(requestID, "URLString");
-            lastRequest.formStringTuples = getTuples(requestID, "FormString");
-            lastRequest.formFileTuples = getTuples(requestID, "File");
+            lastRequest.headers = getTuples(requestID, HEADER);
+            lastRequest.params = getTuples(requestID, PARAM);
+            lastRequest.urlStringTuples = getTuples(requestID, URL_STRING);
+            lastRequest.formStringTuples = getTuples(requestID, FORM_STRING);
+            lastRequest.formFileTuples = getTuples(requestID, FILE);
 
             lastRequest.contentType = getRequestContentType(requestID);
 
@@ -297,7 +333,7 @@ class SQLiteManager implements DataManager {
     }
 
     private Pair<String, String> getRequestBody(int requestID) throws SQLException {
-        statement = conn.prepareStatement(Queries.selectRequestBody);
+        statement = conn.prepareStatement(Queries.SELECT_REQUEST_BODY);
         statement.setInt(1, requestID);
 
         ResultSet RS = statement.executeQuery();
@@ -310,7 +346,7 @@ class SQLiteManager implements DataManager {
     }
 
     private String getFilePath(int requestID) throws SQLException {
-        statement = conn.prepareStatement(Queries.selectFilePath);
+        statement = conn.prepareStatement(Queries.SELECT_FILE_PATH);
         statement.setInt(1, requestID);
 
         ResultSet RS = statement.executeQuery();
@@ -325,7 +361,7 @@ class SQLiteManager implements DataManager {
         if (tuples.size() > 0) {
             try {
                 for (FieldState fieldState : tuples) {
-                    statement = conn.prepareStatement(Queries.saveTuple);
+                    statement = conn.prepareStatement(Queries.SAVE_TUPLE);
                     statement.setInt(1, requestID);
                     statement.setString(2, tupleType);
                     statement.setString(3, fieldState.key);

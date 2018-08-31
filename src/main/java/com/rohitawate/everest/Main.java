@@ -26,7 +26,10 @@ import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+
 public class Main extends Application {
+    public static final String APP_NAME = "Everest";
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         SettingsLoader settingsLoader = new SettingsLoader();
@@ -43,7 +46,7 @@ public class Main extends Application {
 
         dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/Logo.png").toExternalForm()));
         dashboardStage.setScene(new Scene(homeWindow));
-        dashboardStage.setTitle("Everest");
+        dashboardStage.setTitle(APP_NAME);
         dashboardStage.show();
     }
 

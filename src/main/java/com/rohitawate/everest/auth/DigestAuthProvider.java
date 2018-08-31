@@ -1,11 +1,15 @@
 package com.rohitawate.everest.auth;
 
+import com.rohitawate.everest.Main;
+import com.rohitawate.everest.logging.LoggingService;
+
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +47,7 @@ public class DigestAuthProvider implements AuthProvider {
         try {
             URL digestURL = new URL(url);
             HttpURLConnection conn = (HttpURLConnection) digestURL.openConnection();
+            conn.setRequestProperty("User-Agent", Main.APP_NAME);
             String nonceHeader = conn.getHeaderField("WWW-Authenticate");
 
             Pattern digestPattern = Pattern.compile("(\\w+)[:=] ?\"?([^\" ,]+)\"?");
@@ -77,7 +82,7 @@ public class DigestAuthProvider implements AuthProvider {
             header.append(response);
             header.append("\"");
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggingService.logSevere("Digest Authentication Error: Could not make initial request.", e, LocalDateTime.now());
         }
 
         return header.toString();

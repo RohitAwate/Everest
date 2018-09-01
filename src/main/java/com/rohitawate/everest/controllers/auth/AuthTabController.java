@@ -5,6 +5,7 @@ import com.rohitawate.everest.auth.BasicAuthProvider;
 import com.rohitawate.everest.auth.DigestAuthProvider;
 import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.sync.DataManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -69,6 +70,15 @@ public class AuthTabController implements Initializable {
     }
 
     public void getState(ComposerState state) {
+        switch (authTabPane.getSelectionModel().getSelectedIndex()) {
+            case 0:
+                state.authMethod = DataManager.BASIC;
+                break;
+            case 1:
+                state.authMethod = DataManager.DIGEST;
+                break;
+        }
+
         state.basicUsername = basicController.getUsername();
         state.basicPassword = basicController.getPassword();
         state.basicEnabled = basicController.isSelected();
@@ -81,6 +91,14 @@ public class AuthTabController implements Initializable {
     public void setState(ComposerState state) {
         basicController.setState(state.basicUsername, state.basicPassword, state.basicEnabled);
         digestController.setState(state.digestUsername, state.digestPassword, state.digestEnabled);
+
+        switch (state.authMethod) {
+            case DataManager.BASIC:
+                authTabPane.getSelectionModel().select(0);
+                break;
+            case DataManager.DIGEST:
+                authTabPane.getSelectionModel().select(1);
+        }
     }
 
     public void setDashboard(DashboardController dashboard) {

@@ -36,7 +36,7 @@ class SQLiteManager implements DataManager {
 
     private static class Queries {
         private static final String[] CREATE_QUERIES = {
-                "CREATE TABLE IF NOT EXISTS Requests(ID INTEGER PRIMARY KEY, Type TEXT NOT NULL, Target TEXT NOT NULL, Date TEXT NOT NULL)",
+                "CREATE TABLE IF NOT EXISTS Requests(ID INTEGER PRIMARY KEY, Type TEXT NOT NULL, Target TEXT NOT NULL, AuthMethod TEXT, Date TEXT NOT NULL)",
                 "CREATE TABLE IF NOT EXISTS RequestContentMap(RequestID INTEGER, ContentType TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS Bodies(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('application/json', 'application/xml', 'text/html', 'text/plain')), Body TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS FilePaths(RequestID INTEGER, Path TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
@@ -44,7 +44,7 @@ class SQLiteManager implements DataManager {
                 "CREATE TABLE IF NOT EXISTS SimpleAuthCredentials(RequestID INTEGER, Type TEXT NOT NULL, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
         };
 
-        private static final String SAVE_REQUEST = "INSERT INTO Requests(Type, Target, Date) VALUES(?, ?, ?)";
+        private static final String SAVE_REQUEST = "INSERT INTO Requests(Type, Target, AuthMethod, Date) VALUES(?, ?, ?, ?)";
         private static final String SAVE_REQUEST_CONTENT_PAIR = "INSERT INTO RequestContentMap(RequestID, ContentType) VALUES(?, ?)";
         private static final String SAVE_BODY = "INSERT INTO Bodies(RequestID, Body, Type) VALUES(?, ?, ?)";
         private static final String SAVE_FILE_PATH = "INSERT INTO FilePaths(RequestID, Path) VALUES(?, ?)";
@@ -58,15 +58,6 @@ class SQLiteManager implements DataManager {
         private static final String SELECT_TUPLES_BY_TYPE = "SELECT * FROM Tuples WHERE RequestID == ? AND Type == ?";
         private static final String SELECT_MOST_RECENT_REQUEST = "SELECT * FROM Requests ORDER BY ID DESC LIMIT 1";
     }
-
-    private static final String ID = "ID";
-    private static final String HEADER = "Header";
-    private static final String PARAM = "Param";
-    private static final String URL_STRING = "URLString";
-    private static final String FORM_STRING = "FormString";
-    private static final String FILE = "File";
-    private static final String BASIC = "Basic";
-    private static final String DIGEST = "Digest";
 
     public SQLiteManager() {
         try {
@@ -107,7 +98,8 @@ class SQLiteManager implements DataManager {
 
         statement.setString(1, newState.httpMethod);
         statement.setString(2, newState.target);
-        statement.setString(3, LocalDate.now().toString());
+        statement.setString(3, newState.authMethod);
+        statement.setString(4, LocalDate.now().toString());
         statement.executeUpdate();
 
         // Get latest RequestID to insert into Headers table
@@ -184,6 +176,7 @@ class SQLiteManager implements DataManager {
             state = new ComposerState();
 
             state.target = resultSet.getString("Target");
+            state.authMethod = resultSet.getString(AUTH_METHOD);
 
             int requestID = resultSet.getInt(ID);
             state.headers = getTuples(requestID, HEADER);
@@ -304,6 +297,7 @@ class SQLiteManager implements DataManager {
                 requestID = RS.getInt(ID);
                 lastRequest.target = RS.getString("Target");
                 lastRequest.httpMethod = RS.getString("Type");
+                lastRequest.authMethod = RS.getString(AUTH_METHOD);
             }
 
             getSimpleAuthCredentials(lastRequest, requestID, BASIC);

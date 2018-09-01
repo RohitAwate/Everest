@@ -26,6 +26,7 @@ import java.util.List;
 public class ComposerState {
     public String target;
     public String httpMethod;
+    public String authMethod;
 
     public List<FieldState> params;
     public List<FieldState> headers;
@@ -65,6 +66,7 @@ public class ComposerState {
         ComposerState state = (ComposerState) o;
         if (!target.equals(state.target)) return false;
         if (!httpMethod.equals(state.httpMethod)) return false;
+        if (!authMethod.equals(state.authMethod)) return false;
         if (!params.equals(state.params)) return false;
         if (!headers.equals(state.headers)) return false;
         if (!basicUsername.equals(state.basicUsername)) return false;

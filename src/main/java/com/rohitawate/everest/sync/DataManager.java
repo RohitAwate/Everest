@@ -8,6 +8,16 @@ import java.util.List;
  * Manages the history and (in the future) the projects of Everest.
  */
 public interface DataManager {
+    String HEADER = "Header";
+    String PARAM = "Param";
+    String URL_STRING = "URLString";
+    String FORM_STRING = "FormString";
+    String AUTH_METHOD = "AuthMethod";
+    String FILE = "File";
+    String BASIC = "Basic";
+    String DIGEST = "Digest";
+    String ID = "ID";
+
     /**
      * Saves the state of the Composer when the request was made.
      */

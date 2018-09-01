@@ -42,7 +42,11 @@ public class SettingsLoader implements Runnable {
             File settingsFile = new File("Everest/config/settings.json");
 
             if (settingsFile.exists())
-                System.out.println("Settings file found. Loading settings... ");
+                LoggingService.logInfo("Settings file found. Loading settings.", LocalDateTime.now());
+            else {
+                LoggingService.logInfo("Settings file not found. Loading defaults.", LocalDateTime.now());
+                return;
+            }
 
             nodes = EverestUtilities.jsonMapper.readTree(settingsFile);
 
@@ -60,7 +64,9 @@ public class SettingsLoader implements Runnable {
             Settings.syntaxTheme = EverestUtilities.trimString(setStringSetting(Settings.syntaxTheme, "syntaxTheme"));
             Settings.showHistoryRange = setIntegerSetting(Settings.showHistoryRange, "showHistoryRange");
         } catch (IOException IOE) {
-            LoggingService.logInfo("Settings file not found. Using defaults.", LocalDateTime.now());
+            LoggingService.logInfo("Settings file contains invalid JSON. Loading defaults.", LocalDateTime.now());
+        } catch (NullPointerException NPE) {
+            LoggingService.logInfo("Settings file empty. Loading defualts", LocalDateTime.now());
         }
     }
 

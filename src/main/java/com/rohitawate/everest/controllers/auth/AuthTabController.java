@@ -92,6 +92,11 @@ public class AuthTabController implements Initializable {
         basicController.setState(state.basicUsername, state.basicPassword, state.basicEnabled);
         digestController.setState(state.digestUsername, state.digestPassword, state.digestEnabled);
 
+        if (state.authMethod == null) {
+            authTabPane.getSelectionModel().select(0);
+            return;
+        }
+
         switch (state.authMethod) {
             case DataManager.BASIC:
                 authTabPane.getSelectionModel().select(0);

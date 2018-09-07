@@ -26,7 +26,6 @@ import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-
 public class Main extends Application {
     public static final String APP_NAME = "Everest";
 

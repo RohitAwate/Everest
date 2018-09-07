@@ -20,6 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.net.UrlEscapers;
 
+import java.io.InputStream;
+import java.util.Scanner;
+
 public class EverestUtilities {
     public static ObjectMapper jsonMapper;
 
@@ -40,5 +43,16 @@ public class EverestUtilities {
 
     public static String encodeURL(String url) {
         return UrlEscapers.urlFragmentEscaper().escape(url);
+    }
+
+    public static String readFile(InputStream file) {
+        Scanner scanner = new Scanner(file);
+
+        StringBuilder builder = new StringBuilder();
+
+        while (scanner.hasNext())
+            builder.append(scanner.nextLine());
+
+        return builder.toString();
     }
 }

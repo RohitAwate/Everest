@@ -1,4 +1,4 @@
-package com.rohitawate.everest.auth.oauth2.code;
+package com.rohitawate.everest.auth.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
@@ -18,6 +18,9 @@ public class AccessToken {
     @JsonAlias("scope")
     public String scope;
 
+    @JsonAlias("id_token")
+    public String idToken;
+
     @Override
     public String toString() {
         return "AccessToken{" +
@@ -26,6 +29,7 @@ public class AccessToken {
                 ", expiresIn=" + expiresIn +
                 ", refreshToken='" + refreshToken + '\'' +
                 ", scope='" + scope + '\'' +
+                ", idToken='" + idToken + '\'' +
                 '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.rohitawate.everest.auth.oauth2.code;
 
-import com.rohitawate.everest.auth.AuthProvider;
+import com.rohitawate.everest.auth.oauth2.AccessToken;
+import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.UnknownAccessTokenTypeException;
@@ -15,8 +16,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class AuthorizationCodeProvider implements AuthProvider {
-
+public class AuthorizationCodeProvider implements OAuth2Provider {
     private URL authURL;
     private URL accessTokenURL;
     private String authGrant;
@@ -25,7 +25,9 @@ public class AuthorizationCodeProvider implements AuthProvider {
     private URL redirectURL;
     private String scope;
     private boolean enabled;
+
     private CaptureMethod captureMethod;
+    private AccessToken accessToken;
 
     private static final String LOCAL_SERVER_URL = "http://localhost:52849/granted";
 
@@ -52,7 +54,7 @@ public class AuthorizationCodeProvider implements AuthProvider {
         this.enabled = enabled;
     }
 
-    private void getAuthorizationGrant() throws Exception {
+    private void fetchAuthorizationGrant() throws Exception {
         StringBuilder grantURLBuilder = new StringBuilder(authURL.toString());
         grantURLBuilder.append("?response_type=code");
         grantURLBuilder.append("&client_id=");
@@ -77,7 +79,7 @@ public class AuthorizationCodeProvider implements AuthProvider {
         authGrant = capturer.getAuthorizationGrant();
     }
 
-    private String getAccessToken() throws NoAuthorizationGrantException, AccessTokenDeniedException,
+    private void fetchAccessToken() throws NoAuthorizationGrantException, AccessTokenDeniedException,
             IOException, UnknownAccessTokenTypeException {
         if (authGrant == null) {
             throw new NoAuthorizationGrantException(
@@ -85,7 +87,6 @@ public class AuthorizationCodeProvider implements AuthProvider {
             );
         }
 
-        AccessToken accessToken;
         URL tokenURL = new URL(accessTokenURL.toString());
         String tokenURLBuilder = "client_id=" +
                 clientID +
@@ -127,6 +128,7 @@ public class AuthorizationCodeProvider implements AuthProvider {
                         if (pair.split("=").length == 2) {
                             key = pair.split("=")[0];
                             value = pair.split("=")[1];
+
                             switch (key) {
                                 case "access_token":
                                     accessToken.accessToken = value;
@@ -154,14 +156,18 @@ public class AuthorizationCodeProvider implements AuthProvider {
         } else {
             throw new AccessTokenDeniedException(tokenResponseBuilder.toString());
         }
+    }
 
-        return accessToken.accessToken;
+    @Override
+    public AccessToken getAccessToken() {
+        return accessToken;
     }
 
     @Override
     public String getAuthHeader() throws Exception {
-        getAuthorizationGrant();
-        return "Bearer " + getAccessToken();
+        fetchAuthorizationGrant();
+        fetchAccessToken();
+        return "Bearer " + accessToken.accessToken;
     }
 
     @Override

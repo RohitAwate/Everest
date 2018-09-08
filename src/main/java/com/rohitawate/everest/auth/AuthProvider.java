@@ -9,5 +9,5 @@ public interface AuthProvider {
     /**
      * Returns the 'Authorization' header to be attached to an API call.
      */
-    String getAuthHeader();
+    String getAuthHeader() throws Exception;
 }

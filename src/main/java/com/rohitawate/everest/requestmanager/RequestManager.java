@@ -132,7 +132,7 @@ public class RequestManager extends Service<EverestResponse> {
         return this.request;
     }
 
-    private void addAuthHeader() {
+    private void addAuthHeader() throws Exception {
         if (request.getAuthProvider() != null && request.getAuthProvider().isEnabled()) {
             requestBuilder.header("Authorization", request.getAuthProvider().getAuthHeader());
         }

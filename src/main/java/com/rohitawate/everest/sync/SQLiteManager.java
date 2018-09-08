@@ -354,8 +354,8 @@ class SQLiteManager implements DataManager {
     private void saveTuple(List<FieldState> tuples, String tupleType, int requestID) {
         if (tuples.size() > 0) {
             try {
+                statement = conn.prepareStatement(Queries.SAVE_TUPLE);
                 for (FieldState fieldState : tuples) {
-                    statement = conn.prepareStatement(Queries.SAVE_TUPLE);
                     statement.setInt(1, requestID);
                     statement.setString(2, tupleType);
                     statement.setString(3, fieldState.key);

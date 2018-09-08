@@ -35,13 +35,14 @@ class Logger {
 
     /**
      * Appends the log to the respective day's log file.
-     *
      */
     synchronized void log() {
         if (LoggingService.log.level.equals(Level.INFO)) {
-            System.out.println(LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message);
-        } else {
-            System.err.println(LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message);
+            System.out.println(ConsoleColors.BLUE + LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message + ConsoleColors.RESET);
+        } else if (LoggingService.log.level.equals(Level.SEVERE)) {
+            System.out.println(ConsoleColors.RED + LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message + ConsoleColors.RESET);
+        } else if (LoggingService.log.level.equals(Level.WARNING)) {
+            System.out.println(ConsoleColors.YELLOW + LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message + ConsoleColors.RESET);
         }
 
         if (LoggingService.log.level.greaterThanEqualTo(this.writerLevel)) {
@@ -126,5 +127,12 @@ class Logger {
         scanner.close();
 
         return builder.toString();
+    }
+
+    public static class ConsoleColors {
+        public static final String RESET = "\u001B[0m";
+        public static final String RED = "\u001B[31m";
+        public static final String YELLOW = "\u001B[33m";
+        public static final String BLUE = "\u001B[34m";
     }
 }

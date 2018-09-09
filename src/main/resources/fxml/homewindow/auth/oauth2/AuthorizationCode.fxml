@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<StackPane stylesheets="@../../../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController">
+    <children>
+        <ScrollPane fitToHeight="true" fitToWidth="true">
+            <content>
+                <VBox alignment="CENTER" spacing="10.0">
+                    <children>
+                        <HBox alignment="CENTER" spacing="30.0">
+                            <children>
+                                <JFXCheckBox fx:id="enabled" checkedColor="ORANGERED" text="ENABLED" textFill="#b9b9b9"
+                                             unCheckedColor="#7a7a7a" HBox.hgrow="ALWAYS"/>
+                                <Label text="GRANT CAPTURE METHOD:" textFill="#9a9a9a">
+                                    <HBox.margin>
+                                        <Insets left="50.0"/>
+                                    </HBox.margin>
+                                    <tooltip>
+                                        <Tooltip prefWidth="300.0"
+                                                 text="Determines whether the authorization screen opens in Everest's integrated WebView or in your browser."
+                                                 textAlignment="CENTER" wrapText="true"/>
+                                    </tooltip>
+                                </Label>
+                                <ComboBox fx:id="captureMethodBox" minWidth="35.0" prefWidth="150.0"/>
+                            </children>
+                            <padding>
+                                <Insets top="10.0"/>
+                            </padding>
+                        </HBox>
+                        <HBox alignment="CENTER">
+                            <children>
+                                <VBox alignment="CENTER" spacing="30.0" HBox.hgrow="ALWAYS">
+                                    <padding>
+                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                                    </padding>
+                                    <children>
+                                        <JFXTextField fx:id="authURLField" focusColor="ORANGERED" labelFloat="true"
+                                                      promptText="AUTHORIZATION URL" styleClass="material-text-field"
+                                                      unFocusColor="#9a9a9a" VBox.vgrow="ALWAYS"/>
+                                        <JFXTextField fx:id="tokenURLField" focusColor="ORANGERED" labelFloat="true"
+                                                      layoutX="20.0" layoutY="20.0" promptText="ACCESS TOKEN URL"
+                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      VBox.vgrow="ALWAYS"/>
+                                        <JFXTextField fx:id="redirectURLField" focusColor="ORANGERED" labelFloat="true"
+                                                      layoutX="20.0" layoutY="59.0" promptText="REDIRECT URL"
+                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      VBox.vgrow="ALWAYS"/>
+                                    </children>
+                                </VBox>
+                                <VBox alignment="TOP_CENTER" layoutX="10.0" layoutY="10.0" spacing="30.0"
+                                      HBox.hgrow="ALWAYS">
+                                    <padding>
+                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                                    </padding>
+                                    <children>
+                                        <JFXTextField fx:id="clientIDField" focusColor="ORANGERED" labelFloat="true"
+                                                      promptText="CLIENT ID" styleClass="material-text-field"
+                                                      unFocusColor="#9a9a9a" VBox.vgrow="ALWAYS"/>
+                                        <JFXTextField fx:id="clientSecretField" focusColor="ORANGERED" labelFloat="true"
+                                                      layoutX="20.0" layoutY="20.0" promptText="CLIENT SECRET"
+                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      VBox.vgrow="ALWAYS"/>
+                                    </children>
+                                </VBox>
+                                <VBox alignment="CENTER" layoutX="484.0" layoutY="10.0" spacing="30.0"
+                                      HBox.hgrow="ALWAYS">
+                                    <padding>
+                                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                                    </padding>
+                                    <children>
+                                        <JFXTextField fx:id="scopeField" focusColor="ORANGERED" labelFloat="true"
+                                                      promptText="SCOPE" styleClass="material-text-field"
+                                                      unFocusColor="#9a9a9a" VBox.vgrow="ALWAYS"/>
+                                        <JFXTextField fx:id="stateField" focusColor="ORANGERED" labelFloat="true"
+                                                      layoutX="20.0" layoutY="20.0" promptText="STATE"
+                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      VBox.vgrow="ALWAYS"/>
+                                        <JFXTextField fx:id="headerPrefixField" focusColor="ORANGERED" labelFloat="true"
+                                                      layoutX="20.0" layoutY="59.0" promptText="HEADER PREFIX"
+                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      VBox.vgrow="ALWAYS">
+                                            <tooltip>
+                                                <Tooltip
+                                                        text="The prefix for the Authorization header. &quot;Bearer&quot; by default."/>
+                                            </tooltip>
+                                        </JFXTextField>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                        <VBox alignment="CENTER" spacing="5.0" style="-fx-background-color: #282828;"
+                              VBox.vgrow="NEVER">
+                            <children>
+                                <HBox alignment="CENTER" spacing="20.0">
+                                    <children>
+                                        <JFXTextField fx:id="accessTokenField" focusColor="ORANGERED" labelFloat="true"
+                                                      promptText="ACCESS TOKEN" styleClass="material-text-field"
+                                                      unFocusColor="#9a9a9a" HBox.hgrow="ALWAYS"/>
+                                        <JFXTextField fx:id="refreshTokenField" focusColor="ORANGERED" labelFloat="true"
+                                                      layoutX="169.0" layoutY="10.0" promptText="REFRESH TOKEN"
+                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      HBox.hgrow="ALWAYS"/>
+                                        <JFXButton fx:id="refreshTokenButton" graphicTextGap="10.0" ripplerFill="WHITE"
+                                                   text="REFRESH" textFill="#9a9a9a" HBox.hgrow="ALWAYS">
+                                            <graphic>
+                                                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true"
+                                                           preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../../../../assets/Refresh.png"/>
+                                                    </image>
+                                                </ImageView>
+                                            </graphic>
+                                        </JFXButton>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                                    </padding>
+                                </HBox>
+                                <Label fx:id="expiryLabel" text="Expires in 3600s" textFill="RED">
+                                    <font>
+                                        <Font name="System Italic" size="15.0"/>
+                                    </font>
+                                </Label>
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="15.0"/>
+                            </padding>
+                        </VBox>
+                    </children>
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</StackPane>

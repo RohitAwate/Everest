@@ -214,6 +214,11 @@
     -fx-padding: 0px;
 }
 
+.material-text-field {
+    -fx-prompt-text-fill: #9a9a9a;
+    -fx-text-fill: #dadada;
+}
+
 .KVField {
     -fx-prompt-text-fill: #919191;
     -fx-background-color: #303030;
@@ -336,20 +341,27 @@
 }
 
 #rawInputTypeBox,
-#responseTypeBox {
+#responseTypeBox,
+#captureMethodBox {
     -fx-background-color: #505050;
 }
 
 #rawInputTypeBox .list-cell,
-#responseTypeBox .list-cell {
+#responseTypeBox .list-cell,
+#captureMethodBox .list-cell {
     -fx-text-fill: azure;
     -fx-font-size: 13px;
     -fx-background-color: #505050;
 }
 
 #rawInputTypeBox .list-cell:hover,
-#responseTypeBox .list-cell:hover {
+#responseTypeBox .list-cell:hover,
+#captureMethodBox .list-cell:hover {
     -fx-background-color: cornflowerblue;
+}
+
+#captureMethodBox .list-cell {
+    -fx-font-size: 15px;
 }
 
 /* Response Headers Viewer */

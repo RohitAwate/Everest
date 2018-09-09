@@ -9,5 +9,5 @@ public interface OAuth2Provider extends AuthProvider {
     /**
      * Returns the access token for the respective API.
      */
-    AccessToken getAccessToken();
+    AccessToken getAccessToken() throws Exception;
 }

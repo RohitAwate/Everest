@@ -838,6 +838,7 @@ public class DashboardController implements Initializable {
         headerTabController.clear();
         clearParams();
         bodyTabController.reset();
+        authTabController.reset();
         responseArea.clear();
         showLayer(ResponseLayer.PROMPT);
         responseTabPane.getSelectionModel().select(0);
@@ -867,5 +868,4 @@ public class DashboardController implements Initializable {
     public String getHttpMethod() {
         return httpMethodBox.getValue();
     }
-
 }

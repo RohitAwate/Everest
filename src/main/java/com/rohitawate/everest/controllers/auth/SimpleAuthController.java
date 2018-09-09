@@ -1,6 +1,7 @@
 package com.rohitawate.everest.controllers.auth;
 
 import com.jfoenix.controls.JFXCheckBox;
+import com.rohitawate.everest.state.SimpleAuthState;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 
@@ -28,9 +29,21 @@ public class SimpleAuthController {
         return passwordField.getText();
     }
 
-    void setState(String username, String password, boolean enabled) {
-        usernameField.setText(username);
-        passwordField.setText(password);
-        checkBox.setSelected(enabled);
+    SimpleAuthState getState() {
+        return new SimpleAuthState(usernameField.getText(), passwordField.getText(), checkBox.isSelected());
+    }
+
+    void setState(SimpleAuthState state) {
+        if (state != null) {
+            usernameField.setText(state.username);
+            passwordField.setText(state.password);
+            checkBox.setSelected(state.enabled);
+        }
+    }
+
+    public void reset() {
+        usernameField.clear();
+        passwordField.clear();
+        checkBox.setSelected(false);
     }
 }

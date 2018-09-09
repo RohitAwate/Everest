@@ -69,6 +69,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
         AuthorizationGrantCapturer capturer;
         switch (captureMethod) {
+            // TODO: Re-use capturers
             case BROWSER:
                 capturer = new BrowserCapturer();
                 break;
@@ -159,14 +160,21 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     }
 
     @Override
-    public AccessToken getAccessToken() {
+    public AccessToken getAccessToken() throws Exception {
+        if (accessToken == null) {
+            getAuthHeader();
+        }
+
         return accessToken;
     }
 
     @Override
     public String getAuthHeader() throws Exception {
-        fetchAuthorizationGrant();
-        fetchAccessToken();
+        if (accessToken == null) {
+            fetchAuthorizationGrant();
+            fetchAccessToken();
+        }
+
         return "Bearer " + accessToken.accessToken;
     }
 

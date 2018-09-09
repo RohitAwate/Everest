@@ -1,0 +1,132 @@
+package com.rohitawate.everest.controllers.auth.oauth2;
+
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXTextField;
+import com.rohitawate.everest.auth.oauth2.AccessToken;
+import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
+import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.state.AuthorizationCodeState;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ResourceBundle;
+
+import static com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider.CaptureMethod.BROWSER;
+import static com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider.CaptureMethod.WEB_VIEW;
+
+public class AuthorizationCodeController implements Initializable {
+    @FXML
+    private JFXCheckBox enabled;
+    @FXML
+    private ComboBox<String> captureMethodBox;
+    @FXML
+    private JFXTextField authURLField, tokenURLField, redirectURLField,
+            clientIDField, clientSecretField, scopeField, stateField,
+            headerPrefixField, accessTokenField, refreshTokenField;
+    @FXML
+    private Label expiryLabel;
+    @FXML
+    private JFXButton refreshTokenButton;
+
+    // TODO: Re-use provider with setters and getters
+    private AuthorizationCodeProvider provider;
+    private int tokenExpiry;
+
+    private static final String CAPTURE_METHOD_INTEGRATED = "Integrated";
+    private static final String CAPTURE_METHOD_BROWSER = "Browser";
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        captureMethodBox.getItems().addAll(CAPTURE_METHOD_INTEGRATED, CAPTURE_METHOD_BROWSER);
+        captureMethodBox.setValue(CAPTURE_METHOD_INTEGRATED);
+        refreshTokenButton.setOnAction(this::refreshToken);
+        expiryLabel.setVisible(false);
+    }
+
+    private void refreshToken(ActionEvent actionEvent) {
+        refreshTokenButton.setDisable(true);
+        try {
+            provider = new AuthorizationCodeProvider(
+                    authURLField.getText(), tokenURLField.getText(),
+                    clientIDField.getText(), clientSecretField.getText(),
+                    redirectURLField.getText().isEmpty() ? null : redirectURLField.getText(),
+                    scopeField.getText(), enabled.isSelected(),
+                    captureMethodBox.getValue().equals(CAPTURE_METHOD_INTEGRATED) ? WEB_VIEW : BROWSER
+            );
+
+            provider.getAuthHeader();
+            AccessToken accessToken = provider.getAccessToken();
+            if (accessToken != null) {
+                accessTokenField.clear();
+                refreshTokenField.clear();
+
+                accessTokenField.setText(accessToken.accessToken);
+
+                if (accessToken.refreshToken != null) {
+                    refreshTokenField.setText(accessToken.refreshToken);
+                }
+
+                setExpiryLabel(accessToken.expiresIn);
+            }
+        } catch (Exception e) {
+            LoggingService.logWarning("Could not refresh OAuth 2.0 Authorization Code tokens.", e, LocalDateTime.now());
+        } finally {
+            refreshTokenButton.setDisable(false);
+        }
+    }
+
+    public AuthorizationCodeState getState() {
+        return new AuthorizationCodeState(authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
+                clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
+                headerPrefixField.getText(), accessTokenField.getText(), refreshTokenField.getText(), tokenExpiry, enabled.isSelected());
+    }
+
+    public void setState(AuthorizationCodeState state) {
+        if (state != null) {
+            authURLField.setText(state.authURL);
+            tokenURLField.setText(state.accessTokenURL);
+            redirectURLField.setText(state.redirectURL);
+            clientIDField.setText(state.clientID);
+            clientSecretField.setText(state.clientSecret);
+            scopeField.setText(state.scope);
+            stateField.setText(state.state);
+            headerPrefixField.setText(state.headerPrefix);
+            accessTokenField.setText(state.accessToken);
+            refreshTokenField.setText(state.refreshToken);
+            setExpiryLabel(state.expiresIn);
+            enabled.setSelected(state.enabled);
+        }
+    }
+
+    private void setExpiryLabel(int expiresIn) {
+        tokenExpiry = expiresIn;
+        expiryLabel.setVisible(true);
+        if (expiresIn != 0) {
+            expiryLabel.setText("Expires in " + expiresIn + "s");
+        } else {
+            expiryLabel.setText("Never expires.");
+        }
+    }
+
+    public void reset() {
+        authURLField.clear();
+        tokenURLField.clear();
+        redirectURLField.clear();
+        clientIDField.clear();
+        clientSecretField.clear();
+        scopeField.clear();
+        stateField.clear();
+        headerPrefixField.clear();
+        accessTokenField.clear();
+        refreshTokenField.clear();
+        tokenExpiry = 0;
+        expiryLabel.setVisible(false);
+        enabled.setSelected(false);
+    }
+}

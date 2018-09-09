@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.StackPane?>
+<StackPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rohitawate.everest.controllers.auth.OAuth2TabController">
+    <children>
+        <TabPane fx:id="tabPane" stylesheets="@../../../css/Adreana.css" tabClosingPolicy="UNAVAILABLE"
+                 tabMinWidth="150.0">
+            <tabs>
+                <Tab fx:id="codeTab" text="AUTH CODE"/>
+                <Tab fx:id="implicitTab" text="IMPLICIT"/>
+                <Tab fx:id="ropcTab" text="ROPC"/>
+                <Tab fx:id="clientCredentialsTab" text="CLIENT CREDENTIALS"/>
+            </tabs>
+        </TabPane>
+    </children>
+</StackPane>

@@ -3,10 +3,11 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <TabPane fx:id="authTabPane" stylesheets="@../../../css/Adreana.css" tabClosingPolicy="UNAVAILABLE" tabMinHeight="25.0"
-         tabMinWidth="100.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
+         tabMinWidth="100.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
          fx:controller="com.rohitawate.everest.controllers.auth.AuthTabController">
     <tabs>
         <Tab fx:id="basicTab" text="BASIC"/>
         <Tab fx:id="digestTab" text="DIGEST"/>
+        <Tab fx:id="oauth2Tab" text="OAUTH 2.0"/>
     </tabs>
 </TabPane>

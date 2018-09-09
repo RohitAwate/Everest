@@ -21,28 +21,30 @@ public class AuthTabController implements Initializable {
     @FXML
     private TabPane authTabPane;
     @FXML
-    private Tab basicTab, digestTab;
+    private Tab basicTab, digestTab, oauth2Tab;
 
     private SimpleAuthController basicController, digestController;
+    private OAuth2TabController oAuth2Controller;
 
     private DashboardController dashboard;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/SimpleAuth.fxml"));
-            Parent basicFXML = loader.load();
+            FXMLLoader basicLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/SimpleAuth.fxml"));
+            Parent basicFXML = basicLoader.load();
             basicTab.setContent(basicFXML);
-            basicController = loader.getController();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            basicController = basicLoader.getController();
 
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/SimpleAuth.fxml"));
-            Parent digestFXML = loader.load();
+            FXMLLoader digestLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/SimpleAuth.fxml"));
+            Parent digestFXML = digestLoader.load();
             digestTab.setContent(digestFXML);
-            digestController = loader.getController();
+            digestController = digestLoader.getController();
+
+            FXMLLoader oauth2Loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/OAuth2.fxml"));
+            Parent oauth2FXML = oauth2Loader.load();
+            oauth2Tab.setContent(oauth2FXML);
+            oAuth2Controller = oauth2Loader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,18 +81,15 @@ public class AuthTabController implements Initializable {
                 break;
         }
 
-        state.basicUsername = basicController.getUsername();
-        state.basicPassword = basicController.getPassword();
-        state.basicEnabled = basicController.isSelected();
-
-        state.digestUsername = digestController.getUsername();
-        state.digestPassword = digestController.getPassword();
-        state.digestEnabled = digestController.isSelected();
+        state.basicAuthState = basicController.getState();
+        state.digestAuthState = digestController.getState();
+        state.oAuth2State = oAuth2Controller.getState();
     }
 
     public void setState(ComposerState state) {
-        basicController.setState(state.basicUsername, state.basicPassword, state.basicEnabled);
-        digestController.setState(state.digestUsername, state.digestPassword, state.digestEnabled);
+        basicController.setState(state.basicAuthState);
+        digestController.setState(state.digestAuthState);
+        oAuth2Controller.setState(state.oAuth2State);
 
         if (state.authMethod == null) {
             authTabPane.getSelectionModel().select(0);
@@ -108,5 +107,11 @@ public class AuthTabController implements Initializable {
 
     public void setDashboard(DashboardController dashboard) {
         this.dashboard = dashboard;
+    }
+
+    public void reset() {
+        basicController.reset();
+        digestController.reset();
+        oAuth2Controller.reset();
     }
 }

@@ -113,8 +113,10 @@ class SQLiteManager implements DataManager {
         saveTuple(newState.headers, HEADER, requestID);
         saveTuple(newState.params, PARAM, requestID);
 
-        saveSimpleAuthCredentials(requestID, BASIC, newState.basicUsername, newState.basicPassword, newState.basicEnabled);
-        saveSimpleAuthCredentials(requestID, DIGEST, newState.digestUsername, newState.digestPassword, newState.digestEnabled);
+        saveSimpleAuthCredentials(requestID, BASIC, newState.basicAuthState.username,
+                newState.basicAuthState.password, newState.basicAuthState.enabled);
+        saveSimpleAuthCredentials(requestID, DIGEST, newState.digestAuthState.username,
+                newState.digestAuthState.password, newState.digestAuthState.enabled);
 
         if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
             // Maps the request to its ContentType for faster retrieval
@@ -221,23 +223,23 @@ class SQLiteManager implements DataManager {
 
         if (RS.next()) {
             if (type.equals(BASIC)) {
-                state.basicUsername = RS.getString("Username");
-                state.basicPassword = RS.getString("Password");
-                state.basicEnabled = RS.getInt("Enabled") == 1;
+                state.basicAuthState.username = RS.getString("Username");
+                state.basicAuthState.password = RS.getString("Password");
+                state.basicAuthState.enabled = RS.getInt("Enabled") == 1;
             } else if (type.equals(DIGEST)) {
-                state.digestUsername = RS.getString("Username");
-                state.digestPassword = RS.getString("Password");
-                state.digestEnabled = RS.getInt("Enabled") == 1;
+                state.digestAuthState.username = RS.getString("Username");
+                state.digestAuthState.password = RS.getString("Password");
+                state.digestAuthState.enabled = RS.getInt("Enabled") == 1;
             }
         } else {
             String empty = "";
-            state.basicUsername = empty;
-            state.basicPassword = empty;
-            state.basicEnabled = false;
+            state.basicAuthState.username = empty;
+            state.basicAuthState.password = empty;
+            state.basicAuthState.enabled = false;
 
-            state.digestUsername = empty;
-            state.digestPassword = empty;
-            state.digestEnabled = false;
+            state.digestAuthState.username = empty;
+            state.digestAuthState.password = empty;
+            state.digestAuthState.enabled = false;
         }
     }
 

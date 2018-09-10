@@ -1,11 +1,11 @@
 package com.rohitawate.everest.controllers.auth;
 
+import com.rohitawate.everest.auth.AuthMethod;
 import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.auth.BasicAuthProvider;
 import com.rohitawate.everest.auth.DigestAuthProvider;
 import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.state.ComposerState;
-import com.rohitawate.everest.sync.DataManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -74,11 +74,13 @@ public class AuthTabController implements Initializable {
     public void getState(ComposerState state) {
         switch (authTabPane.getSelectionModel().getSelectedIndex()) {
             case 0:
-                state.authMethod = DataManager.BASIC;
+                state.authMethod = AuthMethod.BASIC;
                 break;
             case 1:
-                state.authMethod = DataManager.DIGEST;
+                state.authMethod = AuthMethod.DIGEST;
                 break;
+            case 2:
+                state.authMethod = AuthMethod.OAUTH2;
         }
 
         state.basicAuthState = basicController.getState();
@@ -97,11 +99,14 @@ public class AuthTabController implements Initializable {
         }
 
         switch (state.authMethod) {
-            case DataManager.BASIC:
+            case AuthMethod.BASIC:
                 authTabPane.getSelectionModel().select(0);
                 break;
-            case DataManager.DIGEST:
+            case AuthMethod.DIGEST:
                 authTabPane.getSelectionModel().select(1);
+                break;
+            case AuthMethod.OAUTH2:
+                authTabPane.getSelectionModel().select(2);
         }
     }
 

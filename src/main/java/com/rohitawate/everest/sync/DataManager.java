@@ -14,8 +14,6 @@ public interface DataManager {
     String FORM_STRING = "FormString";
     String AUTH_METHOD = "AuthMethod";
     String FILE = "File";
-    String BASIC = "Basic";
-    String DIGEST = "Digest";
     String ID = "ID";
 
     /**

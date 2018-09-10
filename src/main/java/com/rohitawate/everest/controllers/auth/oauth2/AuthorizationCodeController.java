@@ -5,7 +5,11 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
 import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.state.AuthorizationCodeState;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +17,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
@@ -75,7 +80,21 @@ public class AuthorizationCodeController implements Initializable {
                 setExpiryLabel(accessToken.expiresIn);
             }
         } catch (Exception e) {
-            LoggingService.logWarning("Could not refresh OAuth 2.0 Authorization Code tokens.", e, LocalDateTime.now());
+            String errorMessage;
+            if (e.getClass().equals(AuthWindowClosedException.class)) {
+                errorMessage = "Authorization window closed.";
+            } else if (e.getClass().equals(NoAuthorizationGrantException.class)) {
+                errorMessage = "Grant denied by authorization endpoint.";
+            } else if (e.getClass().equals(AccessTokenDeniedException.class)) {
+                errorMessage = "Access token denied by token endpoint.";
+            } else if (e.getClass().equals(MalformedURLException.class)) {
+                errorMessage = "Invalid URL(s).";
+            } else {
+                errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
+            }
+
+            NotificationsManager.push(errorMessage, 5000);
+            LoggingService.logWarning(errorMessage, e, LocalDateTime.now());
         } finally {
             refreshTokenButton.setDisable(false);
         }
@@ -107,6 +126,7 @@ public class AuthorizationCodeController implements Initializable {
     private void setExpiryLabel(int expiresIn) {
         tokenExpiry = expiresIn;
         expiryLabel.setVisible(true);
+
         if (expiresIn != 0) {
             expiryLabel.setText("Expires in " + expiresIn + "s");
         } else {

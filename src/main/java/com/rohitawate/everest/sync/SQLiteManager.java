@@ -153,6 +153,12 @@ class SQLiteManager implements DataManager {
     }
 
     private void saveAuthCodeCredentials(int requestID, AuthorizationCodeState state) throws SQLException {
+        if (state.authURL == null && state.accessTokenURL == null
+                && state.clientID == null && state.clientSecret == null) {
+            System.out.println("Skipped auth code saving");
+            return;
+        }
+
         statement = conn.prepareStatement(Queries.SAVE_AUTH_CODE_CREDENTIALS);
         statement.setInt(1, requestID);
         statement.setString(2, state.authURL);

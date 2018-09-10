@@ -34,6 +34,7 @@ import com.rohitawate.everest.models.requests.DataRequest;
 import com.rohitawate.everest.models.requests.GETRequest;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
+import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import com.rohitawate.everest.requestmanager.RequestManagersPool;
 import com.rohitawate.everest.state.ComposerState;
@@ -92,7 +93,6 @@ public class DashboardController implements Initializable {
     @FXML
     private JFXProgressBar progressBar;
 
-    private JFXSnackbar snackbar;
     private List<StringKeyValueFieldController> paramsControllers;
     private RequestManager requestManager;
     private AuthTabController authTabController;
@@ -151,7 +151,7 @@ public class DashboardController implements Initializable {
             LoggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
         }
 
-        snackbar = new JFXSnackbar(dashboard);
+        NotificationsManager.registerChannel(new JFXSnackbar(dashboard));
 
         showLayer(ResponseLayer.PROMPT);
         httpMethodBox.getItems().addAll(
@@ -184,7 +184,7 @@ public class DashboardController implements Initializable {
             responseArea.selectAll();
             responseArea.copy();
             responseArea.deselect();
-            snackbar.show("Response body copied to clipboard.", 5000);
+            NotificationsManager.push("Response body copied to clipboard.", 5000);
         });
 
         responseTypeBox.getItems().addAll(
@@ -232,7 +232,7 @@ public class DashboardController implements Initializable {
 
             if (address.equals("")) {
                 showLayer(ResponseLayer.PROMPT);
-                snackbar.show("Please enter an address.", 3000);
+                NotificationsManager.push("Please enter an address.", 3000);
                 return;
             }
 
@@ -306,7 +306,7 @@ public class DashboardController implements Initializable {
             syncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
-            snackbar.show("Invalid address. Please verify and try again.", 3000);
+            NotificationsManager.push("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
             LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
             errorTitle.setText("Oops... That's embarrassing!");
@@ -332,7 +332,7 @@ public class DashboardController implements Initializable {
         } else if (throwable.getClass() == RedirectException.class) {
             RedirectException redirect = (RedirectException) throwable;
             addressField.setText(redirect.getNewLocation());
-            snackbar.show("Resource moved permanently. Redirecting...", 3000);
+            NotificationsManager.push("Resource moved permanently. Redirecting...", 3000);
             requestManager = null;
             sendRequest();
             return;
@@ -461,6 +461,7 @@ public class DashboardController implements Initializable {
                     case "text/html":
                         simplifiedContentType = HTTPConstants.HTML;
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                            JFXSnackbar snackbar = new JFXSnackbar(dashboard);
                             snackbar.show("Open link in browser?", "YES", 5000, e -> {
                                 snackbar.close();
                                 new Thread(() -> {
@@ -490,7 +491,7 @@ public class DashboardController implements Initializable {
             responseTypeBox.setValue(simplifiedContentType);
         } catch (Exception e) {
             String errorMessage = "Response could not be parsed.";
-            snackbar.show(errorMessage, 5000);
+            NotificationsManager.push(errorMessage, 5000);
             LoggingService.logSevere(errorMessage, e, LocalDateTime.now());
             errorTitle.setText("Parsing Error");
             errorDetails.setText(errorMessage);

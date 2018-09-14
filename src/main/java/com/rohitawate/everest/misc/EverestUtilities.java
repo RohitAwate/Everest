@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.net.UrlEscapers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
@@ -45,14 +47,26 @@ public class EverestUtilities {
         return UrlEscapers.urlFragmentEscaper().escape(url);
     }
 
-    public static String readFile(InputStream file) {
-        Scanner scanner = new Scanner(file);
-
+    public static String readFile(InputStream stream) {
         StringBuilder builder = new StringBuilder();
 
-        while (scanner.hasNext())
-            builder.append(scanner.nextLine());
+        try (Scanner scanner = new Scanner(stream)) {
+            while (scanner.hasNext()) {
+                builder.append(scanner.nextLine());
+                builder.append("\n");
+            }
+        }
 
         return builder.toString();
+    }
+
+    public static byte[] readBytes(InputStream stream) throws IOException {
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        int byteRead;
+
+        while ((byteRead = stream.read()) != -1)
+            outStream.write(byteRead);
+
+        return outStream.toByteArray();
     }
 }

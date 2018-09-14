@@ -16,10 +16,14 @@
 
 package com.rohitawate.everest.logging;
 
-import java.io.*;
+import com.rohitawate.everest.misc.EverestUtilities;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Scanner;
 
 class Logger {
     private Level writerLevel;
@@ -30,7 +34,7 @@ class Logger {
         this.writerLevel = writerLevel;
 
         createLogsFile();
-        logEntryTemplate = readFile(getClass().getResourceAsStream("/templates/LogEntry.html"));
+        logEntryTemplate = EverestUtilities.readFile(getClass().getResourceAsStream("/html/LogEntry.html"));
     }
 
     /**
@@ -104,7 +108,7 @@ class Logger {
 
             logsFile.createNewFile();
             BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath));
-            String logsFileTemplate = readFile(getClass().getResourceAsStream("/templates/LogsFile.html"));
+            String logsFileTemplate = EverestUtilities.readFile(getClass().getResourceAsStream("/html/LogsFile.html"));
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             logsFileTemplate = logsFileTemplate.replace("%% Date %%", dateTimeFormatter.format(LocalDate.now()));
             logsFileTemplate = logsFileTemplate.replace("%% Date %%", dateTimeFormatter.format(LocalDate.now()));
@@ -114,19 +118,6 @@ class Logger {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private String readFile(InputStream stream) {
-        StringBuilder builder = new StringBuilder();
-        Scanner scanner = new Scanner(stream);
-
-        while (scanner.hasNext()) {
-            builder.append(scanner.nextLine());
-            builder.append("\n");
-        }
-        scanner.close();
-
-        return builder.toString();
     }
 
     public static class ConsoleColors {

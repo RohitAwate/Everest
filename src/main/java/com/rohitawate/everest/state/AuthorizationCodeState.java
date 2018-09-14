@@ -3,6 +3,17 @@ package com.rohitawate.everest.state;
 public class AuthorizationCodeState {
 
     public AuthorizationCodeState() {
+        String empty = "";
+        this.authURL = empty;
+        this.accessTokenURL = empty;
+        this.redirectURL = empty;
+        this.clientID = empty;
+        this.clientSecret = empty;
+        this.scope = empty;
+        this.state = empty;
+        this.headerPrefix = empty;
+        this.accessToken = empty;
+        this.refreshToken = empty;
     }
 
     public AuthorizationCodeState(String authURL, String accessTokenURL, String redirectURL, String clientID,

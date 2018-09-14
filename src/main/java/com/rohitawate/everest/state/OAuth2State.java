@@ -16,6 +16,8 @@ public class OAuth2State {
         if (o == null || getClass() != o.getClass()) return false;
 
         OAuth2State that = (OAuth2State) o;
-        return codeState.equals(that.codeState);
+        if (!codeState.equals(that.codeState)) return false;
+
+        return true;
     }
 }

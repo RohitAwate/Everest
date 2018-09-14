@@ -139,7 +139,8 @@ public class RequestManager extends Service<EverestResponse> {
     }
 
     private void appendHeaders() {
-        request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
+        if (request.getHeaders() != null)
+            request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
         requestBuilder.header("User-Agent", Main.APP_NAME);
     }
 

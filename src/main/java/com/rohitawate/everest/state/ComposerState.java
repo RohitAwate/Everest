@@ -67,6 +67,7 @@ public class ComposerState {
         if (!headers.equals(state.headers)) return false;
         if (!basicAuthState.equals(state.basicAuthState)) return false;
         if (!digestAuthState.equals(state.digestAuthState)) return false;
+        if (!oAuth2State.equals(state.oAuth2State)) return false;
 
         if (state.httpMethod.equals(HTTPConstants.GET)
                 || state.httpMethod.equals(HTTPConstants.DELETE)) return true;

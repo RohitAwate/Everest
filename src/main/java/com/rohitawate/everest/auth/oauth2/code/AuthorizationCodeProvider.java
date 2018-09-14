@@ -29,8 +29,6 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     private CaptureMethod captureMethod;
     private AccessToken accessToken;
 
-    private static final String LOCAL_SERVER_URL = "http://localhost:52849/granted";
-
     public enum CaptureMethod {
         WEB_VIEW, BROWSER
     }
@@ -46,8 +44,8 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         this.clientID = clientID;
         this.clientSecret = clientSecret;
         this.captureMethod = captureMethod;
-        if (redirectURL == null)
-            this.redirectURL = new URL(LOCAL_SERVER_URL);
+        if (redirectURL == null || captureMethod.equals(CaptureMethod.BROWSER))
+            this.redirectURL = new URL(BrowserCapturer.LOCAL_SERVER_URL);
         else
             this.redirectURL = new URL(redirectURL);
         this.scope = scope;
@@ -62,7 +60,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         grantURLBuilder.append("&redirect_uri=");
         grantURLBuilder.append(redirectURL.toString());
 
-        if (scope != null) {
+        if (scope == null || !scope.isEmpty()) {
             grantURLBuilder.append("&scope=");
             grantURLBuilder.append(scope);
         }
@@ -71,7 +69,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         switch (captureMethod) {
             // TODO: Re-use capturers
             case BROWSER:
-                capturer = new BrowserCapturer();
+                capturer = new BrowserCapturer(grantURLBuilder.toString());
                 break;
             default:
                 capturer = new WebViewCapturer(grantURLBuilder.toString(), redirectURL.toString());
@@ -89,18 +87,24 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         }
 
         URL tokenURL = new URL(accessTokenURL.toString());
-        String tokenURLBuilder = "client_id=" +
-                clientID +
-                "&client_secret=" +
-                clientSecret +
-                "&grant_type=authorization_code" +
-                "&code=" +
-                authGrant +
-                "&redirect_uri=" +
-                redirectURL;
+        StringBuilder tokenURLBuilder = new StringBuilder();
+        tokenURLBuilder.append("client_id=");
+        tokenURLBuilder.append(clientID);
+        tokenURLBuilder.append("&client_secret=");
+        tokenURLBuilder.append(clientSecret);
+        tokenURLBuilder.append("&grant_type=authorization_code");
+        tokenURLBuilder.append("&code=");
+        tokenURLBuilder.append(authGrant);
+        tokenURLBuilder.append("&redirect_uri=");
+        tokenURLBuilder.append(redirectURL);
+        if (scope != null && !scope.isEmpty()) {
+            tokenURLBuilder.append("&scope=");
+            tokenURLBuilder.append(scope);
+        }
 
-        byte[] postData = tokenURLBuilder.getBytes(StandardCharsets.UTF_8);
+        byte[] postData = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
         HttpURLConnection connection = (HttpURLConnection) tokenURL.openConnection();
+
         connection.setRequestMethod(HTTPConstants.POST);
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Length", String.valueOf(postData.length));
@@ -109,11 +113,10 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         connection.getOutputStream().write(postData);
 
         StringBuilder tokenResponseBuilder = new StringBuilder();
-        Scanner scanner = new Scanner(connection.getInputStream());
-        while (scanner.hasNext())
-            tokenResponseBuilder.append(scanner.nextLine());
-
         if (connection.getResponseCode() == 200) {
+            Scanner scanner = new Scanner(connection.getInputStream());
+            while (scanner.hasNext())
+                tokenResponseBuilder.append(scanner.nextLine());
             // Removes the "charset" part
             String contentType = connection.getContentType().split(";")[0];
 
@@ -155,6 +158,9 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             }
             // TODO: Save the access token
         } else {
+            Scanner scanner = new Scanner(connection.getErrorStream());
+            while (scanner.hasNext())
+                tokenResponseBuilder.append(scanner.nextLine());
             throw new AccessTokenDeniedException(tokenResponseBuilder.toString());
         }
     }

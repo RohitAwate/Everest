@@ -1,46 +1,30 @@
 package com.rohitawate.everest.auth.oauth2.code;
 
-import com.rohitawate.everest.logging.LoggingService;
-import com.rohitawate.everest.misc.EverestUtilities;
-import spark.Spark;
+import com.rohitawate.everest.server.CaptureServer;
 
-import java.awt.*;
-import java.io.InputStream;
-import java.net.URI;
-import java.time.LocalDateTime;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+/**
+ * Opens the OAuth 2.0 authorization window in the user's browser
+ * and captures the authorization grant by forcing redirects to a
+ * local server.
+ */
 public class BrowserCapturer implements AuthorizationGrantCapturer {
-    private String authGrant;
+    private String authURL;
 
-    private void startServer() {
-        Spark.port(52849);
-        Spark.staticFiles.location("/assets");
+    static final String LOCAL_SERVER_URL = "http://localhost:52849/granted";
 
-        Spark.get("/granted", (req, res) -> {
-            authGrant = req.queryParams("code");
-            if (authGrant != null) {
-                InputStream stream = getClass().getResourceAsStream("/templates/AuthorizationGrantedPage.html");
-                return EverestUtilities.readFile(stream);
-            } else {
-                return "Not authorized";
-            }
-        });
-    }
-
-    private static void openLinkInBrowser(String url) {
-        if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            new Thread(() -> {
-                try {
-                    Desktop.getDesktop().browse(new URI(url));
-                } catch (Exception ex) {
-                    LoggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
-                }
-            }).start();
-        }
+    BrowserCapturer(String authURL) {
+        this.authURL = authURL;
     }
 
     @Override
-    public String getAuthorizationGrant() {
-        return null;
+    public String getAuthorizationGrant() throws ExecutionException, InterruptedException {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        CaptureServer server = new CaptureServer(52849, authURL);
+        executor.submit(server);
+        return server.get();
     }
 }

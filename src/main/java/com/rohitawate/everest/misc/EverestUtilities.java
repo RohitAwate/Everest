@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.net.UrlEscapers;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
@@ -61,6 +62,10 @@ public class EverestUtilities {
     }
 
     public static byte[] readBytes(InputStream stream) throws IOException {
+        if (stream == null) {
+            throw new FileNotFoundException();
+        }
+
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         int byteRead;
 

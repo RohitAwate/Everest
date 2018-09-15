@@ -56,11 +56,13 @@ public class CaptureServer extends Task<String> {
 
     private String listen() throws IOException {
         String grant = null;
-        String requestedPath = null;
+        String requestedPath;
+        Socket client = null;
         PrintWriter headerWriter;
         DataOutputStream bodyStream;
 
-        try (Socket client = server.accept()) {
+        try {
+            client = server.accept();
             Scanner scanner = new Scanner(client.getInputStream());
             headerWriter = new PrintWriter(client.getOutputStream());
             bodyStream = new DataOutputStream(client.getOutputStream());
@@ -75,12 +77,19 @@ public class CaptureServer extends Task<String> {
 
                 if (requestedPath.startsWith("/granted")) {
                     headers.append("200 OK");
-                    body = EverestUtilities.readFile(getClass().getResourceAsStream(WEB_ROOT + GRANTED)).getBytes();
+                    body = EverestUtilities.readBytes(getClass().getResourceAsStream(WEB_ROOT + GRANTED));
                     headers.append("\nContent-Type: text/html");
                 } else {
-                    body = EverestUtilities.readBytes(getClass().getResourceAsStream(WEB_ROOT + requestedPath));
-                    headers.append("\nContent-Type: ");
-                    headers.append(getMimeType(requestedPath));
+                    try {
+                        body = EverestUtilities.readBytes(getClass().getResourceAsStream(WEB_ROOT + requestedPath));
+                        headers.append("200 OK");
+                        headers.append("\nContent-Type: ");
+                        headers.append(getMimeType(requestedPath));
+                    } catch (FileNotFoundException e) {
+                        body = EverestUtilities.readBytes(getClass().getResourceAsStream(WEB_ROOT + NOT_FOUND));
+                        headers.append("404 Not Found");
+                        headers.append("\nContent-Type: text/html");
+                    }
                 }
 
                 headers.append("\nContent-Length: ");
@@ -95,8 +104,10 @@ public class CaptureServer extends Task<String> {
             } else {
                 System.out.println("Not supported.");
             }
-        } catch (FileNotFoundException e) {
-            LoggingService.logInfo("File not found: " + requestedPath, LocalDateTime.now());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
 
         if (requestedPath != null) {

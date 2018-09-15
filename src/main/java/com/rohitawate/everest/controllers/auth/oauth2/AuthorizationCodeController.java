@@ -65,7 +65,6 @@ public class AuthorizationCodeController implements Initializable {
                     captureMethodBox.getValue().equals(CAPTURE_METHOD_INTEGRATED) ? WEB_VIEW : BROWSER
             );
 
-            provider.getAuthHeader();
             AccessToken accessToken = provider.getAccessToken();
             if (accessToken != null) {
                 accessTokenField.clear();

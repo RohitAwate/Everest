@@ -48,7 +48,11 @@ public class EverestUtilities {
         return UrlEscapers.urlFragmentEscaper().escape(url);
     }
 
-    public static String readFile(InputStream stream) {
+    public static String readFile(InputStream stream) throws IOException {
+        if (stream == null) {
+            throw new FileNotFoundException();
+        }
+
         StringBuilder builder = new StringBuilder();
 
         try (Scanner scanner = new Scanner(stream)) {

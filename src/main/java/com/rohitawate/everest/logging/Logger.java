@@ -34,7 +34,11 @@ class Logger {
         this.writerLevel = writerLevel;
 
         createLogsFile();
-        logEntryTemplate = EverestUtilities.readFile(getClass().getResourceAsStream("/html/LogEntry.html"));
+        try {
+            logEntryTemplate = EverestUtilities.readFile(getClass().getResourceAsStream("/html/LogEntry.html"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

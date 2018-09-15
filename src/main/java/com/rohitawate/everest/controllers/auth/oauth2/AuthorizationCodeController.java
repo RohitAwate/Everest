@@ -43,8 +43,8 @@ public class AuthorizationCodeController implements Initializable {
     private AuthorizationCodeProvider provider;
     private int tokenExpiry;
 
-    private static final String CAPTURE_METHOD_INTEGRATED = "Integrated";
-    private static final String CAPTURE_METHOD_BROWSER = "Browser";
+    private static final String CAPTURE_METHOD_INTEGRATED = "Integrated WebView";
+    private static final String CAPTURE_METHOD_BROWSER = "System Browser";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

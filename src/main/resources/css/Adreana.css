@@ -97,15 +97,15 @@
 }
 
 /* Home window tab */
-#tabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
+.tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
     -fx-background-color: white;
 }
 
-#tabPane:top .tab-header-area .headers-region .tab:hover:top {
+.tab-pane:top .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: orangered;
 }
 
-#tabPane:top .tab-header-area .headers-region .tab:selected:top {
+.tab-pane:top .tab-header-area .headers-region .tab:selected:top {
     -fx-background-color: #505050;
 }
 
@@ -164,6 +164,19 @@
     -fx-background-color: #282828;
 }
 
+.flat-tab-pane {
+    -fx-tab-min-height: 1.4em;
+}
+
+.flat-tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
+    -fx-fill: white;
+    -fx-font-size: 0.9em;
+}
+
+#homeWindowTabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
+    -fx-font-size: 1em;
+}
+
 /* Request options (Headers, Authorization, etc) tab */
 #requestOptionsTab .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: #55a15c;
@@ -181,6 +194,11 @@
     -fx-background-color: #545454;
 }
 
+#oauth2TabPane:top .tab-header-area .tab-header-background,
+#oauth2TabPane:top .tab-header-area .headers-region .tab:top {
+    -fx-background-color: #4b4b4b;
+}
+
 #bodyTabPane .tab-content-area,
 #bodyTabPane .scroll-pane .viewport {
     -fx-background-color: #3d3d3d;
@@ -189,6 +207,10 @@
 #authTabPane:top .tab-header-area .headers-region .tab:hover:top,
 #bodyTabPane:top .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: #4e848f;
+}
+
+#oauth2TabPane:top .tab-header-area .headers-region .tab:hover:top {
+    -fx-background-color: crimson;
 }
 
 #authTabPane:top .tab-header-area .headers-region .tab:selected:top,

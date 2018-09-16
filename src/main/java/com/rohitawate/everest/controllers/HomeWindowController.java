@@ -55,7 +55,7 @@ public class HomeWindowController implements Initializable {
     @FXML
     private SplitPane splitPane;
     @FXML
-    private TabPane tabPane;
+    private TabPane homeWindowTabPane;
 
     private HashMap<Tab, DashboardState> tabStateMap;
     private HistoryPaneController historyController;
@@ -82,7 +82,7 @@ public class HomeWindowController implements Initializable {
             Parent dashboardFXML = dashboardLoader.load();
             dashboard = dashboardLoader.getController();
             dashboard.setSyncManager(syncManager);
-            dashboard.setTabPane(tabPane);
+            dashboard.setTabPane(homeWindowTabPane);
             dashboard.setTabStateMap(tabStateMap);
             dashboardContainer.getChildren().add(dashboardFXML);
             addressProperty = dashboard.addressField.textProperty();
@@ -103,7 +103,7 @@ public class HomeWindowController implements Initializable {
             thisStage.setOnCloseRequest(e -> saveState());
         });
 
-        tabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
+        homeWindowTabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
 
         addressProperty.addListener(this::onTargetChanged);
     }
@@ -113,7 +113,7 @@ public class HomeWindowController implements Initializable {
      * Displays the current target if it is not empty, "New Tab" otherwise.
      */
     private void onTargetChanged(Observable observable, String oldValue, String newValue) {
-        Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
+        Tab activeTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
         if (activeTab == null)
             return;
 
@@ -163,7 +163,7 @@ public class HomeWindowController implements Initializable {
     }
 
     /**
-     * Adds a new tab to the tabPane initialized with
+     * Adds a new tab to the homeWindowTabPane initialized with
      * the ComposerState provided.
      */
     private void addTab(ComposerState composerState) {
@@ -190,17 +190,17 @@ public class HomeWindowController implements Initializable {
              4. Switch to the new tab.
              5. Call onTabSwitched() to update the Dashboard and save the oldState.
          */
-        Tab prevTab = tabPane.getSelectionModel().getSelectedItem();
+        Tab prevTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
         DashboardState prevState = dashboard.getState();
-        tabPane.getTabs().add(newTab);
-        tabPane.getSelectionModel().select(newTab);
+        homeWindowTabPane.getTabs().add(newTab);
+        homeWindowTabPane.getSelectionModel().select(newTab);
         onTabSwitched(prevState, prevTab, newTab);
 
         newTab.setOnCloseRequest(e -> {
             removeTab(newTab);
 
             // Closes the application if the last tab is closed
-            if (tabPane.getTabs().size() == 0) {
+            if (homeWindowTabPane.getTabs().size() == 0) {
                 saveState();
                 Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
                 thisStage.close();
@@ -211,7 +211,7 @@ public class HomeWindowController implements Initializable {
     private void removeTab(Tab newTab) {
         DashboardState state = tabStateMap.remove(newTab);
         state = null;
-        tabPane.getTabs().remove(newTab);
+        homeWindowTabPane.getTabs().remove(newTab);
         newTab.setOnCloseRequest(null);
         newTab = null;
     }
@@ -222,7 +222,7 @@ public class HomeWindowController implements Initializable {
             Other tabs will already have their states saved when they
             were loaded from state.json or on a tab switch.
           */
-        Tab currentTab = tabPane.getSelectionModel().getSelectedItem();
+        Tab currentTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
         DashboardState currentState = dashboard.getState();
         tabStateMap.put(currentTab, currentState);
 
@@ -293,15 +293,15 @@ public class HomeWindowController implements Initializable {
                 } else if (KeyMap.toggleHistory.match(e)) {
                     toggleHistoryPane();
                 } else if (KeyMap.closeTab.match(e)) {
-                    Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
+                    Tab activeTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
                     tabStateMap.remove(activeTab);
-                    tabPane.getTabs().remove(activeTab);
-                    if (tabPane.getTabs().size() == 0) {
+                    homeWindowTabPane.getTabs().remove(activeTab);
+                    if (homeWindowTabPane.getTabs().size() == 0) {
                         saveState();
                         Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
                         thisStage.close();
                     }
-                    tabPane.getTabs().remove(activeTab);
+                    homeWindowTabPane.getTabs().remove(activeTab);
                 } else if (KeyMap.searchHistory.match(e)) {
                     historyController.focusSearchField();
                 } else if (KeyMap.focusParams.match(e)) {

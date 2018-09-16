@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
 
 public class OAuth2TabController implements Initializable {
     @FXML
-    private TabPane tabPane;
+    private TabPane oauth2TabPane;
     @FXML
     private Tab codeTab, implicitTab, ropcTab, clientCredentialsTab;
 

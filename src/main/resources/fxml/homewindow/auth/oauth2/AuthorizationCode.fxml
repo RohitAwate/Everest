@@ -15,21 +15,23 @@
             <content>
                 <VBox alignment="CENTER" spacing="10.0">
                     <children>
-                        <HBox alignment="CENTER" spacing="30.0">
+                        <HBox alignment="CENTER" spacing="50.0">
                             <children>
                                 <JFXCheckBox fx:id="enabled" checkedColor="ORANGERED" text="ENABLED" textFill="#b9b9b9"
                                              unCheckedColor="#7a7a7a" HBox.hgrow="ALWAYS"/>
-                                <Label text="GRANT CAPTURE METHOD:" textFill="#9a9a9a">
-                                    <HBox.margin>
-                                        <Insets left="50.0"/>
-                                    </HBox.margin>
-                                    <tooltip>
-                                        <Tooltip prefWidth="300.0"
-                                                 text="Determines whether the authorization screen opens in Everest's integrated WebView or in your browser."
-                                                 textAlignment="CENTER" wrapText="true"/>
-                                    </tooltip>
-                                </Label>
-                                <ComboBox fx:id="captureMethodBox" minWidth="35.0" prefWidth="150.0"/>
+                                <HBox alignment="CENTER" spacing="10.0">
+                                    <children>
+                                        <Label text="OPEN GRANT WINDOW IN" textFill="#9a9a9a">
+                                            <tooltip>
+                                                <Tooltip prefWidth="300.0"
+                                                         text="Determines whether the authorization screen opens in Everest's integrated WebView or in your browser."
+                                                         textAlignment="CENTER" wrapText="true"/>
+                                            </tooltip>
+                                        </Label>
+                                        <ComboBox fx:id="captureMethodBox" maxHeight="30.0" minWidth="30.0"
+                                                  prefWidth="150.0"/>
+                                    </children>
+                                </HBox>
                             </children>
                             <padding>
                                 <Insets top="10.0"/>

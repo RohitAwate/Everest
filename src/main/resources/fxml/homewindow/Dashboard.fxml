@@ -86,9 +86,9 @@
             <items>
                 <AnchorPane>
                     <children>
-                        <TabPane fx:id="requestOptionsTab" minHeight="190.0" tabClosingPolicy="UNAVAILABLE"
-                                 tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TabPane fx:id="requestOptionsTab" minHeight="190.0" styleClass="flat-tab-pane"
+                                 tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0"
+                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <tabs>
                                 <Tab fx:id="paramsTab" text="PARAMS">
                                     <content>

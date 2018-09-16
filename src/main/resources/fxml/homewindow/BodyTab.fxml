@@ -23,9 +23,9 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<TabPane fx:id="bodyTabPane" stylesheets="@../../css/Adreana.css" tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0"
-         xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1"
-         fx:controller="com.rohitawate.everest.controllers.BodyTabController">
+<TabPane fx:id="bodyTabPane" styleClass="flat-tab-pane" stylesheets="@../../css/Adreana.css"
+         tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0" xmlns="http://javafx.com/javafx/8.0.111"
+         xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.BodyTabController">
     <tabs>
         <Tab fx:id="formTab" text="FORM"/>
         <Tab fx:id="urlTab" text="URL ENCODED"/>

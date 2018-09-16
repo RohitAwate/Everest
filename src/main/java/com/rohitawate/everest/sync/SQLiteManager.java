@@ -42,7 +42,7 @@ class SQLiteManager implements DataManager {
                 "CREATE TABLE IF NOT EXISTS FilePaths(RequestID INTEGER, Path TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS SimpleAuthCredentials(RequestID INTEGER, Type TEXT NOT NULL, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
-                "CREATE TABLE IF NOT EXISTS AuthCodeCredentials(RequestID INTEGER, AuthURL TEXT NOT NULL, AccessTokenURL TEXT NOT NULL, RedirectURL TEXT NOT NULL, ClientID TEXT NOT NULL, ClientSecret TEXT NOT NULL, Scope TEXT, State TEXT, HeaderPrefix TEXT, AccessToken TEXT, RefreshToken TEXT, TokenExpiry NUMBER, Enabled INTEGER CHECK(Enabled IN (0, 1)))"
+                "CREATE TABLE IF NOT EXISTS AuthCodeCredentials(RequestID INTEGER, CaptureMethod TEXT NOT NULL CHECK (CaptureMethod IN ('System Browser', 'Integrated WebView')), AuthURL TEXT NOT NULL, AccessTokenURL TEXT NOT NULL, RedirectURL TEXT NOT NULL, ClientID TEXT NOT NULL, ClientSecret TEXT NOT NULL, Scope TEXT, State TEXT, HeaderPrefix TEXT, AccessToken TEXT, RefreshToken TEXT, TokenExpiry NUMBER, Enabled INTEGER CHECK(Enabled IN (0, 1)))"
         };
 
         private static final String SAVE_REQUEST = "INSERT INTO Requests(Type, Target, AuthMethod, Date) VALUES(?, ?, ?, ?)";
@@ -51,7 +51,7 @@ class SQLiteManager implements DataManager {
         private static final String SAVE_FILE_PATH = "INSERT INTO FilePaths(RequestID, Path) VALUES(?, ?)";
         private static final String SAVE_TUPLE = "INSERT INTO Tuples(RequestID, Type, Key, Value, Checked) VALUES(?, ?, ?, ?, ?)";
         private static final String SAVE_SIMPLE_AUTH_CREDENTIALS = "INSERT INTO SimpleAuthCredentials(RequestID, Type, Username, Password, Enabled) VALUES(?, ?, ?, ?, ?)";
-        private static final String SAVE_AUTH_CODE_CREDENTIALS = "INSERT INTO AuthCodeCredentials(RequestID, AuthURL, AccessTokenURL, RedirectURL, ClientID, ClientSecret, Scope, State, HeaderPrefix, AccessToken, RefreshToken, TokenExpiry, Enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        private static final String SAVE_AUTH_CODE_CREDENTIALS = "INSERT INTO AuthCodeCredentials(RequestID, CaptureMethod, AuthURL, AccessTokenURL, RedirectURL, ClientID, ClientSecret, Scope, State, HeaderPrefix, AccessToken, RefreshToken, TokenExpiry, Enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         private static final String SELECT_RECENT_REQUESTS = "SELECT * FROM Requests WHERE Requests.Date > ?";
         private static final String SELECT_REQUEST_CONTENT_TYPE = "SELECT ContentType FROM RequestContentMap WHERE RequestID == ?";
@@ -160,18 +160,19 @@ class SQLiteManager implements DataManager {
 
         statement = conn.prepareStatement(Queries.SAVE_AUTH_CODE_CREDENTIALS);
         statement.setInt(1, requestID);
-        statement.setString(2, state.authURL);
-        statement.setString(3, state.accessTokenURL);
-        statement.setString(4, state.redirectURL);
-        statement.setString(5, state.clientID);
-        statement.setString(6, state.clientSecret);
-        statement.setString(7, state.state);
+        statement.setString(2, state.grantCaptureMethod);
+        statement.setString(3, state.authURL);
+        statement.setString(4, state.accessTokenURL);
+        statement.setString(5, state.redirectURL);
+        statement.setString(6, state.clientID);
+        statement.setString(7, state.clientSecret);
         statement.setString(8, state.scope);
-        statement.setString(9, state.headerPrefix);
-        statement.setString(10, state.accessToken);
-        statement.setString(11, state.refreshToken);
-        statement.setInt(12, state.expiresIn);
-        statement.setInt(13, state.enabled ? 1 : 0);
+        statement.setString(9, state.state);
+        statement.setString(10, state.headerPrefix);
+        statement.setString(11, state.accessToken);
+        statement.setString(12, state.refreshToken);
+        statement.setInt(13, state.tokenExpiry);
+        statement.setInt(14, state.enabled ? 1 : 0);
 
         statement.executeUpdate();
     }
@@ -294,6 +295,7 @@ class SQLiteManager implements DataManager {
         AuthorizationCodeState state = state = new AuthorizationCodeState();
         if (resultSet.next()) {
             state.authURL = resultSet.getString("AuthURL");
+            state.grantCaptureMethod = resultSet.getString("CaptureMethod");
             state.accessTokenURL = resultSet.getString("AccessTokenURL");
             state.redirectURL = resultSet.getString("RedirectURL");
             state.clientID = resultSet.getString("ClientID");
@@ -303,7 +305,7 @@ class SQLiteManager implements DataManager {
             state.headerPrefix = resultSet.getString("HeaderPrefix");
             state.accessToken = resultSet.getString("AccessToken");
             state.refreshToken = resultSet.getString("RefreshToken");
-            state.expiresIn = resultSet.getInt("TokenExpiry");
+            state.tokenExpiry = resultSet.getInt("TokenExpiry");
             state.enabled = resultSet.getInt("Enabled") == 1;
         }
 

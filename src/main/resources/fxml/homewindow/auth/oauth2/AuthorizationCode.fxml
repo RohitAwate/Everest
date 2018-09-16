@@ -44,14 +44,14 @@
                                     <children>
                                         <JFXTextField fx:id="authURLField" focusColor="ORANGERED" labelFloat="true"
                                                       promptText="AUTHORIZATION URL" styleClass="material-text-field"
-                                                      unFocusColor="#9a9a9a" VBox.vgrow="ALWAYS"/>
+                                                      unFocusColor="#747474" VBox.vgrow="ALWAYS"/>
                                         <JFXTextField fx:id="tokenURLField" focusColor="ORANGERED" labelFloat="true"
                                                       layoutX="20.0" layoutY="20.0" promptText="ACCESS TOKEN URL"
-                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      styleClass="material-text-field" unFocusColor="#747474"
                                                       VBox.vgrow="ALWAYS"/>
                                         <JFXTextField fx:id="redirectURLField" focusColor="ORANGERED" labelFloat="true"
                                                       layoutX="20.0" layoutY="59.0" promptText="REDIRECT URL"
-                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      styleClass="material-text-field" unFocusColor="#747474"
                                                       VBox.vgrow="ALWAYS"/>
                                     </children>
                                 </VBox>
@@ -63,10 +63,10 @@
                                     <children>
                                         <JFXTextField fx:id="clientIDField" focusColor="ORANGERED" labelFloat="true"
                                                       promptText="CLIENT ID" styleClass="material-text-field"
-                                                      unFocusColor="#9a9a9a" VBox.vgrow="ALWAYS"/>
+                                                      unFocusColor="#747474" VBox.vgrow="ALWAYS"/>
                                         <JFXTextField fx:id="clientSecretField" focusColor="ORANGERED" labelFloat="true"
                                                       layoutX="20.0" layoutY="20.0" promptText="CLIENT SECRET"
-                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      styleClass="material-text-field" unFocusColor="#747474"
                                                       VBox.vgrow="ALWAYS"/>
                                     </children>
                                 </VBox>
@@ -78,14 +78,14 @@
                                     <children>
                                         <JFXTextField fx:id="scopeField" focusColor="ORANGERED" labelFloat="true"
                                                       promptText="SCOPE" styleClass="material-text-field"
-                                                      unFocusColor="#9a9a9a" VBox.vgrow="ALWAYS"/>
+                                                      unFocusColor="#747474" VBox.vgrow="ALWAYS"/>
                                         <JFXTextField fx:id="stateField" focusColor="ORANGERED" labelFloat="true"
                                                       layoutX="20.0" layoutY="20.0" promptText="STATE"
-                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      styleClass="material-text-field" unFocusColor="#747474"
                                                       VBox.vgrow="ALWAYS"/>
                                         <JFXTextField fx:id="headerPrefixField" focusColor="ORANGERED" labelFloat="true"
                                                       layoutX="20.0" layoutY="59.0" promptText="HEADER PREFIX"
-                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      styleClass="material-text-field" unFocusColor="#747474"
                                                       VBox.vgrow="ALWAYS">
                                             <tooltip>
                                                 <Tooltip
@@ -103,10 +103,10 @@
                                     <children>
                                         <JFXTextField fx:id="accessTokenField" focusColor="ORANGERED" labelFloat="true"
                                                       promptText="ACCESS TOKEN" styleClass="material-text-field"
-                                                      unFocusColor="#9a9a9a" HBox.hgrow="ALWAYS"/>
+                                                      unFocusColor="#747474" HBox.hgrow="ALWAYS"/>
                                         <JFXTextField fx:id="refreshTokenField" focusColor="ORANGERED" labelFloat="true"
                                                       layoutX="169.0" layoutY="10.0" promptText="REFRESH TOKEN"
-                                                      styleClass="material-text-field" unFocusColor="#9a9a9a"
+                                                      styleClass="material-text-field" unFocusColor="#747474"
                                                       HBox.hgrow="ALWAYS"/>
                                         <JFXButton fx:id="refreshTokenButton" graphicTextGap="10.0" ripplerFill="WHITE"
                                                    text="REFRESH" textFill="#9a9a9a" HBox.hgrow="ALWAYS">

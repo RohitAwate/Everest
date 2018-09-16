@@ -1,9 +1,12 @@
 package com.rohitawate.everest.state;
 
+import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
+
 public class AuthorizationCodeState {
 
     public AuthorizationCodeState() {
         String empty = "";
+        this.grantCaptureMethod = AuthorizationCodeController.CAPTURE_METHOD_BROWSER;
         this.authURL = empty;
         this.accessTokenURL = empty;
         this.redirectURL = empty;
@@ -16,9 +19,10 @@ public class AuthorizationCodeState {
         this.refreshToken = empty;
     }
 
-    public AuthorizationCodeState(String authURL, String accessTokenURL, String redirectURL, String clientID,
+    public AuthorizationCodeState(String grantCaptureMethod, String authURL, String accessTokenURL, String redirectURL, String clientID,
                                   String clientSecret, String scope, String state, String headerPrefix,
-                                  String accessToken, String refreshToken, int expiresIn, boolean enabled) {
+                                  String accessToken, String refreshToken, int tokenExpiry, boolean enabled) {
+        this.grantCaptureMethod = grantCaptureMethod;
         this.authURL = authURL;
         this.accessTokenURL = accessTokenURL;
         this.redirectURL = redirectURL;
@@ -29,9 +33,11 @@ public class AuthorizationCodeState {
         this.headerPrefix = headerPrefix;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.expiresIn = expiresIn;
+        this.tokenExpiry = tokenExpiry;
         this.enabled = enabled;
     }
+
+    public String grantCaptureMethod;
 
     public String authURL;
     public String accessTokenURL;
@@ -46,7 +52,7 @@ public class AuthorizationCodeState {
 
     public String accessToken;
     public String refreshToken;
-    public int expiresIn;
+    public int tokenExpiry;
 
     public boolean enabled;
 
@@ -56,6 +62,7 @@ public class AuthorizationCodeState {
         if (o == null || getClass() != o.getClass()) return false;
 
         AuthorizationCodeState that = (AuthorizationCodeState) o;
+        if (!grantCaptureMethod.equals(that.grantCaptureMethod)) return false;
         if (!authURL.equals(that.authURL)) return false;
         if (!accessTokenURL.equals(that.accessTokenURL)) return false;
         if (!redirectURL.equals(that.redirectURL)) return false;
@@ -66,7 +73,7 @@ public class AuthorizationCodeState {
         if (!headerPrefix.equals(that.headerPrefix)) return false;
         if (!accessToken.equals(that.accessToken)) return false;
         if (!refreshToken.equals(that.refreshToken)) return false;
-        if (expiresIn != that.expiresIn) return false;
+        if (tokenExpiry != that.tokenExpiry) return false;
         if (enabled != that.enabled) return false;
 
         return true;

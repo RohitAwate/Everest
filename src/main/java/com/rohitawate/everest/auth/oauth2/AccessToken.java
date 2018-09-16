@@ -26,7 +26,7 @@ public class AccessToken {
         return "AccessToken{" +
                 "accessToken='" + accessToken + '\'' +
                 ", tokenType='" + tokenType + '\'' +
-                ", expiresIn=" + expiresIn +
+                ", tokenExpiry=" + expiresIn +
                 ", refreshToken='" + refreshToken + '\'' +
                 ", scope='" + scope + '\'' +
                 ", idToken='" + idToken + '\'' +

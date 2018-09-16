@@ -43,13 +43,13 @@ public class AuthorizationCodeController implements Initializable {
     private AuthorizationCodeProvider provider;
     private int tokenExpiry;
 
-    private static final String CAPTURE_METHOD_INTEGRATED = "Integrated WebView";
-    private static final String CAPTURE_METHOD_BROWSER = "System Browser";
+    public static final String CAPTURE_METHOD_INTEGRATED = "Integrated WebView";
+    public static final String CAPTURE_METHOD_BROWSER = "System Browser";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         captureMethodBox.getItems().addAll(CAPTURE_METHOD_INTEGRATED, CAPTURE_METHOD_BROWSER);
-        captureMethodBox.setValue(CAPTURE_METHOD_INTEGRATED);
+        captureMethodBox.setValue(CAPTURE_METHOD_BROWSER);
         refreshTokenButton.setOnAction(this::refreshToken);
         expiryLabel.setVisible(false);
     }
@@ -100,13 +100,14 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     public AuthorizationCodeState getState() {
-        return new AuthorizationCodeState(authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
+        return new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
                 clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
                 headerPrefixField.getText(), accessTokenField.getText(), refreshTokenField.getText(), tokenExpiry, enabled.isSelected());
     }
 
     public void setState(AuthorizationCodeState state) {
         if (state != null) {
+            captureMethodBox.setValue(state.grantCaptureMethod);
             authURLField.setText(state.authURL);
             tokenURLField.setText(state.accessTokenURL);
             redirectURLField.setText(state.redirectURL);
@@ -117,17 +118,17 @@ public class AuthorizationCodeController implements Initializable {
             headerPrefixField.setText(state.headerPrefix);
             accessTokenField.setText(state.accessToken);
             refreshTokenField.setText(state.refreshToken);
-            setExpiryLabel(state.expiresIn);
+            setExpiryLabel(state.tokenExpiry);
             enabled.setSelected(state.enabled);
         }
     }
 
-    private void setExpiryLabel(int expiresIn) {
-        tokenExpiry = expiresIn;
+    private void setExpiryLabel(int tokenExpiry) {
+        this.tokenExpiry = tokenExpiry;
         expiryLabel.setVisible(true);
 
-        if (expiresIn != 0) {
-            expiryLabel.setText("Expires in " + expiresIn + "s");
+        if (tokenExpiry != 0) {
+            expiryLabel.setText("Expires in " + tokenExpiry + "s");
         } else {
             expiryLabel.setText("Never expires.");
         }

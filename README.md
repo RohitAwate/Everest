@@ -5,7 +5,7 @@ Everest _(formerly RESTaurant)_ is an upcoming REST API testing client written i
 ![home](https://user-images.githubusercontent.com/23148259/45769743-23e5a380-bc5e-11e8-9e45-5ea50342c19f.PNG)
 _Everest running on Windows 10._
 # Why Everest?
-- Everest is written in Java. Thus, it is significantly **lighter on resources and more responsive** than its Electron-based competitors like _Postman_. It aims to provide the same level of functionality in a lighter, native but equally slick package.
+- Everest is written in Java. Thus, it is significantly **lighter on resources and more responsive** than its Electron-based alternatives like _Postman_. It aims to provide the same level of functionality in a lighter, native but equally slick package.
 - Aesthetic is very important. With a **gorgeous, flat design**, Everest is a pleasure to look at and to work with. It is also entirely theme-_able_.
 
   > I want you to want to use it!
@@ -42,7 +42,7 @@ Everest is entirely theme-_able_ via CSS. For more details, refer [this guide](T
 #### Efficient multi-tabbing
 Everest utilizes a technique called _pseudo tab-switching_ to maintain a low memory footprint even when heavy multi-tabbing. I have written a highly technical piece about this on my [dev.to](https://dev.to/rohit).
 
-_**Bonus**: The '+' button for adding new tabs is finally live!_**
+_**Bonus**: The '+' button for adding new tabs is finally live!_
 
 #### History
 Everest maintains the history of all the requests made by you. You can search with any of the request's components: the target, the headers, the method, the body or even the files added to the request. Everest will **intelligently rank** the results based on their relevance.
@@ -66,7 +66,7 @@ Everest will fully support both of the OAuth standards. Work on **OAuth 2.0 is i
 - [Summit](https://github.com/RohitAwate/Summit) is the synchronization server for Everest.
 - It will allow for synchronization of your Everest Projects across multiple devices and other members of your team.
 - It will use a Node.js-_powered_ RESTful API and Socket.IO.
-- It will be available early next year as a service. 
+- It will be available early next year as a service. You may also choose to self-host Summit.
 
 #### Extension API
 This will allow developers to create extensions for Everest which can for example, sync to Google Drive, or visualize the response bodies in a certain fashion or summon Batman.

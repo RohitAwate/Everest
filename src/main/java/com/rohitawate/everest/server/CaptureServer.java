@@ -4,7 +4,6 @@ import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.notifications.NotificationsManager;
-import javafx.concurrent.Task;
 
 import java.awt.*;
 import java.io.DataOutputStream;
@@ -17,7 +16,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
-public class CaptureServer extends Task<String> {
+public class CaptureServer {
     private final int port;
     private String authURL;
     private ServerSocket server;
@@ -32,8 +31,7 @@ public class CaptureServer extends Task<String> {
         this.authURL = authURL;
     }
 
-    @Override
-    public String call() throws Exception {
+    public String capture() throws Exception {
         String grant;
 
         server = new ServerSocket(port);
@@ -42,29 +40,17 @@ public class CaptureServer extends Task<String> {
         openLinkInBrowser(authURL);
         grant = listen();
 
-        Thread serverShutdownThread = new Thread(() -> {
+        Thread serverThread = new Thread(() -> {
             try {
-                Thread.sleep(10_000);
-                server.close();
-                LoggingService.logInfo("CaptureServer was shut down.", LocalDateTime.now());
-            } catch (IOException e) {
-                LoggingService.logSevere("Could not shut down CaptureServer.", e, LocalDateTime.now());
-            } catch (InterruptedException e) {
-                LoggingService.logSevere("CaptureServer shutdown thread was interrupted.", e, LocalDateTime.now());
-            }
-        });
-        serverShutdownThread.setDaemon(false);
-        serverShutdownThread.start();
-
-        new Thread(() -> {
-            try {
-                while (serverShutdownThread.isAlive()) {
+                while (true) {
                     listen();
                 }
             } catch (IOException e) {
                 LoggingService.logSevere("CaptureServer could not serve client.", e, LocalDateTime.now());
             }
-        }).start();
+        });
+        serverThread.setDaemon(true);
+        serverThread.start();
 
         return grant;
     }
@@ -146,10 +132,6 @@ public class CaptureServer extends Task<String> {
             } else {
                 System.out.println("Not supported.");
             }
-        }
-
-        if (requestedPath != null) {
-
         }
 
         return grant;

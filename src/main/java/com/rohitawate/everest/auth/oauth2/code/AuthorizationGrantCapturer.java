@@ -10,5 +10,4 @@ public interface AuthorizationGrantCapturer {
      * Grant if the user authorizes the application; null otherwise.
      */
     String getAuthorizationGrant() throws Exception;
-
 }

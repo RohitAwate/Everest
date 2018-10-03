@@ -97,7 +97,7 @@ Everest uses Maven, so building from the source code is very simple. You need to
 1. Clone the repository: `git clone https://github.com/RohitAwate/Everest.git`
 2. Enter the repository: `cd Everest`
 3. Build a binary: `mvn package`
-4. Run the binary: `mvn exec:java`.
+4. Run the binary: `mvn exec:java`
 
 **For JDK  10 and above:** JavaFX has been decoupled from the JDK and will need to be installed separately.
 

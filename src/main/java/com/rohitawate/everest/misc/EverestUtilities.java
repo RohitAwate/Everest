@@ -24,6 +24,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class EverestUtilities {
@@ -77,5 +79,29 @@ public class EverestUtilities {
             outStream.write(byteRead);
 
         return outStream.toByteArray();
+    }
+
+    public static HashMap<String, String> parseParameters(URL url) {
+        String pair[] = url.toString().split("\\?");
+
+        if (pair.length != 2) {
+            return null;
+        }
+
+        HashMap<String, String> params = null;
+        String paramPairs[] = pair[1].split("&");
+        for (String paramPair : paramPairs) {
+            pair = paramPair.split("=");
+
+            if (pair.length == 2) {
+                if (params == null) {
+                    params = new HashMap<>();
+                }
+
+                params.put(pair[0], pair[1]);
+            }
+        }
+
+        return params;
     }
 }

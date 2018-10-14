@@ -32,4 +32,20 @@ public class AccessToken {
                 ", idToken='" + idToken + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        AccessToken that = (AccessToken) obj;
+        if (!this.accessToken.equals(that.accessToken)) return false;
+        if (!this.tokenType.equals(that.tokenType)) return false;
+        if (this.expiresIn != that.expiresIn) return false;
+        if (!this.refreshToken.equals(that.refreshToken)) return false;
+        if (!this.scope.equals(that.scope)) return false;
+        if (!this.idToken.equals(that.idToken)) return false;
+
+        return true;
+    }
 }

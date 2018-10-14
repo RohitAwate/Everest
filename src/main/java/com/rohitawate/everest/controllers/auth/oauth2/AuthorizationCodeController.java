@@ -3,6 +3,7 @@ package com.rohitawate.everest.controllers.auth.oauth2;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
+import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
@@ -25,9 +26,6 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider.CaptureMethod.BROWSER;
-import static com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider.CaptureMethod.WEB_VIEW;
-
 public class AuthorizationCodeController implements Initializable {
     @FXML
     private JFXCheckBox enabled;
@@ -44,97 +42,102 @@ public class AuthorizationCodeController implements Initializable {
 
     // TODO: Re-use provider with setters and getters
     private AuthorizationCodeProvider provider;
-    private int tokenExpiry;
+    private AccessToken accessToken;
 
-    public static final String CAPTURE_METHOD_INTEGRATED = "Integrated WebView";
-    public static final String CAPTURE_METHOD_BROWSER = "System Browser";
+    public class CaptureMethod {
+        public final static String WEB_VIEW = "Integrated WebView";
+        public final static String BROWSER = "System Browser";
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        captureMethodBox.getItems().addAll(CAPTURE_METHOD_INTEGRATED, CAPTURE_METHOD_BROWSER);
-        captureMethodBox.setValue(CAPTURE_METHOD_BROWSER);
+        captureMethodBox.getItems().addAll(CaptureMethod.BROWSER, CaptureMethod.WEB_VIEW);
+        captureMethodBox.setValue(CaptureMethod.BROWSER);
         refreshTokenButton.setOnAction(this::refreshToken);
         expiryLabel.setVisible(false);
     }
 
     private void refreshToken(ActionEvent actionEvent) {
-        Task<AccessToken> tokenTask = new Task<AccessToken>() {
-            @Override
-            protected AccessToken call() throws Exception {
-                provider = new AuthorizationCodeProvider(
-                        authURLField.getText(), tokenURLField.getText(),
-                        clientIDField.getText(), clientSecretField.getText(),
-                        redirectURLField.getText().isEmpty() ? null : redirectURLField.getText(),
-                        scopeField.getText(), enabled.isSelected(),
-                        captureMethodBox.getValue().equals(CAPTURE_METHOD_INTEGRATED) ? WEB_VIEW : BROWSER
-                );
-                return provider.getAccessToken();
+        if (captureMethodBox.getValue().equals(CaptureMethod.BROWSER)) {
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            service.submit(new TokenFetcher());
+        } else {
+            try {
+                AuthorizationCodeState state = new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
+                        clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
+                        headerPrefixField.getText(), null, enabled.isSelected());
+
+                provider = new AuthorizationCodeProvider(state);
+                accessToken = provider.getAccessToken();
+
+                accessTokenField.clear();
+                refreshTokenField.clear();
+
+                accessTokenField.setText(accessToken.accessToken);
+
+                if (accessToken.refreshToken != null) {
+                    refreshTokenField.setText(accessToken.refreshToken);
+                }
+
+                setExpiryLabel(accessToken.expiresIn);
+            } catch (Exception exception) {
+                String errorMessage;
+                if (exception.getClass().equals(AuthWindowClosedException.class)) {
+                    errorMessage = "Authorization window closed.";
+                } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
+                    errorMessage = "Grant denied by authorization endpoint.";
+                } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
+                    errorMessage = "Access token denied by token endpoint.";
+                } else if (exception.getClass().equals(MalformedURLException.class)) {
+                    errorMessage = "Invalid URL(s).";
+                } else {
+                    errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
+                }
+
+                NotificationsManager.push(errorMessage, 10000);
             }
-        };
-
-        tokenTask.setOnSucceeded(e -> {
-            AccessToken accessToken = tokenTask.getValue();
-            accessTokenField.clear();
-            refreshTokenField.clear();
-
-            accessTokenField.setText(accessToken.accessToken);
-
-            if (accessToken.refreshToken != null) {
-                refreshTokenField.setText(accessToken.refreshToken);
-            }
-
-            setExpiryLabel(accessToken.expiresIn);
-        });
-
-        tokenTask.setOnFailed(e -> {
-            Throwable exception = tokenTask.getException();
-            String errorMessage;
-            if (exception.getClass().equals(AuthWindowClosedException.class)) {
-                errorMessage = "Authorization window closed.";
-            } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
-                errorMessage = "Grant denied by authorization endpoint.";
-            } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
-                errorMessage = "Access token denied by token endpoint.";
-            } else if (exception.getClass().equals(MalformedURLException.class)) {
-                errorMessage = "Invalid URL(s).";
-            } else {
-                errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
-            }
-
-            NotificationsManager.push(errorMessage, 10000);
-            LoggingService.logWarning(errorMessage, (Exception) exception, LocalDateTime.now());
-        });
-
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        service.submit(tokenTask);
+        }
     }
 
     public AuthorizationCodeState getState() {
         return new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
                 clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                headerPrefixField.getText(), accessTokenField.getText(), refreshTokenField.getText(), tokenExpiry, enabled.isSelected());
+                headerPrefixField.getText(), accessToken, enabled.isSelected());
     }
 
     public void setState(AuthorizationCodeState state) {
         if (state != null) {
             captureMethodBox.setValue(state.grantCaptureMethod);
+
             authURLField.setText(state.authURL);
             tokenURLField.setText(state.accessTokenURL);
             redirectURLField.setText(state.redirectURL);
+
             clientIDField.setText(state.clientID);
             clientSecretField.setText(state.clientSecret);
+
             scopeField.setText(state.scope);
             stateField.setText(state.state);
             headerPrefixField.setText(state.headerPrefix);
-            accessTokenField.setText(state.accessToken);
-            refreshTokenField.setText(state.refreshToken);
-            setExpiryLabel(state.tokenExpiry);
+
+            if (state.accessToken != null) {
+                accessToken = state.accessToken;
+                accessTokenField.setText(state.accessToken.accessToken);
+                refreshTokenField.setText(state.accessToken.refreshToken);
+                setExpiryLabel(state.accessToken.expiresIn);
+            }
+
             enabled.setSelected(state.enabled);
+
+            try {
+                provider = new AuthorizationCodeProvider(getState());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private void setExpiryLabel(int tokenExpiry) {
-        this.tokenExpiry = tokenExpiry;
         expiryLabel.setVisible(true);
 
         if (tokenExpiry != 0) {
@@ -155,8 +158,68 @@ public class AuthorizationCodeController implements Initializable {
         headerPrefixField.clear();
         accessTokenField.clear();
         refreshTokenField.clear();
-        tokenExpiry = 0;
         expiryLabel.setVisible(false);
         enabled.setSelected(false);
+    }
+
+    public AuthProvider getAuthProvider() {
+        try {
+            provider.setState(getState());
+        } catch (MalformedURLException e) {
+            NotificationsManager.push("Invalid URL: " + e.getMessage(), 7000);
+        }
+
+        if (accessTokenField.getText().isEmpty() && enabled.isSelected()) {
+            refreshToken(null);
+        }
+
+        return provider;
+    }
+
+    private class TokenFetcher extends Task<AccessToken> {
+        @Override
+        protected AccessToken call() throws Exception {
+            AuthorizationCodeState state = new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
+                    clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
+                    headerPrefixField.getText(), null, enabled.isSelected());
+
+            provider = new AuthorizationCodeProvider(state);
+            return provider.getAccessToken();
+        }
+
+        @Override
+        protected void succeeded() {
+            accessToken = getValue();
+            accessTokenField.clear();
+            refreshTokenField.clear();
+
+            accessTokenField.setText(accessToken.accessToken);
+
+            if (accessToken.refreshToken != null) {
+                refreshTokenField.setText(accessToken.refreshToken);
+            }
+
+            setExpiryLabel(accessToken.expiresIn);
+        }
+
+        @Override
+        protected void failed() {
+            Throwable exception = getException();
+            String errorMessage;
+            if (exception.getClass().equals(AuthWindowClosedException.class)) {
+                errorMessage = "Authorization window closed.";
+            } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
+                errorMessage = "Grant denied by authorization endpoint.";
+            } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
+                errorMessage = "Access token denied by token endpoint.";
+            } else if (exception.getClass().equals(MalformedURLException.class)) {
+                errorMessage = "Invalid URL(s).";
+            } else {
+                errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
+            }
+
+            NotificationsManager.push(errorMessage, 10000);
+            LoggingService.logWarning(errorMessage, (Exception) exception, LocalDateTime.now());
+        }
     }
 }

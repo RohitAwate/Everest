@@ -5,8 +5,10 @@ import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.UnknownAccessTokenTypeException;
+import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
+import com.rohitawate.everest.state.AuthorizationCodeState;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class AuthorizationCodeProvider implements OAuth2Provider {
@@ -24,32 +27,41 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     private String clientSecret;
     private URL redirectURL;
     private String scope;
+    private String state;
+    private String headerPrefix;
     private boolean enabled;
 
-    private CaptureMethod captureMethod;
+    private String captureMethod;
     private AccessToken accessToken;
 
-    public enum CaptureMethod {
-        WEB_VIEW, BROWSER
+    public AuthorizationCodeProvider(AuthorizationCodeState state) throws MalformedURLException {
+        setState(state);
     }
 
-    public AuthorizationCodeProvider(String authURL,
-                                     String accessTokenURL, String clientID,
-                                     String clientSecret, String redirectURL,
-                                     String scope,
-                                     boolean enabled,
-                                     CaptureMethod captureMethod) throws MalformedURLException {
-        this.authURL = new URL(authURL);
-        this.accessTokenURL = new URL(accessTokenURL);
-        this.clientID = clientID;
-        this.clientSecret = clientSecret;
-        this.captureMethod = captureMethod;
-        if (redirectURL == null || captureMethod.equals(CaptureMethod.BROWSER))
+    public void setState(AuthorizationCodeState state) throws MalformedURLException {
+        this.authURL = new URL(state.authURL);
+        this.accessTokenURL = new URL(state.accessTokenURL);
+        this.clientID = state.clientID;
+        this.clientSecret = state.clientSecret;
+        this.captureMethod = state.grantCaptureMethod;
+
+        if (state.redirectURL == null || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
             this.redirectURL = new URL(BrowserCapturer.LOCAL_SERVER_URL);
-        else
-            this.redirectURL = new URL(redirectURL);
-        this.scope = scope;
-        this.enabled = enabled;
+        } else {
+            this.redirectURL = new URL(state.redirectURL);
+        }
+
+        this.scope = state.scope;
+        this.state = state.state;
+
+        if (state.headerPrefix == null || state.headerPrefix.isEmpty()) {
+            this.headerPrefix = "Bearer";
+        } else {
+            this.headerPrefix = state.headerPrefix;
+        }
+
+        this.accessToken = state.accessToken;
+        this.enabled = state.enabled;
     }
 
     private void fetchAuthorizationGrant() throws Exception {
@@ -68,7 +80,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         AuthorizationGrantCapturer capturer;
         switch (captureMethod) {
             // TODO: Re-use capturers
-            case BROWSER:
+            case CaptureMethod.BROWSER:
                 capturer = new BrowserCapturer(grantURLBuilder.toString());
                 break;
             default:
@@ -125,14 +137,11 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                     accessToken = EverestUtilities.jsonMapper.readValue(tokenResponseBuilder.toString(), AccessToken.class);
                     break;
                 case MediaType.APPLICATION_FORM_URLENCODED:
-                    String key, value;
                     accessToken = new AccessToken();
 
-                    for (String pair : tokenResponseBuilder.toString().split("&")) {
-                        if (pair.split("=").length == 2) {
-                            key = pair.split("=")[0];
-                            value = pair.split("=")[1];
-
+                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL(tokenResponseBuilder.toString()));
+                    if (params != null) {
+                        params.forEach((key, value) -> {
                             switch (key) {
                                 case "access_token":
                                     accessToken.accessToken = value;
@@ -150,14 +159,14 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                                     accessToken.scope = value;
                                     break;
                             }
-                        }
+                        });
                     }
                     break;
                 default:
                     throw new UnknownAccessTokenTypeException("Unknown access token type: " + contentType + "\nBody: " + tokenResponseBuilder.toString());
             }
-            // TODO: Save the access token
         } else {
+            System.out.println(connection.getResponseCode());
             Scanner scanner = new Scanner(connection.getErrorStream());
             while (scanner.hasNext())
                 tokenResponseBuilder.append(scanner.nextLine());
@@ -181,7 +190,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             fetchAccessToken();
         }
 
-        return "Bearer " + accessToken.accessToken;
+        return headerPrefix + " " + accessToken.accessToken;
     }
 
     @Override

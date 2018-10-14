@@ -1,5 +1,6 @@
 package com.rohitawate.everest.controllers.auth;
 
+import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
 import com.rohitawate.everest.state.OAuth2State;
 import javafx.fxml.FXML;
@@ -45,5 +46,14 @@ public class OAuth2TabController implements Initializable {
 
     public void reset() {
         codeController.reset();
+    }
+
+    AuthProvider getAuthProvider() {
+        switch (oauth2TabPane.getSelectionModel().getSelectedIndex()) {
+            case 0:
+                return codeController.getAuthProvider();
+            default:
+                return null;
+        }
     }
 }

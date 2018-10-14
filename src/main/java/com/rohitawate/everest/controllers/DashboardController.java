@@ -310,7 +310,7 @@ public class DashboardController implements Initializable {
         } catch (Exception E) {
             LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
             errorTitle.setText("Oops... That's embarrassing!");
-            errorDetails.setText("Something went wrong. Try to make another request. gRestart Everest if that doesn't work.");
+            errorDetails.setText("Something went wrong. Try to make another request. Restart Everest if that doesn't work.");
             showLayer(ResponseLayer.ERROR);
         }
     }

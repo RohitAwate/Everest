@@ -169,9 +169,9 @@ class SQLiteManager implements DataManager {
         statement.setString(8, state.scope);
         statement.setString(9, state.state);
         statement.setString(10, state.headerPrefix);
-        statement.setString(11, state.accessToken);
-        statement.setString(12, state.refreshToken);
-        statement.setInt(13, state.tokenExpiry);
+        statement.setString(11, state.accessToken.accessToken);
+        statement.setString(12, state.accessToken.refreshToken);
+        statement.setInt(13, state.accessToken.expiresIn);
         statement.setInt(14, state.enabled ? 1 : 0);
 
         statement.executeUpdate();
@@ -292,7 +292,7 @@ class SQLiteManager implements DataManager {
 
         ResultSet resultSet = statement.executeQuery();
 
-        AuthorizationCodeState state = state = new AuthorizationCodeState();
+        AuthorizationCodeState state = new AuthorizationCodeState();
         if (resultSet.next()) {
             state.authURL = resultSet.getString("AuthURL");
             state.grantCaptureMethod = resultSet.getString("CaptureMethod");
@@ -303,9 +303,9 @@ class SQLiteManager implements DataManager {
             state.state = resultSet.getString("State");
             state.scope = resultSet.getString("Scope");
             state.headerPrefix = resultSet.getString("HeaderPrefix");
-            state.accessToken = resultSet.getString("AccessToken");
-            state.refreshToken = resultSet.getString("RefreshToken");
-            state.tokenExpiry = resultSet.getInt("TokenExpiry");
+            state.accessToken.accessToken = resultSet.getString("AccessToken");
+            state.accessToken.refreshToken = resultSet.getString("RefreshToken");
+            state.accessToken.expiresIn = resultSet.getInt("TokenExpiry");
             state.enabled = resultSet.getInt("Enabled") == 1;
         }
 

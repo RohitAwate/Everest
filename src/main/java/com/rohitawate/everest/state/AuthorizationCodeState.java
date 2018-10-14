@@ -1,12 +1,13 @@
 package com.rohitawate.everest.state;
 
-import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
+import com.rohitawate.everest.auth.oauth2.AccessToken;
+import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
 
 public class AuthorizationCodeState {
 
     public AuthorizationCodeState() {
         String empty = "";
-        this.grantCaptureMethod = AuthorizationCodeController.CAPTURE_METHOD_BROWSER;
+        this.grantCaptureMethod = CaptureMethod.BROWSER;
         this.authURL = empty;
         this.accessTokenURL = empty;
         this.redirectURL = empty;
@@ -15,13 +16,12 @@ public class AuthorizationCodeState {
         this.scope = empty;
         this.state = empty;
         this.headerPrefix = empty;
-        this.accessToken = empty;
-        this.refreshToken = empty;
+        this.accessToken = new AccessToken();
     }
 
     public AuthorizationCodeState(String grantCaptureMethod, String authURL, String accessTokenURL, String redirectURL, String clientID,
                                   String clientSecret, String scope, String state, String headerPrefix,
-                                  String accessToken, String refreshToken, int tokenExpiry, boolean enabled) {
+                                  AccessToken accessToken, boolean enabled) {
         this.grantCaptureMethod = grantCaptureMethod;
         this.authURL = authURL;
         this.accessTokenURL = accessTokenURL;
@@ -32,8 +32,6 @@ public class AuthorizationCodeState {
         this.state = state;
         this.headerPrefix = headerPrefix;
         this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.tokenExpiry = tokenExpiry;
         this.enabled = enabled;
     }
 
@@ -50,9 +48,7 @@ public class AuthorizationCodeState {
     public String state;
     public String headerPrefix;
 
-    public String accessToken;
-    public String refreshToken;
-    public int tokenExpiry;
+    public AccessToken accessToken;
 
     public boolean enabled;
 
@@ -72,8 +68,6 @@ public class AuthorizationCodeState {
         if (!state.equals(that.state)) return false;
         if (!headerPrefix.equals(that.headerPrefix)) return false;
         if (!accessToken.equals(that.accessToken)) return false;
-        if (!refreshToken.equals(that.refreshToken)) return false;
-        if (tokenExpiry != that.tokenExpiry) return false;
         if (enabled != that.enabled) return false;
 
         return true;

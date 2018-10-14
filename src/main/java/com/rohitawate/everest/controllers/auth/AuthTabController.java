@@ -66,6 +66,8 @@ public class AuthTabController implements Initializable {
                         digestController.getPassword(),
                         digestController.isSelected()
                 );
+            case 2:
+                return oAuth2Controller.getAuthProvider();
             default:
                 return null;
         }

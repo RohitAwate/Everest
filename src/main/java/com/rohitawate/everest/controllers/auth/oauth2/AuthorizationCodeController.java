@@ -62,40 +62,14 @@ public class AuthorizationCodeController implements Initializable {
             ExecutorService service = Executors.newSingleThreadExecutor();
             service.submit(new TokenFetcher());
         } else {
+            TokenFetcher fetcher = new TokenFetcher();
             try {
-                AuthorizationCodeState state = new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
-                        clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                        headerPrefixField.getText(), null, enabled.isSelected());
-
-                provider = new AuthorizationCodeProvider(state);
-                accessToken = provider.getAccessToken();
-
-                accessTokenField.clear();
-                refreshTokenField.clear();
-
-                accessTokenField.setText(accessToken.accessToken);
-
-                if (accessToken.refreshToken != null) {
-                    refreshTokenField.setText(accessToken.refreshToken);
-                }
-
-                setExpiryLabel(accessToken.expiresIn);
-            } catch (Exception exception) {
-                String errorMessage;
-                if (exception.getClass().equals(AuthWindowClosedException.class)) {
-                    errorMessage = "Authorization window closed.";
-                } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
-                    errorMessage = "Grant denied by authorization endpoint.";
-                } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
-                    errorMessage = "Access token denied by token endpoint.";
-                } else if (exception.getClass().equals(MalformedURLException.class)) {
-                    errorMessage = "Invalid URL(s).";
-                } else {
-                    errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
-                }
-
-                NotificationsManager.push(errorMessage, 10000);
+                accessToken = fetcher.call();
+                onRefreshSucceeded();
+            } catch (Exception e) {
+                onRefreshFailed(e);
             }
+
         }
     }
 
@@ -176,6 +150,37 @@ public class AuthorizationCodeController implements Initializable {
         return provider;
     }
 
+    private void onRefreshSucceeded() {
+        accessTokenField.clear();
+        refreshTokenField.clear();
+
+        accessTokenField.setText(accessToken.accessToken);
+
+        if (accessToken.refreshToken != null) {
+            refreshTokenField.setText(accessToken.refreshToken);
+        }
+
+        setExpiryLabel(accessToken.expiresIn);
+    }
+
+    private void onRefreshFailed(Throwable exception) {
+        String errorMessage;
+        if (exception.getClass().equals(AuthWindowClosedException.class)) {
+            errorMessage = "Authorization window closed.";
+        } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
+            errorMessage = "Grant denied by authorization endpoint.";
+        } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
+            errorMessage = "Access token denied by token endpoint.";
+        } else if (exception.getClass().equals(MalformedURLException.class)) {
+            errorMessage = "Invalid URL(s).";
+        } else {
+            errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
+        }
+
+        NotificationsManager.push(errorMessage, 10000);
+        LoggingService.logWarning(errorMessage, (Exception) exception, LocalDateTime.now());
+    }
+
     private class TokenFetcher extends Task<AccessToken> {
         @Override
         protected AccessToken call() throws Exception {
@@ -190,36 +195,13 @@ public class AuthorizationCodeController implements Initializable {
         @Override
         protected void succeeded() {
             accessToken = getValue();
-            accessTokenField.clear();
-            refreshTokenField.clear();
-
-            accessTokenField.setText(accessToken.accessToken);
-
-            if (accessToken.refreshToken != null) {
-                refreshTokenField.setText(accessToken.refreshToken);
-            }
-
-            setExpiryLabel(accessToken.expiresIn);
+            onRefreshSucceeded();
         }
 
         @Override
         protected void failed() {
             Throwable exception = getException();
-            String errorMessage;
-            if (exception.getClass().equals(AuthWindowClosedException.class)) {
-                errorMessage = "Authorization window closed.";
-            } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
-                errorMessage = "Grant denied by authorization endpoint.";
-            } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
-                errorMessage = "Access token denied by token endpoint.";
-            } else if (exception.getClass().equals(MalformedURLException.class)) {
-                errorMessage = "Invalid URL(s).";
-            } else {
-                errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
-            }
-
-            NotificationsManager.push(errorMessage, 10000);
-            LoggingService.logWarning(errorMessage, (Exception) exception, LocalDateTime.now());
+            onRefreshFailed(exception);
         }
     }
 }

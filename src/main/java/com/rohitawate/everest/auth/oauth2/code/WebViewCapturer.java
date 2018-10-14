@@ -59,6 +59,7 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
 
         if (grant == null)
             throw new AuthWindowClosedException();
+
         return grant;
     }
 }

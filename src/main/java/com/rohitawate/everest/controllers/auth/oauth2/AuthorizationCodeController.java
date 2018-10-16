@@ -40,7 +40,6 @@ public class AuthorizationCodeController implements Initializable {
     @FXML
     private JFXButton refreshTokenButton;
 
-    // TODO: Re-use provider with setters and getters
     private AuthorizationCodeProvider provider;
     private AccessToken accessToken;
 
@@ -74,9 +73,14 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     public AuthorizationCodeState getState() {
+        if (this.accessToken != null) {
+            this.accessToken.accessToken = accessTokenField.getText();
+            this.accessToken.refreshToken = refreshTokenField.getText();
+        }
+
         return new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
                 clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                headerPrefixField.getText(), accessToken, enabled.isSelected());
+                headerPrefixField.getText(), this.accessToken, enabled.isSelected());
     }
 
     public void setState(AuthorizationCodeState state) {

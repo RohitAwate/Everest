@@ -45,7 +45,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         this.clientSecret = state.clientSecret;
         this.captureMethod = state.grantCaptureMethod;
 
-        if (state.redirectURL == null || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
+        if (state.redirectURL.isEmpty() || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
             this.redirectURL = new URL(BrowserCapturer.LOCAL_SERVER_URL);
         } else {
             this.redirectURL = new URL(state.redirectURL);
@@ -80,11 +80,11 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         AuthorizationGrantCapturer capturer;
         switch (captureMethod) {
             // TODO: Re-use capturers
-            case CaptureMethod.BROWSER:
-                capturer = new BrowserCapturer(grantURLBuilder.toString());
+            case CaptureMethod.WEB_VIEW:
+                capturer = new WebViewCapturer(grantURLBuilder.toString());
                 break;
             default:
-                capturer = new WebViewCapturer(grantURLBuilder.toString(), redirectURL.toString());
+                capturer = new BrowserCapturer(grantURLBuilder.toString());
         }
 
         authGrant = capturer.getAuthorizationGrant();

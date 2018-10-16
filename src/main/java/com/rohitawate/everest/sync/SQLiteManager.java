@@ -17,6 +17,7 @@
 package com.rohitawate.everest.sync;
 
 import com.rohitawate.everest.auth.AuthMethod;
+import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.settings.Settings;
@@ -42,7 +43,8 @@ class SQLiteManager implements DataManager {
                 "CREATE TABLE IF NOT EXISTS FilePaths(RequestID INTEGER, Path TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS SimpleAuthCredentials(RequestID INTEGER, Type TEXT NOT NULL, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
-                "CREATE TABLE IF NOT EXISTS AuthCodeCredentials(RequestID INTEGER, CaptureMethod TEXT NOT NULL CHECK (CaptureMethod IN ('System Browser', 'Integrated WebView')), AuthURL TEXT NOT NULL, AccessTokenURL TEXT NOT NULL, RedirectURL TEXT NOT NULL, ClientID TEXT NOT NULL, ClientSecret TEXT NOT NULL, Scope TEXT, State TEXT, HeaderPrefix TEXT, AccessToken TEXT, RefreshToken TEXT, TokenExpiry NUMBER, Enabled INTEGER CHECK(Enabled IN (0, 1)))"
+                "CREATE TABLE IF NOT EXISTS AuthCodeCredentials(RequestID INTEGER, CaptureMethod TEXT NOT NULL CHECK (CaptureMethod IN ('System Browser', 'Integrated WebView')), AuthURL TEXT NOT NULL, AccessTokenURL TEXT NOT NULL, RedirectURL TEXT NOT NULL, ClientID TEXT NOT NULL, ClientSecret TEXT NOT NULL, Scope TEXT, State TEXT, HeaderPrefix TEXT, Enabled INTEGER CHECK(Enabled IN (0, 1)))",
+                "CREATE TABLE IF NOT EXISTS OAuth2AccessTokens(RequestID INTEGER, AccessToken TEXT, RefreshToken TEXT, TokenType TEXT, TokenExpiry NUMBER, Scope TEXT, FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
         };
 
         private static final String SAVE_REQUEST = "INSERT INTO Requests(Type, Target, AuthMethod, Date) VALUES(?, ?, ?, ?)";
@@ -51,7 +53,8 @@ class SQLiteManager implements DataManager {
         private static final String SAVE_FILE_PATH = "INSERT INTO FilePaths(RequestID, Path) VALUES(?, ?)";
         private static final String SAVE_TUPLE = "INSERT INTO Tuples(RequestID, Type, Key, Value, Checked) VALUES(?, ?, ?, ?, ?)";
         private static final String SAVE_SIMPLE_AUTH_CREDENTIALS = "INSERT INTO SimpleAuthCredentials(RequestID, Type, Username, Password, Enabled) VALUES(?, ?, ?, ?, ?)";
-        private static final String SAVE_AUTH_CODE_CREDENTIALS = "INSERT INTO AuthCodeCredentials(RequestID, CaptureMethod, AuthURL, AccessTokenURL, RedirectURL, ClientID, ClientSecret, Scope, State, HeaderPrefix, AccessToken, RefreshToken, TokenExpiry, Enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        private static final String SAVE_AUTH_CODE_CREDENTIALS = "INSERT INTO AuthCodeCredentials(RequestID, CaptureMethod, AuthURL, AccessTokenURL, RedirectURL, ClientID, ClientSecret, Scope, State, HeaderPrefix, Enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        private static final String SAVE_OAUTH2_ACCESS_TOKEN = "INSERT INTO OAuth2AccessTokens(RequestID, AccessToken, RefreshToken, TokenType, TokenExpiry, Scope) VALUES(?, ?, ?, ?, ?, ?)";
 
         private static final String SELECT_RECENT_REQUESTS = "SELECT * FROM Requests WHERE Requests.Date > ?";
         private static final String SELECT_REQUEST_CONTENT_TYPE = "SELECT ContentType FROM RequestContentMap WHERE RequestID == ?";
@@ -59,6 +62,7 @@ class SQLiteManager implements DataManager {
         private static final String SELECT_FILE_PATH = "SELECT Path FROM FilePaths WHERE RequestID == ?";
         private static final String SELECT_SIMPLE_AUTH_CREDENTIALS = "SELECT * FROM SimpleAuthCredentials WHERE RequestID == ? AND Type == ?";
         private static final String SELECT_AUTH_CODE_CREDENTIALS = "SELECT * FROM AuthCodeCredentials WHERE RequestID == ?";
+        private static final String SELECT_OAUTH2_ACCESS_TOKEN = "SELECT * FROM OAuth2AccessTokens WHERE RequestID == ?";
         private static final String SELECT_TUPLES_BY_TYPE = "SELECT * FROM Tuples WHERE RequestID == ? AND Type == ?";
         private static final String SELECT_MOST_RECENT_REQUEST = "SELECT * FROM Requests ORDER BY ID DESC LIMIT 1";
     }
@@ -150,9 +154,27 @@ class SQLiteManager implements DataManager {
 
     private void saveOAuth2Credentials(int requestID, OAuth2State oAuth2State) throws SQLException {
         saveAuthCodeCredentials(requestID, oAuth2State.codeState);
+        saveOAuth2AccessToken(requestID, oAuth2State.codeState.accessToken);
+    }
+
+    private void saveOAuth2AccessToken(int requestID, AccessToken accessToken) throws SQLException {
+        if (accessToken == null) {
+            return;
+        }
+
+        statement = conn.prepareStatement(Queries.SAVE_OAUTH2_ACCESS_TOKEN);
+        statement.setInt(1, requestID);
+        statement.setString(2, accessToken.accessToken);
+        statement.setString(3, accessToken.refreshToken);
+        statement.setString(4, accessToken.tokenType);
+        statement.setInt(5, accessToken.expiresIn);
+        statement.setString(6, accessToken.scope);
+
+        statement.executeUpdate();
     }
 
     private void saveAuthCodeCredentials(int requestID, AuthorizationCodeState state) throws SQLException {
+        // TODO: Check if these checks are enough
         if (state.authURL.isEmpty() && state.accessTokenURL.isEmpty()
                 && state.clientID.isEmpty() && state.clientSecret.isEmpty()) {
             return;
@@ -169,10 +191,7 @@ class SQLiteManager implements DataManager {
         statement.setString(8, state.scope);
         statement.setString(9, state.state);
         statement.setString(10, state.headerPrefix);
-        statement.setString(11, state.accessToken.accessToken);
-        statement.setString(12, state.accessToken.refreshToken);
-        statement.setInt(13, state.accessToken.expiresIn);
-        statement.setInt(14, state.enabled ? 1 : 0);
+        statement.setInt(11, state.enabled ? 1 : 0);
 
         statement.executeUpdate();
     }
@@ -282,8 +301,28 @@ class SQLiteManager implements DataManager {
     private OAuth2State getOAuth2State(int requestID) throws SQLException {
         OAuth2State state = new OAuth2State();
         state.codeState = getAuthCodeCredentials(requestID);
+        state.codeState.accessToken = getOAuth2AccessToken(requestID);
 
         return state;
+    }
+
+    private AccessToken getOAuth2AccessToken(int requestID) throws SQLException {
+        statement = conn.prepareStatement(Queries.SELECT_OAUTH2_ACCESS_TOKEN);
+        statement.setInt(1, requestID);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        AccessToken accessToken = null;
+        if (resultSet.next()) {
+            accessToken = new AccessToken();
+            accessToken.accessToken = resultSet.getString("AccessToken");
+            accessToken.refreshToken = resultSet.getString("RefreshToken");
+            accessToken.expiresIn = resultSet.getInt("TokenExpiry");
+            accessToken.tokenType = resultSet.getString("TokenType");
+            accessToken.scope = resultSet.getString("Scope");
+        }
+
+        return accessToken;
     }
 
     private AuthorizationCodeState getAuthCodeCredentials(int requestID) throws SQLException {
@@ -303,9 +342,6 @@ class SQLiteManager implements DataManager {
             state.state = resultSet.getString("State");
             state.scope = resultSet.getString("Scope");
             state.headerPrefix = resultSet.getString("HeaderPrefix");
-            state.accessToken.accessToken = resultSet.getString("AccessToken");
-            state.accessToken.refreshToken = resultSet.getString("RefreshToken");
-            state.accessToken.expiresIn = resultSet.getInt("TokenExpiry");
             state.enabled = resultSet.getInt("Enabled") == 1;
         }
 

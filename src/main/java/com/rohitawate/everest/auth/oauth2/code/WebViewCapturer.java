@@ -21,7 +21,6 @@ import java.util.HashMap;
  */
 public class WebViewCapturer implements AuthorizationGrantCapturer {
     private String authURL;
-    private String callbackURL;
 
     private Stage authStage;
     private WebView webView;
@@ -29,10 +28,9 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
 
     private String grant;
 
-    WebViewCapturer(String finalGrantURL, String callbackURL) {
+    WebViewCapturer(String finalGrantURL) {
         CookieHandler.setDefault(new CookieManager());
         this.authURL = finalGrantURL;
-        this.callbackURL = callbackURL;
         this.webView = new WebView();
         this.engine = webView.getEngine();
     }

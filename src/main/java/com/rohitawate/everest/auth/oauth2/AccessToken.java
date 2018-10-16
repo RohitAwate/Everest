@@ -18,9 +18,6 @@ public class AccessToken {
     @JsonAlias("scope")
     public String scope;
 
-    @JsonAlias("id_token")
-    public String idToken;
-
     @Override
     public String toString() {
         return "AccessToken{" +
@@ -29,7 +26,6 @@ public class AccessToken {
                 ", tokenExpiry=" + expiresIn +
                 ", refreshToken='" + refreshToken + '\'' +
                 ", scope='" + scope + '\'' +
-                ", idToken='" + idToken + '\'' +
                 '}';
     }
 
@@ -44,7 +40,6 @@ public class AccessToken {
         if (this.expiresIn != that.expiresIn) return false;
         if (!this.refreshToken.equals(that.refreshToken)) return false;
         if (!this.scope.equals(that.scope)) return false;
-        if (!this.idToken.equals(that.idToken)) return false;
 
         return true;
     }

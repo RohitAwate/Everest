@@ -3,6 +3,7 @@
 <?import com.jfoenix.controls.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
@@ -129,6 +130,9 @@
                                     <font>
                                         <Font name="System Italic" size="15.0"/>
                                     </font>
+                                    <cursor>
+                                        <Cursor fx:constant="HAND"/>
+                                    </cursor>
                                 </Label>
                             </children>
                             <padding>

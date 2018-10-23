@@ -18,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -54,6 +55,9 @@ public class AuthorizationCodeController implements Initializable {
         captureMethodBox.setValue(CaptureMethod.BROWSER);
         refreshTokenButton.setOnAction(this::refreshToken);
         expiryLabel.setVisible(false);
+
+        expiryLabel.setOnMouseClicked(e -> setExpiryLabel());
+        expiryLabel.setTooltip(new Tooltip("Click to check expiry status"));
     }
 
     private void refreshToken(ActionEvent actionEvent) {
@@ -80,8 +84,12 @@ public class AuthorizationCodeController implements Initializable {
 
     public AuthorizationCodeState getState() {
         if (this.accessToken != null) {
-            this.accessToken.accessToken = accessTokenField.getText();
-            this.accessToken.refreshToken = refreshTokenField.getText();
+            /*
+                Setting these values again before adding the AccessToken to the AuthCodeState
+                since they can be manually changed in the UI.
+             */
+            this.accessToken.setAccessToken(accessTokenField.getText());
+            this.accessToken.setRefreshToken(refreshTokenField.getText());
         }
 
         return new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
@@ -106,9 +114,9 @@ public class AuthorizationCodeController implements Initializable {
 
             if (state.accessToken != null) {
                 accessToken = state.accessToken;
-                accessTokenField.setText(state.accessToken.accessToken);
-                refreshTokenField.setText(state.accessToken.refreshToken);
-                setExpiryLabel(state.accessToken.expiresIn);
+                accessTokenField.setText(state.accessToken.getAccessToken());
+                refreshTokenField.setText(state.accessToken.getRefreshToken());
+                setExpiryLabel();
             }
 
             enabled.setSelected(state.enabled);
@@ -121,13 +129,20 @@ public class AuthorizationCodeController implements Initializable {
         }
     }
 
-    private void setExpiryLabel(int tokenExpiry) {
-        expiryLabel.setVisible(true);
+    private void setExpiryLabel() {
+        if (accessToken != null) {
+            expiryLabel.setVisible(true);
 
-        if (tokenExpiry != 0) {
-            expiryLabel.setText("Expires in " + tokenExpiry + "s");
-        } else {
-            expiryLabel.setText("Never expires.");
+            if (accessToken.getExpiresIn() == 0) {
+                expiryLabel.setText("Never expires.");
+            } else {
+                long timeToExpiry = accessToken.getTimeToExpiry();
+                if (timeToExpiry < 0) {
+                    expiryLabel.setText("Token expired.");
+                } else {
+                    expiryLabel.setText("Expires in " + timeToExpiry + "s");
+                }
+            }
         }
     }
 
@@ -164,13 +179,13 @@ public class AuthorizationCodeController implements Initializable {
         accessTokenField.clear();
         refreshTokenField.clear();
 
-        accessTokenField.setText(accessToken.accessToken);
+        accessTokenField.setText(accessToken.getAccessToken());
 
-        if (accessToken.refreshToken != null) {
-            refreshTokenField.setText(accessToken.refreshToken);
+        if (accessToken.getRefreshToken() != null) {
+            refreshTokenField.setText(accessToken.getRefreshToken());
         }
 
-        setExpiryLabel(accessToken.expiresIn);
+        setExpiryLabel();
     }
 
     private void onRefreshFailed(Throwable exception) {

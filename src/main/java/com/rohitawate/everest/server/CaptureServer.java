@@ -67,6 +67,7 @@ public class CaptureServer {
         return grant;
     }
 
+    // TODO: Clean this up
     private static String listen() throws IOException {
         String grant = null;
         String requestedPath;
@@ -96,7 +97,6 @@ public class CaptureServer {
                         grant = params.get("code");
                         error = params.get("error");
                     }
-
 
                     if (grant == null) {
                         String deniedHTML = EverestUtilities.readFile(CaptureServer.class.getResourceAsStream(WEB_ROOT + DENIED));

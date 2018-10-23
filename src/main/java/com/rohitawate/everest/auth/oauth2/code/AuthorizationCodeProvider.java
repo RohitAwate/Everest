@@ -144,19 +144,19 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                         params.forEach((key, value) -> {
                             switch (key) {
                                 case "access_token":
-                                    accessToken.accessToken = value;
+                                    accessToken.setAccessToken(value);
                                     break;
                                 case "token_type":
-                                    accessToken.tokenType = value;
+                                    accessToken.setTokenType(value);
                                     break;
                                 case "expires_in":
-                                    accessToken.expiresIn = Integer.parseInt(value);
+                                    accessToken.setExpiresIn(Integer.parseInt(value));
                                     break;
                                 case "refresh_token":
-                                    accessToken.refreshToken = value;
+                                    accessToken.setRefreshToken(value);
                                     break;
                                 case "scope":
-                                    accessToken.scope = value;
+                                    accessToken.setScope(value);
                                     break;
                             }
                         });
@@ -190,7 +190,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             fetchAccessToken();
         }
 
-        return headerPrefix + " " + accessToken.accessToken;
+        return headerPrefix + " " + accessToken.getAccessToken();
     }
 
     @Override

@@ -164,11 +164,11 @@ class SQLiteManager implements DataManager {
 
         statement = conn.prepareStatement(Queries.SAVE_OAUTH2_ACCESS_TOKEN);
         statement.setInt(1, requestID);
-        statement.setString(2, accessToken.accessToken);
-        statement.setString(3, accessToken.refreshToken);
-        statement.setString(4, accessToken.tokenType);
-        statement.setInt(5, accessToken.expiresIn);
-        statement.setString(6, accessToken.scope);
+        statement.setString(2, accessToken.getAccessToken());
+        statement.setString(3, accessToken.getRefreshToken());
+        statement.setString(4, accessToken.getTokenType());
+        statement.setInt(5, accessToken.getExpiresIn());
+        statement.setString(6, accessToken.getScope());
 
         statement.executeUpdate();
     }
@@ -314,12 +314,13 @@ class SQLiteManager implements DataManager {
 
         AccessToken accessToken = null;
         if (resultSet.next()) {
-            accessToken = new AccessToken();
-            accessToken.accessToken = resultSet.getString("AccessToken");
-            accessToken.refreshToken = resultSet.getString("RefreshToken");
-            accessToken.expiresIn = resultSet.getInt("TokenExpiry");
-            accessToken.tokenType = resultSet.getString("TokenType");
-            accessToken.scope = resultSet.getString("Scope");
+            accessToken = new AccessToken(
+                    resultSet.getString("AccessToken"),
+                    resultSet.getString("TokenType"),
+                    resultSet.getInt("TokenExpiry"),
+                    resultSet.getString("RefreshToken"),
+                    resultSet.getString("Scope")
+            );
         }
 
         return accessToken;

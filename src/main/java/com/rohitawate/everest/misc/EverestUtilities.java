@@ -18,6 +18,7 @@ package com.rohitawate.everest.misc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.net.UrlEscapers;
 
 import java.io.ByteArrayOutputStream;
@@ -34,6 +35,7 @@ public class EverestUtilities {
     static {
         jsonMapper = new ObjectMapper();
         jsonMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        jsonMapper.registerModule(new JavaTimeModule());
     }
 
     /**

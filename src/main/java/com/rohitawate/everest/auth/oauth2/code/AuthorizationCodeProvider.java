@@ -138,8 +138,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                     break;
                 case MediaType.APPLICATION_FORM_URLENCODED:
                     accessToken = new AccessToken();
-
-                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL(tokenResponseBuilder.toString()));
+                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()));
                     if (params != null) {
                         params.forEach((key, value) -> {
                             switch (key) {

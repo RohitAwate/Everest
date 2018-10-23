@@ -98,8 +98,7 @@
                                 </VBox>
                             </children>
                         </HBox>
-                        <VBox alignment="CENTER" spacing="5.0" style="-fx-background-color: #282828;"
-                              VBox.vgrow="NEVER">
+                        <VBox fx:id="accessTokenBox" alignment="CENTER" spacing="5.0" VBox.vgrow="NEVER">
                             <children>
                                 <HBox alignment="CENTER" spacing="20.0">
                                     <children>

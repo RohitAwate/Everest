@@ -13,13 +13,27 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
+import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class CaptureServer {
     private final int port;
     private String authURL;
-    private ServerSocket server;
+
+    private static ServerSocket server;
+    private static Thread serverThread;
+    private static final Runnable serverLoop = () -> {
+        while (!Thread.interrupted()) {
+            try {
+                listen();
+            } catch (IOException e) {
+                LoggingService.logWarning("Server loop shut down.", e, LocalDateTime.now());
+                break;
+            }
+        }
+    };
 
     private static final String WEB_ROOT = "/html";
     private static final String GRANTED = "/AuthorizationGranted.html";
@@ -34,28 +48,26 @@ public class CaptureServer {
     public String capture() throws Exception {
         String grant;
 
+        if (server != null) {
+            server.close();
+            serverThread.interrupt();
+            server = null;
+        }
+
         server = new ServerSocket(port);
         LoggingService.logInfo("Authorization grant capturing server has started on port " + port + ".", LocalDateTime.now());
 
         openLinkInBrowser(authURL);
         grant = listen();
 
-        Thread serverThread = new Thread(() -> {
-            try {
-                while (true) {
-                    listen();
-                }
-            } catch (IOException e) {
-                LoggingService.logSevere("CaptureServer could not serve client.", e, LocalDateTime.now());
-            }
-        });
+        serverThread = new Thread(serverLoop);
         serverThread.setDaemon(true);
         serverThread.start();
 
         return grant;
     }
 
-    private String listen() throws IOException {
+    private static String listen() throws IOException {
         String grant = null;
         String requestedPath;
 
@@ -77,24 +89,17 @@ public class CaptureServer {
                 if (requestedPath.startsWith("/granted")) {
                     headers.append("200 OK");
 
-                    String[] params = requestedPath.split("\\?");
+                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL("http://localhost:52849" + requestedPath));
+
                     String error = null;
-                    if (params.length > 1) {
-                        String pairs[] = params[1].split("&");
-                        for (String pair : pairs) {
-                            String pairValues[] = pair.split("=");
-                            if (pairValues[0].equals("code")) {
-                                grant = pairValues[1];
-                                break;
-                            } else if (pairValues[0].equals("error")) {
-                                error = pairValues[1];
-                                break;
-                            }
-                        }
+                    if (params != null) {
+                        grant = params.get("code");
+                        error = params.get("error");
                     }
 
+
                     if (grant == null) {
-                        String deniedHTML = EverestUtilities.readFile(getClass().getResourceAsStream(WEB_ROOT + DENIED));
+                        String deniedHTML = EverestUtilities.readFile(CaptureServer.class.getResourceAsStream(WEB_ROOT + DENIED));
                         if (error != null) {
                             deniedHTML = deniedHTML.replace("{% Error %}", error);
                         } else {
@@ -103,18 +108,18 @@ public class CaptureServer {
 
                         body = deniedHTML.getBytes();
                     } else {
-                        body = EverestUtilities.readBytes(getClass().getResourceAsStream(WEB_ROOT + GRANTED));
+                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + GRANTED));
                     }
 
                     headers.append("\nContent-Type: text/html");
                 } else {
                     try {
-                        body = EverestUtilities.readBytes(getClass().getResourceAsStream(WEB_ROOT + requestedPath));
+                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + requestedPath));
                         headers.append("200 OK");
                         headers.append("\nContent-Type: ");
                         headers.append(getMimeType(requestedPath));
                     } catch (FileNotFoundException e) {
-                        body = EverestUtilities.readBytes(getClass().getResourceAsStream(WEB_ROOT + NOT_FOUND));
+                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + NOT_FOUND));
                         headers.append("404 Not Found");
                         headers.append("\nContent-Type: text/html");
                     }

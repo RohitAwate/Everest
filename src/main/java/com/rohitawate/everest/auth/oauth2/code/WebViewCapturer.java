@@ -3,13 +3,11 @@ package com.rohitawate.everest.auth.oauth2.code;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
-import com.sun.webkit.network.CookieManager;
 import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
-import java.net.CookieHandler;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -29,7 +27,6 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
     private String grant;
 
     WebViewCapturer(String finalGrantURL) {
-        CookieHandler.setDefault(new CookieManager());
         this.authURL = finalGrantURL;
         this.webView = new WebView();
         this.engine = webView.getEngine();

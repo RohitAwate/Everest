@@ -444,6 +444,11 @@
     -fx-padding: 0;
 }
 
+/* Authorization Code */
+#accessTokenBox {
+    -fx-background-color: #282828;
+}
+
 /* Snackbar */
 .jfx-snackbar-content {
     -fx-background-color: black;

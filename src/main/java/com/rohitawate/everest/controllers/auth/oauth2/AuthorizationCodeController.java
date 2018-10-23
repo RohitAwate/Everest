@@ -57,6 +57,13 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     private void refreshToken(ActionEvent actionEvent) {
+        /*
+            Opening a system browser window need not be done on the JavaFX Application Thread.
+            Hence, this is performed on a separate thread.
+
+            However, a WebView can only be opened on the JavaFX Application Thread hence it is
+            NOT performed on some other thread.
+         */
         if (captureMethodBox.getValue().equals(CaptureMethod.BROWSER)) {
             ExecutorService service = Executors.newSingleThreadExecutor();
             service.submit(new TokenFetcher());
@@ -68,7 +75,6 @@ public class AuthorizationCodeController implements Initializable {
             } catch (Exception e) {
                 onRefreshFailed(e);
             }
-
         }
     }
 

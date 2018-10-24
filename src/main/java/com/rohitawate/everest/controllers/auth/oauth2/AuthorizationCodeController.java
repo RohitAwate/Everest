@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class AuthorizationCodeController implements Initializable {
     @FXML
@@ -69,7 +70,18 @@ public class AuthorizationCodeController implements Initializable {
             NOT performed on some other thread.
          */
         if (captureMethodBox.getValue().equals(CaptureMethod.BROWSER)) {
-            ExecutorService service = Executors.newSingleThreadExecutor();
+            ExecutorService service = Executors.newSingleThreadExecutor(new ThreadFactory() {
+                /*
+                    Custom ThreadFactory which produces daemon threads so that
+                    the CaptureServer doesn't keep the JVM from exiting.
+                 */
+                @Override
+                public Thread newThread(Runnable runnable) {
+                    Thread newThread = new Thread(runnable);
+                    newThread.setDaemon(true);
+                    return newThread;
+                }
+            });
             service.submit(new TokenFetcher());
         } else {
             TokenFetcher fetcher = new TokenFetcher();

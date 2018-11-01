@@ -20,7 +20,6 @@ import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.models.requests.*;
 import com.rohitawate.everest.models.responses.EverestResponse;
-import com.rohitawate.everest.settings.Settings;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -73,10 +72,10 @@ public class RequestManager extends Service<EverestResponse> {
         // Required for making PATCH requests through Jersey
         client.property(HttpUrlConnectorProvider.SET_METHOD_WORKAROUND, true);
 
-        if (Settings.connectionTimeOutEnable)
-            client.property(ClientProperties.CONNECT_TIMEOUT, Settings.connectionTimeOut);
-        if (Settings.connectionReadTimeOutEnable)
-            client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
+        if (Main.preferences.request.enableConnectionTimeOut)
+            client.property(ClientProperties.CONNECT_TIMEOUT, Main.preferences.request.connectionTimeOut);
+        if (Main.preferences.request.enableConnectionReadTimeOut)
+            client.property(ClientProperties.READ_TIMEOUT, Main.preferences.request.connectionReadTimeOut);
     }
 
     private long initialTime;

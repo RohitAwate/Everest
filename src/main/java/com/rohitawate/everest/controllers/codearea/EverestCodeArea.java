@@ -16,9 +16,9 @@
 
 package com.rohitawate.everest.controllers.codearea;
 
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.codearea.highlighters.Highlighter;
 import com.rohitawate.everest.format.Formatter;
-import com.rohitawate.everest.settings.Settings;
 import javafx.geometry.Insets;
 import org.fxmisc.richtext.CodeArea;
 
@@ -31,7 +31,7 @@ public class EverestCodeArea extends CodeArea {
     public EverestCodeArea() {
         this.getStylesheets().add(getClass().getResource("/css/syntax/Moondust.css").toString());
         this.getStyleClass().add("everest-code-area");
-        this.setWrapText(Settings.editorWrapText);
+        this.setWrapText(Main.preferences.editor.wrapText);
         this.setPadding(new Insets(5));
 
         this.multiPlainChanges()
@@ -62,7 +62,6 @@ public class EverestCodeArea extends CodeArea {
     /**
      * Formats the text with the provided Formatter if it is not null,
      * sets the text and then computes the highlighting.
-     *
      */
     public void setText(String text, Formatter formatter, Highlighter highlighter) {
         clear();

@@ -16,11 +16,11 @@
 
 package com.rohitawate.everest.sync;
 
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthMethod;
 import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.models.requests.HTTPConstants;
-import com.rohitawate.everest.settings.Settings;
 import com.rohitawate.everest.state.*;
 import javafx.util.Pair;
 
@@ -220,9 +220,9 @@ class SQLiteManager implements DataManager {
     @Override
     public synchronized List<ComposerState> getHistory() throws SQLException {
         List<ComposerState> history = new ArrayList<>();
-        // Loads the requests from the last x number of days, x being Settings.showHistoryRange
+        // Loads the requests from the last x number of days, x being Preferences.showHistoryRange
         statement = conn.prepareStatement(Queries.SELECT_RECENT_REQUESTS);
-        String historyStartDate = LocalDate.now().minusDays(Settings.showHistoryRange).toString();
+        String historyStartDate = LocalDate.now().minusDays(Main.preferences.appearance.showHistoryRange).toString();
         statement.setString(1, historyStartDate);
 
         ResultSet resultSet = statement.executeQuery();

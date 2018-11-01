@@ -4,6 +4,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Scanner;
 
+/**
+ * Utility class to parse HTTP requests
+ */
 public class HttpRequestParser {
     private String method;
     private String path;

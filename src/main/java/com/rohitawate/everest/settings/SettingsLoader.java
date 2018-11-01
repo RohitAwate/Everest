@@ -59,6 +59,7 @@ public class SettingsLoader implements Runnable {
                 Settings.connectionReadTimeOut = setIntegerSetting(Settings.connectionReadTimeOut, "connectionReadTimeOut");
 
             Settings.editorWrapText = setBooleanSetting(Settings.editorWrapText, "editorWrapText");
+            Settings.enableAccessTokenExpiryTimer = setBooleanSetting(Settings.enableAccessTokenExpiryTimer, "enableAccessTokenExpiryTimer");
 
             Settings.theme = EverestUtilities.trimString(setStringSetting(Settings.theme, "theme"));
             Settings.syntaxTheme = EverestUtilities.trimString(setStringSetting(Settings.syntaxTheme, "syntaxTheme"));

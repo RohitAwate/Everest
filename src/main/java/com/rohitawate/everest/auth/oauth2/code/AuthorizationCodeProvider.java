@@ -19,6 +19,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Scanner;
 
+/**
+ * Authorization provider for OAuth 2.0's Authorization Code flow.
+ * Makes requests to authorization and access token endpoints and returns
+ * either the final 'Authorization' header or an AccessToken object.
+ */
 public class AuthorizationCodeProvider implements OAuth2Provider {
     private URL authURL;
     private URL accessTokenURL;

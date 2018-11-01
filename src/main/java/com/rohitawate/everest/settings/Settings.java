@@ -34,4 +34,6 @@ public class Settings {
     public static boolean editorWrapText = true;
 
     public static String fetchSource = "SQLite";
+
+    public static boolean enableAccessTokenExpiryTimer = true;
 }

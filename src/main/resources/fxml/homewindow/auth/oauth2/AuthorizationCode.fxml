@@ -131,7 +131,7 @@
                                         <Font name="System Italic" size="15.0"/>
                                     </font>
                                     <cursor>
-                                        <Cursor fx:constant="HAND"/>
+                                        <Cursor fx:constant="DEFAULT"/>
                                     </cursor>
                                 </Label>
                             </children>

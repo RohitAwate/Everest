@@ -11,14 +11,21 @@ import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedExcept
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.notifications.NotificationsManager;
+import com.rohitawate.everest.settings.Settings;
 import com.rohitawate.everest.state.AuthorizationCodeState;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.util.Duration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -57,8 +64,27 @@ public class AuthorizationCodeController implements Initializable {
         refreshTokenButton.setOnAction(this::refreshToken);
         expiryLabel.setVisible(false);
 
-        expiryLabel.setOnMouseClicked(e -> setExpiryLabel());
-        expiryLabel.setTooltip(new Tooltip("Click to check expiry status"));
+        Platform.runLater(() -> {
+            if (Settings.enableAccessTokenExpiryTimer) {
+                Timeline timeline = new Timeline();
+                timeline.setCycleCount(Timeline.INDEFINITE);
+                timeline.getKeyFrames().add(
+                        new KeyFrame(Duration.seconds(1),
+                                new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        setExpiryLabel();
+                                    }
+                                })
+                );
+
+                timeline.play();
+            } else {
+                expiryLabel.setOnMouseClicked(e -> setExpiryLabel());
+                expiryLabel.setTooltip(new Tooltip("Click to update expiry status"));
+                expiryLabel.setCursor(Cursor.HAND);
+            }
+        });
     }
 
     private void refreshToken(ActionEvent actionEvent) {
@@ -152,7 +178,19 @@ public class AuthorizationCodeController implements Initializable {
                 if (timeToExpiry < 0) {
                     expiryLabel.setText("Token expired.");
                 } else {
-                    expiryLabel.setText("Expires in " + timeToExpiry + "s");
+                    int hours, minutes, seconds;
+                    hours = (int) (timeToExpiry / 3600);
+                    timeToExpiry %= 3600;
+                    minutes = (int) timeToExpiry / 60;
+                    seconds = (int) timeToExpiry % 60;
+
+                    if (hours == 0 && minutes != 0) {
+                        expiryLabel.setText(String.format("Expires in %dm %ds", minutes, seconds));
+                    } else if (hours == 0 && minutes == 0) {
+                        expiryLabel.setText(String.format("Expires in %ds", seconds));
+                    } else {
+                        expiryLabel.setText(String.format("Expires in %dh %dm %ds", hours, minutes, seconds));
+                    }
                 }
             }
         }

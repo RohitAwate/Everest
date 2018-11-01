@@ -1,5 +1,6 @@
 package com.rohitawate.everest.server;
 
+import com.rohitawate.everest.http.HttpRequestParser;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
@@ -16,7 +17,6 @@ import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Scanner;
 
 public class CaptureServer {
     private final int port;
@@ -67,30 +67,23 @@ public class CaptureServer {
         return grant;
     }
 
-    // TODO: Clean this up
     private static String listen() throws IOException {
         String grant = null;
-        String requestedPath;
 
         PrintWriter headerWriter;
         DataOutputStream bodyStream;
         try (Socket client = server.accept()) {
-            Scanner scanner = new Scanner(client.getInputStream());
+            HttpRequestParser requestParser = new HttpRequestParser(client.getInputStream(), false);
             headerWriter = new PrintWriter(client.getOutputStream());
             bodyStream = new DataOutputStream(client.getOutputStream());
 
-            String firstLineTokens[] = scanner.nextLine().split(" ");
-            String method = firstLineTokens[0];
-            requestedPath = firstLineTokens[1];
-
-            if (method.equals(HTTPConstants.GET)) {
+            if (requestParser.getMethod().equals(HTTPConstants.GET)) {
                 StringBuilder headers = new StringBuilder("HTTP/1.1 ");
                 byte[] body;
 
-                if (requestedPath.startsWith("/granted")) {
+                if (requestParser.getPath().startsWith("/granted")) {
                     headers.append("200 OK");
-
-                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL("http://localhost:52849" + requestedPath));
+                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL("http://localhost:52849" + requestParser.getPath()));
 
                     String error = null;
                     if (params != null) {
@@ -114,10 +107,10 @@ public class CaptureServer {
                     headers.append("\nContent-Type: text/html");
                 } else {
                     try {
-                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + requestedPath));
+                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + requestParser.getPath()));
                         headers.append("200 OK");
                         headers.append("\nContent-Type: ");
-                        headers.append(getMimeType(requestedPath));
+                        headers.append(getMimeType(requestParser.getPath()));
                     } catch (FileNotFoundException e) {
                         body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + NOT_FOUND));
                         headers.append("404 Not Found");

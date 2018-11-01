@@ -3,6 +3,7 @@ package com.rohitawate.everest.controllers.auth.oauth2;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
@@ -11,7 +12,6 @@ import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedExcept
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.notifications.NotificationsManager;
-import com.rohitawate.everest.settings.Settings;
 import com.rohitawate.everest.state.AuthorizationCodeState;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -65,7 +65,7 @@ public class AuthorizationCodeController implements Initializable {
         expiryLabel.setVisible(false);
 
         Platform.runLater(() -> {
-            if (Settings.enableAccessTokenExpiryTimer) {
+            if (Main.preferences.auth.enableAccessTokenExpiryTimer) {
                 Timeline timeline = new Timeline();
                 timeline.setCycleCount(Timeline.INDEFINITE);
                 timeline.getKeyFrames().add(

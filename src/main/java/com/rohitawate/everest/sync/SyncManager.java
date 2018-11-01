@@ -1,10 +1,10 @@
 package com.rohitawate.everest.sync;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.HomeWindowController;
 import com.rohitawate.everest.exceptions.DuplicateException;
 import com.rohitawate.everest.logging.LoggingService;
-import com.rohitawate.everest.settings.Settings;
 import com.rohitawate.everest.state.ComposerState;
 
 import java.time.LocalDateTime;
@@ -43,7 +43,7 @@ public class SyncManager {
      */
     public void saveState(ComposerState newState) {
         // Compares new state with the last added state from the primary fetch source
-        if (newState.equals(managers.get(Settings.fetchSource).getLastAdded()))
+        if (newState.equals(managers.get(Main.preferences.sync.fetchSource).getLastAdded()))
             return;
 
         historySaver.newState = newState;
@@ -60,11 +60,11 @@ public class SyncManager {
     public List<ComposerState> getHistory() {
         List<ComposerState> history = null;
         try {
-            if (managers.get(Settings.fetchSource) == null) {
-                LoggingService.logSevere("No such source found: " + Settings.fetchSource, null, LocalDateTime.now());
+            if (managers.get(Main.preferences.sync.fetchSource) == null) {
+                LoggingService.logSevere("No such source found: " + Main.preferences.sync.fetchSource, null, LocalDateTime.now());
                 history = managers.get("SQLite").getHistory();
             } else {
-                history = managers.get(Settings.fetchSource).getHistory();
+                history = managers.get(Main.preferences.sync.fetchSource).getHistory();
             }
         } catch (Exception e) {
             LoggingService.logSevere("History could not be fetched.", e, LocalDateTime.now());

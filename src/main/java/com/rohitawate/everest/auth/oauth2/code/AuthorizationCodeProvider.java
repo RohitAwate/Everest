@@ -92,6 +92,42 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
     private void fetchAccessToken() throws NoAuthorizationGrantException, AccessTokenDeniedException,
             IOException, UnknownAccessTokenTypeException {
+        if (accessToken == null) {
+            fetchNewAccessToken();
+        } else {
+            refreshAccessToken();
+        }
+    }
+
+    private void refreshAccessToken() throws NoAuthorizationGrantException, AccessTokenDeniedException, UnknownAccessTokenTypeException, IOException {
+        if (accessToken.getRefreshToken() == null ||
+                (accessToken.getRefreshToken() != null && accessToken.getRefreshToken().isEmpty())) {
+            fetchNewAccessToken();
+            return;
+        }
+
+        URL tokenURL = new URL(accessTokenURL.toString());
+        StringBuilder tokenURLBuilder = new StringBuilder();
+        tokenURLBuilder.append("client_id=");
+        tokenURLBuilder.append(clientID);
+        tokenURLBuilder.append("&client_secret=");
+        tokenURLBuilder.append(clientSecret);
+        tokenURLBuilder.append("&grant_type=refresh_token");
+        tokenURLBuilder.append("&refresh_token=");
+        tokenURLBuilder.append(accessToken.getRefreshToken());
+        if (scope != null && !scope.isEmpty()) {
+            tokenURLBuilder.append("&scope=");
+            tokenURLBuilder.append(scope);
+        }
+
+        byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
+        AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
+        String refreshToken = accessToken.getRefreshToken();
+        accessToken = tokenRequest.accessToken;
+        accessToken.setRefreshToken(refreshToken);
+    }
+
+    private void fetchNewAccessToken() throws NoAuthorizationGrantException, IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
         if (authGrant == null) {
             throw new NoAuthorizationGrantException(
                     "OAuth 2.0 Authorization Code: Authorization grant not found. Aborting access token fetch."
@@ -114,69 +150,18 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             tokenURLBuilder.append(scope);
         }
 
-        byte[] postData = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
-        HttpURLConnection connection = (HttpURLConnection) tokenURL.openConnection();
-
-        connection.setRequestMethod(HTTPConstants.POST);
-        connection.setDoOutput(true);
-        connection.setRequestProperty("Content-Length", String.valueOf(postData.length));
-        connection.setRequestProperty("charset", "utf-8");
-        connection.setRequestProperty("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-        connection.getOutputStream().write(postData);
-
-        StringBuilder tokenResponseBuilder = new StringBuilder();
-        if (connection.getResponseCode() == 200) {
-            Scanner scanner = new Scanner(connection.getInputStream());
-            while (scanner.hasNext())
-                tokenResponseBuilder.append(scanner.nextLine());
-            // Removes the "charset" part
-            String contentType = connection.getContentType().split(";")[0];
-
-            switch (contentType) {
-                case MediaType.APPLICATION_JSON:
-                    accessToken = EverestUtilities.jsonMapper.readValue(tokenResponseBuilder.toString(), AccessToken.class);
-                    break;
-                case MediaType.APPLICATION_FORM_URLENCODED:
-                    accessToken = new AccessToken();
-                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()));
-                    if (params != null) {
-                        params.forEach((key, value) -> {
-                            switch (key) {
-                                case "access_token":
-                                    accessToken.setAccessToken(value);
-                                    break;
-                                case "token_type":
-                                    accessToken.setTokenType(value);
-                                    break;
-                                case "expires_in":
-                                    accessToken.setExpiresIn(Integer.parseInt(value));
-                                    break;
-                                case "refresh_token":
-                                    accessToken.setRefreshToken(value);
-                                    break;
-                                case "scope":
-                                    accessToken.setScope(value);
-                                    break;
-                            }
-                        });
-                    }
-                    break;
-                default:
-                    throw new UnknownAccessTokenTypeException("Unknown access token type: " + contentType + "\nBody: " + tokenResponseBuilder.toString());
-            }
-        } else {
-            System.out.println(connection.getResponseCode());
-            Scanner scanner = new Scanner(connection.getErrorStream());
-            while (scanner.hasNext())
-                tokenResponseBuilder.append(scanner.nextLine());
-            throw new AccessTokenDeniedException(tokenResponseBuilder.toString());
-        }
+        byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
+        AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
+        accessToken = tokenRequest.accessToken;
     }
 
     @Override
     public AccessToken getAccessToken() throws Exception {
-        if (accessToken == null) {
-            getAuthHeader();
+        if (accessToken.getRefreshToken().isEmpty()) {
+            fetchAuthorizationGrant();
+            fetchAccessToken();
+        } else {
+            refreshAccessToken();
         }
 
         return accessToken;
@@ -195,5 +180,90 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    /**
+     * Makes a request to the access token endpoint, parses the response into an AccessToken object.
+     */
+    private static class AccessTokenRequest {
+        private AccessToken accessToken;
+        private URL tokenURL;
+        private byte[] body;
+        private HttpURLConnection connection;
+
+        /**
+         * @param tokenURL The access token endpoint
+         * @param body     The application/x-www-form-urlencoded request body
+         */
+        AccessTokenRequest(URL tokenURL, byte[] body) throws IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
+            this.tokenURL = tokenURL;
+            this.body = body;
+            openConnection();
+            parseTokenResponse();
+        }
+
+        private void openConnection() throws IOException {
+            connection = (HttpURLConnection) tokenURL.openConnection();
+            connection.setRequestMethod(HTTPConstants.POST);
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Length", String.valueOf(body.length));
+            connection.setRequestProperty("charset", "utf-8");
+            connection.setRequestProperty("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            connection.getOutputStream().write(body);
+        }
+
+        private void parseTokenResponse() throws UnknownAccessTokenTypeException, AccessTokenDeniedException, IOException {
+            StringBuilder tokenResponseBuilder = new StringBuilder();
+            if (connection.getResponseCode() == 200) {
+                Scanner scanner = new Scanner(connection.getInputStream());
+                while (scanner.hasNext())
+                    tokenResponseBuilder.append(scanner.nextLine());
+                // Removes the "charset" part
+                String contentType = connection.getContentType().split(";")[0];
+
+                switch (contentType) {
+                    case MediaType.APPLICATION_JSON:
+                        accessToken = EverestUtilities.jsonMapper.readValue(tokenResponseBuilder.toString(), AccessToken.class);
+                        break;
+                    case MediaType.APPLICATION_FORM_URLENCODED:
+                        accessToken = new AccessToken();
+                        HashMap<String, String> params = EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()));
+                        if (params != null) {
+                            params.forEach((key, value) -> {
+                                switch (key) {
+                                    case "access_token":
+                                        accessToken.setAccessToken(value);
+                                        break;
+                                    case "token_type":
+                                        accessToken.setTokenType(value);
+                                        break;
+                                    case "expires_in":
+                                        accessToken.setExpiresIn(Integer.parseInt(value));
+                                        break;
+                                    case "refresh_token":
+                                        accessToken.setRefreshToken(value);
+                                        break;
+                                    case "scope":
+                                        accessToken.setScope(value);
+                                        break;
+                                }
+                            });
+                        }
+                        break;
+                    default:
+                        throw new UnknownAccessTokenTypeException("Unknown access token type: " + contentType + "\nBody: " + tokenResponseBuilder.toString());
+                }
+            } else {
+                System.out.println(connection.getResponseCode());
+                Scanner scanner = new Scanner(connection.getErrorStream());
+                while (scanner.hasNext())
+                    tokenResponseBuilder.append(scanner.nextLine());
+                throw new AccessTokenDeniedException(tokenResponseBuilder.toString());
+            }
+        }
+
+        AccessToken getAccessToken() {
+            return this.accessToken;
+        }
     }
 }

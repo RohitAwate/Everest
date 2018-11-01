@@ -110,4 +110,8 @@ public class AccessToken {
         Duration duration = Duration.between(this.tokenCreationTime, LocalDateTime.now());
         return this.expiresIn - duration.getSeconds();
     }
+
+    public boolean hasExpired() {
+        return getTimeToExpiry() > this.expiresIn;
+    }
 }

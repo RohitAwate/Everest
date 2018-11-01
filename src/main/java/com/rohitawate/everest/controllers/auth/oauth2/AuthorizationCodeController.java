@@ -223,7 +223,7 @@ public class AuthorizationCodeController implements Initializable {
         protected AccessToken call() throws Exception {
             AuthorizationCodeState state = new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
                     clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                    headerPrefixField.getText(), null, enabled.isSelected());
+                    headerPrefixField.getText(), accessToken, enabled.isSelected());
 
             provider = new AuthorizationCodeProvider(state);
             return provider.getAccessToken();

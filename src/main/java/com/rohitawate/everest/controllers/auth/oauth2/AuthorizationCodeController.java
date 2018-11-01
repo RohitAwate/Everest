@@ -221,6 +221,9 @@ public class AuthorizationCodeController implements Initializable {
     private class TokenFetcher extends Task<AccessToken> {
         @Override
         protected AccessToken call() throws Exception {
+            accessToken.setAccessToken(accessTokenField.getText());
+            accessToken.setRefreshToken(refreshTokenField.getText());
+
             AuthorizationCodeState state = new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
                     clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
                     headerPrefixField.getText(), accessToken, enabled.isSelected());

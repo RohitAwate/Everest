@@ -99,7 +99,8 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         }
     }
 
-    private void refreshAccessToken() throws NoAuthorizationGrantException, AccessTokenDeniedException, UnknownAccessTokenTypeException, IOException {
+    private void refreshAccessToken()
+            throws NoAuthorizationGrantException, AccessTokenDeniedException, UnknownAccessTokenTypeException, IOException {
         if (accessToken.getRefreshToken() == null ||
                 (accessToken.getRefreshToken() != null && accessToken.getRefreshToken().isEmpty())) {
             fetchNewAccessToken();
@@ -127,7 +128,8 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         accessToken.setRefreshToken(refreshToken);
     }
 
-    private void fetchNewAccessToken() throws NoAuthorizationGrantException, IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
+    private void fetchNewAccessToken()
+            throws NoAuthorizationGrantException, IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
         if (authGrant == null) {
             throw new NoAuthorizationGrantException(
                     "OAuth 2.0 Authorization Code: Authorization grant not found. Aborting access token fetch."
@@ -195,7 +197,8 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
          * @param tokenURL The access token endpoint
          * @param body     The application/x-www-form-urlencoded request body
          */
-        AccessTokenRequest(URL tokenURL, byte[] body) throws IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
+        AccessTokenRequest(URL tokenURL, byte[] body)
+                throws IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
             this.tokenURL = tokenURL;
             this.body = body;
             openConnection();
@@ -212,7 +215,8 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             connection.getOutputStream().write(body);
         }
 
-        private void parseTokenResponse() throws UnknownAccessTokenTypeException, AccessTokenDeniedException, IOException {
+        private void parseTokenResponse()
+                throws UnknownAccessTokenTypeException, AccessTokenDeniedException, IOException {
             StringBuilder tokenResponseBuilder = new StringBuilder();
             if (connection.getResponseCode() == 200) {
                 Scanner scanner = new Scanner(connection.getInputStream());
@@ -227,7 +231,8 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                         break;
                     case MediaType.APPLICATION_FORM_URLENCODED:
                         accessToken = new AccessToken();
-                        HashMap<String, String> params = EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()));
+                        HashMap<String, String> params =
+                                EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()));
                         if (params != null) {
                             params.forEach((key, value) -> {
                                 switch (key) {

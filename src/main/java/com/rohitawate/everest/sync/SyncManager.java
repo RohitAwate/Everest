@@ -21,6 +21,9 @@ public class SyncManager {
     private static HomeWindowController homeWindowController;
     private static Executor executor = MoreExecutors.directExecutor();
     private static HistorySaver historySaver;
+    private static String fetchSource;
+
+    private static final String DEFAULT_FETCH_SOURCE = "SQLite";
 
     /**
      * @param homeWindowController - to add a HistoryItem by invoking addHistoryItem()
@@ -29,6 +32,7 @@ public class SyncManager {
         SyncManager.homeWindowController = homeWindowController;
         managers = new HashMap<>();
         historySaver = new HistorySaver();
+        fetchSource = Main.preferences.sync.fetchSource;
 
         // Registering the default
         try {
@@ -43,13 +47,15 @@ public class SyncManager {
      */
     public void saveState(ComposerState newState) {
         // Compares new state with the last added state from the primary fetch source
-        if (newState.equals(managers.get(Main.preferences.sync.fetchSource).getLastAdded()))
+        if (newState.equals(managers.get(fetchSource).getLastAdded()))
             return;
 
         historySaver.newState = newState;
         executor.execute(historySaver);
 
-        homeWindowController.addHistoryItem(newState);
+        if (Main.preferences.appearance.showHistoryRange > 0) {
+            homeWindowController.addHistoryItem(newState);
+        }
     }
 
     /**
@@ -60,12 +66,12 @@ public class SyncManager {
     public List<ComposerState> getHistory() {
         List<ComposerState> history = null;
         try {
-            if (managers.get(Main.preferences.sync.fetchSource) == null) {
-                LoggingService.logSevere("No such source found: " + Main.preferences.sync.fetchSource, null, LocalDateTime.now());
-                history = managers.get("SQLite").getHistory();
-            } else {
-                history = managers.get(Main.preferences.sync.fetchSource).getHistory();
+            if (managers.get(fetchSource) == null) {
+                LoggingService.logSevere("No such source found: " + fetchSource, null, LocalDateTime.now());
+                fetchSource = DEFAULT_FETCH_SOURCE;
             }
+
+            history = managers.get(fetchSource).getHistory();
         } catch (Exception e) {
             LoggingService.logSevere("History could not be fetched.", e, LocalDateTime.now());
         }

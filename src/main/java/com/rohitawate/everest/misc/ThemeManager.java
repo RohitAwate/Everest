@@ -30,9 +30,12 @@ public class ThemeManager {
     public static final String DEFAULT_THEME = "Adreana";
     public static final String DEFAULT_SYNTAX_THEME = "Moondust";
 
-    private static List<Parent> parentNodes = new ArrayList<>();
-    private static File themeFile = new File("Everest/themes/" + Main.preferences.appearance.theme + ".css");
-    private static File syntaxThemeFile = new File("Everest/themes/syntax/" + Main.preferences.appearance.syntaxTheme + ".css");
+    private static String theme = Main.preferences.appearance.theme;
+    private static String syntaxTheme = Main.preferences.appearance.syntaxTheme;
+
+    private static final List<Parent> parentNodes = new ArrayList<>();
+    private static File themeFile = new File("Everest/themes/" + theme + ".css");
+    private static File syntaxThemeFile = new File("Everest/themes/syntax/" + syntaxTheme + ".css");
 
     /**
      * Refreshes the theme of all the registered parents by replacing
@@ -40,7 +43,7 @@ public class ThemeManager {
      * is always retained.
      */
     public static void refreshTheme() {
-        if (!Main.preferences.appearance.theme.equals(DEFAULT_THEME)) {
+        if (!theme.equals(DEFAULT_THEME)) {
             if (themeFile.exists()) {
                 String themePath = themeFile.toURI().toString();
 
@@ -49,33 +52,33 @@ public class ThemeManager {
                     parent.getStylesheets().add(1, themePath);
                 }
 
-                LoggingService.logInfo("Theme changed to " + Main.preferences.appearance.theme + ".", LocalDateTime.now());
+                LoggingService.logInfo("Theme changed to " + theme + ".", LocalDateTime.now());
             } else {
-                LoggingService.logInfo(Main.preferences.appearance.theme + ": No such theme file found.", LocalDateTime.now());
-                Main.preferences.appearance.theme = DEFAULT_THEME;
+                LoggingService.logInfo(theme + ": No such theme file found.", LocalDateTime.now());
+                theme = DEFAULT_THEME;
             }
         }
     }
 
     public static void setTheme(Parent parent) {
-        if (!Main.preferences.appearance.theme.equals("Adreana")) {
+        if (!theme.equals(DEFAULT_THEME)) {
             if (themeFile.exists()) {
                 parent.getStylesheets().add(themeFile.toURI().toString());
                 parentNodes.add(parent);
             } else {
-                LoggingService.logInfo(Main.preferences.appearance.theme + ": No such theme file found.", LocalDateTime.now());
-                Main.preferences.appearance.theme = DEFAULT_THEME;
+                LoggingService.logInfo(theme + ": No such theme file found.", LocalDateTime.now());
+                theme = DEFAULT_THEME;
             }
         }
     }
 
     public static void setSyntaxTheme(EverestCodeArea everestCodeArea) {
-        if (!Main.preferences.appearance.syntaxTheme.equals(DEFAULT_SYNTAX_THEME)) {
+        if (!syntaxTheme.equals(DEFAULT_SYNTAX_THEME)) {
             if (syntaxThemeFile.exists()) {
                 everestCodeArea.getStylesheets().add(syntaxThemeFile.toURI().toString());
             } else {
-                LoggingService.logInfo(Main.preferences.appearance.syntaxTheme + ": No such theme file found.", LocalDateTime.now());
-                Main.preferences.appearance.syntaxTheme = DEFAULT_SYNTAX_THEME;
+                LoggingService.logInfo(syntaxTheme + ": No such theme file found.", LocalDateTime.now());
+                syntaxTheme = DEFAULT_SYNTAX_THEME;
             }
         }
     }

@@ -18,6 +18,8 @@ package com.rohitawate.everest.controllers;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.controllers.auth.AuthTabController;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
@@ -230,7 +232,7 @@ public class DashboardController implements Initializable {
         try {
             String address = addressField.getText().trim();
 
-            if (address.equals("")) {
+            if (address.isEmpty()) {
                 showLayer(ResponseLayer.PROMPT);
                 NotificationsManager.push("Please enter an address.", 3000);
                 return;
@@ -309,8 +311,8 @@ public class DashboardController implements Initializable {
             NotificationsManager.push("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
             LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
-            errorTitle.setText("Oops... That's embarrassing!");
-            errorDetails.setText("Something went wrong. Try to make another request. Restart Everest if that doesn't work.");
+            errorTitle.setText("Oops... Something went wrong!");
+            errorDetails.setText("Try to make another request. Restart Everest if that doesn't work.");
             showLayer(ResponseLayer.ERROR);
         }
     }
@@ -329,6 +331,12 @@ public class DashboardController implements Initializable {
         } else if (throwable.getClass() == ProcessingException.class) {
             errorTitle.setText("Everest couldn't connect.");
             errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
+        } else if (throwable.getClass() == AuthWindowClosedException.class) {
+            errorTitle.setText("Authorization window closed.");
+            errorDetails.setText("Everest could not get an authorization grant.");
+        } else if (throwable.getClass() == NoAuthorizationGrantException.class) {
+            errorTitle.setText("You denied authorization to the service.");
+            errorDetails.setText("Everest could not get an authorization grant.");
         } else if (throwable.getClass() == RedirectException.class) {
             RedirectException redirect = (RedirectException) throwable;
             addressField.setText(redirect.getNewLocation());

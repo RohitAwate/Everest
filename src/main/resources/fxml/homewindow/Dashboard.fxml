@@ -256,14 +256,14 @@
                                                         <Image url="@../../assets/Explosion.png"/>
                                                     </image>
                                                 </ImageView>
-                                                <Label fx:id="errorTitle" text="Oops... That's embarrassing!"
+                                                <Label fx:id="errorTitle" text="Oops... Something went wrong!"
                                                        textFill="WHITE">
                                                     <font>
                                                         <Font name="System Bold" size="32.0"/>
                                                     </font>
                                                 </Label>
                                                 <Label fx:id="errorDetails"
-                                                       text="Something went wrong. Try to make another request.Restart Everest if that doesn't work."
+                                                       text="Try to make another request. Restart Everest if that doesn't work."
                                                        textAlignment="CENTER" textFill="#c3c3c3">
                                                     <font>
                                                         <Font size="22.0"/>

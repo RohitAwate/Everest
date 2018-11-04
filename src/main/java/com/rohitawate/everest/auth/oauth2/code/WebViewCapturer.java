@@ -26,8 +26,8 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
 
     private String grant;
 
-    WebViewCapturer(String finalGrantURL) {
-        this.authURL = finalGrantURL;
+    WebViewCapturer(String authURL) {
+        this.authURL = authURL;
         this.webView = new WebView();
         this.engine = webView.getEngine();
     }

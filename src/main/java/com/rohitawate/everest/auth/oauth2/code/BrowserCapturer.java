@@ -18,7 +18,6 @@ public class BrowserCapturer implements AuthorizationGrantCapturer {
 
     @Override
     public String getAuthorizationGrant() throws Exception {
-        CaptureServer captureServer = new CaptureServer(52849, authURL);
-        return captureServer.capture();
+        return CaptureServer.capture(authURL);
     }
 }

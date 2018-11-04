@@ -11,6 +11,7 @@ import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedExcep
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.state.AuthorizationCodeState;
 import javafx.animation.KeyFrame;
@@ -32,8 +33,6 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 public class AuthorizationCodeController implements Initializable {
     @FXML
@@ -49,7 +48,7 @@ public class AuthorizationCodeController implements Initializable {
     @FXML
     private JFXButton refreshTokenButton;
 
-    private AuthorizationCodeProvider provider;
+    private static AuthorizationCodeProvider provider;
     private AccessToken accessToken;
 
     public class CaptureMethod {
@@ -59,6 +58,7 @@ public class AuthorizationCodeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        provider = new AuthorizationCodeProvider(this);
         captureMethodBox.getItems().addAll(CaptureMethod.BROWSER, CaptureMethod.WEB_VIEW);
         captureMethodBox.setValue(CaptureMethod.BROWSER);
         refreshTokenButton.setOnAction(this::refreshToken);
@@ -95,24 +95,13 @@ public class AuthorizationCodeController implements Initializable {
             However, a WebView can only be opened on the JavaFX Application Thread hence it is
             NOT performed on some other thread.
          */
+        TokenFetcher tokenFetcher = new TokenFetcher();
         if (captureMethodBox.getValue().equals(CaptureMethod.BROWSER)) {
-            ExecutorService service = Executors.newSingleThreadExecutor(new ThreadFactory() {
-                /*
-                    Custom ThreadFactory which produces daemon threads so that
-                    the CaptureServer doesn't keep the JVM from exiting.
-                 */
-                @Override
-                public Thread newThread(Runnable runnable) {
-                    Thread newThread = new Thread(runnable);
-                    newThread.setDaemon(true);
-                    return newThread;
-                }
-            });
-            service.submit(new TokenFetcher());
+            ExecutorService service = EverestUtilities.newDaemonSingleThreadExecutor();
+            service.submit(tokenFetcher);
         } else {
-            TokenFetcher fetcher = new TokenFetcher();
             try {
-                accessToken = fetcher.call();
+                accessToken = tokenFetcher.call();
                 onRefreshSucceeded();
             } catch (Exception e) {
                 onRefreshFailed(e);
@@ -158,12 +147,7 @@ public class AuthorizationCodeController implements Initializable {
             }
 
             enabled.setSelected(state.enabled);
-
-            try {
-                provider = new AuthorizationCodeProvider(getState());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            provider.setState(getState());
         }
     }
 
@@ -184,13 +168,15 @@ public class AuthorizationCodeController implements Initializable {
                     minutes = (int) timeToExpiry / 60;
                     seconds = (int) timeToExpiry % 60;
 
-                    if (hours == 0 && minutes != 0) {
-                        expiryLabel.setText(String.format("Expires in %dm %ds", minutes, seconds));
-                    } else if (hours == 0 && minutes == 0) {
-                        expiryLabel.setText(String.format("Expires in %ds", seconds));
-                    } else {
-                        expiryLabel.setText(String.format("Expires in %dh %dm %ds", hours, minutes, seconds));
-                    }
+                    Platform.runLater(() -> {
+                        if (hours == 0 && minutes != 0) {
+                            expiryLabel.setText(String.format("Expires in %dm %ds", minutes, seconds));
+                        } else if (hours == 0 && minutes == 0) {
+                            expiryLabel.setText(String.format("Expires in %ds", seconds));
+                        } else {
+                            expiryLabel.setText(String.format("Expires in %dh %dm %ds", hours, minutes, seconds));
+                        }
+                    });
                 }
             }
         }
@@ -212,13 +198,13 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     public AuthProvider getAuthProvider() {
-        try {
-            provider.setState(getState());
-        } catch (MalformedURLException e) {
-            NotificationsManager.push("Invalid URL: " + e.getMessage(), 7000);
-        }
+        provider.setState(getState());
 
-        if (accessTokenField.getText().isEmpty() && enabled.isSelected()) {
+        /*
+            Integrated WebView requests need to be processed on the JavaFX Application Thread.
+            Hence, calling refreshToken() here itself if token is absent.
+         */
+        if (accessTokenField.getText().isEmpty() && enabled.isSelected() && captureMethodBox.getValue().equals(CaptureMethod.WEB_VIEW)) {
             refreshToken(null);
         }
 
@@ -256,6 +242,15 @@ public class AuthorizationCodeController implements Initializable {
         LoggingService.logWarning(errorMessage, (Exception) exception, LocalDateTime.now());
     }
 
+    public void setAccessToken(AccessToken accessToken) {
+        this.accessToken = accessToken;
+        Platform.runLater(() -> {
+            onRefreshSucceeded();
+            accessTokenField.requestLayout();
+            refreshTokenField.requestLayout();
+        });
+    }
+
     private class TokenFetcher extends Task<AccessToken> {
         @Override
         protected AccessToken call() throws Exception {
@@ -266,7 +261,7 @@ public class AuthorizationCodeController implements Initializable {
                     clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
                     headerPrefixField.getText(), accessToken, enabled.isSelected());
 
-            provider = new AuthorizationCodeProvider(state);
+            provider.setState(state);
             return provider.getAccessToken();
         }
 

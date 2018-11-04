@@ -28,6 +28,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class EverestUtilities {
     public static ObjectMapper jsonMapper;
@@ -105,5 +108,16 @@ public class EverestUtilities {
         }
 
         return params;
+    }
+
+    public static ExecutorService newDaemonSingleThreadExecutor() {
+        return Executors.newSingleThreadExecutor(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r);
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
     }
 }

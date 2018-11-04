@@ -19,52 +19,26 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class CaptureServer {
-    private final int port;
-    private String authURL;
-
     private static ServerSocket server;
-    private static Thread serverThread;
-    private static final Runnable serverLoop = () -> {
-        while (!Thread.interrupted()) {
-            try {
-                listen();
-            } catch (IOException e) {
-                LoggingService.logWarning("Server loop shut down.", e, LocalDateTime.now());
-                break;
-            }
-        }
-    };
+    private static final int PORT = 52849;
 
     private static final String WEB_ROOT = "/html";
     private static final String GRANTED = "/AuthorizationGranted.html";
     private static final String DENIED = "/AuthorizationDenied.html";
     private static final String NOT_FOUND = "/404.html";
 
-    public CaptureServer(int port, String authURL) {
-        this.port = port;
-        this.authURL = authURL;
-    }
-
-    public String capture() throws Exception {
-        String grant;
-
-        if (server != null) {
-            server.close();
-            serverThread.interrupt();
-            server = null;
+    public static String capture(String authURL) throws Exception {
+        if (server == null) {
+            try {
+                server = new ServerSocket(PORT);
+                LoggingService.logInfo("Authorization grant capturing server has started on port " + PORT + ".", LocalDateTime.now());
+            } catch (IOException e) {
+                LoggingService.logSevere("Could not start capture server on port " + PORT + ".", e, LocalDateTime.now());
+            }
         }
 
-        server = new ServerSocket(port);
-        LoggingService.logInfo("Authorization grant capturing server has started on port " + port + ".", LocalDateTime.now());
-
         openLinkInBrowser(authURL);
-        grant = listen();
-
-        serverThread = new Thread(serverLoop);
-        serverThread.setDaemon(true);
-        serverThread.start();
-
-        return grant;
+        return listen();
     }
 
     private static String listen() throws IOException {

@@ -3,9 +3,12 @@ package com.rohitawate.everest.auth.oauth2.code;
 import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.UnknownAccessTokenTypeException;
+import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.AuthorizationCodeState;
@@ -16,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -27,7 +31,10 @@ import java.util.Scanner;
 public class AuthorizationCodeProvider implements OAuth2Provider {
     private URL authURL;
     private URL accessTokenURL;
+
     private String authGrant;
+    private boolean authGrantUsed;
+
     private String clientID;
     private String clientSecret;
     private URL redirectURL;
@@ -38,22 +45,37 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
     private String captureMethod;
     private AccessToken accessToken;
+    private AuthorizationCodeController controller;
 
-    public AuthorizationCodeProvider(AuthorizationCodeState state) throws MalformedURLException {
-        setState(state);
+    public AuthorizationCodeProvider(AuthorizationCodeController controller) {
+        this.controller = controller;
+        this.authGrantUsed = true;
     }
 
-    public void setState(AuthorizationCodeState state) throws MalformedURLException {
-        this.authURL = new URL(state.authURL);
-        this.accessTokenURL = new URL(state.accessTokenURL);
+    public void setState(AuthorizationCodeState state) {
+        try {
+            this.authURL = new URL(state.authURL);
+            this.accessTokenURL = new URL(state.accessTokenURL);
+        } catch (MalformedURLException e) {
+            if (!state.authURL.isEmpty() || !state.accessTokenURL.isEmpty()) {
+                LoggingService.logWarning("Invalid URL: " + e.getMessage(), e, LocalDateTime.now());
+            }
+        }
+
         this.clientID = state.clientID;
         this.clientSecret = state.clientSecret;
         this.captureMethod = state.grantCaptureMethod;
 
-        if (state.redirectURL.isEmpty() || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
-            this.redirectURL = new URL(BrowserCapturer.LOCAL_SERVER_URL);
-        } else {
-            this.redirectURL = new URL(state.redirectURL);
+        try {
+            if (state.redirectURL.isEmpty() || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
+                this.redirectURL = new URL(BrowserCapturer.LOCAL_SERVER_URL);
+            } else {
+                this.redirectURL = new URL(state.redirectURL);
+            }
+        } catch (MalformedURLException e) {
+            if (!state.redirectURL.isEmpty()) {
+                LoggingService.logWarning("Invalid URL: " + e.getMessage(), e, LocalDateTime.now());
+            }
         }
 
         this.scope = state.scope;
@@ -70,48 +92,36 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     }
 
     private void fetchAuthorizationGrant() throws Exception {
-        StringBuilder grantURLBuilder = new StringBuilder(authURL.toString());
-        grantURLBuilder.append("?response_type=code");
-        grantURLBuilder.append("&client_id=");
-        grantURLBuilder.append(clientID);
-        grantURLBuilder.append("&redirect_uri=");
-        grantURLBuilder.append(redirectURL.toString());
+        if (accessToken.getRefreshToken().isEmpty() && authGrantUsed) {
+            StringBuilder grantURLBuilder = new StringBuilder(authURL.toString());
+            grantURLBuilder.append("?response_type=code");
+            grantURLBuilder.append("&client_id=");
+            grantURLBuilder.append(clientID);
+            grantURLBuilder.append("&redirect_uri=");
+            grantURLBuilder.append(redirectURL.toString());
 
-        if (scope == null || !scope.isEmpty()) {
-            grantURLBuilder.append("&scope=");
-            grantURLBuilder.append(scope);
-        }
+            if (scope == null || !scope.isEmpty()) {
+                grantURLBuilder.append("&scope=");
+                grantURLBuilder.append(scope);
+            }
 
-        AuthorizationGrantCapturer capturer;
-        switch (captureMethod) {
-            // TODO: Re-use capturers
-            case CaptureMethod.WEB_VIEW:
-                capturer = new WebViewCapturer(grantURLBuilder.toString());
-                break;
-            default:
-                capturer = new BrowserCapturer(grantURLBuilder.toString());
-        }
+            AuthorizationGrantCapturer capturer;
+            switch (captureMethod) {
+                // TODO: Re-use capturers
+                case CaptureMethod.WEB_VIEW:
+                    capturer = new WebViewCapturer(grantURLBuilder.toString());
+                    break;
+                default:
+                    capturer = new BrowserCapturer(grantURLBuilder.toString());
+            }
 
-        authGrant = capturer.getAuthorizationGrant();
-    }
-
-    private void fetchAccessToken() throws NoAuthorizationGrantException, AccessTokenDeniedException,
-            IOException, UnknownAccessTokenTypeException {
-        if (accessToken == null) {
-            fetchNewAccessToken();
-        } else {
-            refreshAccessToken();
+            authGrant = capturer.getAuthorizationGrant();
+            authGrantUsed = false;
         }
     }
 
     private void refreshAccessToken()
-            throws NoAuthorizationGrantException, AccessTokenDeniedException, UnknownAccessTokenTypeException, IOException {
-        if (accessToken.getRefreshToken() == null ||
-                (accessToken.getRefreshToken() != null && accessToken.getRefreshToken().isEmpty())) {
-            fetchNewAccessToken();
-            return;
-        }
-
+            throws AccessTokenDeniedException, UnknownAccessTokenTypeException, IOException {
         URL tokenURL = new URL(accessTokenURL.toString());
         StringBuilder tokenURLBuilder = new StringBuilder();
         tokenURLBuilder.append("client_id=");
@@ -160,25 +170,42 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
         accessToken = tokenRequest.accessToken;
+        authGrantUsed = true;
     }
 
     @Override
     public AccessToken getAccessToken() throws Exception {
+        fetchAuthorizationGrant();
+
         if (accessToken.getRefreshToken().isEmpty()) {
-            fetchAuthorizationGrant();
-            fetchAccessToken();
+            fetchNewAccessToken();
         } else {
             refreshAccessToken();
         }
+
+        // This will display the new AccessToken in the UI
+        controller.setAccessToken(accessToken);
 
         return accessToken;
     }
 
     @Override
     public String getAuthHeader() throws Exception {
-        if (accessToken == null) {
+        /*
+            Integrated WebView calls will already have been resolved in AuthorizationCodeController,
+            hence, they are skipped here.
+         */
+        if (accessToken.getAccessToken().isEmpty()) {
+            /*
+                Checking if refreshToken is available. If it is, we can still fetch a new AccessToken and complete
+                this request without re-authorizing. (which would require a WebView which cannot be invoked here)
+             */
+            if (captureMethod.equals(CaptureMethod.WEB_VIEW) && !accessToken.getRefreshToken().isEmpty()) {
+                throw new AuthWindowClosedException();
+            }
+
             fetchAuthorizationGrant();
-            fetchAccessToken();
+            getAccessToken();
         }
 
         return headerPrefix + " " + accessToken.getAccessToken();
@@ -264,7 +291,6 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                         throw new UnknownAccessTokenTypeException("Unknown access token type: " + contentType + "\nBody: " + tokenResponseBuilder.toString());
                 }
             } else {
-                System.out.println(connection.getResponseCode());
                 Scanner scanner = new Scanner(connection.getErrorStream());
                 while (scanner.hasNext())
                     tokenResponseBuilder.append(scanner.nextLine());

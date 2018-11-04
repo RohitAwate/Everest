@@ -130,8 +130,8 @@ public class DashboardState {
                 LoggingService.logInfo("Invalid URL: " + this.composer.target, LocalDateTime.now());
             }
         } else {
-            errorTitle = "Oops... That's embarrassing!";
-            errorDetails = "Something went wrong. Try to make another request.Restart Everest if that doesn't work.";
+            errorTitle = "Oops... Something went wrong!";
+            errorDetails = "Try to make another request. Restart Everest if that doesn't work.";
         }
 
         if (requestManager.getRequest().getClass().equals(DataRequest.class)) {

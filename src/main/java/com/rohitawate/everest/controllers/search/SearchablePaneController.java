@@ -16,9 +16,9 @@
 
 package com.rohitawate.everest.controllers.search;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.jfoenix.controls.JFXButton;
 import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.misc.EverestUtilities;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 public abstract class SearchablePaneController<T> implements Initializable {
     @FXML
@@ -126,7 +125,7 @@ public abstract class SearchablePaneController<T> implements Initializable {
         entryLoader.setOnFailed(e -> LoggingService.logWarning("Failed to load history.",
                 (Exception) entryLoader.getException(), LocalDateTime.now()));
 
-        MoreExecutors.directExecutor().execute(entryLoader);
+        EverestUtilities.newDaemonSingleThreadExecutor().execute(entryLoader);
     }
 
     private void addSearchItem(T state) {

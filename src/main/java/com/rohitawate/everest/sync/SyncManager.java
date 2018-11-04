@@ -1,16 +1,16 @@
 package com.rohitawate.everest.sync;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.HomeWindowController;
 import com.rohitawate.everest.exceptions.DuplicateException;
 import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.state.ComposerState;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Manages all the DataManagers of Everest and registers new ones.
@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
 public class SyncManager {
     private static HashMap<String, DataManager> managers;
     private static HomeWindowController homeWindowController;
-    private static Executor executor = MoreExecutors.directExecutor();
+    private static ExecutorService executor = EverestUtilities.newDaemonSingleThreadExecutor();
     private static HistorySaver historySaver;
     private static String fetchSource;
 

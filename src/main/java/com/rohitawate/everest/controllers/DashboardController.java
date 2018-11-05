@@ -685,7 +685,8 @@ public class DashboardController implements Initializable {
         composerState.httpMethod = httpMethodBox.getValue();
         composerState.headers = headerTabController.getFieldStates();
         composerState.params = getParamFieldStates();
-        authTabController.getState(composerState);
+        composerState.authMethod = authTabController.getAuthMethod();
+        composerState.authState = authTabController.getState();
 
         dashboardState.composer = composerState;
         dashboardState.visibleResponseLayer = visibleLayer;

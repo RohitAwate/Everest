@@ -1,7 +1,7 @@
 package com.rohitawate.everest.controllers.auth;
 
 import com.jfoenix.controls.JFXCheckBox;
-import com.rohitawate.everest.state.SimpleAuthState;
+import com.rohitawate.everest.state.auth.SimpleAuthState;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 

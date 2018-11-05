@@ -1,4 +1,4 @@
-package com.rohitawate.everest.state;
+package com.rohitawate.everest.state.auth;
 
 public class OAuth2State {
     public AuthorizationCodeState codeState;

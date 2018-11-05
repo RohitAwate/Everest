@@ -5,6 +5,7 @@ import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.auth.BasicAuthProvider;
 import com.rohitawate.everest.auth.DigestAuthProvider;
 import com.rohitawate.everest.controllers.DashboardController;
+import com.rohitawate.everest.state.AuthState;
 import com.rohitawate.everest.state.ComposerState;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -73,27 +74,31 @@ public class AuthTabController implements Initializable {
         }
     }
 
-    public void getState(ComposerState state) {
+    public String getAuthMethod() {
         switch (authTabPane.getSelectionModel().getSelectedIndex()) {
             case 0:
-                state.authMethod = AuthMethod.BASIC;
-                break;
+                return AuthMethod.BASIC;
             case 1:
-                state.authMethod = AuthMethod.DIGEST;
-                break;
+                return AuthMethod.DIGEST;
             case 2:
-                state.authMethod = AuthMethod.OAUTH2;
+                return AuthMethod.OAUTH2;
+            default:
+                return null;
         }
+    }
 
-        state.basicAuthState = basicController.getState();
-        state.digestAuthState = digestController.getState();
-        state.oAuth2State = oAuth2Controller.getState();
+    public AuthState getState() {
+        AuthState authState = new AuthState();
+        authState.basicAuthState = basicController.getState();
+        authState.digestAuthState = digestController.getState();
+        authState.oAuth2State = oAuth2Controller.getState();
+        return authState;
     }
 
     public void setState(ComposerState state) {
-        basicController.setState(state.basicAuthState);
-        digestController.setState(state.digestAuthState);
-        oAuth2Controller.setState(state.oAuth2State);
+        basicController.setState(state.authState.basicAuthState);
+        digestController.setState(state.authState.digestAuthState);
+        oAuth2Controller.setState(state.authState.oAuth2State);
 
         if (state.authMethod == null) {
             authTabPane.getSelectionModel().select(0);

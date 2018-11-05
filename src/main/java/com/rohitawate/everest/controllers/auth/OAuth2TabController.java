@@ -2,7 +2,7 @@ package com.rohitawate.everest.controllers.auth;
 
 import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
-import com.rohitawate.everest.state.OAuth2State;
+import com.rohitawate.everest.state.auth.OAuth2State;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;

@@ -11,7 +11,7 @@ import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeControlle
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
-import com.rohitawate.everest.state.AuthorizationCodeState;
+import com.rohitawate.everest.state.auth.AuthorizationCodeState;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;

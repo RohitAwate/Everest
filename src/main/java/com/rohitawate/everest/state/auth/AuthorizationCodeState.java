@@ -1,4 +1,4 @@
-package com.rohitawate.everest.state;
+package com.rohitawate.everest.state.auth;
 
 import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;

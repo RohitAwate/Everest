@@ -36,9 +36,7 @@ public class ComposerState {
     public String rawBody;
     public String rawBodyBoxValue;
 
-    public SimpleAuthState basicAuthState;
-    public SimpleAuthState digestAuthState;
-    public OAuth2State oAuth2State;
+    public AuthState authState;
 
     // Tuples of URL-encoded requests
     public List<FieldState> urlStringTuples;
@@ -52,6 +50,7 @@ public class ComposerState {
 
     public ComposerState() {
         this.httpMethod = HTTPConstants.GET;
+        this.authState = new AuthState();
     }
 
     @Override
@@ -65,9 +64,7 @@ public class ComposerState {
         if (!authMethod.equals(state.authMethod)) return false;
         if (!params.equals(state.params)) return false;
         if (!headers.equals(state.headers)) return false;
-        if (!basicAuthState.equals(state.basicAuthState)) return false;
-        if (!digestAuthState.equals(state.digestAuthState)) return false;
-        if (!oAuth2State.equals(state.oAuth2State)) return false;
+        if (!authState.equals(state.authState)) return false;
 
         if (state.httpMethod.equals(HTTPConstants.GET)
                 || state.httpMethod.equals(HTTPConstants.DELETE)) return true;

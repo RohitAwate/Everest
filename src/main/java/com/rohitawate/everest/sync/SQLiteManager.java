@@ -21,7 +21,11 @@ import com.rohitawate.everest.auth.AuthMethod;
 import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.models.requests.HTTPConstants;
-import com.rohitawate.everest.state.*;
+import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.state.FieldState;
+import com.rohitawate.everest.state.auth.AuthorizationCodeState;
+import com.rohitawate.everest.state.auth.OAuth2State;
+import com.rohitawate.everest.state.auth.SimpleAuthState;
 import javafx.util.Pair;
 
 import java.io.File;
@@ -121,12 +125,12 @@ class SQLiteManager implements DataManager {
         saveTuple(newState.headers, HEADER, requestID);
         saveTuple(newState.params, PARAM, requestID);
 
-        saveSimpleAuthCredentials(requestID, AuthMethod.BASIC, newState.basicAuthState.username,
-                newState.basicAuthState.password, newState.basicAuthState.enabled);
-        saveSimpleAuthCredentials(requestID, AuthMethod.DIGEST, newState.digestAuthState.username,
-                newState.digestAuthState.password, newState.digestAuthState.enabled);
+        saveSimpleAuthCredentials(requestID, AuthMethod.BASIC, newState.authState.basicAuthState.username,
+                newState.authState.basicAuthState.password, newState.authState.basicAuthState.enabled);
+        saveSimpleAuthCredentials(requestID, AuthMethod.DIGEST, newState.authState.digestAuthState.username,
+                newState.authState.digestAuthState.password, newState.authState.digestAuthState.enabled);
 
-        saveOAuth2Credentials(requestID, newState.oAuth2State);
+        saveOAuth2Credentials(requestID, newState.authState.oAuth2State);
 
         if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
             // Maps the request to its ContentType for faster retrieval
@@ -238,9 +242,10 @@ class SQLiteManager implements DataManager {
             state.headers = getTuples(requestID, HEADER);
             state.params = getTuples(requestID, PARAM);
             state.httpMethod = resultSet.getString("Type");
-            state.basicAuthState = getSimpleAuthCredentials(requestID, AuthMethod.BASIC);
-            state.digestAuthState = getSimpleAuthCredentials(requestID, AuthMethod.DIGEST);
-            state.oAuth2State = getOAuth2State(requestID);
+
+            state.authState.basicAuthState = getSimpleAuthCredentials(requestID, AuthMethod.BASIC);
+            state.authState.digestAuthState = getSimpleAuthCredentials(requestID, AuthMethod.DIGEST);
+            state.authState.oAuth2State = getOAuth2State(requestID);
 
             if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                 // Retrieves request body ContentType for querying corresponding table
@@ -408,9 +413,9 @@ class SQLiteManager implements DataManager {
                 lastRequest.authMethod = RS.getString(AUTH_METHOD);
             }
 
-            lastRequest.basicAuthState = getSimpleAuthCredentials(requestID, AuthMethod.BASIC);
-            lastRequest.digestAuthState = getSimpleAuthCredentials(requestID, AuthMethod.DIGEST);
-            lastRequest.oAuth2State = getOAuth2State(requestID);
+            lastRequest.authState.basicAuthState = getSimpleAuthCredentials(requestID, AuthMethod.BASIC);
+            lastRequest.authState.digestAuthState = getSimpleAuthCredentials(requestID, AuthMethod.DIGEST);
+            lastRequest.authState.oAuth2State = getOAuth2State(requestID);
 
             lastRequest.headers = getTuples(requestID, HEADER);
             lastRequest.params = getTuples(requestID, PARAM);

@@ -13,7 +13,7 @@ import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantEx
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.notifications.NotificationsManager;
-import com.rohitawate.everest.state.AuthorizationCodeState;
+import com.rohitawate.everest.state.auth.AuthorizationCodeState;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;

@@ -103,7 +103,6 @@ public class DashboardController implements Initializable {
     private IntegerProperty paramsCountProperty;
     private Visualizer visualizer;
     private ResponseHeadersViewer responseHeadersViewer;
-    private SyncManager syncManager;
 
     private GETRequest getRequest;
     private DataRequest dataRequest;
@@ -305,7 +304,7 @@ public class DashboardController implements Initializable {
             cancelButton.setOnAction(e -> requestManager.cancel());
             requestManager.addHandlers(this::whileRunning, this::onSucceeded, this::onFailed, this::onCancelled);
             requestManager.start();
-            syncManager.saveState(getState().composer);
+            SyncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
             NotificationsManager.push("Invalid address. Please verify and try again.", 3000);
@@ -631,10 +630,6 @@ public class DashboardController implements Initializable {
         } catch (IOException e) {
             LoggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
         }
-    }
-
-    public void setSyncManager(SyncManager syncManager) {
-        this.syncManager = syncManager;
     }
 
     public ComposerTab getVisibleComposerTab() {

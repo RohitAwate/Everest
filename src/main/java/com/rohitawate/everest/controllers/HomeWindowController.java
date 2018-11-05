@@ -61,12 +61,10 @@ public class HomeWindowController implements Initializable {
     private HistoryPaneController historyController;
     private DashboardController dashboard;
     private StringProperty addressProperty;
-    private SyncManager syncManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        syncManager = new SyncManager(this);
-
+        SyncManager.setHomeWindowController(this);
         // Using LinkedHashMap because it retains order
         tabStateMap = new LinkedHashMap<>();
 
@@ -75,13 +73,11 @@ public class HomeWindowController implements Initializable {
             Parent historyFXML = historyLoader.load();
             splitPane.getItems().add(0, historyFXML);
             historyController = historyLoader.getController();
-            historyController.setSyncManager(syncManager);
             historyController.addItemClickHandler(this::addTab);
 
             FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
             Parent dashboardFXML = dashboardLoader.load();
             dashboard = dashboardLoader.getController();
-            dashboard.setSyncManager(syncManager);
             dashboard.setTabPane(homeWindowTabPane);
             dashboard.setTabStateMap(tabStateMap);
             dashboardContainer.getChildren().add(dashboardFXML);
@@ -233,9 +229,9 @@ public class HomeWindowController implements Initializable {
         try {
             File stateFile = new File("Everest/config/state.json");
             EverestUtilities.jsonMapper.writeValue(stateFile, composerStates);
-            LoggingService.logInfo("Application state saved.", LocalDateTime.now());
+            LoggingService.logInfo("State saved.", LocalDateTime.now());
         } catch (IOException e) {
-            LoggingService.logSevere("Failed to save application state.", e, LocalDateTime.now());
+            LoggingService.logSevere("Failed to save state.", e, LocalDateTime.now());
         }
     }
 
@@ -244,7 +240,7 @@ public class HomeWindowController implements Initializable {
             File stateFile = new File("Everest/config/state.json");
 
             if (!stateFile.exists()) {
-                LoggingService.logInfo("Application state file not found. Loading default state.", LocalDateTime.now());
+                LoggingService.logInfo("State file not found. Loading default state.", LocalDateTime.now());
                 addTab();
                 return;
             }
@@ -262,7 +258,7 @@ public class HomeWindowController implements Initializable {
                 addTab();
             }
         } catch (IOException e) {
-            LoggingService.logWarning("Application state file is either corrupted or outdated. State recovery failed. Loading default state.", e, LocalDateTime.now());
+            LoggingService.logWarning("State file is either corrupted or outdated. State recovery failed. Loading default state.", e, LocalDateTime.now());
             addTab();
         } finally {
             LoggingService.logInfo("Application loaded.", LocalDateTime.now());

@@ -34,7 +34,7 @@ public class FormatterFactory {
     public static void addFormatter(String name, Formatter formatter)
             throws DuplicateException {
         if (formatters.containsKey(name)) {
-            throw new DuplicateException("Formatter already exists for the following type: " + name);
+            throw new DuplicateException("Formatter", name);
         }
 
         formatters.put(name, formatter);

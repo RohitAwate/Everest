@@ -40,7 +40,7 @@ public class HighlighterFactory {
     public static void addHighlighter(String name, Highlighter highlighter)
             throws DuplicateException {
         if (highlighters.containsKey(name)) {
-            throw new DuplicateException("Highlighter already exists for the following type: " + name);
+            throw new DuplicateException("Highlighter", name);
         }
 
         highlighters.put(name, highlighter);

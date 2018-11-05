@@ -17,7 +17,7 @@ package com.rohitawate.everest;
 
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.preferences.Preferences;
-import com.rohitawate.everest.preferences.PreferencesLoader;
+import com.rohitawate.everest.sync.SyncManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -33,8 +33,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        PreferencesLoader prefsLoader = new PreferencesLoader();
-        preferences = prefsLoader.loadPrefs();
+        new SyncManager();
+        preferences = SyncManager.loadPrefs();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
         Parent homeWindow = loader.load();
@@ -48,7 +48,10 @@ public class Main extends Application {
         dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/Logo.png").toExternalForm()));
         dashboardStage.setScene(new Scene(homeWindow));
         dashboardStage.setTitle(APP_NAME);
-        dashboardStage.setOnHiding(e -> prefsLoader.savePrefs());
+        dashboardStage.setOnHiding(e -> {
+            SyncManager.savePrefs(Main.preferences);
+            SyncManager.saveSyncPrefs();
+        });
         dashboardStage.show();
     }
 

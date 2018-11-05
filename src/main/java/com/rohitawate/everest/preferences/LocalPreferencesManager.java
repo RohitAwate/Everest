@@ -16,7 +16,6 @@
 
 package com.rohitawate.everest.preferences;
 
-import com.rohitawate.everest.Main;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 
@@ -25,37 +24,32 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 /**
- * Loads up custom values into Preferences from Everest/config/preferences.json.
+ * Loads up custom values into Preferences from a local JSON file.
  */
-public class PreferencesLoader {
+public class LocalPreferencesManager implements PreferencesManager {
     private static final File PREFS_FILE = new File("Everest/config/preferences.json");
 
-    public Preferences loadPrefs() {
-        new EverestUtilities();
-        Preferences preferences = null;
-
+    @Override
+    public Preferences loadPrefs() throws IOException {
         if (!PREFS_FILE.exists()) {
             LoggingService.logInfo("Preferences file not found. Everest will use the default values.", LocalDateTime.now());
             return new Preferences();
         }
 
-        try {
-            preferences = EverestUtilities.jsonMapper.readValue(PREFS_FILE, Preferences.class);
-            LoggingService.logInfo("Preferences loaded.", LocalDateTime.now());
-        } catch (IOException e) {
-            LoggingService.logInfo("Could not parse preferences file. Everest will use the default values.", LocalDateTime.now());
-            preferences = new Preferences();
-        }
-
-        return preferences;
+        return EverestUtilities.jsonMapper.readValue(PREFS_FILE, Preferences.class);
     }
 
-    public void savePrefs() {
+    public void savePrefs(Preferences prefs) {
         try {
-            EverestUtilities.jsonMapper.writeValue(PREFS_FILE, Main.preferences);
-            LoggingService.logInfo("Application settings saved.", LocalDateTime.now());
+            EverestUtilities.jsonMapper.writeValue(PREFS_FILE, prefs);
+            LoggingService.logInfo("Application preferences saved to local file.", LocalDateTime.now());
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "Local";
     }
 }

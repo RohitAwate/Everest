@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.sync;
+package com.rohitawate.everest.project;
 
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthMethod;
@@ -35,7 +35,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-class SQLiteManager implements DataManager {
+public class SQLiteManager implements ProjectManager {
     private Connection conn;
     private PreparedStatement statement;
 

@@ -18,20 +18,18 @@ package com.rohitawate.everest.preferences;
 
 /**
  * Holds default preferences values which may
- * get overwritten by PreferencesLoader.
+ * get overwritten by PreferencesManager.
  */
 public class Preferences {
     public RequestPrefs request;
     public AppearancePrefs appearance;
     public EditorPrefs editor;
-    public SyncPrefs sync;
     public AuthPrefs auth;
 
-    Preferences() {
+    public Preferences() {
         request = new RequestPrefs();
         appearance = new AppearancePrefs();
         editor = new EditorPrefs();
-        sync = new SyncPrefs();
         auth = new AuthPrefs();
     }
 }

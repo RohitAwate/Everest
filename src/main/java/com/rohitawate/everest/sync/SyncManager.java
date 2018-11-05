@@ -83,14 +83,16 @@ public class SyncManager {
      * @return a list of all the requests
      */
     public static List<ComposerState> getHistory() {
+        String projectSource = syncPrefs.projectSource;
+
         List<ComposerState> history = null;
         try {
-            if (projectManagers.get(syncPrefs.projectSource) == null) {
-                LoggingService.logSevere("No such source found: " + syncPrefs.projectSource, null, LocalDateTime.now());
-                syncPrefs.projectSource = DEFAULT_PROJECT_SOURCE;
+            if (projectManagers.get(projectSource) == null) {
+                LoggingService.logSevere("No such source found: " + projectSource, null, LocalDateTime.now());
+                projectSource = DEFAULT_PROJECT_SOURCE;
             }
 
-            history = projectManagers.get(syncPrefs.projectSource).getHistory();
+            history = projectManagers.get(projectSource).getHistory();
         } catch (Exception e) {
             LoggingService.logSevere("History could not be fetched.", e, LocalDateTime.now());
         }
@@ -104,15 +106,17 @@ public class SyncManager {
      * @return the user's preferences
      */
     public static Preferences loadPrefs() {
-        if (prefsManagers.get(syncPrefs.prefsSource) == null) {
-            LoggingService.logSevere("No such source found: " + syncPrefs, null, LocalDateTime.now());
-            syncPrefs.prefsSource = DEFAULT_PREFS_SOURCE;
+        String prefsSource = syncPrefs.prefsSource;
+
+        if (prefsManagers.get(prefsSource) == null) {
+            LoggingService.logSevere("No such source found: " + prefsSource, null, LocalDateTime.now());
+            prefsSource = DEFAULT_PREFS_SOURCE;
         }
 
         Preferences prefs;
 
         try {
-            prefs = prefsManagers.get(syncPrefs.prefsSource).loadPrefs();
+            prefs = prefsManagers.get(prefsSource).loadPrefs();
             LoggingService.logInfo("Preferences loaded.", LocalDateTime.now());
         } catch (Exception e) {
             LoggingService.logInfo("Could not load preferences. Everest will use the default values.", LocalDateTime.now());

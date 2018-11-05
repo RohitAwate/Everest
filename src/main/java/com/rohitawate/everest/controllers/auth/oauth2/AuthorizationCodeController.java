@@ -2,6 +2,7 @@ package com.rohitawate.everest.controllers.auth.oauth2;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthProvider;
@@ -26,6 +27,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import java.net.MalformedURLException;
@@ -35,6 +37,8 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
 public class AuthorizationCodeController implements Initializable {
+    @FXML
+    private VBox authCodeBox, accessTokenBox;
     @FXML
     private JFXCheckBox enabled;
     @FXML
@@ -47,6 +51,8 @@ public class AuthorizationCodeController implements Initializable {
     private Label expiryLabel;
     @FXML
     private JFXButton refreshTokenButton;
+
+    private JFXRippler rippler;
 
     private static AuthorizationCodeProvider provider;
     private AccessToken accessToken;
@@ -63,6 +69,10 @@ public class AuthorizationCodeController implements Initializable {
         captureMethodBox.setValue(CaptureMethod.BROWSER);
         refreshTokenButton.setOnAction(this::refreshToken);
         expiryLabel.setVisible(false);
+
+        rippler = new JFXRippler(accessTokenBox);
+        rippler.setPrefSize(authCodeBox.getPrefWidth(), authCodeBox.getPrefHeight());
+        authCodeBox.getChildren().add(rippler);
 
         Platform.runLater(() -> {
             if (Main.preferences.auth.enableAccessTokenExpiryTimer) {
@@ -222,6 +232,8 @@ public class AuthorizationCodeController implements Initializable {
         }
 
         setExpiryLabel();
+
+        rippler.createManualRipple().run();
     }
 
     private void onRefreshFailed(Throwable exception) {

@@ -463,3 +463,8 @@
     -fx-fill: azure;
     -fx-font-weight: bold;
 }
+
+/* Auth Code Access Token Rippler */
+.jfx-rippler {
+    -jfx-rippler-fill: orangered;
+}

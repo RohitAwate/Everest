@@ -69,6 +69,7 @@ public class EverestUtilities {
             }
         }
 
+        stream.close();
         return builder.toString();
     }
 

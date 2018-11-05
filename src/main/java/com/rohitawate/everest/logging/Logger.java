@@ -27,8 +27,18 @@ import java.time.format.DateTimeFormatter;
 
 class Logger {
     private Level writerLevel;
-    private String logEntryTemplate;
-    private String logFilePath = "Everest/logs/" + LocalDate.now() + ".html";
+    private static String logEntryTemplate;
+    private static String logFilePath = "Everest/logs/" + LocalDate.now() + ".html";
+    private static BufferedWriter writer;
+
+    static {
+        try {
+            writer = new BufferedWriter(new FileWriter(logFilePath, true));
+        } catch (IOException e) {
+            System.err.println("Could not open today's log file.");
+            e.printStackTrace();
+        }
+    }
 
     Logger(Level writerLevel) {
         this.writerLevel = writerLevel;
@@ -37,6 +47,7 @@ class Logger {
         try {
             logEntryTemplate = EverestUtilities.readFile(getClass().getResourceAsStream("/html/LogEntry.html"));
         } catch (IOException e) {
+            System.err.println("Could not read log template.");
             e.printStackTrace();
         }
     }
@@ -44,20 +55,21 @@ class Logger {
     /**
      * Appends the log to the respective day's log file.
      */
-    synchronized void log() {
-        if (LoggingService.log.level.equals(Level.INFO)) {
-            System.out.println(ConsoleColors.BLUE + LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message + ConsoleColors.RESET);
-        } else if (LoggingService.log.level.equals(Level.SEVERE)) {
-            System.out.println(ConsoleColors.RED + LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message + ConsoleColors.RESET);
-        } else if (LoggingService.log.level.equals(Level.WARNING)) {
-            System.out.println(ConsoleColors.YELLOW + LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message + ConsoleColors.RESET);
+    synchronized void log(Log log) {
+        if (log.level.equals(Level.INFO)) {
+            System.out.println(ConsoleColors.BLUE + log.level + " " + log.time + ": " + log.message + ConsoleColors.RESET);
+        } else if (log.level.equals(Level.SEVERE)) {
+            System.out.println(ConsoleColors.RED + log.level + " " + log.time + ": " + log.message + ConsoleColors.RESET);
+        } else if (log.level.equals(Level.WARNING)) {
+            System.out.println(ConsoleColors.YELLOW + log.level + " " + log.time + ": " + log.message + ConsoleColors.RESET);
         }
 
-        if (LoggingService.log.level.greaterThanEqualTo(this.writerLevel)) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath, true))) {
+        if (log.level.greaterThanEqualTo(this.writerLevel)) {
+            try {
                 writer.flush();
-                writer.append(getLogEntry(LoggingService.log));
+                writer.append(getLogEntry(log));
             } catch (IOException e) {
+                System.err.println("Could not write log to file.");
                 e.printStackTrace();
             }
         }
@@ -73,7 +85,7 @@ class Logger {
      * Green = Info
      */
     private String getLogEntry(Log log) {
-        String logEntry = this.logEntryTemplate;
+        String logEntry = logEntryTemplate;
         logEntry = logEntry.replace("%% LogLevel %%", log.level.toString());
         logEntry = logEntry.replace("%% Time %%", log.time);
         logEntry = logEntry.replace("%% Message %%", log.message);
@@ -122,6 +134,11 @@ class Logger {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        writer.close();
     }
 
     public static class ConsoleColors {

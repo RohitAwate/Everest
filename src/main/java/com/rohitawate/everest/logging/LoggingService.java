@@ -26,7 +26,7 @@ public class LoggingService {
     private static ExecutorService executor = EverestUtilities.newDaemonSingleThreadExecutor();
     private static final Logger logger = new Logger(Level.INFO);
     private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-    static final Log log = new Log();
+    private static final Log log = new Log();
 
     public static void logSevere(String message, Exception exception, LocalDateTime time) {
         log(message, exception, time, Level.SEVERE);
@@ -48,5 +48,5 @@ public class LoggingService {
         executor.execute(logThread);
     }
 
-    private static Runnable logThread = logger::log;
+    private static Runnable logThread = () -> logger.log(log);
 }

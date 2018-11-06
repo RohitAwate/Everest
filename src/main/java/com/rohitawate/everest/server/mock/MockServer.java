@@ -105,8 +105,8 @@ public class MockServer implements Runnable {
         return loggingEnabled;
     }
 
-    private static Endpoint notFound = new Endpoint(null, 404,
-            "{ \"error\": \"Requested route does not exist.\"}", MediaType.APPLICATION_JSON);
+    private static Endpoint notFound = new Endpoint(null, null, 404,
+            "{ \"error\": \"Requested route does not support this method or does not exist.\"}", MediaType.APPLICATION_JSON);
 
     static void handleNotFound(Socket socket, HttpRequestParser requestParser) throws IOException {
         WebService.sendResponse(socket, notFound);

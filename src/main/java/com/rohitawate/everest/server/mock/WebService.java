@@ -45,7 +45,7 @@ public class WebService {
         String path = prefixIdentifier ? stripIdentifier(requestParser.getPath()) : requestParser.getPath();
 
         for (Endpoint endpoint : endpoints) {
-            if (endpoint.path.equals(path)) {
+            if (endpoint.path.equals(path) && requestParser.getMethod().equals(endpoint.method)) {
                 sendResponse(socket, endpoint);
                 ServerLogger.logInfo(endpoint.responseCode, requestParser);
                 return;

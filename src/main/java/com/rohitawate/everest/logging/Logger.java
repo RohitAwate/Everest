@@ -33,6 +33,7 @@ class Logger {
 
     static {
         try {
+            createLogsFile();
             writer = new BufferedWriter(new FileWriter(logFilePath, true));
         } catch (IOException e) {
             System.err.println("Could not open today's log file.");
@@ -43,7 +44,6 @@ class Logger {
     Logger(Level writerLevel) {
         this.writerLevel = writerLevel;
 
-        createLogsFile();
         try {
             logEntryTemplate = EverestUtilities.readFile(getClass().getResourceAsStream("/html/LogEntry.html"));
         } catch (IOException e) {
@@ -111,7 +111,7 @@ class Logger {
         return logEntry;
     }
 
-    private void createLogsFile() {
+    private static void createLogsFile() {
         File logsDirectory = new File("Everest/logs/");
         if (!logsDirectory.exists())
             logsDirectory.mkdirs();
@@ -124,7 +124,7 @@ class Logger {
 
             logsFile.createNewFile();
             BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath));
-            String logsFileTemplate = EverestUtilities.readFile(getClass().getResourceAsStream("/html/LogsFile.html"));
+            String logsFileTemplate = EverestUtilities.readFile(Logger.class.getResourceAsStream("/html/LogsFile.html"));
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             logsFileTemplate = logsFileTemplate.replace("%% Date %%", dateTimeFormatter.format(LocalDate.now()));
             logsFileTemplate = logsFileTemplate.replace("%% Date %%", dateTimeFormatter.format(LocalDate.now()));

@@ -61,8 +61,14 @@ public class SyncManager {
      * Asynchronously saves the new state by invoking all the registered DataManagers.
      */
     public static void saveState(ComposerState newState) {
+        String projectSource = syncPrefs.projectSource;
+
+        if (projectManagers.get(projectSource) == null) {
+            projectSource = DEFAULT_PROJECT_SOURCE;
+        }
+
         // Compares new state with the last added state from the primary fetch source
-        if (newState.equals(projectManagers.get(syncPrefs.projectSource).getLastAdded()))
+        if (newState.equals(projectManagers.get(projectSource).getLastAdded()))
             return;
 
         historySaver.setResource(newState);

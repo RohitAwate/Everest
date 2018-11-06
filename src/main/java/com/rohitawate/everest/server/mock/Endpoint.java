@@ -6,13 +6,13 @@ public class Endpoint {
     String resource;
     int responseCode;
 
-    String serializationFormat;
+    String contentType;
 
-    public Endpoint(String method, String path, int responseCode, String resource, String serializationFormat) {
+    public Endpoint(String method, String path, int responseCode, String resource, String contentType) {
         this.method = method;
         this.path = path;
         this.resource = resource;
         this.responseCode = responseCode;
-        this.serializationFormat = serializationFormat;
+        this.contentType = contentType;
     }
 }

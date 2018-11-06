@@ -85,12 +85,6 @@ public class MockServer implements Runnable {
                 LoggingService.logSevere("Mock server could not listen for connections.", e, LocalDateTime.now());
             }
         }
-
-        try {
-            server.close();
-        } catch (IOException e) {
-            LoggingService.logSevere("Could not shut down mock server.", e, LocalDateTime.now());
-        }
     }
 
     public boolean isRunning() {

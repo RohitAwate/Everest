@@ -17,6 +17,7 @@
 package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.rohitawate.everest.controllers.mockserver.MockServerDashboardController;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
@@ -61,6 +62,9 @@ public class HomeWindowController implements Initializable {
     private HistoryPaneController historyController;
     private DashboardController dashboard;
     private StringProperty addressProperty;
+
+    private Stage mockServerDashboard;
+    private MockServerDashboardController mockServerDashboardController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -313,6 +317,23 @@ public class HomeWindowController implements Initializable {
                     }
                 } else if (KeyMap.refreshTheme.match(e)) {
                     ThemeManager.refreshTheme();
+                } else if (KeyMap.showMockServerDashboard.match(e)) {
+                    if (mockServerDashboard == null) {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/mockserver/MockServerDashboard.fxml"));
+                            Parent mockDashboardFXML = loader.load();
+                            mockServerDashboardController = loader.getController();
+                            mockServerDashboard = new Stage();
+                            mockServerDashboard.setScene(new Scene(mockDashboardFXML));
+                            mockServerDashboard.setOnCloseRequest(event -> mockServerDashboard.hide());
+
+                            mockServerDashboard.show();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    mockServerDashboard.show();
                 }
             });
         }

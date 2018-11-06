@@ -59,7 +59,7 @@ public class WebService {
         PrintWriter headersWriter = new PrintWriter(socket.getOutputStream());
         DataOutputStream bodyStream = new DataOutputStream(socket.getOutputStream());
 
-        headersWriter.println(generateHeader(endpoint.responseCode, endpoint.serializationFormat, endpoint.resource.length()));
+        headersWriter.println(generateHeader(endpoint.responseCode, endpoint.contentType, endpoint.resource.length()));
         headersWriter.flush();
 
         bodyStream.write(endpoint.resource.getBytes(), 0, endpoint.resource.length());

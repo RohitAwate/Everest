@@ -449,6 +449,31 @@
     -fx-background-color: #282828;
 }
 
+/* MockServerDashboard */
+#serverDetails {
+    -fx-background-color: #282828;
+}
+
+#startButton {
+    -fx-padding: 0 10;
+}
+
+#endpointsBox {
+    -fx-background-color: #404040;
+}
+
+#endpointDetails {
+    -fx-background-color: #303030;
+}
+
+#pathField, #portField, #serverAddressBox {
+    -fx-background-color: #505050;
+}
+
+.field-label {
+    -fx-text-fill: #ababab;
+}
+
 /* Snackbar */
 .jfx-snackbar-content {
     -fx-background-color: black;

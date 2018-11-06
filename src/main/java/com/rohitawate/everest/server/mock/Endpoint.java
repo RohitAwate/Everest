@@ -1,7 +1,5 @@
 package com.rohitawate.everest.server.mock;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 public class Endpoint {
     String path;
     String resource;
@@ -9,7 +7,7 @@ public class Endpoint {
 
     String serializationFormat;
 
-    public Endpoint(String path, int responseCode, String resource, String serializationFormat) throws JsonProcessingException {
+    public Endpoint(String path, int responseCode, String resource, String serializationFormat) {
         this.path = path;
         this.resource = resource;
         this.responseCode = responseCode;

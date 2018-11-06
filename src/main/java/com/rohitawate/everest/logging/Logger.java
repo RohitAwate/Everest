@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-class Logger {
+public class Logger {
     private Level writerLevel;
     private static String logEntryTemplate;
     private static String logFilePath = "Everest/logs/" + LocalDate.now() + ".html";

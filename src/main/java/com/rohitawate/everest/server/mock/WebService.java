@@ -14,8 +14,11 @@ public class WebService {
     private String identifier;
     private ArrayList<Endpoint> endpoints;
 
-    public WebService(String identifier) {
+    private boolean prefixIdentifier;
+
+    public WebService(String identifier, boolean prefixIdentifier) {
         setIdentifier(identifier);
+        this.prefixIdentifier = prefixIdentifier;
         this.endpoints = new ArrayList<>();
     }
 
@@ -31,27 +34,40 @@ public class WebService {
         return this.identifier;
     }
 
+    private String stripIdentifier(String path) {
+        if (path.startsWith("/" + identifier))
+            return path.substring(identifier.length() + 1);
+
+        return path;
+    }
+
     void handle(Socket socket, HttpRequestParser requestParser) throws IOException {
-        PrintWriter headersWriter = new PrintWriter(socket.getOutputStream());
-        DataOutputStream bodyStream = new DataOutputStream(socket.getOutputStream());
+        String path = prefixIdentifier ? stripIdentifier(requestParser.getPath()) : requestParser.getPath();
 
         for (Endpoint endpoint : endpoints) {
-            if (endpoint.path.equals(requestParser.getPath())) {
-                headersWriter.println(generateHeader(endpoint.responseCode, endpoint.serializationFormat, endpoint.resource.length()));
-                headersWriter.flush();
-
-                bodyStream.write(endpoint.resource.getBytes(), 0, endpoint.resource.length());
-                bodyStream.flush();
-
-                headersWriter.close();
-                bodyStream.close();
-                socket.close();
-
+            if (endpoint.path.equals(path)) {
+                sendResponse(socket, endpoint);
+                ServerLogger.logInfo(endpoint.responseCode, requestParser);
                 return;
             }
         }
 
-        MockServer.routeNotFound(socket, requestParser);
+        MockServer.handleNotFound(socket, requestParser);
+    }
+
+    static void sendResponse(Socket socket, Endpoint endpoint) throws IOException {
+        PrintWriter headersWriter = new PrintWriter(socket.getOutputStream());
+        DataOutputStream bodyStream = new DataOutputStream(socket.getOutputStream());
+
+        headersWriter.println(generateHeader(endpoint.responseCode, endpoint.serializationFormat, endpoint.resource.length()));
+        headersWriter.flush();
+
+        bodyStream.write(endpoint.resource.getBytes(), 0, endpoint.resource.length());
+        bodyStream.flush();
+
+        headersWriter.close();
+        bodyStream.close();
+        socket.close();
     }
 
     private static String generateHeader(int statusCode, String contentType, int contentLength) {
@@ -71,5 +87,13 @@ public class WebService {
         header.append("/MockServer\n");
 
         return header.toString();
+    }
+
+    public void setPrefixIdentifier(boolean prefixIdentifier) {
+        this.prefixIdentifier = prefixIdentifier;
+    }
+
+    public boolean isPrefixIdentifier() {
+        return prefixIdentifier;
     }
 }

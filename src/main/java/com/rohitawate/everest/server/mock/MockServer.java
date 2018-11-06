@@ -3,6 +3,7 @@ package com.rohitawate.everest.server.mock;
 import com.rohitawate.everest.http.HttpRequestParser;
 import com.rohitawate.everest.logging.LoggingService;
 
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,6 +14,7 @@ public class MockServer implements Runnable {
     private static final int PORT = 9090;
     private ServerSocket server;
     private boolean isRunning;
+    static boolean loggingEnabled;
 
     private ArrayList<WebService> webServices;
 
@@ -54,20 +56,16 @@ public class MockServer implements Runnable {
             String identifier = getIdentifierFromPath(requestParser.getPath());
 
             for (WebService service : webServices) {
-                if (service.getIdentifier().equals(identifier)) {
+                if (service.getIdentifier().equals(identifier) || !service.isPrefixIdentifier()) {
                     service.handle(socket, requestParser);
                     return;
                 }
             }
 
-            routeNotFound(socket, requestParser);
+            handleNotFound(socket, requestParser);
         } catch (IOException e) {
             LoggingService.logSevere("Could not parse request: Socket error.", e, LocalDateTime.now());
         }
-    }
-
-    static void routeNotFound(Socket socket, HttpRequestParser requestParser) {
-        System.err.println("404 Not Found: " + requestParser.getPath());
     }
 
     public void addService(WebService webService) {
@@ -97,5 +95,21 @@ public class MockServer implements Runnable {
 
     public boolean isRunning() {
         return isRunning;
+    }
+
+    public void setLoggingEnabled(boolean enabled) {
+        loggingEnabled = enabled;
+    }
+
+    public static boolean isLoggingEnabled() {
+        return loggingEnabled;
+    }
+
+    private static Endpoint notFound = new Endpoint(null, 404,
+            "{ \"error\": \"Requested route does not exist.\"}", MediaType.APPLICATION_JSON);
+
+    static void handleNotFound(Socket socket, HttpRequestParser requestParser) throws IOException {
+        WebService.sendResponse(socket, notFound);
+        ServerLogger.logWarning(404, requestParser);
     }
 }

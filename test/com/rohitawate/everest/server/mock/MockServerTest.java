@@ -11,7 +11,7 @@ class MockServerTest {
     @Test
     void start() throws IOException {
         MockServer server = new MockServer();
-        WebService service = new WebService("everest");
+        WebService service = new WebService("everest", false);
         Preferences preferences = new Preferences();
         Endpoint endpoint = new Endpoint("/everest", 200,
                 EverestUtilities.jsonMapper.writeValueAsString(preferences), MediaType.APPLICATION_JSON);

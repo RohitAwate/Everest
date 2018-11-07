@@ -1,8 +1,6 @@
 package com.rohitawate.everest.server.mock;
 
-import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
-import com.rohitawate.everest.preferences.Preferences;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -11,18 +9,18 @@ import java.io.IOException;
 class MockServerTest {
     @Test
     void start() throws IOException {
-        MockServer server = new MockServer();
-        server.setLoggingEnabled(true);
+        MockService service = new MockService("Summit", "/api", 9090);
+        service.loggingEnabled = true;
 
-        WebService service = new WebService("everest", false);
-        Preferences preferences = new Preferences();
-        Endpoint endpoint = new Endpoint(HTTPConstants.GET, "/everest", 200,
-                EverestUtilities.jsonMapper.writeValueAsString(preferences), MediaType.APPLICATION_JSON);
+        Endpoint endpoint = new Endpoint(HTTPConstants.GET, "/summit", 200,
+                "{ \"name\": \"Rohit\", \"age\": 20 }", MediaType.APPLICATION_JSON);
+        Endpoint endpoint2 = new Endpoint(HTTPConstants.GET, "/welcome", 200,
+                "{ \"name\": \"Nolan\", \"age\": 48 }", MediaType.APPLICATION_JSON);
 
         service.addEndpoint(endpoint);
-        server.addService(service);
-        server.start();
+        service.addEndpoint(endpoint2);
+        service.start();
 
-        while (server.isRunning()) ;
+        while (service.isRunning()) ;
     }
 }

@@ -474,6 +474,42 @@
     -fx-text-fill: #ababab;
 }
 
+.transparent-list-view {
+    -fx-background-color: transparent;
+}
+
+.jfx-list-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-radius: 0;
+}
+
+.jfx-list-cell {
+    -fx-background-color: transparent;
+    -fx-spacing: 0px;
+    -fx-padding: 10px 0px 10px 20px;
+    -fx-font-weight: 200;
+    -fx-font-size: 17px;
+}
+
+.jfx-list-cell Label {
+    -fx-text-fill: #ababab;
+}
+
+.jfx-list-cell:selected {
+    -fx-background-color: #ff450060;
+}
+
+.jfx-list-cell:selected Label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.service-card {
+    -fx-padding: 5px;
+}
+
 /* Snackbar */
 .jfx-snackbar-content {
     -fx-background-color: black;

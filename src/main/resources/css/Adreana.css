@@ -123,6 +123,7 @@
 #headersBox,
 .scroll-pane,
 .scroll-pane .viewport,
+.combo-box .scroll-bar:vertical,
 .virtualized-scroll-pane .scroll-bar:vertical,
 .virtualized-scroll-pane .scroll-bar:horizontal,
 .scroll-pane .scroll-bar:vertical,
@@ -218,6 +219,7 @@
     -fx-background-color: #3d3d3d;
 }
 
+.combo-box .scroll-bar:vertical .thumb,
 .virtualized-scroll-pane .scroll-bar .thumb,
 .scroll-pane .scroll-bar .thumb {
     -fx-background-color: #808080;
@@ -468,6 +470,10 @@
 
 #pathField, #portField, #serverAddressBox {
     -fx-background-color: #505050;
+}
+
+#codeBox {
+    -fx-background-color: #282828;
 }
 
 .field-label {

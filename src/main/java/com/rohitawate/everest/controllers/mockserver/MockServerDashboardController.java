@@ -3,18 +3,21 @@ package com.rohitawate.everest.controllers.mockserver;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXSnackbar;
-import com.jfoenix.controls.JFXToggleButton;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
+import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.models.requests.HTTPConstants;
+import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.server.mock.Endpoint;
 import com.rohitawate.everest.server.mock.MockService;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -27,24 +30,23 @@ public class MockServerDashboardController implements Initializable {
     @FXML
     private VBox endpointDetailsBox;
     @FXML
-    private JFXToggleButton startButton;
-    @FXML
     private JFXButton optionsButton;
     @FXML
-    private ComboBox<String> methodBox;
+    private ComboBox<String> methodBox, contentTypeBox, responseCodeBox;
     @FXML
     private JFXListView<ServiceCard> servicesList;
     @FXML
     private JFXListView<EndpointCard> endpointsList;
     @FXML
     private TextField pathField;
+    @FXML
+    private ScrollPane codeAreaScrollPane;
 
     private static JFXSnackbar snackbar;
     private EverestCodeArea codeArea;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         methodBox.getItems().addAll(
                 HTTPConstants.GET,
                 HTTPConstants.POST,
@@ -54,10 +56,23 @@ public class MockServerDashboardController implements Initializable {
         );
         methodBox.setValue(HTTPConstants.GET);
 
+        contentTypeBox.getItems().addAll(
+                HTTPConstants.JSON,
+                HTTPConstants.XML,
+                HTTPConstants.HTML,
+                HTTPConstants.PLAIN_TEXT
+        );
+
+        contentTypeBox.valueProperty().addListener(change -> codeArea.setHighlighter(HighlighterFactory.getHighlighter(contentTypeBox.getValue())));
+
+        EverestResponse.statusCodeReasonPhrases.forEach((key, value) -> responseCodeBox.getItems().add(key + " (" + value + ")"));
+
         snackbar = new JFXSnackbar(mockDashboardSP);
 
         codeArea = new EverestCodeArea();
-        endpointDetailsBox.getChildren().add(new VBox(codeArea));
+        codeAreaScrollPane.setContent(new VirtualizedScrollPane<>(codeArea));
+
+        contentTypeBox.getSelectionModel().select(0);
 
         MockService service = null;
         try {

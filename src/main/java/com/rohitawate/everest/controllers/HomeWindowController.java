@@ -17,6 +17,7 @@
 package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.mockserver.MockServerDashboardController;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
@@ -324,6 +325,8 @@ public class HomeWindowController implements Initializable {
                             Parent mockDashboardFXML = loader.load();
                             mockServerDashboardController = loader.getController();
                             mockServerDashboard = new Stage();
+                            mockServerDashboard.setTitle("Mock Servers Dashboard - " + Main.APP_NAME);
+                            mockServerDashboard.getIcons().add(Main.APP_ICON);
                             mockServerDashboard.setScene(new Scene(mockDashboardFXML));
                             mockServerDashboard.setOnCloseRequest(event -> mockServerDashboard.hide());
 

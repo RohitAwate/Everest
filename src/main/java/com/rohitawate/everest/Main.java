@@ -29,6 +29,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     public static final String APP_NAME = "Everest";
+    public static final Image APP_ICON = new Image(Main.class.getResource("/assets/Logo.png").toExternalForm());
     public static Preferences preferences;
 
     @Override
@@ -45,7 +46,7 @@ public class Main extends Application {
         dashboardStage.setWidth(screenBounds.getWidth() * 0.83);
         dashboardStage.setHeight(screenBounds.getHeight() * 0.74);
 
-        dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/Logo.png").toExternalForm()));
+        dashboardStage.getIcons().add(APP_ICON);
         dashboardStage.setScene(new Scene(homeWindow));
         dashboardStage.setTitle(APP_NAME);
         dashboardStage.setOnHiding(e -> {

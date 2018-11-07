@@ -1,12 +1,12 @@
 package com.rohitawate.everest.server.mock;
 
 public class Endpoint {
-    String method;
-    String path;
-    String resource;
-    int responseCode;
+    public String method;
+    public String path;
+    public String resource;
+    public int responseCode;
 
-    String contentType;
+    public String contentType;
 
     public Endpoint(String method, String path, int responseCode, String resource, String contentType) {
         this.method = method;

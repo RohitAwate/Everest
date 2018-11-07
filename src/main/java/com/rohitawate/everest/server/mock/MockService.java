@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class MockService implements Runnable {
+    private int port;
     private ServerSocket server;
     private boolean running;
     private String prefix;
@@ -22,18 +23,16 @@ public class MockService implements Runnable {
     private ArrayList<Endpoint> endpoints;
 
     public MockService(String name, int port) throws IOException {
-        this.server = new ServerSocket(port);
-
         this.name = name;
         this.prefix = "";
+        this.port = port;
         this.endpoints = new ArrayList<>();
     }
 
     public MockService(String name, String prefix, int port) throws IOException {
-        this.server = new ServerSocket(port);
-
         this.name = name;
         this.prefix = prefix;
+        this.port = port;
         this.endpoints = new ArrayList<>();
         this.attachPrefix = prefix != null;
     }
@@ -53,7 +52,11 @@ public class MockService implements Runnable {
         }
     }
 
-    public void start() {
+    public void start() throws IOException {
+        if (this.server == null) {
+            this.server = new ServerSocket(port);
+        }
+
         this.running = true;
 
         Thread serverThread = new Thread(this);
@@ -136,5 +139,13 @@ public class MockService implements Runnable {
 
     public void setAttachPrefix(boolean attachPrefix) {
         this.attachPrefix = attachPrefix;
+    }
+
+    public ArrayList<Endpoint> getEndpoints() {
+        return this.endpoints;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

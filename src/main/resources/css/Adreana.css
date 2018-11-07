@@ -15,7 +15,7 @@
  */
 
 #dashboard {
-	-fx-background-color: #505050;
+    -fx-background-color: #505050;
 }
 
 #addressSection {
@@ -24,7 +24,7 @@
 
 #addressField {
     -fx-background-color: #707070;
-	-fx-text-fill: white;
+    -fx-text-fill: white;
 }
 
 .combo-box {
@@ -46,8 +46,8 @@
 
 .combo-box:showing .list-cell:hover,
 .combo-box:showing .list-cell:selected {
-	-fx-background-color: orangered;
-	-fx-text-fill: white;
+    -fx-background-color: orangered;
+    -fx-text-fill: white;
 }
 
 .combo-box .arrow-button .arrow {
@@ -459,11 +459,11 @@
 }
 
 #endpointsBox {
-    -fx-background-color: #404040;
+    -fx-background-color: #454545;
 }
 
-#endpointDetails {
-    -fx-background-color: #303030;
+#endpointDetailsBox {
+    -fx-background-color: #353535;
 }
 
 #pathField, #portField, #serverAddressBox {
@@ -488,26 +488,50 @@
 .jfx-list-cell {
     -fx-background-color: transparent;
     -fx-spacing: 0px;
-    -fx-padding: 10px 0px 10px 20px;
+    -fx-padding: 5px;
     -fx-font-weight: 200;
-    -fx-font-size: 17px;
 }
 
 .jfx-list-cell Label {
     -fx-text-fill: #ababab;
 }
 
-.jfx-list-cell:selected {
+#servicesList .jfx-list-cell {
+    -fx-font-size: 20px;
+}
+
+#servicesList .jfx-list-cell:selected {
     -fx-background-color: #ff450060;
 }
 
-.jfx-list-cell:selected Label {
+#endpointsList .jfx-list-cell {
+    -fx-font-size: 16px;
+}
+
+#endpointsList .jfx-list-cell:selected {
+    -fx-background-color: #ff450030;
+}
+
+#servicesList .jfx-list-cell:selected Label,
+#endpointsList .jfx-list-cell:selected .endpoint-card-path {
     -fx-text-fill: white;
     -fx-font-weight: bold;
 }
 
-.service-card {
-    -fx-padding: 5px;
+.service-card .jfx-toggle-button {
+    -fx-text-fill: #ababab;
+    -fx-font-size: 20px;
+}
+
+.endpoint-card Label {
+    -fx-text-fill: #cacaca;
+}
+
+.endpoint-card-method {
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 2px 5px;
+    -fx-background-radius: 2px;
 }
 
 /* Snackbar */

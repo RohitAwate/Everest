@@ -23,7 +23,7 @@
                                         <Insets left="20.0" right="20.0"/>
                                     </HBox.margin>
                                 </ImageView>
-                                <Label text="MOCKSERVERS" textFill="#c9c9c9">
+                                <Label text="MOCK SERVERS" textFill="#c9c9c9">
                                     <font>
                                         <Font size="25.0"/>
                                     </font>

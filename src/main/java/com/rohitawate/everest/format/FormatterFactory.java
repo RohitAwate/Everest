@@ -18,7 +18,7 @@ public class FormatterFactory {
         formatters.put(HTTPConstants.JSON, new JSONFormatter());
     }
 
-    public static Formatter getHighlighter(String type) {
+    public static Formatter getFormatter(String type) {
         return formatters.get(type);
     }
 

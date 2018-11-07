@@ -10,8 +10,11 @@ import javafx.scene.layout.HBox;
 class EndpointCard extends HBox {
     private Label method;
     private Label path;
+    Endpoint endpoint;
 
     EndpointCard(Endpoint endpoint) {
+        this.endpoint = endpoint;
+
         method = new Label(endpoint.method);
         applyStyle(method);
         method.getStyleClass().add("endpoint-card-method");

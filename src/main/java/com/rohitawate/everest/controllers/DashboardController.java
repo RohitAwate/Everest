@@ -199,7 +199,7 @@ public class DashboardController implements Initializable {
 
             if (type.equals(HTTPConstants.JSON)) {
                 responseArea.setText(responseArea.getText(),
-                        FormatterFactory.getHighlighter(type),
+                        FormatterFactory.getFormatter(type),
                         HighlighterFactory.getHighlighter(type));
 
                 return;
@@ -492,7 +492,7 @@ public class DashboardController implements Initializable {
                 body = "No body returned in the response.";
 
             responseArea.setText(body,
-                    FormatterFactory.getHighlighter(simplifiedContentType),
+                    FormatterFactory.getFormatter(simplifiedContentType),
                     HighlighterFactory.getHighlighter(simplifiedContentType));
 
             responseTypeBox.setValue(simplifiedContentType);

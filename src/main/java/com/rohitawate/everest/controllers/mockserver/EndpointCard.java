@@ -8,8 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
 class EndpointCard extends HBox {
-    private Label method;
-    private Label path;
+    Label method;
+    Label path;
     Endpoint endpoint;
 
     EndpointCard(Endpoint endpoint) {

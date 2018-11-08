@@ -22,14 +22,14 @@ public class MockService implements Runnable {
 
     private ArrayList<Endpoint> endpoints;
 
-    public MockService(String name, int port) throws IOException {
+    public MockService(String name, int port) {
         this.name = name;
         this.prefix = "";
         this.port = port;
         this.endpoints = new ArrayList<>();
     }
 
-    public MockService(String name, String prefix, int port) throws IOException {
+    public MockService(String name, String prefix, int port) {
         this.name = name;
         this.prefix = prefix;
         this.port = port;
@@ -59,16 +59,18 @@ public class MockService implements Runnable {
 
         this.running = true;
 
-        Thread serverThread = new Thread(this);
-        serverThread.setDaemon(true);
-        serverThread.start();
+        Thread listenThread = new Thread(this);
+        listenThread.setDaemon(true);
+        listenThread.start();
 
         LoggingService.logInfo("Mock server has started on port " + server.getLocalPort() + ".", LocalDateTime.now());
     }
 
-    public void stop() {
+    public void stop() throws IOException {
         if (running) {
             running = false;
+            this.server.close();
+            this.server = null;
             LoggingService.logInfo("Mock server was stopped.", LocalDateTime.now());
         } else {
             LoggingService.logInfo("Mock server is not running.", LocalDateTime.now());
@@ -83,7 +85,7 @@ public class MockService implements Runnable {
                 String path = stripPrefix(requestParser.getPath());
 
                 for (Endpoint endpoint : endpoints) {
-                    if (path.equals(endpoint.path)) {
+                    if (path.equals(endpoint.path) && requestParser.getMethod().equals(endpoint.method)) {
                         ResponseWriter.sendResponse(socket, endpoint);
                         ServerLogger.logInfo(this.name, endpoint.responseCode, requestParser);
                         return;

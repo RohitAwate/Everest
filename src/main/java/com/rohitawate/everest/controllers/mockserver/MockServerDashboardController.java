@@ -10,6 +10,7 @@ import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.server.mock.Endpoint;
 import com.rohitawate.everest.server.mock.MockService;
+import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
@@ -21,7 +22,6 @@ import javafx.scene.layout.VBox;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -47,10 +47,8 @@ public class MockServerDashboardController implements Initializable {
     private EverestCodeArea codeArea;
 
     private ServiceCard selectedServiceCard;
-    private MockService selectedService;
 
     private EndpointCard selectedEndpointCard;
-    private Endpoint selectedEndpoint;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -81,20 +79,10 @@ public class MockServerDashboardController implements Initializable {
 
         contentTypeBox.getSelectionModel().select(0);
 
-        MockService service = null;
-        try {
-            service = new MockService("Summit", "/api", 9090);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        MockService service = new MockService("Summit", "/api", 9090);
         service.loggingEnabled = true;
 
-        MockService service2 = null;
-        try {
-            service2 = new MockService("Everest", 9091);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        MockService service2 = new MockService("Everest", 9091);
         service2.loggingEnabled = true;
 
         Endpoint endpoint = new Endpoint(HTTPConstants.GET, "/summit", 200,
@@ -113,20 +101,49 @@ public class MockServerDashboardController implements Initializable {
 
         servicesList.setOnMouseClicked(this::onServiceSelected);
         endpointsList.setOnMouseClicked(this::onEndpointSelected);
+
+        endpointDetailsBox.setDisable(true);
+
+        pathField.textProperty().addListener(this::pathListener);
+        methodBox.valueProperty().addListener(this::methodListener);
+        codeArea.textProperty().addListener(this::codeAreaListener);
+        contentTypeBox.valueProperty().addListener(this::contentTypeBoxListener);
+        responseCodeBox.valueProperty().addListener(this::responseCodeListener);
     }
 
     private void onServiceSelected(MouseEvent event) {
         selectedServiceCard = servicesList.getSelectionModel().getSelectedItem();
-        selectedService = selectedServiceCard.service;
-        populateEndpointsList(selectedService);
-        clearEndpointDetails();
+        resetEndpointDetails();
+        populateEndpointsList(selectedServiceCard.service);
     }
 
 
     private void onEndpointSelected(MouseEvent event) {
+        resetEndpointDetails();
+
         selectedEndpointCard = endpointsList.getSelectionModel().getSelectedItem();
-        selectedEndpoint = selectedEndpointCard.endpoint;
-        populateEndpointDetails(selectedEndpoint);
+
+        if (selectedEndpointCard != null) {
+            pathField.setText(selectedEndpointCard.endpoint.path);
+            methodBox.setValue(selectedEndpointCard.endpoint.method);
+            contentTypeBox.setValue(HTTPConstants.getSimpleContentType(selectedEndpointCard.endpoint.contentType));
+            codeArea.setText(selectedEndpointCard.endpoint.resource, FormatterFactory.getFormatter(contentTypeBox.getValue()),
+                    HighlighterFactory.getHighlighter(contentTypeBox.getValue()));
+            setResponseCode(selectedEndpointCard.endpoint.responseCode);
+            endpointDetailsBox.setDisable(false);
+        }
+    }
+
+    private void resetEndpointDetails() {
+        selectedEndpointCard = null;
+
+        methodBox.getSelectionModel().select(0);
+        pathField.clear();
+        contentTypeBox.getSelectionModel().select(0);
+        codeArea.clear();
+        responseCodeBox.getSelectionModel().select(0);
+
+        endpointDetailsBox.setDisable(true);
     }
 
     private void populateEndpointsList(MockService service) {
@@ -137,30 +154,45 @@ public class MockServerDashboardController implements Initializable {
         }
     }
 
-    private void populateEndpointDetails(Endpoint endpoint) {
-        endpointDetailsBox.setDisable(false);
-        methodBox.setValue(endpoint.method);
-        pathField.setText(endpoint.path);
-        contentTypeBox.setValue(HTTPConstants.getSimpleContentType(endpoint.contentType));
-        codeArea.setText(endpoint.resource, FormatterFactory.getFormatter(contentTypeBox.getValue()),
-                HighlighterFactory.getHighlighter(contentTypeBox.getValue()));
-        setResponseCode(endpoint.responseCode);
-    }
-
-    private void clearEndpointDetails() {
-        methodBox.getSelectionModel().select(0);
-        pathField.clear();
-        contentTypeBox.getSelectionModel().select(0);
-        codeArea.clear();
-        responseCodeBox.getSelectionModel().select(0);
-        endpointDetailsBox.setDisable(true);
-    }
-
     private void setResponseCode(int responseCode) {
         responseCodeBox.setValue(responseCode + " (" + EverestResponse.getReasonPhrase(responseCode) + ")");
     }
 
     static void pushServerNotification(String message, long duration) {
         snackbar.show(message, duration);
+    }
+
+
+    // Listeners
+    private void pathListener(Observable observable, String oldVal, String newVal) {
+        if (selectedEndpointCard != null) {
+            selectedEndpointCard.path.setText(newVal);
+            selectedEndpointCard.endpoint.path = newVal;
+        }
+    }
+
+    private void methodListener(Observable observable, String oldVal, String newVal) {
+        if (selectedEndpointCard != null) {
+            selectedEndpointCard.method.setText(newVal);
+            selectedEndpointCard.endpoint.method = newVal;
+        }
+    }
+
+    private void responseCodeListener(Observable observable, String oldVal, String newVal) {
+        if (selectedEndpointCard != null) {
+            selectedEndpointCard.endpoint.responseCode = Integer.parseInt(newVal.substring(0, 3));
+        }
+    }
+
+    private void codeAreaListener(Observable observable, String oldVal, String newVal) {
+        if (selectedEndpointCard != null) {
+            selectedEndpointCard.endpoint.resource = newVal;
+        }
+    }
+
+    private void contentTypeBoxListener(Observable observable, String oldVal, String newVal) {
+        if (selectedEndpointCard != null) {
+            selectedEndpointCard.endpoint.contentType = HTTPConstants.getComplexContentType(newVal);
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.rohitawate.everest.controllers.mockserver;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXToggleButton;
+import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.server.mock.MockService;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -14,6 +15,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.paint.Paint;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static com.rohitawate.everest.controllers.mockserver.MockServerDashboardController.pushServerNotification;
 
@@ -56,13 +58,25 @@ class ServiceCard extends HBox {
         if (toggle.isSelected()) {
             try {
                 service.start();
-                pushServerNotification(String.format("Mock service '%s' has started.", service.name), 7000);
+                String msg = String.format("Mock service '%s' has started.", service.name);
+                LoggingService.logInfo(msg, LocalDateTime.now());
+                pushServerNotification(msg, 7000);
             } catch (IOException e) {
-                pushServerNotification(String.format("Could not start mock service '%s'.", service.name), 7000);
+                String error = String.format("Could not start mock service '%s'.", service.name);
+                LoggingService.logSevere(error, e, LocalDateTime.now());
+                pushServerNotification(error, 7000);
             }
         } else {
-            service.stop();
-            pushServerNotification(String.format("Mock service '%s' has stopped.", service.name), 7000);
+            try {
+                service.stop();
+                String msg = String.format("Mock service '%s' has stopped.", service.name);
+                LoggingService.logInfo(msg, LocalDateTime.now());
+                pushServerNotification(msg, 7000);
+            } catch (IOException e) {
+                String error = String.format("Could not stop mock service '%s'.", service.name);
+                LoggingService.logSevere(error, e, LocalDateTime.now());
+                pushServerNotification(error, 7000);
+            }
         }
     }
 }

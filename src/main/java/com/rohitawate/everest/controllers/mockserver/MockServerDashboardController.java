@@ -144,14 +144,12 @@ public class MockServerDashboardController implements Initializable {
 
         serviceDetailsController.setMode(ServiceDetailsController.ADD_MODE);
         serviceDetailsStage.showAndWait();
-        ServiceCard serviceCard = new ServiceCard(serviceDetailsController.getService());
-        serviceCard.setOptionsHandler(this::onServiceOptions);
-        servicesList.getItems().add(serviceCard);
-    }
 
-    private void onServiceOptions(ActionEvent actionEvent) {
-        serviceDetailsController.setMode(ServiceDetailsController.UPDATE_MODE);
-        serviceDetailsStage.showAndWait();
+        if (serviceDetailsController.getService() != null) {
+            ServiceCard serviceCard = new ServiceCard(serviceDetailsController.getService());
+            serviceCard.setOptionsStage(serviceDetailsStage, serviceDetailsController);
+            servicesList.getItems().add(serviceCard);
+        }
     }
 
     private void addNewEndpoint(ActionEvent actionEvent) {

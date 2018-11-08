@@ -46,6 +46,7 @@ public class ServiceDetailsController implements Initializable {
             service = new MockService(serviceNameField.getText(), Integer.parseInt(servicePortField.getText()));
         }
 
+        service.loggingEnabled = loggingEnableToggle.isSelected();
         ((Stage) titleLabel.getScene().getWindow()).close();
     }
 
@@ -53,12 +54,21 @@ public class ServiceDetailsController implements Initializable {
         if (mode.equals(ADD_MODE)) {
             titleLabel.setText("A D D   N E W   S E R V I C E");
             serviceActionButton.setText(ADD_MODE);
-            servicePortField.setVisible(true);
+            servicePortField.setDisable(false);
         } else if (mode.equals(UPDATE_MODE)) {
             titleLabel.setText("S E R V I C E   D E T A I L S");
             serviceActionButton.setText(UPDATE_MODE);
-            servicePortField.setVisible(false);
+            servicePortField.setDisable(true);
+
+            serviceNameField.setText(service.name);
+            servicePrefixField.setText(service.getPrefix());
+            attachPrefixCheckBox.setSelected(service.isAttachPrefix());
+            loggingEnableToggle.setSelected(service.loggingEnabled);
         }
+    }
+
+    void setService(MockService service) {
+        this.service = service;
     }
 
     MockService getService() {

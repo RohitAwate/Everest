@@ -5,7 +5,6 @@ import com.jfoenix.controls.JFXToggleButton;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.server.mock.MockService;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
@@ -14,6 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Paint;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -25,6 +25,8 @@ class ServiceCard extends HBox {
     private final JFXToggleButton toggle;
     private final JFXButton optionsButton;
     final MockService service;
+    private ServiceDetailsController controller;
+    private Stage optionsStage;
 
     ServiceCard(MockService service) {
         this.service = service;
@@ -55,6 +57,23 @@ class ServiceCard extends HBox {
         setPadding(new Insets(0, 10, 0, 10));
     }
 
+    void setOptionsStage(Stage optionsStage, ServiceDetailsController controller) {
+        this.optionsStage = optionsStage;
+        this.controller = controller;
+
+        this.optionsButton.setOnAction(e -> {
+            controller.setService(service);
+            controller.setMode(ServiceDetailsController.UPDATE_MODE);
+            optionsStage.showAndWait();
+
+            service.name = controller.getService().name;
+            service.setAttachPrefix(controller.getService().isAttachPrefix());
+            service.loggingEnabled = controller.getService().loggingEnabled;
+
+            name.setText(service.name);
+        });
+    }
+
     private void toggleService(ActionEvent actionEvent) {
         if (toggle.isSelected()) {
             try {
@@ -79,9 +98,5 @@ class ServiceCard extends HBox {
                 pushServerNotification(error, 7000);
             }
         }
-    }
-
-    void setOptionsHandler(EventHandler<ActionEvent> handler) {
-        optionsButton.setOnAction(handler);
     }
 }

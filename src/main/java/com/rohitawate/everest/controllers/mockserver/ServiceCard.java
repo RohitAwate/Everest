@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXToggleButton;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.server.mock.MockService;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
@@ -78,5 +79,9 @@ class ServiceCard extends HBox {
                 pushServerNotification(error, 7000);
             }
         }
+    }
+
+    void setOptionsHandler(EventHandler<ActionEvent> handler) {
+        optionsButton.setOnAction(handler);
     }
 }

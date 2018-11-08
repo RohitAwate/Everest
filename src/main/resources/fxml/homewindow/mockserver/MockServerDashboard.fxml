@@ -63,7 +63,7 @@
                                  </VBox.margin>
                                  <children>
                                               <Label fx:id="servicesLabel" styleClass="field-label" text="S E R V I C E S" />
-                                    <JFXButton ripplerFill="WHITE">
+                                     <JFXButton fx:id="newServiceButton" ripplerFill="WHITE">
                                        <graphic>
                                           <ImageView fitHeight="15.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
@@ -97,7 +97,7 @@
                                              </VBox.margin>
                                              <children>
                                                               <Label styleClass="field-label" text="E N D P O I N T S" />
-                                                <JFXButton ripplerFill="WHITE">
+                                                 <JFXButton fx:id="newEndpointButton" ripplerFill="WHITE">
                                                    <graphic>
                                                       <ImageView fitHeight="15.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
                                                          <image>
@@ -127,8 +127,15 @@
                                                         <HBox alignment="CENTER" spacing="20.0">
                                                             <children>
                                                                 <ComboBox fx:id="methodBox" prefWidth="100.0"/>
-                                                                <TextField fx:id="pathField" promptText="PATH" styleClass="material-text-field" HBox.hgrow="ALWAYS" />
+                                                                <JFXTextField fx:id="endpointPathField"
+                                                                              focusColor="ORANGERED" labelFloat="true"
+                                                                              prefWidth="300.0" promptText="PATH"
+                                                                              styleClass="material-text-field"
+                                                                              unFocusColor="#909090"/>
                                                             </children>
+                                                            <VBox.margin>
+                                                                <Insets top="10.0"/>
+                                                            </VBox.margin>
                                                         </HBox>
                                                         <HBox alignment="CENTER" spacing="20.0">
                                                             <children>

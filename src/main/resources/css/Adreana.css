@@ -468,7 +468,7 @@
     -fx-background-color: #353535;
 }
 
-#pathField, #portField, #serverAddressBox {
+#portField, #serverAddressBox {
     -fx-background-color: #505050;
 }
 
@@ -538,6 +538,27 @@
     -fx-text-fill: white;
     -fx-padding: 2px 5px;
     -fx-background-radius: 2px;
+}
+
+/* Service Adder */
+#serviceDetailsHeaderBox {
+    -fx-background-color: #545454;
+}
+
+.service-details {
+    -fx-background-color: #282828;
+}
+
+#loggingEnableToggle {
+    -fx-padding: 0px 10px;
+}
+
+#cancelActionButton {
+    -fx-background-color: #747474;
+}
+
+#serviceActionButton {
+    -fx-background-color: red;
 }
 
 /* Snackbar */

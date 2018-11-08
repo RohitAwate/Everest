@@ -35,7 +35,7 @@ class EndpointCard extends HBox {
     private static final String PATCHStyle = "-fx-background-color: teal";
     private static final String DELETEStyle = "-fx-background-color: limegreen";
 
-    private static void applyStyle(Label label) {
+    static void applyStyle(Label label) {
         switch (label.getText()) {
             case HTTPConstants.GET:
                 label.setStyle(GETStyle);

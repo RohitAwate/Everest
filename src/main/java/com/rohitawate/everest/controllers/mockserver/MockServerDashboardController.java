@@ -3,6 +3,8 @@ package com.rohitawate.everest.controllers.mockserver;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXSnackbar;
+import com.jfoenix.controls.JFXTextField;
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.format.FormatterFactory;
@@ -11,17 +13,23 @@ import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.server.mock.Endpoint;
 import com.rohitawate.everest.server.mock.MockService;
 import javafx.beans.Observable;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -31,7 +39,7 @@ public class MockServerDashboardController implements Initializable {
     @FXML
     private VBox endpointDetailsBox;
     @FXML
-    private JFXButton optionsButton;
+    private JFXButton optionsButton, newServiceButton, newEndpointButton;
     @FXML
     private ComboBox<String> methodBox, contentTypeBox, responseCodeBox;
     @FXML
@@ -39,7 +47,7 @@ public class MockServerDashboardController implements Initializable {
     @FXML
     private JFXListView<EndpointCard> endpointsList;
     @FXML
-    private TextField pathField;
+    private JFXTextField endpointPathField;
     @FXML
     private ScrollPane codeAreaScrollPane;
 
@@ -49,6 +57,9 @@ public class MockServerDashboardController implements Initializable {
     private ServiceCard selectedServiceCard;
 
     private EndpointCard selectedEndpointCard;
+
+    private Stage serviceDetailsStage;
+    private ServiceDetailsController serviceDetailsController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -104,11 +115,46 @@ public class MockServerDashboardController implements Initializable {
 
         endpointDetailsBox.setDisable(true);
 
-        pathField.textProperty().addListener(this::pathListener);
+        endpointPathField.textProperty().addListener(this::pathListener);
         methodBox.valueProperty().addListener(this::methodListener);
         codeArea.textProperty().addListener(this::codeAreaListener);
         contentTypeBox.valueProperty().addListener(this::contentTypeBoxListener);
         responseCodeBox.valueProperty().addListener(this::responseCodeListener);
+
+        newServiceButton.setOnAction(this::addNewService);
+        newEndpointButton.setOnAction(this::addNewEndpoint);
+    }
+
+    private void addNewService(ActionEvent actionEvent) {
+        if (serviceDetailsStage == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/mockserver/ServiceDetails.fxml"));
+                Parent serviceAdderFXML = loader.load();
+                serviceDetailsStage = new Stage();
+                serviceDetailsStage.setScene(new Scene(serviceAdderFXML));
+                serviceDetailsController = loader.getController();
+                serviceDetailsStage.setTitle("Add new mock service - " + Main.APP_NAME);
+                serviceDetailsStage.setResizable(false);
+                serviceDetailsStage.initModality(Modality.APPLICATION_MODAL);
+                serviceDetailsStage.getIcons().add(Main.APP_ICON);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        serviceDetailsController.setMode(ServiceDetailsController.ADD_MODE);
+        serviceDetailsStage.showAndWait();
+        ServiceCard serviceCard = new ServiceCard(serviceDetailsController.getService());
+        serviceCard.setOptionsHandler(this::onServiceOptions);
+        servicesList.getItems().add(serviceCard);
+    }
+
+    private void onServiceOptions(ActionEvent actionEvent) {
+        serviceDetailsController.setMode(ServiceDetailsController.UPDATE_MODE);
+        serviceDetailsStage.showAndWait();
+    }
+
+    private void addNewEndpoint(ActionEvent actionEvent) {
     }
 
     private void onServiceSelected(MouseEvent event) {
@@ -124,7 +170,7 @@ public class MockServerDashboardController implements Initializable {
         selectedEndpointCard = endpointsList.getSelectionModel().getSelectedItem();
 
         if (selectedEndpointCard != null) {
-            pathField.setText(selectedEndpointCard.endpoint.path);
+            endpointPathField.setText(selectedEndpointCard.endpoint.path);
             methodBox.setValue(selectedEndpointCard.endpoint.method);
             contentTypeBox.setValue(HTTPConstants.getSimpleContentType(selectedEndpointCard.endpoint.contentType));
             codeArea.setText(selectedEndpointCard.endpoint.resource, FormatterFactory.getFormatter(contentTypeBox.getValue()),
@@ -138,7 +184,7 @@ public class MockServerDashboardController implements Initializable {
         selectedEndpointCard = null;
 
         methodBox.getSelectionModel().select(0);
-        pathField.clear();
+        endpointPathField.clear();
         contentTypeBox.getSelectionModel().select(0);
         codeArea.clear();
         responseCodeBox.getSelectionModel().select(0);
@@ -175,6 +221,7 @@ public class MockServerDashboardController implements Initializable {
         if (selectedEndpointCard != null) {
             selectedEndpointCard.method.setText(newVal);
             selectedEndpointCard.endpoint.method = newVal;
+            EndpointCard.applyStyle(selectedEndpointCard.method);
         }
     }
 

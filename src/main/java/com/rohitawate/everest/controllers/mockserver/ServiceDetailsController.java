@@ -46,7 +46,10 @@ public class ServiceDetailsController implements Initializable {
             service.name = serviceNameField.getText();
         }
 
-        service.setPrefix("/" + servicePrefixField.getText());
+        if (!servicePrefixField.getText().isEmpty()) {
+            service.setPrefix("/" + servicePrefixField.getText());
+        }
+
         service.setAttachPrefix(attachPrefixCheckBox.isSelected());
         service.loggingEnabled = loggingEnableToggle.isSelected();
         ((Stage) titleLabel.getScene().getWindow()).close();

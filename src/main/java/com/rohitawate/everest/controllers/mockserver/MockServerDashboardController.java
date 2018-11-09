@@ -38,17 +38,17 @@ public class MockServerDashboardController implements Initializable {
     @FXML
     private VBox endpointsBox, endpointDetailsBox;
     @FXML
-    private JFXButton optionsButton, newServiceButton, newEndpointButton;
-    @FXML
     private ComboBox<String> methodBox, contentTypeBox, responseCodeBox;
     @FXML
     private JFXListView<ServiceCard> servicesList;
     @FXML
     private JFXListView<EndpointCard> endpointsList;
     @FXML
-    private JFXTextField endpointPathField;
+    private JFXTextField endpointPathField, finalURLField;
     @FXML
     private ScrollPane codeAreaScrollPane;
+    @FXML
+    private JFXButton copyButton;
 
     private static JFXSnackbar snackbar;
     private EverestCodeArea codeArea;
@@ -97,6 +97,12 @@ public class MockServerDashboardController implements Initializable {
         codeArea.textProperty().addListener(this::codeAreaListener);
         contentTypeBox.valueProperty().addListener(this::contentTypeBoxListener);
         responseCodeBox.valueProperty().addListener(this::responseCodeListener);
+
+        copyButton.setOnAction(e -> {
+            finalURLField.selectAll();
+            finalURLField.copy();
+            finalURLField.deselect();
+        });
     }
 
     @FXML
@@ -122,7 +128,7 @@ public class MockServerDashboardController implements Initializable {
 
         if (serviceDetailsController.getService() != null) {
             ServiceCard serviceCard = new ServiceCard(serviceDetailsController.getService());
-            serviceCard.setOptionsStage(serviceDetailsStage, serviceDetailsController);
+            serviceCard.setOptionsStage(serviceDetailsStage, serviceDetailsController, this);
             servicesList.getItems().add(serviceCard);
             servicesList.getSelectionModel().select(serviceCard);
             onServiceSelected(null);
@@ -194,8 +200,21 @@ public class MockServerDashboardController implements Initializable {
         if (selectedEndpointCard != null) {
             selectedEndpointCard.path.setText(newVal);
             selectedEndpointCard.endpoint.path = newVal;
+            setFinalURLField();
             checkDuplicateEndpoints();
         }
+    }
+
+    void setFinalURLField() {
+        String finalURL = "http://localhost:" + String.valueOf(selectedServiceCard.service.getPort());
+
+        if (selectedServiceCard.service.isAttachPrefix()) {
+            finalURL += selectedServiceCard.service.getPrefix();
+        }
+
+        finalURL += selectedEndpointCard.endpoint.path;
+
+        finalURLField.setText(finalURL);
     }
 
     private void methodListener(Observable observable, String oldVal, String newVal) {

@@ -97,9 +97,9 @@ public class MockService implements Runnable {
             boolean startsWithPrefix = requestParser.getPath().startsWith(this.prefix);
             String path = null;
 
-            if (startsWithPrefix && attachPrefix) {
+            if (attachPrefix && startsWithPrefix) {
                 path = stripPrefix(requestParser.getPath());
-            } else if (startsWithPrefix == attachPrefix) {
+            } else if (!attachPrefix && !startsWithPrefix) {
                 path = requestParser.getPath();
             }
 

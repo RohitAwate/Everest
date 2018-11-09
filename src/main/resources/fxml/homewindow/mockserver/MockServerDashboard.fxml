@@ -23,9 +23,9 @@
                                         <Insets left="20.0" right="20.0"/>
                                     </HBox.margin>
                                 </ImageView>
-                                <Label text="MOCK SERVERS" textFill="#c9c9c9">
+                                <Label text="M O C K   S E R V E R S" textFill="#c9c9c9">
                                     <font>
-                                        <Font size="25.0"/>
+                                        <Font size="20.0"/>
                                     </font>
                                 </Label>
                             </children>
@@ -126,6 +126,31 @@
                                                       AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                     <children>
+                                                        <HBox spacing="10.0">
+                                                            <VBox.margin>
+                                                                <Insets top="10.0"/>
+                                                            </VBox.margin>
+                                                            <children>
+                                                                <JFXTextField fx:id="finalURLField" editable="false"
+                                                                              focusColor="ORANGERED" labelFloat="true"
+                                                                              promptText="FINAL URL"
+                                                                              styleClass="material-text-field"
+                                                                              unFocusColor="#909090"
+                                                                              HBox.hgrow="ALWAYS"/>
+                                                                <JFXButton fx:id="copyButton"
+                                                                           contentDisplay="GRAPHIC_ONLY">
+                                                                    <graphic>
+                                                                        <ImageView fitHeight="20.0" fitWidth="20.0"
+                                                                                   pickOnBounds="true"
+                                                                                   preserveRatio="true">
+                                                                            <image>
+                                                                                <Image url="@../../../assets/Copy.png"/>
+                                                                            </image>
+                                                                        </ImageView>
+                                                                    </graphic>
+                                                                </JFXButton>
+                                                            </children>
+                                                        </HBox>
                                                         <HBox alignment="CENTER" spacing="20.0">
                                                             <children>
                                                                 <ComboBox fx:id="methodBox" prefWidth="100.0"/>

@@ -25,8 +25,6 @@ class ServiceCard extends HBox {
     private final JFXToggleButton toggle;
     private final JFXButton optionsButton;
     MockService service;
-    private ServiceDetailsController controller;
-    private Stage optionsStage;
 
     ServiceCard(MockService service) {
         this.service = service;
@@ -57,14 +55,12 @@ class ServiceCard extends HBox {
         setPadding(new Insets(0, 10, 0, 10));
     }
 
-    void setOptionsStage(Stage optionsStage, ServiceDetailsController controller) {
-        this.optionsStage = optionsStage;
-        this.controller = controller;
-
+    void setOptionsStage(Stage optionsStage, ServiceDetailsController controller, MockServerDashboardController dashboardController) {
         this.optionsButton.setOnAction(e -> {
             controller.setService(service);
             controller.setMode(ServiceDetailsController.UPDATE_MODE);
             optionsStage.showAndWait();
+            dashboardController.setFinalURLField();
         });
     }
 

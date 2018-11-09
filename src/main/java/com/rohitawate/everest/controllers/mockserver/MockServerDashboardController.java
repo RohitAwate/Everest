@@ -139,6 +139,7 @@ public class MockServerDashboardController implements Initializable {
     private void addNewEndpoint(ActionEvent actionEvent) {
         Endpoint newEndpoint = new Endpoint();
         EndpointCard newCard = new EndpointCard(newEndpoint);
+        newCard.path.setText("/");
         endpointsList.getItems().add(newCard);
         endpointsList.getSelectionModel().select(newCard);
         selectedServiceCard.service.addEndpoint(newEndpoint);
@@ -195,26 +196,38 @@ public class MockServerDashboardController implements Initializable {
         }
     }
 
+    void setFinalURLField() {
+        if (selectedServiceCard != null && !endpointsBox.isDisable()) {
+            String finalURL = "http://localhost:" + String.valueOf(selectedServiceCard.service.getPort());
+
+            if (selectedServiceCard.service.isAttachPrefix()) {
+                finalURL += selectedServiceCard.service.getPrefix();
+            }
+
+            if (selectedEndpointCard != null) {
+                finalURL += selectedEndpointCard.endpoint.path;
+            }
+
+            finalURLField.setText(finalURL);
+        } else {
+            finalURLField.clear();
+        }
+    }
+
     // Listeners
     private void pathListener(Observable observable, String oldVal, String newVal) {
         if (selectedEndpointCard != null) {
+            if (!newVal.isEmpty() && newVal.startsWith("/")) {
+                newVal = newVal.substring(1);
+                endpointPathField.setText(newVal);
+            }
+
+            newVal = "/" + newVal;
             selectedEndpointCard.path.setText(newVal);
             selectedEndpointCard.endpoint.path = newVal;
             setFinalURLField();
             checkDuplicateEndpoints();
         }
-    }
-
-    void setFinalURLField() {
-        String finalURL = "http://localhost:" + String.valueOf(selectedServiceCard.service.getPort());
-
-        if (selectedServiceCard.service.isAttachPrefix()) {
-            finalURL += selectedServiceCard.service.getPrefix();
-        }
-
-        finalURL += selectedEndpointCard.endpoint.path;
-
-        finalURLField.setText(finalURL);
     }
 
     private void methodListener(Observable observable, String oldVal, String newVal) {
@@ -251,6 +264,7 @@ public class MockServerDashboardController implements Initializable {
             resetEndpointDetails();
             populateEndpointsList(selectedServiceCard.service);
             endpointsBox.setDisable(false);
+            setFinalURLField();
         } else {
             endpointsBox.setDisable(true);
         }

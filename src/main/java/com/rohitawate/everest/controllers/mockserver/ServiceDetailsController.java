@@ -1,20 +1,20 @@
 package com.rohitawate.everest.controllers.mockserver;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXCheckBox;
-import com.jfoenix.controls.JFXTextField;
-import com.jfoenix.controls.JFXToggleButton;
+import com.jfoenix.controls.*;
 import com.rohitawate.everest.server.mock.MockService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class ServiceDetailsController implements Initializable {
+    @FXML
+    private VBox serviceDetailsBox;
     @FXML
     private JFXTextField serviceNameField, servicePortField, servicePrefixField;
     @FXML
@@ -31,23 +31,57 @@ public class ServiceDetailsController implements Initializable {
     static final String ADD_MODE = "ADD";
     static final String UPDATE_MODE = "UPDATE";
 
+    private JFXSnackbar snackbar;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         servicePrefixField.disableProperty().bind(attachPrefixCheckBox.selectedProperty().not());
         serviceActionButton.setOnAction(this::onAction);
         cancelActionButton.setOnAction(e -> ((Stage) cancelActionButton.getScene().getWindow()).close());
+
+        snackbar = new JFXSnackbar(serviceDetailsBox);
+
+        servicePortField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal.matches("\\d*")) {
+                newVal = newVal.replaceAll("[^\\d]", "");
+                servicePortField.setText(newVal);
+            }
+
+            if (!newVal.equals("") && Integer.parseInt(newVal) > 65535) {
+                servicePortField.setText("65535");
+            }
+        });
     }
 
     private void onAction(ActionEvent actionEvent) {
-        // TODO: Empty checks, trimming, NumberFormatException, prefix '/' trimming
+        if (serviceNameField.getText().isEmpty() || serviceNameField.getText().trim().equals("")) {
+            serviceNameField.clear();
+            snackbar.show("Name required.", 5000);
+            return;
+        }
+
+        if (servicePortField.getText().isEmpty()) {
+            snackbar.show("Port number required.", 5000);
+            return;
+        }
+
         if (serviceActionButton.getText().equals(ADD_MODE)) {
             service = new MockService(serviceNameField.getText(), Integer.parseInt(servicePortField.getText()));
         } else if (serviceActionButton.getText().equals(UPDATE_MODE)) {
             service.name = serviceNameField.getText();
         }
 
-        if (!servicePrefixField.getText().isEmpty()) {
-            service.setPrefix("/" + servicePrefixField.getText());
+        if (attachPrefixCheckBox.isSelected()) {
+            if (servicePrefixField.getText().trim().isEmpty()) {
+                snackbar.show("Prefix required.", 5000);
+                return;
+            } else {
+                if (servicePrefixField.getText().trim().startsWith("/")) {
+                    servicePrefixField.setText(servicePrefixField.getText().trim().substring(1));
+                }
+
+                service.setPrefix("/" + servicePrefixField.getText().trim());
+            }
         }
 
         service.setAttachPrefix(attachPrefixCheckBox.isSelected());

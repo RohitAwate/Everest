@@ -14,7 +14,7 @@ public class Endpoint {
 
     public Endpoint() {
         this.method = HTTPConstants.GET;
-        this.path = "/";
+        this.path = "";
         this.resource = "{\n\t\n}";
         this.responseCode = 200;
         this.contentType = MediaType.APPLICATION_JSON;

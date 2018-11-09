@@ -94,13 +94,22 @@ public class MockService implements Runnable {
         try {
             HttpRequestParser requestParser = new HttpRequestParser(socket.getInputStream(), false);
 
-            if (requestParser.getPath().startsWith(this.prefix) || attachPrefix) {
-                String path = stripPrefix(requestParser.getPath());
+            boolean startsWithPrefix = requestParser.getPath().startsWith(this.prefix);
+            String path = null;
 
+            if (startsWithPrefix && attachPrefix) {
+                path = stripPrefix(requestParser.getPath());
+            } else if (startsWithPrefix == attachPrefix) {
+                path = requestParser.getPath();
+            }
+
+            if (path != null) {
                 for (Endpoint endpoint : endpoints) {
                     if (path.equals(endpoint.path) && requestParser.getMethod().equals(endpoint.method)) {
                         ResponseWriter.sendResponse(socket, endpoint);
-                        ServerLogger.logInfo(this.name, endpoint.responseCode, requestParser);
+                        if (loggingEnabled) {
+                            ServerLogger.logInfo(this.name, endpoint.responseCode, requestParser);
+                        }
                         return;
                     }
                 }
@@ -133,7 +142,9 @@ public class MockService implements Runnable {
 
     private void handleNotFound(Socket socket, HttpRequestParser requestParser) throws IOException {
         ResponseWriter.sendResponse(socket, notFound);
-        ServerLogger.logWarning(this.name, 404, requestParser);
+        if (loggingEnabled) {
+            ServerLogger.logWarning(this.name, 404, requestParser);
+        }
     }
 
     public boolean isRunning() {

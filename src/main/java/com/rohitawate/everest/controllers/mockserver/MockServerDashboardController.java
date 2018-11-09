@@ -28,7 +28,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -37,7 +36,7 @@ public class MockServerDashboardController implements Initializable {
     @FXML
     private StackPane mockDashboardSP;
     @FXML
-    private VBox endpointDetailsBox;
+    private VBox endpointsBox, endpointDetailsBox;
     @FXML
     private JFXButton optionsButton, newServiceButton, newEndpointButton;
     @FXML
@@ -90,29 +89,7 @@ public class MockServerDashboardController implements Initializable {
 
         contentTypeBox.getSelectionModel().select(0);
 
-        MockService service = new MockService("Summit", "/api", 9090);
-        service.loggingEnabled = true;
-
-        MockService service2 = new MockService("Everest", 9091);
-        service2.loggingEnabled = true;
-
-        Endpoint endpoint = new Endpoint(HTTPConstants.GET, "/summit", 200,
-                "{ \"name\": \"Rohit\", \"age\": 20 }", MediaType.APPLICATION_JSON);
-        Endpoint endpoint2 = new Endpoint(HTTPConstants.PATCH, "/welcome", 200,
-                "{ \"name\": \"Nolan\", \"age\": 48 }", MediaType.APPLICATION_JSON);
-        Endpoint endpoint3 = new Endpoint(HTTPConstants.POST, "/post", 404,
-                "<name>Rohit</name>", MediaType.APPLICATION_XML);
-
-        service.addEndpoint(endpoint);
-        service2.addEndpoint(endpoint2);
-        service2.addEndpoint(endpoint3);
-
-        servicesList.getItems().add(new ServiceCard(service));
-        servicesList.getItems().add(new ServiceCard(service2));
-
-        servicesList.setOnMouseClicked(this::onServiceSelected);
-        endpointsList.setOnMouseClicked(this::onEndpointSelected);
-
+        endpointsBox.setDisable(true);
         endpointDetailsBox.setDisable(true);
 
         endpointPathField.textProperty().addListener(this::pathListener);
@@ -120,11 +97,9 @@ public class MockServerDashboardController implements Initializable {
         codeArea.textProperty().addListener(this::codeAreaListener);
         contentTypeBox.valueProperty().addListener(this::contentTypeBoxListener);
         responseCodeBox.valueProperty().addListener(this::responseCodeListener);
-
-        newServiceButton.setOnAction(this::addNewService);
-        newEndpointButton.setOnAction(this::addNewEndpoint);
     }
 
+    @FXML
     private void addNewService(ActionEvent actionEvent) {
         if (serviceDetailsStage == null) {
             try {
@@ -149,33 +124,17 @@ public class MockServerDashboardController implements Initializable {
             ServiceCard serviceCard = new ServiceCard(serviceDetailsController.getService());
             serviceCard.setOptionsStage(serviceDetailsStage, serviceDetailsController);
             servicesList.getItems().add(serviceCard);
+            servicesList.getSelectionModel().select(serviceCard);
+            onServiceSelected(null);
         }
     }
 
+    @FXML
     private void addNewEndpoint(ActionEvent actionEvent) {
-    }
-
-    private void onServiceSelected(MouseEvent event) {
-        selectedServiceCard = servicesList.getSelectionModel().getSelectedItem();
-        resetEndpointDetails();
-        populateEndpointsList(selectedServiceCard.service);
-    }
-
-
-    private void onEndpointSelected(MouseEvent event) {
-        resetEndpointDetails();
-
-        selectedEndpointCard = endpointsList.getSelectionModel().getSelectedItem();
-
-        if (selectedEndpointCard != null) {
-            endpointPathField.setText(selectedEndpointCard.endpoint.path);
-            methodBox.setValue(selectedEndpointCard.endpoint.method);
-            contentTypeBox.setValue(HTTPConstants.getSimpleContentType(selectedEndpointCard.endpoint.contentType));
-            codeArea.setText(selectedEndpointCard.endpoint.resource, FormatterFactory.getFormatter(contentTypeBox.getValue()),
-                    HighlighterFactory.getHighlighter(contentTypeBox.getValue()));
-            setResponseCode(selectedEndpointCard.endpoint.responseCode);
-            endpointDetailsBox.setDisable(false);
-        }
+        EndpointCard newCard = new EndpointCard(new Endpoint());
+        endpointsList.getItems().add(newCard);
+        endpointsList.getSelectionModel().select(newCard);
+        onEndpointSelected(null);
     }
 
     private void resetEndpointDetails() {
@@ -238,6 +197,35 @@ public class MockServerDashboardController implements Initializable {
     private void contentTypeBoxListener(Observable observable, String oldVal, String newVal) {
         if (selectedEndpointCard != null) {
             selectedEndpointCard.endpoint.contentType = HTTPConstants.getComplexContentType(newVal);
+        }
+    }
+
+    @FXML
+    private void onServiceSelected(MouseEvent event) {
+        selectedServiceCard = servicesList.getSelectionModel().getSelectedItem();
+        if (selectedServiceCard != null) {
+            resetEndpointDetails();
+            populateEndpointsList(selectedServiceCard.service);
+            endpointsBox.setDisable(false);
+        } else {
+            endpointsBox.setDisable(true);
+        }
+    }
+
+    @FXML
+    private void onEndpointSelected(MouseEvent event) {
+        resetEndpointDetails();
+
+        selectedEndpointCard = endpointsList.getSelectionModel().getSelectedItem();
+
+        if (selectedEndpointCard != null) {
+            endpointPathField.setText(selectedEndpointCard.endpoint.path);
+            methodBox.setValue(selectedEndpointCard.endpoint.method);
+            contentTypeBox.setValue(HTTPConstants.getSimpleContentType(selectedEndpointCard.endpoint.contentType));
+            codeArea.setText(selectedEndpointCard.endpoint.resource, FormatterFactory.getFormatter(contentTypeBox.getValue()),
+                    HighlighterFactory.getHighlighter(contentTypeBox.getValue()));
+            setResponseCode(selectedEndpointCard.endpoint.responseCode);
+            endpointDetailsBox.setDisable(false);
         }
     }
 }

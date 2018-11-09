@@ -63,7 +63,7 @@
                                  </VBox.margin>
                                  <children>
                                               <Label fx:id="servicesLabel" styleClass="field-label" text="S E R V I C E S" />
-                                     <JFXButton fx:id="newServiceButton" ripplerFill="WHITE">
+                                     <JFXButton fx:id="newServiceButton" onAction="#addNewService" ripplerFill="WHITE">
                                        <graphic>
                                           <ImageView fitHeight="15.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
@@ -77,8 +77,8 @@
                                     <Insets left="10.0" />
                                  </padding>
                               </HBox>
-                                        <JFXListView fx:id="servicesList" styleClass="transparent-list-view"
-                                                     VBox.vgrow="ALWAYS"/>
+                                        <JFXListView fx:id="servicesList" onMouseClicked="#onServiceSelected"
+                                                     styleClass="transparent-list-view" VBox.vgrow="ALWAYS"/>
                                     </children>
                                 </VBox>
                             </children>
@@ -97,7 +97,8 @@
                                              </VBox.margin>
                                              <children>
                                                               <Label styleClass="field-label" text="E N D P O I N T S" />
-                                                 <JFXButton fx:id="newEndpointButton" ripplerFill="WHITE">
+                                                 <JFXButton fx:id="newEndpointButton" onAction="#addNewEndpoint"
+                                                            ripplerFill="WHITE">
                                                    <graphic>
                                                       <ImageView fitHeight="15.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
                                                          <image>
@@ -112,6 +113,7 @@
                                              </padding>
                                           </HBox>
                                                         <JFXListView fx:id="endpointsList"
+                                                                     onMouseClicked="#onEndpointSelected"
                                                                      styleClass="transparent-list-view"
                                                                      VBox.vgrow="ALWAYS"/>
                                                     </children>

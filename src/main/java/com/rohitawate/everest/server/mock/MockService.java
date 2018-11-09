@@ -9,16 +9,21 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class MockService implements Runnable {
     private int port;
-    private ServerSocket server;
     private boolean running;
     private String prefix;
     private boolean attachPrefix;
 
     public boolean loggingEnabled;
     public String name;
+
+    private ServerSocket server;
+    private ExecutorService executorService;
 
     private ArrayList<Endpoint> endpoints;
 
@@ -57,11 +62,19 @@ public class MockService implements Runnable {
             this.server = new ServerSocket(port);
         }
 
-        this.running = true;
+        if (this.executorService == null) {
+            this.executorService = Executors.newCachedThreadPool(new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thread = new Thread(r);
+                    thread.setDaemon(true);
+                    return thread;
+                }
+            });
+        }
 
-        Thread listenThread = new Thread(this);
-        listenThread.setDaemon(true);
-        listenThread.start();
+        this.running = true;
+        executorService.submit(this);
 
         LoggingService.logInfo("Mock server has started on port " + server.getLocalPort() + ".", LocalDateTime.now());
     }

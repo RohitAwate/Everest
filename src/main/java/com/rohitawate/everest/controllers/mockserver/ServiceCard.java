@@ -24,7 +24,7 @@ class ServiceCard extends HBox {
     private Label name;
     private final JFXToggleButton toggle;
     private final JFXButton optionsButton;
-    final MockService service;
+    MockService service;
     private ServiceDetailsController controller;
     private Stage optionsStage;
 
@@ -65,12 +65,6 @@ class ServiceCard extends HBox {
             controller.setService(service);
             controller.setMode(ServiceDetailsController.UPDATE_MODE);
             optionsStage.showAndWait();
-
-            service.name = controller.getService().name;
-            service.setAttachPrefix(controller.getService().isAttachPrefix());
-            service.loggingEnabled = controller.getService().loggingEnabled;
-
-            name.setText(service.name);
         });
     }
 

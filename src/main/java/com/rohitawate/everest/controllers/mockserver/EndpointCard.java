@@ -5,12 +5,17 @@ import com.rohitawate.everest.server.mock.Endpoint;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 
 class EndpointCard extends HBox {
     Label method;
     Label path;
     Endpoint endpoint;
+    private ImageView alertIcon;
+    private HBox alertBox;
 
     EndpointCard(Endpoint endpoint) {
         this.endpoint = endpoint;
@@ -22,11 +27,29 @@ class EndpointCard extends HBox {
         path = new Label(endpoint.path);
         path.getStyleClass().add("endpoint-card-path");
 
+        alertIcon = new ImageView(getClass().getResource("/assets/Alert.png").toString());
+        alertIcon.setFitWidth(15);
+        alertIcon.setFitHeight(15);
+        Tooltip.install(alertIcon, new Tooltip("Duplicate endpoint"));
+        alertIcon.setVisible(false);
+
+        alertBox = new HBox(alertIcon);
+        alertBox.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(alertBox, Priority.ALWAYS);
+
         getStyleClass().add("endpoint-card");
-        getChildren().addAll(method, path);
+        getChildren().addAll(method, path, alertBox);
         setAlignment(Pos.CENTER_LEFT);
         setSpacing(10);
         setPadding(new Insets(2, 10, 2, 10));
+    }
+
+    void showAlert() {
+        alertIcon.setVisible(true);
+    }
+
+    void hideAlert() {
+        alertIcon.setVisible(false);
     }
 
     private static final String GETStyle = "-fx-background-color: orangered";

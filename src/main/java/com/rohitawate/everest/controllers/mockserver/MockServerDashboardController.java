@@ -131,10 +131,13 @@ public class MockServerDashboardController implements Initializable {
 
     @FXML
     private void addNewEndpoint(ActionEvent actionEvent) {
-        EndpointCard newCard = new EndpointCard(new Endpoint());
+        Endpoint newEndpoint = new Endpoint();
+        EndpointCard newCard = new EndpointCard(newEndpoint);
         endpointsList.getItems().add(newCard);
         endpointsList.getSelectionModel().select(newCard);
+        selectedServiceCard.service.addEndpoint(newEndpoint);
         onEndpointSelected(null);
+        checkDuplicateEndpoints();
     }
 
     private void resetEndpointDetails() {
@@ -165,12 +168,33 @@ public class MockServerDashboardController implements Initializable {
         snackbar.show(message, duration);
     }
 
+    private void checkDuplicateEndpoints() {
+        boolean duplicate;
+        for (EndpointCard outerCard : endpointsList.getItems()) {
+            duplicate = false;
+            for (EndpointCard innerCard : endpointsList.getItems()) {
+                if (innerCard != outerCard) {
+                    if (innerCard.endpoint.method.equals(outerCard.endpoint.method) &&
+                            innerCard.endpoint.path.equals(outerCard.endpoint.path)) {
+                        outerCard.showAlert();
+                        innerCard.showAlert();
+                        duplicate = true;
+                    }
+                }
+
+                if (!duplicate) {
+                    outerCard.hideAlert();
+                }
+            }
+        }
+    }
 
     // Listeners
     private void pathListener(Observable observable, String oldVal, String newVal) {
         if (selectedEndpointCard != null) {
             selectedEndpointCard.path.setText(newVal);
             selectedEndpointCard.endpoint.path = newVal;
+            checkDuplicateEndpoints();
         }
     }
 
@@ -179,6 +203,7 @@ public class MockServerDashboardController implements Initializable {
             selectedEndpointCard.method.setText(newVal);
             selectedEndpointCard.endpoint.method = newVal;
             EndpointCard.applyStyle(selectedEndpointCard.method);
+            checkDuplicateEndpoints();
         }
     }
 

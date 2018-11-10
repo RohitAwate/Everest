@@ -16,7 +16,7 @@ public class ServiceDetailsController implements Initializable {
     @FXML
     private VBox serviceDetailsBox;
     @FXML
-    private JFXTextField serviceNameField, servicePortField, servicePrefixField;
+    private JFXTextField serviceNameField, servicePortField, servicePrefixField, serviceLatencyField;
     @FXML
     private JFXCheckBox attachPrefixCheckBox;
     @FXML
@@ -49,6 +49,13 @@ public class ServiceDetailsController implements Initializable {
 
             if (!newVal.equals("") && Integer.parseInt(newVal) > 65535) {
                 servicePortField.setText("65535");
+            }
+        });
+
+        serviceLatencyField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal.matches("\\d*")) {
+                newVal = newVal.replaceAll("[^\\d]", "");
+                serviceLatencyField.setText(newVal);
             }
         });
     }
@@ -84,6 +91,10 @@ public class ServiceDetailsController implements Initializable {
             }
         }
 
+        if (!serviceLatencyField.getText().isEmpty()) {
+            service.latency = Integer.parseInt(serviceLatencyField.getText());
+        }
+
         service.setAttachPrefix(attachPrefixCheckBox.isSelected());
         service.loggingEnabled = loggingEnableToggle.isSelected();
         ((Stage) titleLabel.getScene().getWindow()).close();
@@ -96,6 +107,7 @@ public class ServiceDetailsController implements Initializable {
             servicePortField.clear();
             attachPrefixCheckBox.setSelected(false);
             servicePrefixField.clear();
+            serviceLatencyField.clear();
             loggingEnableToggle.setSelected(false);
 
             titleLabel.setText("A D D   N E W   S E R V I C E");
@@ -105,14 +117,16 @@ public class ServiceDetailsController implements Initializable {
             titleLabel.setText("S E R V I C E   D E T A I L S");
             serviceActionButton.setText(UPDATE_MODE);
             servicePortField.setText(String.valueOf(service.getPort()));
+            serviceLatencyField.setText(String.valueOf(service.latency));
             servicePortField.setDisable(true);
-
             serviceNameField.setText(service.name);
+
             if (service.getPrefix().startsWith("/")) {
                 servicePrefixField.setText(service.getPrefix().substring(1));
             } else {
                 servicePrefixField.setText(service.getPrefix());
             }
+
             attachPrefixCheckBox.setSelected(service.isAttachPrefix());
             loggingEnableToggle.setSelected(service.loggingEnabled);
         }

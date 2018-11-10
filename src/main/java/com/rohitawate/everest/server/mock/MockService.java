@@ -16,11 +16,13 @@ import java.util.concurrent.ThreadFactory;
 public class MockService implements Runnable {
     private int port;
     private boolean running;
+
     private String prefix;
     private boolean attachPrefix;
 
-    public boolean loggingEnabled;
     public String name;
+    public boolean loggingEnabled;
+    public int latency;
 
     private ServerSocket server;
     private ExecutorService executorService;
@@ -32,6 +34,7 @@ public class MockService implements Runnable {
         this.prefix = "";
         this.port = port;
         this.endpoints = new ArrayList<>();
+        this.latency = 0;
     }
 
     public MockService(String name, String prefix, int port) {
@@ -39,6 +42,7 @@ public class MockService implements Runnable {
         this.prefix = prefix;
         this.port = port;
         this.endpoints = new ArrayList<>();
+        this.latency = 0;
         this.attachPrefix = prefix != null;
     }
 
@@ -94,7 +98,12 @@ public class MockService implements Runnable {
         try {
             HttpRequestParser requestParser = new HttpRequestParser(socket.getInputStream(), false);
 
-            boolean startsWithPrefix = requestParser.getPath().startsWith(this.prefix);
+            boolean startsWithPrefix = false;
+
+            if (!this.prefix.isEmpty()) {
+                startsWithPrefix = requestParser.getPath().startsWith(this.prefix);
+            }
+
             String path = null;
 
             if (attachPrefix && startsWithPrefix) {
@@ -106,7 +115,7 @@ public class MockService implements Runnable {
             if (path != null) {
                 for (Endpoint endpoint : endpoints) {
                     if (path.equals(endpoint.path) && requestParser.getMethod().equals(endpoint.method)) {
-                        ResponseWriter.sendResponse(socket, endpoint);
+                        ResponseWriter.sendResponse(socket, endpoint, latency);
                         if (loggingEnabled) {
                             ServerLogger.logInfo(this.name, endpoint.responseCode, requestParser);
                         }
@@ -141,7 +150,7 @@ public class MockService implements Runnable {
             "{ \"error\": \"Requested route does not support this method or does not exist.\"}", MediaType.APPLICATION_JSON);
 
     private void handleNotFound(Socket socket, HttpRequestParser requestParser) throws IOException {
-        ResponseWriter.sendResponse(socket, notFound);
+        ResponseWriter.sendResponse(socket, notFound, latency);
         if (loggingEnabled) {
             ServerLogger.logWarning(this.name, 404, requestParser);
         }

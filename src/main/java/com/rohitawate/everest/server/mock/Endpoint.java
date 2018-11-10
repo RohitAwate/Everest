@@ -9,6 +9,7 @@ public class Endpoint {
     public String path;
     public String resource;
     public int responseCode;
+    public int latency;
 
     public String contentType;
 

@@ -126,17 +126,21 @@
                                                       AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                     <children>
-                                                        <HBox spacing="10.0">
+                                                        <HBox fx:id="finalURLBox" alignment="CENTER" spacing="10.0">
                                                             <VBox.margin>
-                                                                <Insets top="10.0"/>
+                                                                <Insets/>
                                                             </VBox.margin>
                                                             <children>
-                                                                <JFXTextField fx:id="finalURLField" editable="false"
-                                                                              focusColor="ORANGERED" labelFloat="true"
-                                                                              promptText="FINAL URL"
-                                                                              styleClass="material-text-field"
-                                                                              unFocusColor="#909090"
-                                                                              HBox.hgrow="ALWAYS"/>
+                                                                <Label text="ENDPOINT" textFill="#9e9e9e"/>
+                                                                <TextField fx:id="finalURLField" editable="false"
+                                                                           promptText="URL"
+                                                                           style="-fx-background-color: transparent;"
+                                                                           styleClass="material-text-field"
+                                                                           HBox.hgrow="ALWAYS">
+                                                                    <HBox.margin>
+                                                                        <Insets left="10.0"/>
+                                                                    </HBox.margin>
+                                                                </TextField>
                                                                 <JFXButton fx:id="copyButton"
                                                                            contentDisplay="GRAPHIC_ONLY">
                                                                     <graphic>
@@ -148,6 +152,24 @@
                                                                             </image>
                                                                         </ImageView>
                                                                     </graphic>
+                                                                    <tooltip>
+                                                                        <Tooltip text="Copy address"/>
+                                                                    </tooltip>
+                                                                </JFXButton>
+                                                                <JFXButton fx:id="openBrowserButton"
+                                                                           contentDisplay="GRAPHIC_ONLY">
+                                                                    <graphic>
+                                                                        <ImageView fitHeight="20.0" fitWidth="20.0"
+                                                                                   pickOnBounds="true"
+                                                                                   preserveRatio="true">
+                                                                            <image>
+                                                                                <Image url="@../../../assets/OpenInBrowser.png"/>
+                                                                            </image>
+                                                                        </ImageView>
+                                                                    </graphic>
+                                                                    <tooltip>
+                                                                        <Tooltip text="Open endpoint in browser"/>
+                                                                    </tooltip>
                                                                 </JFXButton>
                                                             </children>
                                                         </HBox>
@@ -162,7 +184,7 @@
                                                                               unFocusColor="#909090"/>
                                                             </children>
                                                             <VBox.margin>
-                                                                <Insets top="10.0"/>
+                                                                <Insets/>
                                                             </VBox.margin>
                                                         </HBox>
                                                         <HBox alignment="CENTER" spacing="20.0">
@@ -171,6 +193,12 @@
                                                                           promptText="Content Type"/>
                                                                 <ComboBox fx:id="responseCodeBox" prefWidth="300.0"
                                                                           promptText="Response Code"/>
+                                                                <JFXTextField fx:id="endpointLatencyField"
+                                                                              focusColor="ORANGERED" labelFloat="true"
+                                                                              prefWidth="120.0"
+                                                                              promptText="LATENCY (ms)"
+                                                                              styleClass="material-text-field"
+                                                                              unFocusColor="#909090"/>
                                                             </children>
                                                         </HBox>
                                                         <VBox fx:id="codeBox" alignment="CENTER_LEFT" spacing="5.0"
@@ -193,11 +221,12 @@
                                                             <padding>
                                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                                                             </padding>
+                                                            <VBox.margin>
+                                                                <Insets bottom="10.0" left="10.0" right="10.0"
+                                                                        top="10.0"/>
+                                                            </VBox.margin>
                                                         </VBox>
                                                     </children>
-                                                    <padding>
-                                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                                    </padding>
                                                 </VBox>
                                             </children>
                                         </AnchorPane>

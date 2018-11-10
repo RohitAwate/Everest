@@ -468,6 +468,11 @@
     -fx-background-color: #353535;
 }
 
+#finalURLBox {
+    -fx-background-color: #202020;
+    -fx-padding: 10px 20px;
+}
+
 #portField, #serverAddressBox {
     -fx-background-color: #505050;
 }

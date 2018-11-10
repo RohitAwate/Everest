@@ -4,16 +4,13 @@ import com.rohitawate.everest.http.HttpRequestParser;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
-import com.rohitawate.everest.notifications.NotificationsManager;
 
-import java.awt.*;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -37,7 +34,7 @@ public class CaptureServer {
             }
         }
 
-        openLinkInBrowser(authURL);
+        EverestUtilities.openLinkInBrowser(authURL);
         return listen();
     }
 
@@ -107,22 +104,6 @@ public class CaptureServer {
         }
 
         return grant;
-    }
-
-    private static void openLinkInBrowser(String url) {
-        if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            new Thread(() -> {
-                try {
-                    Desktop.getDesktop().browse(new URI(url));
-                } catch (Exception ex) {
-                    LoggingService.logWarning("Invalid URL encountered while opening link in browser.", ex, LocalDateTime.now());
-                }
-            }).start();
-
-            LoggingService.logInfo("Opened authorization grant page in system browser.", LocalDateTime.now());
-        } else {
-            NotificationsManager.push("Couldn't find a web browser on your system.", 6000);
-        }
     }
 
     private static String getMimeType(String file) {

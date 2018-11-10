@@ -36,9 +36,12 @@
                         <JFXTextField fx:id="servicePortField" focusColor="ORANGERED" labelFloat="true" layoutX="55.0"
                                       layoutY="10.0" promptText="PORT" styleClass="material-text-field"
                                       unFocusColor="#909090"/>
+                        <JFXTextField fx:id="serviceLatencyField" focusColor="ORANGERED" labelFloat="true"
+                                      layoutX="199.0" layoutY="10.0" promptText="LATENCY (ms)"
+                                      styleClass="material-text-field" unFocusColor="#909090"/>
                     </children>
                 </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <HBox alignment="CENTER" spacing="20.0">
                     <children>
                         <JFXCheckBox fx:id="attachPrefixCheckBox" checkedColor="ORANGERED" contentDisplay="RIGHT"
                                      graphicTextGap="10.0" textFill="#909090" unCheckedColor="#909090"/>
@@ -53,7 +56,7 @@
                                          textFill="#909090" toggleColor="ORANGERED" toggleLineColor="#cacaca"/>
                     </children>
                 </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <HBox alignment="CENTER" spacing="20.0">
                     <children>
                         <JFXButton fx:id="cancelActionButton" buttonType="RAISED" ripplerFill="WHITE" text="CANCEL"
                                    textFill="WHITE"/>

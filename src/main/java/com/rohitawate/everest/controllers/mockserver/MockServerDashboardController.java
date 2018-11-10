@@ -8,6 +8,7 @@ import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.format.FormatterFactory;
+import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.server.mock.Endpoint;
@@ -21,6 +22,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -44,11 +46,13 @@ public class MockServerDashboardController implements Initializable {
     @FXML
     private JFXListView<EndpointCard> endpointsList;
     @FXML
-    private JFXTextField endpointPathField, finalURLField;
+    private JFXTextField endpointPathField, endpointLatencyField;
+    @FXML
+    private TextField finalURLField;
     @FXML
     private ScrollPane codeAreaScrollPane;
     @FXML
-    private JFXButton copyButton;
+    private JFXButton copyButton, openBrowserButton;
 
     private static JFXSnackbar snackbar;
     private EverestCodeArea codeArea;
@@ -97,12 +101,15 @@ public class MockServerDashboardController implements Initializable {
         codeArea.textProperty().addListener(this::codeAreaListener);
         contentTypeBox.valueProperty().addListener(this::contentTypeBoxListener);
         responseCodeBox.valueProperty().addListener(this::responseCodeListener);
+        endpointLatencyField.textProperty().addListener(this::latencyListener);
 
         copyButton.setOnAction(e -> {
             finalURLField.selectAll();
             finalURLField.copy();
             finalURLField.deselect();
         });
+
+        openBrowserButton.setOnAction(e -> EverestUtilities.openLinkInBrowser(finalURLField.getText()));
     }
 
     @FXML
@@ -208,7 +215,7 @@ public class MockServerDashboardController implements Initializable {
                 finalURL += selectedEndpointCard.endpoint.path;
             }
 
-            finalURLField.setText(finalURL);
+            finalURLField.setText(EverestUtilities.encodeURL(finalURL));
         } else {
             finalURLField.clear();
         }
@@ -254,6 +261,19 @@ public class MockServerDashboardController implements Initializable {
     private void contentTypeBoxListener(Observable observable, String oldVal, String newVal) {
         if (selectedEndpointCard != null) {
             selectedEndpointCard.endpoint.contentType = HTTPConstants.getComplexContentType(newVal);
+        }
+    }
+
+    private void latencyListener(Observable observable, String oldVal, String newVal) {
+        if (selectedEndpointCard != null) {
+            if (!newVal.matches("\\d*")) {
+                newVal = newVal.replaceAll("[^\\d]", "");
+                endpointLatencyField.setText(newVal);
+            }
+
+            if (!newVal.isEmpty()) {
+                selectedEndpointCard.endpoint.latency = Integer.parseInt(newVal);
+            }
         }
     }
 

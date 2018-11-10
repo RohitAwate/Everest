@@ -3,7 +3,7 @@ package com.rohitawate.everest.controllers.mockserver;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXToggleButton;
 import com.rohitawate.everest.logging.LoggingService;
-import com.rohitawate.everest.server.mock.MockService;
+import com.rohitawate.everest.server.mock.MockServer;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -20,16 +20,16 @@ import java.time.LocalDateTime;
 
 import static com.rohitawate.everest.controllers.mockserver.MockServerDashboardController.pushServerNotification;
 
-class ServiceCard extends HBox {
+class ServerCard extends HBox {
     private Label name;
     private final JFXToggleButton toggle;
     private final JFXButton optionsButton;
-    MockService service;
+    MockServer server;
 
-    ServiceCard(MockService service) {
-        this.service = service;
+    ServerCard(MockServer server) {
+        this.server = server;
 
-        name = new Label(service.name);
+        name = new Label(server.name);
 
         toggle = new JFXToggleButton();
         toggle.setGraphicTextGap(20);
@@ -50,15 +50,15 @@ class ServiceCard extends HBox {
 
         getChildren().addAll(name, filler);
         setAlignment(Pos.CENTER_LEFT);
-        getStyleClass().add("service-card");
+        getStyleClass().add("server-card");
         setSpacing(20);
         setPadding(new Insets(0, 10, 0, 10));
     }
 
-    void setOptionsStage(Stage optionsStage, ServiceDetailsController controller, MockServerDashboardController dashboardController) {
+    void setOptionsStage(Stage optionsStage, ServerDetailsController controller, MockServerDashboardController dashboardController) {
         this.optionsButton.setOnAction(e -> {
-            controller.setService(service);
-            controller.setMode(ServiceDetailsController.UPDATE_MODE);
+            controller.setServer(server);
+            controller.setMode(ServerDetailsController.UPDATE_MODE);
             optionsStage.showAndWait();
             dashboardController.setFinalURLField();
         });
@@ -67,23 +67,23 @@ class ServiceCard extends HBox {
     private void toggleService(ActionEvent actionEvent) {
         if (toggle.isSelected()) {
             try {
-                service.start();
-                String msg = String.format("Mock service '%s' has started.", service.name);
+                server.start();
+                String msg = String.format("Mock server '%s' has started.", server.name);
                 LoggingService.logInfo(msg, LocalDateTime.now());
                 pushServerNotification(msg, 7000);
             } catch (IOException e) {
-                String error = String.format("Could not start mock service '%s'.", service.name);
+                String error = String.format("Could not start mock server '%s'.", server.name);
                 LoggingService.logSevere(error, e, LocalDateTime.now());
                 pushServerNotification(error, 7000);
             }
         } else {
             try {
-                service.stop();
-                String msg = String.format("Mock service '%s' has stopped.", service.name);
+                server.stop();
+                String msg = String.format("Mock server '%s' has stopped.", server.name);
                 LoggingService.logInfo(msg, LocalDateTime.now());
                 pushServerNotification(msg, 7000);
             } catch (IOException e) {
-                String error = String.format("Could not stop mock service '%s'.", service.name);
+                String error = String.format("Could not stop mock server '%s'.", server.name);
                 LoggingService.logSevere(error, e, LocalDateTime.now());
                 pushServerNotification(error, 7000);
             }

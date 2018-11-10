@@ -9,7 +9,7 @@ import java.io.IOException;
 class MockServerTest {
     @Test
     void start() throws IOException {
-        MockService service = new MockService("Summit", "/api", 9090);
+        MockServer service = new MockServer("Summit", "/api", 9090);
         service.loggingEnabled = true;
 
         Endpoint endpoint = new Endpoint(HTTPConstants.GET, "/summit", 200,

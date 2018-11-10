@@ -12,7 +12,7 @@ import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.server.mock.Endpoint;
-import com.rohitawate.everest.server.mock.MockService;
+import com.rohitawate.everest.server.mock.MockServer;
 import javafx.beans.Observable;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -42,7 +42,7 @@ public class MockServerDashboardController implements Initializable {
     @FXML
     private ComboBox<String> methodBox, contentTypeBox, responseCodeBox;
     @FXML
-    private JFXListView<ServiceCard> servicesList;
+    private JFXListView<ServerCard> serversList;
     @FXML
     private JFXListView<EndpointCard> endpointsList;
     @FXML
@@ -57,12 +57,12 @@ public class MockServerDashboardController implements Initializable {
     private static JFXSnackbar snackbar;
     private EverestCodeArea codeArea;
 
-    private ServiceCard selectedServiceCard;
+    private ServerCard selectedServerCard;
 
     private EndpointCard selectedEndpointCard;
 
     private Stage serviceDetailsStage;
-    private ServiceDetailsController serviceDetailsController;
+    private ServerDetailsController serverDetailsController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -116,12 +116,12 @@ public class MockServerDashboardController implements Initializable {
     private void addNewService(ActionEvent actionEvent) {
         if (serviceDetailsStage == null) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/mockserver/ServiceDetails.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/mockserver/ServerDetails.fxml"));
                 Parent serviceAdderFXML = loader.load();
                 serviceDetailsStage = new Stage();
                 serviceDetailsStage.setScene(new Scene(serviceAdderFXML));
-                serviceDetailsController = loader.getController();
-                serviceDetailsStage.setTitle("Add new mock service - " + Main.APP_NAME);
+                serverDetailsController = loader.getController();
+                serviceDetailsStage.setTitle("Add new mock server - " + Main.APP_NAME);
                 serviceDetailsStage.setResizable(false);
                 serviceDetailsStage.initModality(Modality.APPLICATION_MODAL);
                 serviceDetailsStage.getIcons().add(Main.APP_ICON);
@@ -130,14 +130,14 @@ public class MockServerDashboardController implements Initializable {
             }
         }
 
-        serviceDetailsController.setMode(ServiceDetailsController.ADD_MODE);
+        serverDetailsController.setMode(ServerDetailsController.ADD_MODE);
         serviceDetailsStage.showAndWait();
 
-        if (serviceDetailsController.getService() != null) {
-            ServiceCard serviceCard = new ServiceCard(serviceDetailsController.getService());
-            serviceCard.setOptionsStage(serviceDetailsStage, serviceDetailsController, this);
-            servicesList.getItems().add(serviceCard);
-            servicesList.getSelectionModel().select(serviceCard);
+        if (serverDetailsController.getServer() != null) {
+            ServerCard serverCard = new ServerCard(serverDetailsController.getServer());
+            serverCard.setOptionsStage(serviceDetailsStage, serverDetailsController, this);
+            serversList.getItems().add(serverCard);
+            serversList.getSelectionModel().select(serverCard);
             onServiceSelected(null);
         }
     }
@@ -149,7 +149,7 @@ public class MockServerDashboardController implements Initializable {
         newCard.path.setText("/");
         endpointsList.getItems().add(newCard);
         endpointsList.getSelectionModel().select(newCard);
-        selectedServiceCard.service.addEndpoint(newEndpoint);
+        selectedServerCard.server.addEndpoint(newEndpoint);
         onEndpointSelected(null);
         checkDuplicateEndpoints();
     }
@@ -166,7 +166,7 @@ public class MockServerDashboardController implements Initializable {
         endpointDetailsBox.setDisable(true);
     }
 
-    private void populateEndpointsList(MockService service) {
+    private void populateEndpointsList(MockServer service) {
         endpointsList.getItems().clear();
 
         for (Endpoint endpoint : service.getEndpoints()) {
@@ -204,11 +204,11 @@ public class MockServerDashboardController implements Initializable {
     }
 
     void setFinalURLField() {
-        if (selectedServiceCard != null && !endpointsBox.isDisable()) {
-            String finalURL = "http://localhost:" + String.valueOf(selectedServiceCard.service.getPort());
+        if (selectedServerCard != null && !endpointsBox.isDisable()) {
+            String finalURL = "http://localhost:" + String.valueOf(selectedServerCard.server.getPort());
 
-            if (selectedServiceCard.service.isAttachPrefix()) {
-                finalURL += selectedServiceCard.service.getPrefix();
+            if (selectedServerCard.server.isAttachPrefix()) {
+                finalURL += selectedServerCard.server.getPrefix();
             }
 
             if (selectedEndpointCard != null) {
@@ -279,10 +279,10 @@ public class MockServerDashboardController implements Initializable {
 
     @FXML
     private void onServiceSelected(MouseEvent event) {
-        selectedServiceCard = servicesList.getSelectionModel().getSelectedItem();
-        if (selectedServiceCard != null) {
+        selectedServerCard = serversList.getSelectionModel().getSelectedItem();
+        if (selectedServerCard != null) {
             resetEndpointDetails();
-            populateEndpointsList(selectedServiceCard.service);
+            populateEndpointsList(selectedServerCard.server);
             endpointsBox.setDisable(false);
             setFinalURLField();
         } else {

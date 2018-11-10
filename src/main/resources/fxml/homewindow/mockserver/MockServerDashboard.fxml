@@ -1,43 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+
 <StackPane fx:id="mockDashboardSP" prefHeight="720.0" prefWidth="1280.0" stylesheets="@../../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.mockserver.MockServerDashboardController">
     <children>
         <VBox>
             <children>
-                <HBox fx:id="serverDetails" alignment="CENTER_RIGHT" maxHeight="60.0" spacing="20.0"
-                      VBox.vgrow="ALWAYS">
+                <HBox fx:id="serverDetails" alignment="CENTER_RIGHT" maxHeight="60.0" spacing="20.0" VBox.vgrow="ALWAYS">
                     <children>
                         <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                             <children>
                                 <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
-                                        <Image url="@../../../assets/Logo.png"/>
+                                        <Image url="@../../../assets/Logo.png" />
                                     </image>
                                     <HBox.margin>
-                                        <Insets left="20.0" right="20.0"/>
+                                        <Insets left="20.0" right="20.0" />
                                     </HBox.margin>
                                 </ImageView>
                                 <Label text="M O C K   S E R V E R S" textFill="#c9c9c9">
                                     <font>
-                                        <Font size="20.0"/>
+                                        <Font size="20.0" />
                                     </font>
                                 </Label>
                             </children>
                             <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                             </padding>
                             <HBox.margin>
-                                <Insets/>
+                                <Insets />
                             </HBox.margin>
                         </HBox>
-                        <JFXButton fx:id="optionsButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="10.0"
-                                   ripplerFill="WHITE" textFill="WHITE">
+                        <JFXButton fx:id="optionsButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="10.0" ripplerFill="WHITE" textFill="WHITE">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
@@ -46,7 +56,7 @@
                                 </ImageView>
                             </graphic>
                             <HBox.margin>
-                                <Insets right="20.0"/>
+                                <Insets right="20.0" />
                             </HBox.margin>
                         </JFXButton>
                     </children>
@@ -62,7 +72,7 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </VBox.margin>
                                  <children>
-                                              <Label fx:id="servicesLabel" styleClass="field-label" text="S E R V I C E S" />
+                                              <Label fx:id="serversLabel" styleClass="field-label" text="S E R V E R S" />
                                      <JFXButton fx:id="newServiceButton" onAction="#addNewService" ripplerFill="WHITE">
                                        <graphic>
                                           <ImageView fitHeight="15.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
@@ -77,8 +87,7 @@
                                     <Insets left="10.0" />
                                  </padding>
                               </HBox>
-                                        <JFXListView fx:id="servicesList" onMouseClicked="#onServiceSelected"
-                                                     styleClass="transparent-list-view" VBox.vgrow="ALWAYS"/>
+                                        <JFXListView fx:id="serversList" onMouseClicked="#onServiceSelected" styleClass="transparent-list-view" VBox.vgrow="ALWAYS" />
                                     </children>
                                 </VBox>
                             </children>
@@ -97,8 +106,7 @@
                                              </VBox.margin>
                                              <children>
                                                               <Label styleClass="field-label" text="E N D P O I N T S" />
-                                                 <JFXButton fx:id="newEndpointButton" onAction="#addNewEndpoint"
-                                                            ripplerFill="WHITE">
+                                                 <JFXButton fx:id="newEndpointButton" onAction="#addNewEndpoint" ripplerFill="WHITE">
                                                    <graphic>
                                                       <ImageView fitHeight="15.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
                                                          <image>
@@ -112,118 +120,87 @@
                                                 <Insets left="10.0" />
                                              </padding>
                                           </HBox>
-                                                        <JFXListView fx:id="endpointsList"
-                                                                     onMouseClicked="#onEndpointSelected"
-                                                                     styleClass="transparent-list-view"
-                                                                     VBox.vgrow="ALWAYS"/>
+                                                        <JFXListView fx:id="endpointsList" onMouseClicked="#onEndpointSelected" styleClass="transparent-list-view" VBox.vgrow="ALWAYS" />
                                                     </children>
                                                 </VBox>
                                             </children>
                                         </AnchorPane>
                                         <AnchorPane>
                                             <children>
-                                                <VBox fx:id="endpointDetailsBox" alignment="TOP_CENTER" spacing="20.0"
-                                                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                <VBox fx:id="endpointDetailsBox" alignment="TOP_CENTER" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                                     <children>
                                                         <HBox fx:id="finalURLBox" alignment="CENTER" spacing="10.0">
                                                             <VBox.margin>
-                                                                <Insets/>
+                                                                <Insets />
                                                             </VBox.margin>
                                                             <children>
-                                                                <Label text="ENDPOINT" textFill="#9e9e9e"/>
-                                                                <TextField fx:id="finalURLField" editable="false"
-                                                                           promptText="URL"
-                                                                           style="-fx-background-color: transparent;"
-                                                                           styleClass="material-text-field"
-                                                                           HBox.hgrow="ALWAYS">
+                                                                <Label text="ENDPOINT" textFill="#9e9e9e" />
+                                                                <TextField fx:id="finalURLField" editable="false" promptText="URL" style="-fx-background-color: transparent;" styleClass="material-text-field" HBox.hgrow="ALWAYS">
                                                                     <HBox.margin>
-                                                                        <Insets left="10.0"/>
+                                                                        <Insets left="10.0" />
                                                                     </HBox.margin>
                                                                 </TextField>
-                                                                <JFXButton fx:id="copyButton"
-                                                                           contentDisplay="GRAPHIC_ONLY">
+                                                                <JFXButton fx:id="copyButton" contentDisplay="GRAPHIC_ONLY">
                                                                     <graphic>
-                                                                        <ImageView fitHeight="20.0" fitWidth="20.0"
-                                                                                   pickOnBounds="true"
-                                                                                   preserveRatio="true">
+                                                                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                                             <image>
-                                                                                <Image url="@../../../assets/Copy.png"/>
+                                                                                <Image url="@../../../assets/Copy.png" />
                                                                             </image>
                                                                         </ImageView>
                                                                     </graphic>
                                                                     <tooltip>
-                                                                        <Tooltip text="Copy address"/>
+                                                                        <Tooltip text="Copy address" />
                                                                     </tooltip>
                                                                 </JFXButton>
-                                                                <JFXButton fx:id="openBrowserButton"
-                                                                           contentDisplay="GRAPHIC_ONLY">
+                                                                <JFXButton fx:id="openBrowserButton" contentDisplay="GRAPHIC_ONLY">
                                                                     <graphic>
-                                                                        <ImageView fitHeight="20.0" fitWidth="20.0"
-                                                                                   pickOnBounds="true"
-                                                                                   preserveRatio="true">
+                                                                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                                                             <image>
-                                                                                <Image url="@../../../assets/OpenInBrowser.png"/>
+                                                                                <Image url="@../../../assets/OpenInBrowser.png" />
                                                                             </image>
                                                                         </ImageView>
                                                                     </graphic>
                                                                     <tooltip>
-                                                                        <Tooltip text="Open endpoint in browser"/>
+                                                                        <Tooltip text="Open endpoint in browser" />
                                                                     </tooltip>
                                                                 </JFXButton>
                                                             </children>
                                                         </HBox>
                                                         <HBox alignment="CENTER" spacing="20.0">
                                                             <children>
-                                                                <ComboBox fx:id="methodBox" prefWidth="100.0"/>
-                                                                <Label text="/" textFill="#dadada"/>
-                                                                <JFXTextField fx:id="endpointPathField"
-                                                                              focusColor="ORANGERED" labelFloat="true"
-                                                                              prefWidth="300.0" promptText="PATH"
-                                                                              styleClass="material-text-field"
-                                                                              unFocusColor="#909090"/>
+                                                                <ComboBox fx:id="methodBox" prefWidth="100.0" />
+                                                                <Label text="/" textFill="#dadada" />
+                                                                <JFXTextField fx:id="endpointPathField" focusColor="ORANGERED" labelFloat="true" prefWidth="300.0" promptText="PATH" styleClass="material-text-field" unFocusColor="#909090" />
                                                             </children>
                                                             <VBox.margin>
-                                                                <Insets/>
+                                                                <Insets />
                                                             </VBox.margin>
                                                         </HBox>
                                                         <HBox alignment="CENTER" spacing="20.0">
                                                             <children>
-                                                                <ComboBox fx:id="contentTypeBox" prefWidth="150.0"
-                                                                          promptText="Content Type"/>
-                                                                <ComboBox fx:id="responseCodeBox" prefWidth="300.0"
-                                                                          promptText="Response Code"/>
-                                                                <JFXTextField fx:id="endpointLatencyField"
-                                                                              focusColor="ORANGERED" labelFloat="true"
-                                                                              prefWidth="120.0"
-                                                                              promptText="LATENCY (ms)"
-                                                                              styleClass="material-text-field"
-                                                                              unFocusColor="#909090"/>
+                                                                <ComboBox fx:id="contentTypeBox" prefWidth="150.0" promptText="Content Type" />
+                                                                <ComboBox fx:id="responseCodeBox" prefWidth="300.0" promptText="Response Code" />
+                                                                <JFXTextField fx:id="endpointLatencyField" focusColor="ORANGERED" labelFloat="true" prefWidth="120.0" promptText="LATENCY (ms)" styleClass="material-text-field" unFocusColor="#909090" />
                                                             </children>
                                                         </HBox>
-                                                        <VBox fx:id="codeBox" alignment="CENTER_LEFT" spacing="5.0"
-                                                              VBox.vgrow="ALWAYS">
+                                                        <VBox fx:id="codeBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="ALWAYS">
                                                             <children>
-                                                                <Label text="RESPONSE BODY" textFill="#a8a8a8"
-                                                                       VBox.vgrow="ALWAYS">
+                                                                <Label text="RESPONSE BODY" textFill="#a8a8a8" VBox.vgrow="ALWAYS">
                                                                     <VBox.margin>
-                                                                        <Insets left="5.0"/>
+                                                                        <Insets left="5.0" />
                                                                     </VBox.margin>
                                                                 </Label>
-                                                                <ScrollPane fx:id="codeAreaScrollPane"
-                                                                            fitToHeight="true" fitToWidth="true"
-                                                                            VBox.vgrow="ALWAYS">
+                                                                <ScrollPane fx:id="codeAreaScrollPane" fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
                                                                     <content>
-                                                                        <AnchorPane/>
+                                                                        <AnchorPane />
                                                                     </content>
                                                                 </ScrollPane>
                                                             </children>
                                                             <padding>
-                                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                                             </padding>
                                                             <VBox.margin>
-                                                                <Insets bottom="10.0" left="10.0" right="10.0"
-                                                                        top="10.0"/>
+                                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                                             </VBox.margin>
                                                         </VBox>
                                                     </children>

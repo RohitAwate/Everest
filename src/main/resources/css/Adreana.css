@@ -507,11 +507,11 @@
     -fx-text-fill: #ababab;
 }
 
-#servicesList .jfx-list-cell {
+#serversList .jfx-list-cell {
     -fx-font-size: 20px;
 }
 
-#servicesList .jfx-list-cell:selected {
+#serversList .jfx-list-cell:selected {
     -fx-background-color: #ff450060;
 }
 
@@ -523,13 +523,13 @@
     -fx-background-color: #ff450030;
 }
 
-#servicesList .jfx-list-cell:selected Label,
+#serversList .jfx-list-cell:selected Label,
 #endpointsList .jfx-list-cell:selected .endpoint-card-path {
     -fx-text-fill: white;
     -fx-font-weight: bold;
 }
 
-.service-card .jfx-toggle-button {
+.server-card .jfx-toggle-button {
     -fx-text-fill: #ababab;
     -fx-font-size: 20px;
 }
@@ -546,11 +546,11 @@
 }
 
 /* Service Adder */
-#serviceDetailsHeaderBox {
+#serverDetailsHeaderBox {
     -fx-background-color: #545454;
 }
 
-.service-details {
+.server-details {
     -fx-background-color: #282828;
 }
 
@@ -562,7 +562,7 @@
     -fx-background-color: #747474;
 }
 
-#serviceActionButton {
+#serverActionButton {
     -fx-background-color: red;
 }
 

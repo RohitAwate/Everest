@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class MockService implements Runnable {
+public class MockServer implements Runnable {
     private int port;
     private boolean running;
 
@@ -29,7 +29,7 @@ public class MockService implements Runnable {
 
     private ArrayList<Endpoint> endpoints;
 
-    public MockService(String name, int port) {
+    public MockServer(String name, int port) {
         this.name = name;
         this.prefix = "";
         this.port = port;
@@ -37,7 +37,7 @@ public class MockService implements Runnable {
         this.latency = 0;
     }
 
-    public MockService(String name, String prefix, int port) {
+    public MockServer(String name, String prefix, int port) {
         this.name = name;
         this.prefix = prefix;
         this.port = port;

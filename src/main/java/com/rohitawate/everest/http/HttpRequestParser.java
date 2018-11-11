@@ -32,6 +32,7 @@ public class HttpRequestParser {
     public HttpRequestParser(InputStream stream, boolean parseHeaders) {
         Scanner scanner = new Scanner(stream);
 
+        while (!scanner.hasNextLine()) ;
         String line = scanner.nextLine();
         String tokens[] = line.split(" ");
         this.method = tokens[0];
@@ -42,7 +43,7 @@ public class HttpRequestParser {
 
         if (parseHeaders) {
             this.headers = new HashMap<>();
-            while (!(line = scanner.nextLine()).isEmpty()) {
+            while (scanner.hasNextLine() && !(line = scanner.nextLine()).isEmpty()) {
                 tokens = line.split(": ");
                 this.headers.put(tokens[0], tokens[1]);
             }

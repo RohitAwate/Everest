@@ -109,6 +109,8 @@ public class ServerDetailsController implements Initializable {
 
         if (!serverLatencyField.getText().isEmpty()) {
             server.latency = Integer.parseInt(serverLatencyField.getText());
+        } else {
+            server.latency = 0;
         }
 
         server.setAttachPrefix(attachPrefixCheckBox.isSelected());
@@ -123,7 +125,7 @@ public class ServerDetailsController implements Initializable {
             serverPortField.clear();
             attachPrefixCheckBox.setSelected(false);
             serverPrefixField.clear();
-            serverLatencyField.clear();
+            serverLatencyField.setText("0");
             loggingEnableToggle.setSelected(false);
 
             titleLabel.setText("A D D   N E W   S E R V E R");

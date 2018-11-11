@@ -137,7 +137,7 @@ public class EverestUtilities {
                 }
             }).start();
 
-            LoggingService.logInfo("Opened authorization grant page in system browser.", LocalDateTime.now());
+            LoggingService.logInfo("Opened " + url + " in system browser.", LocalDateTime.now());
         } else {
             NotificationsManager.push("Couldn't find a web browser on your system.", 6000);
         }

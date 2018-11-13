@@ -24,7 +24,7 @@ public class CoreConsoleLogWriter implements LogWriter {
     }
 
     @Override
-    public void append(Log log) {
+    public synchronized void append(Log log) {
         CoreLog coreLog = (CoreLog) log;
         if (coreLog.level.greaterThanEqualTo(this.level)) {
             if (coreLog.level.equals(Level.INFO)) {

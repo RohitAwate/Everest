@@ -53,7 +53,7 @@ class ServerFileLogWriter implements LogWriter {
     }
 
     @Override
-    public void append(Log log) {
+    public synchronized void append(Log log) {
         ServerLog serverLog = (ServerLog) log;
         if (serverLog.level.greaterThanEqualTo(this.level)) {
             try {

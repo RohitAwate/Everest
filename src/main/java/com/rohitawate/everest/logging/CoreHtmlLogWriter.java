@@ -24,7 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
 class CoreHtmlLogWriter implements LogWriter {
     private final Level writerLevel;
@@ -57,7 +56,7 @@ class CoreHtmlLogWriter implements LogWriter {
     /**
      * Appends the append to the respective day's append file.
      */
-    public void append(Log log) {
+    public synchronized void append(Log log) {
         CoreLog coreLog = (CoreLog) log;
         if (coreLog.level.greaterThanEqualTo(this.writerLevel)) {
             try {

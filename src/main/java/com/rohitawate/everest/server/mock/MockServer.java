@@ -16,7 +16,7 @@
 
 package com.rohitawate.everest.server.mock;
 
-import com.rohitawate.everest.http.HttpRequestParser;
+import com.rohitawate.everest.http.HttpRequest;
 import com.rohitawate.everest.logging.LoggingService;
 
 import javax.ws.rs.core.MediaType;
@@ -112,7 +112,7 @@ public class MockServer implements Runnable {
 
     private void routeRequest(Socket socket) {
         try {
-            HttpRequestParser requestParser = new HttpRequestParser(socket.getInputStream(), false);
+            HttpRequest requestParser = HttpRequest.parse(socket.getInputStream(), false);
 
             boolean startsWithPrefix = false;
 
@@ -165,7 +165,7 @@ public class MockServer implements Runnable {
     private static Endpoint notFound = new Endpoint(null, null, 404,
             "{ \"error\": \"Requested route does not support this method or does not exist.\"}", MediaType.APPLICATION_JSON);
 
-    private void handleNotFound(Socket socket, HttpRequestParser requestParser) throws IOException {
+    private void handleNotFound(Socket socket, HttpRequest requestParser) throws IOException {
         ResponseWriter.sendResponse(socket, notFound, latency);
         if (loggingEnabled) {
             ServerLogger.logWarning(this.name, 404, requestParser);

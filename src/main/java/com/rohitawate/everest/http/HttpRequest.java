@@ -23,31 +23,34 @@ import java.util.Scanner;
 /**
  * Utility class to parse HTTP requests
  */
-public class HttpRequestParser {
+public class HttpRequest {
     private String method;
     private String path;
     private double version;
     private HashMap<String, String> headers;
 
-    public HttpRequestParser(InputStream stream, boolean parseHeaders) {
+    public static HttpRequest parse(InputStream stream, boolean parseHeaders) {
+        HttpRequest request = new HttpRequest();
         Scanner scanner = new Scanner(stream);
 
         while (!scanner.hasNextLine()) ;
         String line = scanner.nextLine();
         String tokens[] = line.split(" ");
-        this.method = tokens[0];
-        this.path = tokens[1];
+        request.method = tokens[0];
+        request.path = tokens[1];
 
         tokens = tokens[2].split("/");
-        this.version = Double.parseDouble(tokens[1]);
+        request.version = Double.parseDouble(tokens[1]);
 
         if (parseHeaders) {
-            this.headers = new HashMap<>();
+            request.headers = new HashMap<>();
             while (scanner.hasNextLine() && !(line = scanner.nextLine()).isEmpty()) {
                 tokens = line.split(": ");
-                this.headers.put(tokens[0], tokens[1]);
+                request.headers.put(tokens[0], tokens[1]);
             }
         }
+
+        return request;
     }
 
     public String getMethod() {

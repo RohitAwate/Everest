@@ -16,7 +16,7 @@
 
 package com.rohitawate.everest.server;
 
-import com.rohitawate.everest.http.HttpRequestParser;
+import com.rohitawate.everest.http.HttpRequest;
 import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
@@ -60,17 +60,17 @@ public class CaptureServer {
         PrintWriter headerWriter;
         DataOutputStream bodyStream;
         try (Socket client = server.accept()) {
-            HttpRequestParser requestParser = new HttpRequestParser(client.getInputStream(), false);
+            HttpRequest request = HttpRequest.parse(client.getInputStream(), false);
             headerWriter = new PrintWriter(client.getOutputStream());
             bodyStream = new DataOutputStream(client.getOutputStream());
 
-            if (requestParser.getMethod().equals(HTTPConstants.GET)) {
+            if (request.getMethod().equals(HTTPConstants.GET)) {
                 StringBuilder headers = new StringBuilder("HTTP/1.1 ");
                 byte[] body;
 
-                if (requestParser.getPath().startsWith("/granted")) {
+                if (request.getPath().startsWith("/granted")) {
                     headers.append("200 OK");
-                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL("http://localhost:52849" + requestParser.getPath()));
+                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL("http://localhost:52849" + request.getPath()));
 
                     String error = null;
                     if (params != null) {
@@ -94,10 +94,10 @@ public class CaptureServer {
                     headers.append("\nContent-Type: text/html");
                 } else {
                     try {
-                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + requestParser.getPath()));
+                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + request.getPath()));
                         headers.append("200 OK");
                         headers.append("\nContent-Type: ");
-                        headers.append(getMimeType(requestParser.getPath()));
+                        headers.append(getMimeType(request.getPath()));
                     } catch (FileNotFoundException e) {
                         body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + NOT_FOUND));
                         headers.append("404 Not Found");

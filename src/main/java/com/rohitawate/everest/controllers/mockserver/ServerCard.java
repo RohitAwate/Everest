@@ -18,7 +18,7 @@ package com.rohitawate.everest.controllers.mockserver;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXToggleButton;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.server.mock.MockServer;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -32,7 +32,6 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import static com.rohitawate.everest.controllers.mockserver.MockServerDashboardController.pushServerNotification;
 
@@ -85,22 +84,22 @@ class ServerCard extends HBox {
             try {
                 server.start();
                 String msg = String.format("Mock server '%s' has started.", server.name);
-                LoggingService.logInfo(msg, LocalDateTime.now());
+                Logger.info(msg);
                 pushServerNotification(msg, 7000);
             } catch (IOException e) {
                 String error = String.format("Could not start mock server '%s'.", server.name);
-                LoggingService.logSevere(error, e, LocalDateTime.now());
+                Logger.severe(error, e);
                 pushServerNotification(error, 7000);
             }
         } else {
             try {
                 server.stop();
                 String msg = String.format("Mock server '%s' has stopped.", server.name);
-                LoggingService.logInfo(msg, LocalDateTime.now());
+                Logger.info(msg);
                 pushServerNotification(msg, 7000);
             } catch (IOException e) {
                 String error = String.format("Could not stop mock server '%s'.", server.name);
-                LoggingService.logSevere(error, e, LocalDateTime.now());
+                Logger.severe(error, e);
                 pushServerNotification(error, 7000);
             }
         }

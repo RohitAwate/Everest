@@ -16,9 +16,10 @@
 
 package com.rohitawate.everest.logging;
 
-import java.time.LocalDateTime;
+import com.rohitawate.everest.http.HttpRequest;
 
-class Log {
-    Level level;
-    LocalDateTime time;
+class ServerLog extends Log {
+    String serverName;
+    int responseCode;
+    HttpRequest request;
 }

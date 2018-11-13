@@ -24,7 +24,7 @@ import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantEx
 import com.rohitawate.everest.auth.oauth2.code.exceptions.UnknownAccessTokenTypeException;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
@@ -35,7 +35,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -74,7 +73,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             this.accessTokenURL = new URL(state.accessTokenURL);
         } catch (MalformedURLException e) {
             if (!state.authURL.isEmpty() || !state.accessTokenURL.isEmpty()) {
-                LoggingService.logWarning("Invalid URL: " + e.getMessage(), e, LocalDateTime.now());
+                Logger.warning("Invalid URL: " + e.getMessage(), e);
             }
         }
 
@@ -90,7 +89,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             }
         } catch (MalformedURLException e) {
             if (!state.redirectURL.isEmpty()) {
-                LoggingService.logWarning("Invalid URL: " + e.getMessage(), e, LocalDateTime.now());
+                Logger.warning("Invalid URL: " + e.getMessage(), e);
             }
         }
 

@@ -16,9 +16,16 @@
 
 package com.rohitawate.everest.logging;
 
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-class Log {
-    Level level;
-    LocalDateTime time;
+public interface LogWriter {
+    /**
+     * Appends the append to its resource.
+     */
+    void append(Log log);
+
+    /**
+     * The universal date format used in all Everest logs.
+     */
+    DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 }

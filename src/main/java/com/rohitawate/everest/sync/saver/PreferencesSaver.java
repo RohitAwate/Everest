@@ -16,11 +16,10 @@
 
 package com.rohitawate.everest.sync.saver;
 
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.preferences.Preferences;
 import com.rohitawate.everest.preferences.PreferencesManager;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 
 public class PreferencesSaver implements ResourceSaver {
@@ -42,7 +41,7 @@ public class PreferencesSaver implements ResourceSaver {
             for (PreferencesManager manager : prefsManagers)
                 manager.savePrefs(prefs);
         } catch (Exception e) {
-            LoggingService.logSevere("Could not save history.", e, LocalDateTime.now());
+            Logger.severe("Could not save history.", e);
         }
     }
 }

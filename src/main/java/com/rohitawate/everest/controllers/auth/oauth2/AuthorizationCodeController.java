@@ -27,7 +27,7 @@ import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
@@ -48,7 +48,6 @@ import javafx.util.Duration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
@@ -267,7 +266,7 @@ public class AuthorizationCodeController implements Initializable {
         }
 
         NotificationsManager.push(errorMessage, 10000);
-        LoggingService.logWarning(errorMessage, (Exception) exception, LocalDateTime.now());
+        Logger.warning(errorMessage, (Exception) exception);
     }
 
     public void setAccessToken(AccessToken accessToken) {

@@ -18,11 +18,10 @@ package com.rohitawate.everest.misc;
 
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import javafx.scene.Parent;
 
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,9 +51,9 @@ public class ThemeManager {
                     parent.getStylesheets().add(1, themePath);
                 }
 
-                LoggingService.logInfo("Theme changed to " + theme + ".", LocalDateTime.now());
+                Logger.info("Theme changed to " + theme + ".");
             } else {
-                LoggingService.logInfo(theme + ": No such theme file found.", LocalDateTime.now());
+                Logger.info(theme + ": No such theme file found.");
                 theme = DEFAULT_THEME;
             }
         }
@@ -66,7 +65,7 @@ public class ThemeManager {
                 parent.getStylesheets().add(themeFile.toURI().toString());
                 parentNodes.add(parent);
             } else {
-                LoggingService.logInfo(theme + ": No such theme file found.", LocalDateTime.now());
+                Logger.info(theme + ": No such theme file found.");
                 theme = DEFAULT_THEME;
             }
         }
@@ -77,7 +76,7 @@ public class ThemeManager {
             if (syntaxThemeFile.exists()) {
                 everestCodeArea.getStylesheets().add(syntaxThemeFile.toURI().toString());
             } else {
-                LoggingService.logInfo(syntaxTheme + ": No such theme file found.", LocalDateTime.now());
+                Logger.info(syntaxTheme + ": No such theme file found.");
                 syntaxTheme = DEFAULT_SYNTAX_THEME;
             }
         }

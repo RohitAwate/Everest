@@ -17,7 +17,7 @@
 package com.rohitawate.everest.server;
 
 import com.rohitawate.everest.http.HttpRequest;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 
@@ -28,7 +28,6 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class CaptureServer {
@@ -44,9 +43,9 @@ public class CaptureServer {
         if (server == null) {
             try {
                 server = new ServerSocket(PORT);
-                LoggingService.logInfo("Authorization grant capturing server has started on port " + PORT + ".", LocalDateTime.now());
+                Logger.info("Authorization grant capturing server has started on port " + PORT + ".");
             } catch (IOException e) {
-                LoggingService.logSevere("Could not start capture server on port " + PORT + ".", e, LocalDateTime.now());
+                Logger.severe("Could not start capture server on port " + PORT + ".", e);
             }
         }
 

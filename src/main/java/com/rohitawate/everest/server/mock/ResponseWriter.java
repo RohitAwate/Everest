@@ -17,14 +17,13 @@
 package com.rohitawate.everest.server.mock;
 
 import com.rohitawate.everest.Main;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.models.responses.EverestResponse;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.time.LocalDateTime;
 
 public class ResponseWriter {
     static void sendResponse(Socket socket, Endpoint endpoint, int latency) throws IOException {
@@ -42,7 +41,7 @@ public class ResponseWriter {
             bodyStream.write(endpoint.resource.getBytes(), 0, endpoint.resource.length());
             bodyStream.flush();
         } catch (InterruptedException e) {
-            LoggingService.logSevere("Thread interrupted during latency period.", e, LocalDateTime.now());
+            Logger.severe("Thread interrupted during latency period.", e);
         } finally {
             headersWriter.close();
             bodyStream.close();

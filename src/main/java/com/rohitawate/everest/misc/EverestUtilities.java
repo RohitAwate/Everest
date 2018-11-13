@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.net.UrlEscapers;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.notifications.NotificationsManager;
 
 import java.awt.*;
@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -133,11 +132,11 @@ public class EverestUtilities {
                 try {
                     Desktop.getDesktop().browse(new URI(url));
                 } catch (Exception ex) {
-                    LoggingService.logWarning("Invalid URL encountered while opening link in browser.", ex, LocalDateTime.now());
+                    Logger.warning("Invalid URL encountered while opening link in browser.", ex);
                 }
             }).start();
 
-            LoggingService.logInfo("Opened " + url + " in system browser.", LocalDateTime.now());
+            Logger.info("Opened " + url + " in system browser.");
         } else {
             NotificationsManager.push("Couldn't find a web browser on your system.", 6000);
         }

@@ -19,7 +19,7 @@ package com.rohitawate.everest.controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.mockserver.MockServerDashboardController;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.ThemeManager;
@@ -45,7 +45,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -234,9 +233,9 @@ public class HomeWindowController implements Initializable {
         try {
             File stateFile = new File("Everest/config/state.json");
             EverestUtilities.jsonMapper.writeValue(stateFile, composerStates);
-            LoggingService.logInfo("State saved.", LocalDateTime.now());
+            Logger.info("State saved.");
         } catch (IOException e) {
-            LoggingService.logSevere("Failed to save state.", e, LocalDateTime.now());
+            Logger.severe("Failed to save state.", e);
         }
     }
 
@@ -245,7 +244,7 @@ public class HomeWindowController implements Initializable {
             File stateFile = new File("Everest/config/state.json");
 
             if (!stateFile.exists()) {
-                LoggingService.logInfo("State file not found. Loading default state.", LocalDateTime.now());
+                Logger.info("State file not found. Loading default state.");
                 addTab();
                 return;
             }
@@ -263,10 +262,10 @@ public class HomeWindowController implements Initializable {
                 addTab();
             }
         } catch (IOException e) {
-            LoggingService.logWarning("State file is either corrupted or outdated. State recovery failed. Loading default state.", e, LocalDateTime.now());
+            Logger.warning("State file is either corrupted or outdated. State recovery failed. Loading default state.", e);
             addTab();
         } finally {
-            LoggingService.logInfo("Application loaded.", LocalDateTime.now());
+            Logger.info("Application loaded.");
         }
     }
 

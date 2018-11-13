@@ -17,13 +17,12 @@
 package com.rohitawate.everest.server.mock;
 
 import com.rohitawate.everest.http.HttpRequest;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,7 +71,7 @@ public class MockServer implements Runnable {
                 requestThread.setDaemon(true);
                 requestThread.start();
             } catch (IOException e) {
-                LoggingService.logSevere("Mock server could not listen for connections.", e, LocalDateTime.now());
+                Logger.severe("Mock server could not listen for connections.", e);
             }
         }
     }
@@ -96,7 +95,7 @@ public class MockServer implements Runnable {
         this.running = true;
         executorService.submit(this);
 
-        LoggingService.logInfo("Mock server has started on port " + server.getLocalPort() + ".", LocalDateTime.now());
+        Logger.info("Mock server has started on port " + server.getLocalPort() + ".");
     }
 
     public void stop() throws IOException {
@@ -104,9 +103,9 @@ public class MockServer implements Runnable {
             running = false;
             this.server.close();
             this.server = null;
-            LoggingService.logInfo("Mock server was stopped.", LocalDateTime.now());
+            Logger.info("Mock server was stopped.");
         } else {
-            LoggingService.logInfo("Mock server is not running.", LocalDateTime.now());
+            Logger.info("Mock server is not running.");
         }
     }
 
@@ -133,7 +132,7 @@ public class MockServer implements Runnable {
                     if (path.equals(endpoint.path) && requestParser.getMethod().equals(endpoint.method)) {
                         ResponseWriter.sendResponse(socket, endpoint, latency);
                         if (loggingEnabled) {
-                            ServerLogger.logInfo(this.name, endpoint.responseCode, requestParser);
+                            Logger.serverInfo(this.name, endpoint.responseCode, requestParser);
                         }
                         return;
                     }
@@ -142,7 +141,7 @@ public class MockServer implements Runnable {
 
             handleNotFound(socket, requestParser);
         } catch (IOException e) {
-            LoggingService.logSevere("Error while routing request.", e, LocalDateTime.now());
+            Logger.severe("Error while routing request.", e);
         }
     }
 
@@ -168,7 +167,7 @@ public class MockServer implements Runnable {
     private void handleNotFound(Socket socket, HttpRequest requestParser) throws IOException {
         ResponseWriter.sendResponse(socket, notFound, latency);
         if (loggingEnabled) {
-            ServerLogger.logWarning(this.name, 404, requestParser);
+            Logger.serverWarning(this.name, 404, requestParser);
         }
     }
 

@@ -19,7 +19,7 @@ package com.rohitawate.everest.sync;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.HomeWindowController;
 import com.rohitawate.everest.exceptions.DuplicateException;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.preferences.LocalPreferencesManager;
 import com.rohitawate.everest.preferences.Preferences;
@@ -32,7 +32,6 @@ import com.rohitawate.everest.sync.saver.PreferencesSaver;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -69,7 +68,7 @@ public class SyncManager {
             Registrar.registerManager(new SQLiteManager());
             Registrar.registerManager(new LocalPreferencesManager());
         } catch (DuplicateException e) {
-            LoggingService.logSevere(e.getMessage(), e, LocalDateTime.now());
+            Logger.severe(e.getMessage(), e);
         }
     }
 
@@ -94,7 +93,7 @@ public class SyncManager {
             try {
                 homeWindowController.addHistoryItem(newState);
             } catch (NullPointerException e) {
-                LoggingService.logWarning("HomeWindowController not registered. SyncManager could add history item.", e, LocalDateTime.now());
+                Logger.warning("HomeWindowController not registered. SyncManager could add history item.", e);
             }
         }
     }
@@ -110,13 +109,13 @@ public class SyncManager {
         List<ComposerState> history = null;
         try {
             if (projectManagers.get(projectSource) == null) {
-                LoggingService.logSevere("No such source found: " + projectSource, null, LocalDateTime.now());
+                Logger.severe("No such source found: " + projectSource, null);
                 projectSource = DEFAULT_PROJECT_SOURCE;
             }
 
             history = projectManagers.get(projectSource).getHistory();
         } catch (Exception e) {
-            LoggingService.logSevere("History could not be fetched.", e, LocalDateTime.now());
+            Logger.severe("History could not be fetched.", e);
         }
 
         return history;
@@ -131,7 +130,7 @@ public class SyncManager {
         String prefsSource = syncPrefs.prefsSource;
 
         if (prefsManagers.get(prefsSource) == null) {
-            LoggingService.logSevere("No such source found: " + prefsSource, null, LocalDateTime.now());
+            Logger.severe("No such source found: " + prefsSource, null);
             prefsSource = DEFAULT_PREFS_SOURCE;
         }
 
@@ -139,9 +138,9 @@ public class SyncManager {
 
         try {
             prefs = prefsManagers.get(prefsSource).loadPrefs();
-            LoggingService.logInfo("Preferences loaded.", LocalDateTime.now());
+            Logger.info("Preferences loaded.");
         } catch (Exception e) {
-            LoggingService.logInfo("Could not load preferences. Everest will use the default values.", LocalDateTime.now());
+            Logger.info("Could not load preferences. Everest will use the default values.");
             prefs = new Preferences();
         }
 
@@ -158,7 +157,7 @@ public class SyncManager {
 
     public static void setHomeWindowController(HomeWindowController controller) {
         if (homeWindowController != null) {
-            LoggingService.logInfo("HomeWindowController already registered with SyncManager.", LocalDateTime.now());
+            Logger.info("HomeWindowController already registered with SyncManager.");
             return;
         }
 
@@ -167,24 +166,24 @@ public class SyncManager {
 
     private static void loadSyncPrefs() {
         if (!SYNC_PREFS_FILE.exists()) {
-            LoggingService.logInfo("Sync preferences file not found. Everest will use the default values.", LocalDateTime.now());
+            Logger.info("Sync preferences file not found. Everest will use the default values.");
             syncPrefs = new SyncPrefs();
         } else {
             try {
                 syncPrefs = EverestUtilities.jsonMapper.readValue(SYNC_PREFS_FILE, SyncPrefs.class);
             } catch (IOException e) {
-                LoggingService.logInfo("Could not load sync preferences. Everest will use the default values.", LocalDateTime.now());
+                Logger.info("Could not load sync preferences. Everest will use the default values.");
                 syncPrefs = new SyncPrefs();
             }
         }
 
-        LoggingService.logInfo("Sync preferences loaded.", LocalDateTime.now());
+        Logger.info("Sync preferences loaded.");
     }
 
     public static void saveSyncPrefs() {
         try {
             EverestUtilities.jsonMapper.writeValue(SYNC_PREFS_FILE, syncPrefs);
-            LoggingService.logInfo("Sync preferences saved.", LocalDateTime.now());
+            Logger.info("Sync preferences saved.");
         } catch (IOException e) {
             e.printStackTrace();
         }

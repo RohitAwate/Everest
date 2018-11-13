@@ -19,7 +19,7 @@ package com.rohitawate.everest.project;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthMethod;
 import com.rohitawate.everest.auth.oauth2.AccessToken;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.FieldState;
@@ -31,7 +31,6 @@ import javafx.util.Pair;
 import java.io.File;
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,14 +76,14 @@ public class SQLiteManager implements ProjectManager {
             File configFolder = new File(configPath);
             if (!configFolder.exists()) {
                 if (configFolder.mkdirs())
-                    LoggingService.logSevere("Unable to create directory: " + configPath, null, LocalDateTime.now());
+                    Logger.severe("Unable to create directory: " + configPath, null);
             }
 
             conn = DriverManager.getConnection("jdbc:sqlite:Everest/config/history.sqlite");
             createDatabase();
-            LoggingService.logInfo("Connected to database.", LocalDateTime.now());
+            Logger.info("Connected to database.");
         } catch (Exception E) {
-            LoggingService.logSevere("Exception while initializing SQLiteManager.", E, LocalDateTime.now());
+            Logger.severe("Exception while initializing SQLiteManager.", E);
         }
     }
 
@@ -479,7 +478,7 @@ public class SQLiteManager implements ProjectManager {
                 }
                 statement.executeBatch();
             } catch (SQLException e) {
-                LoggingService.logSevere("Database error.", e, LocalDateTime.now());
+                Logger.severe("Database error.", e);
             }
         }
     }

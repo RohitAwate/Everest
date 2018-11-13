@@ -16,9 +16,9 @@
 
 package com.rohitawate.everest.logging;
 
-import java.time.LocalDateTime;
-
-class Log {
-    Level level;
-    LocalDateTime time;
+public interface ConsoleColors {
+    String RESET = "\u001B[0m";
+    String RED = "\u001B[31m";
+    String YELLOW = "\u001B[33m";
+    String BLUE = "\u001B[34m";
 }

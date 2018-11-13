@@ -17,7 +17,7 @@
 package com.rohitawate.everest.auth;
 
 import com.rohitawate.everest.Main;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
@@ -25,7 +25,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -98,7 +97,7 @@ public class DigestAuthProvider implements AuthProvider {
             header.append(response);
             header.append("\"");
         } catch (IOException e) {
-            LoggingService.logSevere("Digest Authentication Error: Could not make initial request.", e, LocalDateTime.now());
+            Logger.severe("Digest Authentication Error: Could not make initial request.", e);
         }
 
         return header.toString();

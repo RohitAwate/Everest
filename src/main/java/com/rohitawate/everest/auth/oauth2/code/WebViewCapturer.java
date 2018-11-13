@@ -17,7 +17,7 @@
 package com.rohitawate.everest.auth.oauth2.code;
 
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
@@ -26,7 +26,6 @@ import javafx.stage.Stage;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -58,7 +57,7 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
                     authStage.close();
                 }
             } catch (MalformedURLException e) {
-                LoggingService.logWarning("Invalid URL while authorizing application.", e, LocalDateTime.now());
+                Logger.warning("Invalid URL while authorizing application.", e);
             }
         });
 

@@ -28,7 +28,7 @@ import com.rohitawate.everest.controllers.visualizers.Visualizer;
 import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.format.FormatterFactory;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
@@ -66,7 +66,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -149,7 +148,7 @@ public class DashboardController implements Initializable {
             bodyTabController = bodyTabLoader.getController();
             bodyTab.setContent(bodyTabFXML);
         } catch (IOException e) {
-            LoggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
+            Logger.severe("Could not load headers/body tabs.", e);
         }
 
         NotificationsManager.registerChannel(new JFXSnackbar(dashboard));
@@ -309,7 +308,7 @@ public class DashboardController implements Initializable {
             showLayer(ResponseLayer.PROMPT);
             NotificationsManager.push("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
-            LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
+            Logger.severe("Request execution failed.", E);
             errorTitle.setText("Oops... Something went wrong!");
             errorDetails.setText("Try to make another request. Restart Everest if that doesn't work.");
             showLayer(ResponseLayer.ERROR);
@@ -321,7 +320,7 @@ public class DashboardController implements Initializable {
         showLayer(ResponseLayer.ERROR);
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
-        LoggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
+        Logger.warning(httpMethodBox.getValue() + " request could not be processed.", exception);
 
         if (throwable.getClass() == NullResponseException.class) {
             NullResponseException URE = (NullResponseException) throwable;
@@ -475,7 +474,7 @@ public class DashboardController implements Initializable {
                                     try {
                                         Desktop.getDesktop().browse(new URI(addressField.getText()));
                                     } catch (Exception ex) {
-                                        LoggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
+                                        Logger.warning("Invalid URL encountered while opening in browser.", ex);
                                     }
                                 }).start();
                             });
@@ -499,7 +498,7 @@ public class DashboardController implements Initializable {
         } catch (Exception e) {
             String errorMessage = "Response could not be parsed.";
             NotificationsManager.push(errorMessage, 5000);
-            LoggingService.logSevere(errorMessage, e, LocalDateTime.now());
+            Logger.severe(errorMessage, e);
             errorTitle.setText("Parsing Error");
             errorDetails.setText(errorMessage);
             showLayer(ResponseLayer.ERROR);
@@ -628,7 +627,7 @@ public class DashboardController implements Initializable {
             controller.getValueProperty().addListener(e -> appendParams());
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {
-            LoggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
+            Logger.severe("Could not append params field.", e);
         }
     }
 
@@ -811,7 +810,7 @@ public class DashboardController implements Initializable {
         }
 
         if (!validMethod) {
-            LoggingService.logInfo("Application state file was tampered with. State could not be recovered.", LocalDateTime.now());
+            Logger.info("Application state file was tampered with. State could not be recovered.");
             return;
         }
 

@@ -148,6 +148,8 @@ public class ServerDetailsController implements Initializable {
             attachPrefixCheckBox.setSelected(server.isAttachPrefix());
             loggingEnableToggle.setSelected(server.loggingEnabled);
         }
+
+        serverNameField.requestFocus();
     }
 
     void setServer(MockServer server) {

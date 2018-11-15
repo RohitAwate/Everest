@@ -77,7 +77,8 @@
                                  </VBox.margin>
                                  <children>
                                               <Label fx:id="serversLabel" styleClass="field-label" text="S E R V E R S" />
-                                     <JFXButton fx:id="newServiceButton" onAction="#addNewService" ripplerFill="WHITE">
+                                     <JFXButton fx:id="newServiceButton" onAction="#showNewServerDialog"
+                                                ripplerFill="WHITE">
                                        <graphic>
                                           <ImageView fitHeight="15.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
                                              <image>

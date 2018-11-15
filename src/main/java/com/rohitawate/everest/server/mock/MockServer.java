@@ -104,8 +104,6 @@ public class MockServer implements Runnable {
             this.server.close();
             this.server = null;
             Logger.info("Mock server was stopped.");
-        } else {
-            Logger.info("Mock server is not running.");
         }
     }
 

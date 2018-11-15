@@ -24,6 +24,7 @@ import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
 import com.rohitawate.everest.format.FormatterFactory;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
@@ -31,6 +32,7 @@ import com.rohitawate.everest.server.mock.Endpoint;
 import com.rohitawate.everest.server.mock.MockServer;
 import javafx.beans.Observable;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -129,7 +131,7 @@ public class MockServerDashboardController implements Initializable {
     }
 
     @FXML
-    private void addNewService(ActionEvent actionEvent) {
+    private void showNewServerDialog(ActionEvent actionEvent) {
         if (serviceDetailsStage == null) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/mockserver/ServerDetails.fxml"));
@@ -150,12 +152,41 @@ public class MockServerDashboardController implements Initializable {
         serviceDetailsStage.showAndWait();
 
         if (serverDetailsController.getServer() != null) {
-            ServerCard serverCard = new ServerCard(serverDetailsController.getServer());
-            serverCard.setOptionsStage(serviceDetailsStage, serverDetailsController, this);
-            serversList.getItems().add(serverCard);
-            serversList.getSelectionModel().select(serverCard);
-            onServiceSelected(null);
+            addNewServer(serverDetailsController.getServer());
         }
+    }
+
+    private void addNewServer(MockServer server) {
+        ServerCard serverCard = new ServerCard(server);
+        serverCard.setOptionsStage(serviceDetailsStage, serverDetailsController,
+                this, deleteServerHandler(serverCard), cloneServerHandler(serverCard));
+        serversList.getItems().add(serverCard);
+        serversList.getSelectionModel().select(serverCard);
+        onServiceSelected(null);
+        addNewEndpoint(null);
+    }
+
+    private EventHandler<ActionEvent> cloneServerHandler(ServerCard serverCard) {
+        return event -> {
+            MockServer clone = new MockServer("(Copy) " + serverCard.server.name, serverCard.server.getPort() + 1);
+            addNewServer(clone);
+        };
+    }
+
+    private EventHandler<ActionEvent> deleteServerHandler(ServerCard serverCard) {
+        return event -> {
+            selectedServerCard = null;
+            selectedEndpointCard = null;
+            serversList.getItems().remove(serverCard);
+            endpointsList.getItems().clear();
+            resetEndpointDetails();
+
+            try {
+                serverCard.server.stop();
+            } catch (IOException e) {
+                Logger.severe("Error while deleting server.", e);
+            }
+        };
     }
 
     @FXML
@@ -168,6 +199,8 @@ public class MockServerDashboardController implements Initializable {
         selectedServerCard.server.addEndpoint(newEndpoint);
         onEndpointSelected(null);
         checkDuplicateEndpoints();
+        endpointPathField.requestFocus();
+        setFinalURLField();
     }
 
     private void resetEndpointDetails() {
@@ -178,6 +211,7 @@ public class MockServerDashboardController implements Initializable {
         contentTypeBox.getSelectionModel().select(0);
         codeArea.clear();
         responseCodeBox.getSelectionModel().select(0);
+        setFinalURLField();
 
         endpointDetailsBox.setDisable(true);
     }
@@ -228,7 +262,11 @@ public class MockServerDashboardController implements Initializable {
             }
 
             if (selectedEndpointCard != null) {
-                finalURL += selectedEndpointCard.endpoint.path;
+                if (endpointPathField.getText().isEmpty()) {
+                    finalURL += "/";
+                } else {
+                    finalURL += selectedEndpointCard.endpoint.path;
+                }
             }
 
             finalURLField.setText(EverestUtilities.encodeURL(finalURL));

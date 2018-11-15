@@ -27,7 +27,7 @@ import java.time.LocalDate;
 class ServerFileLogWriter implements LogWriter {
     private final Level level;
 
-    private static final String LOGS_DIR_PATH = "Everest/logs/mockservers/";
+    private static final String LOGS_DIR_PATH = "Everest/logs/servers/";
     private static final String LOG_FILE_PATH = LOGS_DIR_PATH + LocalDate.now() + ".txt";
     private static BufferedWriter writer;
 

@@ -63,8 +63,10 @@
                 </HBox>
                 <HBox alignment="CENTER" spacing="20.0">
                     <children>
-                        <JFXButton fx:id="cancelActionButton" buttonType="RAISED" ripplerFill="WHITE" text="CANCEL" textFill="WHITE" />
-                        <JFXButton fx:id="serverActionButton" buttonType="RAISED" ripplerFill="BLACK" text="ADD" textFill="WHITE">
+                        <JFXButton fx:id="cancelActionButton" buttonType="RAISED" cancelButton="true"
+                                   ripplerFill="WHITE" text="CANCEL" textFill="WHITE"/>
+                        <JFXButton fx:id="serverActionButton" buttonType="RAISED" defaultButton="true"
+                                   ripplerFill="BLACK" text="ADD" textFill="WHITE">
                             <padding>
                                 <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
                             </padding>

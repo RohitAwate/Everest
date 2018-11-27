@@ -21,6 +21,8 @@
     <groupId>com.rohitawate</groupId>
     <artifactId>Everest</artifactId>
     <version>Alpha-1.3</version>
+    <name>Everest</name>
+    <description>A beautiful REST workbench.</description>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,6 +51,8 @@
                                     <mainClass>${main.class}</mainClass>
                                 </transformer>
                             </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>bundled</shadedClassifierName>
                         </configuration>
                     </execution>
                 </executions>
@@ -60,6 +64,19 @@
                 <version>1.6.0</version>
                 <configuration>
                     <mainClass>${main.class}</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Graviton-Features>inline</Graviton-Features>
+                            <Main-Class>${main.class}</Main-Class>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>

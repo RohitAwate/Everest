@@ -18,6 +18,8 @@ package com.rohitawate.everest.controllers;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.controllers.auth.AuthTabController;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
@@ -26,7 +28,7 @@ import com.rohitawate.everest.controllers.visualizers.Visualizer;
 import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.format.FormatterFactory;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
@@ -34,6 +36,7 @@ import com.rohitawate.everest.models.requests.DataRequest;
 import com.rohitawate.everest.models.requests.GETRequest;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
+import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import com.rohitawate.everest.requestmanager.RequestManagersPool;
 import com.rohitawate.everest.state.ComposerState;
@@ -63,7 +66,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +94,6 @@ public class DashboardController implements Initializable {
     @FXML
     private JFXProgressBar progressBar;
 
-    private JFXSnackbar snackbar;
     private List<StringKeyValueFieldController> paramsControllers;
     private RequestManager requestManager;
     private AuthTabController authTabController;
@@ -101,7 +102,6 @@ public class DashboardController implements Initializable {
     private IntegerProperty paramsCountProperty;
     private Visualizer visualizer;
     private ResponseHeadersViewer responseHeadersViewer;
-    private SyncManager syncManager;
 
     private GETRequest getRequest;
     private DataRequest dataRequest;
@@ -148,10 +148,10 @@ public class DashboardController implements Initializable {
             bodyTabController = bodyTabLoader.getController();
             bodyTab.setContent(bodyTabFXML);
         } catch (IOException e) {
-            LoggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
+            Logger.severe("Could not load headers/body tabs.", e);
         }
 
-        snackbar = new JFXSnackbar(dashboard);
+        NotificationsManager.registerChannel(new JFXSnackbar(dashboard));
 
         showLayer(ResponseLayer.PROMPT);
         httpMethodBox.getItems().addAll(
@@ -184,7 +184,7 @@ public class DashboardController implements Initializable {
             responseArea.selectAll();
             responseArea.copy();
             responseArea.deselect();
-            snackbar.show("Response body copied to clipboard.", 5000);
+            NotificationsManager.push("Response body copied to clipboard.", 5000);
         });
 
         responseTypeBox.getItems().addAll(
@@ -198,7 +198,7 @@ public class DashboardController implements Initializable {
 
             if (type.equals(HTTPConstants.JSON)) {
                 responseArea.setText(responseArea.getText(),
-                        FormatterFactory.getHighlighter(type),
+                        FormatterFactory.getFormatter(type),
                         HighlighterFactory.getHighlighter(type));
 
                 return;
@@ -230,9 +230,9 @@ public class DashboardController implements Initializable {
         try {
             String address = addressField.getText().trim();
 
-            if (address.equals("")) {
+            if (address.isEmpty()) {
                 showLayer(ResponseLayer.PROMPT);
-                snackbar.show("Please enter an address.", 3000);
+                NotificationsManager.push("Please enter an address.", 3000);
                 return;
             }
 
@@ -303,14 +303,14 @@ public class DashboardController implements Initializable {
             cancelButton.setOnAction(e -> requestManager.cancel());
             requestManager.addHandlers(this::whileRunning, this::onSucceeded, this::onFailed, this::onCancelled);
             requestManager.start();
-            syncManager.saveState(getState().composer);
+            SyncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
-            snackbar.show("Invalid address. Please verify and try again.", 3000);
+            NotificationsManager.push("Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
-            LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
-            errorTitle.setText("Oops... That's embarrassing!");
-            errorDetails.setText("Something went wrong. Try to make another request.\nRestart Everest if that doesn't work.");
+            Logger.severe("Request execution failed.", E);
+            errorTitle.setText("Oops... Something went wrong!");
+            errorDetails.setText("Try to make another request. Restart Everest if that doesn't work.");
             showLayer(ResponseLayer.ERROR);
         }
     }
@@ -320,7 +320,7 @@ public class DashboardController implements Initializable {
         showLayer(ResponseLayer.ERROR);
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
-        LoggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
+        Logger.warning(httpMethodBox.getValue() + " request could not be processed.", exception);
 
         if (throwable.getClass() == NullResponseException.class) {
             NullResponseException URE = (NullResponseException) throwable;
@@ -329,10 +329,16 @@ public class DashboardController implements Initializable {
         } else if (throwable.getClass() == ProcessingException.class) {
             errorTitle.setText("Everest couldn't connect.");
             errorDetails.setText("Either you are not connected to the Internet or the server is offline.");
+        } else if (throwable.getClass() == AuthWindowClosedException.class) {
+            errorTitle.setText("Authorization window closed.");
+            errorDetails.setText("Everest could not get an authorization grant.");
+        } else if (throwable.getClass() == NoAuthorizationGrantException.class) {
+            errorTitle.setText("You denied authorization to the service.");
+            errorDetails.setText("Everest could not get an authorization grant.");
         } else if (throwable.getClass() == RedirectException.class) {
             RedirectException redirect = (RedirectException) throwable;
             addressField.setText(redirect.getNewLocation());
-            snackbar.show("Resource moved permanently. Redirecting...", 3000);
+            NotificationsManager.push("Resource moved permanently. Redirecting...", 3000);
             requestManager = null;
             sendRequest();
             return;
@@ -461,13 +467,14 @@ public class DashboardController implements Initializable {
                     case "text/html":
                         simplifiedContentType = HTTPConstants.HTML;
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                            JFXSnackbar snackbar = new JFXSnackbar(dashboard);
                             snackbar.show("Open link in browser?", "YES", 5000, e -> {
                                 snackbar.close();
                                 new Thread(() -> {
                                     try {
                                         Desktop.getDesktop().browse(new URI(addressField.getText()));
                                     } catch (Exception ex) {
-                                        LoggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
+                                        Logger.warning("Invalid URL encountered while opening in browser.", ex);
                                     }
                                 }).start();
                             });
@@ -484,14 +491,14 @@ public class DashboardController implements Initializable {
                 body = "No body returned in the response.";
 
             responseArea.setText(body,
-                    FormatterFactory.getHighlighter(simplifiedContentType),
+                    FormatterFactory.getFormatter(simplifiedContentType),
                     HighlighterFactory.getHighlighter(simplifiedContentType));
 
             responseTypeBox.setValue(simplifiedContentType);
         } catch (Exception e) {
             String errorMessage = "Response could not be parsed.";
-            snackbar.show(errorMessage, 5000);
-            LoggingService.logSevere(errorMessage, e, LocalDateTime.now());
+            NotificationsManager.push(errorMessage, 5000);
+            Logger.severe(errorMessage, e);
             errorTitle.setText("Parsing Error");
             errorDetails.setText(errorMessage);
             showLayer(ResponseLayer.ERROR);
@@ -620,12 +627,8 @@ public class DashboardController implements Initializable {
             controller.getValueProperty().addListener(e -> appendParams());
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {
-            LoggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
+            Logger.severe("Could not append params field.", e);
         }
-    }
-
-    public void setSyncManager(SyncManager syncManager) {
-        this.syncManager = syncManager;
     }
 
     public ComposerTab getVisibleComposerTab() {
@@ -676,7 +679,8 @@ public class DashboardController implements Initializable {
         composerState.httpMethod = httpMethodBox.getValue();
         composerState.headers = headerTabController.getFieldStates();
         composerState.params = getParamFieldStates();
-        authTabController.getState(composerState);
+        composerState.authMethod = authTabController.getAuthMethod();
+        composerState.authState = authTabController.getState();
 
         dashboardState.composer = composerState;
         dashboardState.visibleResponseLayer = visibleLayer;
@@ -806,7 +810,7 @@ public class DashboardController implements Initializable {
         }
 
         if (!validMethod) {
-            LoggingService.logInfo("Application state file was tampered with. State could not be recovered.", LocalDateTime.now());
+            Logger.info("Application state file was tampered with. State could not be recovered.");
             return;
         }
 
@@ -838,6 +842,7 @@ public class DashboardController implements Initializable {
         headerTabController.clear();
         clearParams();
         bodyTabController.reset();
+        authTabController.reset();
         responseArea.clear();
         showLayer(ResponseLayer.PROMPT);
         responseTabPane.getSelectionModel().select(0);
@@ -867,5 +872,4 @@ public class DashboardController implements Initializable {
     public String getHttpMethod() {
         return httpMethodBox.getValue();
     }
-
 }

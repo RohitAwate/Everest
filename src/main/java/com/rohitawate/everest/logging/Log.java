@@ -16,9 +16,9 @@
 
 package com.rohitawate.everest.logging;
 
+import java.time.LocalDateTime;
+
 class Log {
     Level level;
-    String message;
-    String time;
-    Exception exception;
+    LocalDateTime time;
 }

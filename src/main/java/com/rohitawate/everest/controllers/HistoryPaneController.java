@@ -30,40 +30,35 @@ import java.util.function.Consumer;
 
 public class HistoryPaneController extends SearchablePaneController<ComposerState> {
     private List<Consumer<ComposerState>> stateClickHandler = new LinkedList<>();
-	private SyncManager syncManager;
 
-	@Override
+    @Override
     protected List<ComposerState> loadInitialEntries() {
-		return syncManager.getHistory();
-	}
+        return SyncManager.getHistory();
+    }
 
     protected SearchEntry<ComposerState> createEntryFromState(ComposerState state) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryItem.fxml"));
-		Parent historyItem = loader.load();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HistoryItem.fxml"));
+        Parent historyItem = loader.load();
 
-		HistoryItemController controller = loader.getController();
-		controller.setState(state);
+        HistoryItemController controller = loader.getController();
+        controller.setState(state);
 
-		// Clicking on HistoryItem opens it up in a new tab
-		historyItem.setOnMouseClicked(mouseEvent -> {
-			if (mouseEvent.getButton() == MouseButton.PRIMARY)
-				handleClick(state);
-		});
+        // Clicking on HistoryItem opens it up in a new tab
+        historyItem.setOnMouseClicked(mouseEvent -> {
+            if (mouseEvent.getButton() == MouseButton.PRIMARY)
+                handleClick(state);
+        });
 
-		return new SearchEntry<>(historyItem, controller);
-	}
+        return new SearchEntry<>(historyItem, controller);
+    }
 
     private void handleClick(ComposerState state) {
         for (Consumer<ComposerState> consumer : stateClickHandler) {
-			consumer.accept(state);
-		}
-	}
+            consumer.accept(state);
+        }
+    }
 
     public void addItemClickHandler(Consumer<ComposerState> handler) {
-		stateClickHandler.add(handler);
-	}
-
-	public void setSyncManager(SyncManager syncManager) {
-		this.syncManager = syncManager;
-	}
+        stateClickHandler.add(handler);
+    }
 }

@@ -17,7 +17,9 @@
 package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.Main;
+import com.rohitawate.everest.controllers.mockserver.MockServerDashboardController;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.ThemeManager;
@@ -43,7 +45,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -55,18 +56,19 @@ public class HomeWindowController implements Initializable {
     @FXML
     private SplitPane splitPane;
     @FXML
-    private TabPane tabPane;
+    private TabPane homeWindowTabPane;
 
     private HashMap<Tab, DashboardState> tabStateMap;
     private HistoryPaneController historyController;
     private DashboardController dashboard;
     private StringProperty addressProperty;
-    private SyncManager syncManager;
+
+    private Stage mockServerDashboard;
+    private MockServerDashboardController mockServerDashboardController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        syncManager = new SyncManager(this);
-
+        SyncManager.setHomeWindowController(this);
         // Using LinkedHashMap because it retains order
         tabStateMap = new LinkedHashMap<>();
 
@@ -75,14 +77,12 @@ public class HomeWindowController implements Initializable {
             Parent historyFXML = historyLoader.load();
             splitPane.getItems().add(0, historyFXML);
             historyController = historyLoader.getController();
-            historyController.setSyncManager(syncManager);
             historyController.addItemClickHandler(this::addTab);
 
             FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/Dashboard.fxml"));
             Parent dashboardFXML = dashboardLoader.load();
             dashboard = dashboardLoader.getController();
-            dashboard.setSyncManager(syncManager);
-            dashboard.setTabPane(tabPane);
+            dashboard.setTabPane(homeWindowTabPane);
             dashboard.setTabStateMap(tabStateMap);
             dashboardContainer.getChildren().add(dashboardFXML);
             addressProperty = dashboard.addressField.textProperty();
@@ -103,7 +103,7 @@ public class HomeWindowController implements Initializable {
             thisStage.setOnCloseRequest(e -> saveState());
         });
 
-        tabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
+        homeWindowTabPane.getSelectionModel().selectedItemProperty().addListener(this::onTabSwitched);
 
         addressProperty.addListener(this::onTargetChanged);
     }
@@ -113,7 +113,7 @@ public class HomeWindowController implements Initializable {
      * Displays the current target if it is not empty, "New Tab" otherwise.
      */
     private void onTargetChanged(Observable observable, String oldValue, String newValue) {
-        Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
+        Tab activeTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
         if (activeTab == null)
             return;
 
@@ -163,7 +163,7 @@ public class HomeWindowController implements Initializable {
     }
 
     /**
-     * Adds a new tab to the tabPane initialized with
+     * Adds a new tab to the homeWindowTabPane initialized with
      * the ComposerState provided.
      */
     private void addTab(ComposerState composerState) {
@@ -190,17 +190,17 @@ public class HomeWindowController implements Initializable {
              4. Switch to the new tab.
              5. Call onTabSwitched() to update the Dashboard and save the oldState.
          */
-        Tab prevTab = tabPane.getSelectionModel().getSelectedItem();
+        Tab prevTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
         DashboardState prevState = dashboard.getState();
-        tabPane.getTabs().add(newTab);
-        tabPane.getSelectionModel().select(newTab);
+        homeWindowTabPane.getTabs().add(newTab);
+        homeWindowTabPane.getSelectionModel().select(newTab);
         onTabSwitched(prevState, prevTab, newTab);
 
         newTab.setOnCloseRequest(e -> {
             removeTab(newTab);
 
             // Closes the application if the last tab is closed
-            if (tabPane.getTabs().size() == 0) {
+            if (homeWindowTabPane.getTabs().size() == 0) {
                 saveState();
                 Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
                 thisStage.close();
@@ -211,7 +211,7 @@ public class HomeWindowController implements Initializable {
     private void removeTab(Tab newTab) {
         DashboardState state = tabStateMap.remove(newTab);
         state = null;
-        tabPane.getTabs().remove(newTab);
+        homeWindowTabPane.getTabs().remove(newTab);
         newTab.setOnCloseRequest(null);
         newTab = null;
     }
@@ -222,7 +222,7 @@ public class HomeWindowController implements Initializable {
             Other tabs will already have their states saved when they
             were loaded from state.json or on a tab switch.
           */
-        Tab currentTab = tabPane.getSelectionModel().getSelectedItem();
+        Tab currentTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
         DashboardState currentState = dashboard.getState();
         tabStateMap.put(currentTab, currentState);
 
@@ -233,9 +233,9 @@ public class HomeWindowController implements Initializable {
         try {
             File stateFile = new File("Everest/config/state.json");
             EverestUtilities.jsonMapper.writeValue(stateFile, composerStates);
-            LoggingService.logInfo("Application state saved.", LocalDateTime.now());
+            Logger.info("State saved.");
         } catch (IOException e) {
-            LoggingService.logSevere("Failed to save application state.", e, LocalDateTime.now());
+            Logger.severe("Failed to save state.", e);
         }
     }
 
@@ -244,7 +244,7 @@ public class HomeWindowController implements Initializable {
             File stateFile = new File("Everest/config/state.json");
 
             if (!stateFile.exists()) {
-                LoggingService.logInfo("Application state file not found. Loading default state.", LocalDateTime.now());
+                Logger.info("State file not found. Loading default state.");
                 addTab();
                 return;
             }
@@ -262,10 +262,10 @@ public class HomeWindowController implements Initializable {
                 addTab();
             }
         } catch (IOException e) {
-            LoggingService.logWarning("Application state file is either corrupted or outdated. State recovery failed. Loading default state.", e, LocalDateTime.now());
+            Logger.warning("State file is either corrupted or outdated. State recovery failed. Loading default state.", e);
             addTab();
         } finally {
-            LoggingService.logInfo("Application loaded.", LocalDateTime.now());
+            Logger.info("Application loaded.");
         }
     }
 
@@ -293,15 +293,15 @@ public class HomeWindowController implements Initializable {
                 } else if (KeyMap.toggleHistory.match(e)) {
                     toggleHistoryPane();
                 } else if (KeyMap.closeTab.match(e)) {
-                    Tab activeTab = tabPane.getSelectionModel().getSelectedItem();
+                    Tab activeTab = homeWindowTabPane.getSelectionModel().getSelectedItem();
                     tabStateMap.remove(activeTab);
-                    tabPane.getTabs().remove(activeTab);
-                    if (tabPane.getTabs().size() == 0) {
+                    homeWindowTabPane.getTabs().remove(activeTab);
+                    if (homeWindowTabPane.getTabs().size() == 0) {
                         saveState();
                         Stage thisStage = (Stage) homeWindowSP.getScene().getWindow();
                         thisStage.close();
                     }
-                    tabPane.getTabs().remove(activeTab);
+                    homeWindowTabPane.getTabs().remove(activeTab);
                 } else if (KeyMap.searchHistory.match(e)) {
                     historyController.focusSearchField();
                 } else if (KeyMap.focusParams.match(e)) {
@@ -317,6 +317,25 @@ public class HomeWindowController implements Initializable {
                     }
                 } else if (KeyMap.refreshTheme.match(e)) {
                     ThemeManager.refreshTheme();
+                } else if (KeyMap.showMockServerDashboard.match(e)) {
+                    if (mockServerDashboard == null) {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/mockserver/MockServerDashboard.fxml"));
+                            Parent mockDashboardFXML = loader.load();
+                            mockServerDashboardController = loader.getController();
+                            mockServerDashboard = new Stage();
+                            mockServerDashboard.setTitle("Mock Servers Dashboard - " + Main.APP_NAME);
+                            mockServerDashboard.getIcons().add(Main.APP_ICON);
+                            mockServerDashboard.setScene(new Scene(mockDashboardFXML));
+                            mockServerDashboard.setOnCloseRequest(event -> mockServerDashboard.hide());
+
+                            mockServerDashboard.show();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    mockServerDashboard.show();
                 }
             });
         }

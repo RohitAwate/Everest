@@ -22,7 +22,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<StackPane fx:id="homeWindowSP" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
+<StackPane fx:id="homeWindowSP" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.HomeWindowController">
 	<children>
         <SplitPane fx:id="splitPane">
@@ -31,8 +31,8 @@
                     <children>
                         <HBox VBox.vgrow="NEVER">
                             <children>
-                                <JFXButton fx:id="newTabButton" contentDisplay="CENTER" minHeight="35.0" minWidth="40.0"
-                                           onAction="#addTab" ripplerFill="WHITE" HBox.hgrow="ALWAYS">
+                                <JFXButton fx:id="newTabButton" contentDisplay="CENTER" minHeight="30.0"
+                                           onAction="#addTab" prefWidth="30.0" ripplerFill="WHITE" HBox.hgrow="ALWAYS">
                                     <graphic>
                                         <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true"
                                                    preserveRatio="true">
@@ -42,9 +42,9 @@
                                         </ImageView>
                                     </graphic>
                                 </JFXButton>
-                                <TabPane fx:id="tabPane" maxHeight="35.0" minHeight="35.0" minWidth="220.0"
-                                         tabClosingPolicy="ALL_TABS" tabMaxHeight="35.0" tabMaxWidth="200.0"
-                                         tabMinHeight="35.0" tabMinWidth="200.0" HBox.hgrow="ALWAYS"/>
+                                <TabPane fx:id="homeWindowTabPane" maxHeight="30.0" minHeight="30.0" minWidth="220.0"
+                                         tabClosingPolicy="ALL_TABS" tabMaxHeight="30.0" tabMaxWidth="200.0"
+                                         tabMinHeight="30.0" tabMinWidth="200.0" HBox.hgrow="ALWAYS"/>
                             </children>
                         </HBox>
                         <StackPane fx:id="dashboardContainer" VBox.vgrow="ALWAYS"/>

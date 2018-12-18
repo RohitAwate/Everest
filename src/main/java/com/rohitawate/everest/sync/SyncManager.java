@@ -1,101 +1,191 @@
+/*
+ * Copyright 2018 Rohit Awate.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rohitawate.everest.sync;
 
-import com.google.common.util.concurrent.MoreExecutors;
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.HomeWindowController;
 import com.rohitawate.everest.exceptions.DuplicateException;
-import com.rohitawate.everest.logging.LoggingService;
-import com.rohitawate.everest.settings.Settings;
+import com.rohitawate.everest.logging.Logger;
+import com.rohitawate.everest.misc.EverestUtilities;
+import com.rohitawate.everest.preferences.LocalPreferencesManager;
+import com.rohitawate.everest.preferences.Preferences;
+import com.rohitawate.everest.preferences.PreferencesManager;
+import com.rohitawate.everest.project.ProjectManager;
+import com.rohitawate.everest.project.SQLiteManager;
 import com.rohitawate.everest.state.ComposerState;
+import com.rohitawate.everest.sync.saver.HistorySaver;
+import com.rohitawate.everest.sync.saver.PreferencesSaver;
 
-import java.time.LocalDateTime;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
- * Manages all the DataManagers of Everest and registers new ones.
- * Registers Everest's default SQLiteManager automatically.
+ * Manages all the ProjectManagers and PreferencesManagers of Everest and registers new ones.
+ * Also, registers Everest's default implementations of the above viz. SQLiteManager and LocalPreferencesManager.
  */
 public class SyncManager {
-    private static HashMap<String, DataManager> managers;
     private static HomeWindowController homeWindowController;
-    private static Executor executor = MoreExecutors.directExecutor();
-    private static HistorySaver historySaver;
+    private static ExecutorService executor = EverestUtilities.newDaemonSingleThreadExecutor();
 
-    /**
-     * @param homeWindowController - to add a HistoryItem by invoking addHistoryItem()
-     */
-    public SyncManager(HomeWindowController homeWindowController) {
-        SyncManager.homeWindowController = homeWindowController;
-        managers = new HashMap<>();
-        historySaver = new HistorySaver();
+    // Selected sources
+    private static final File SYNC_PREFS_FILE = new File("Everest/config/sync_preferences.json");
+    private static SyncPrefs syncPrefs;
+
+    // Default sources
+    public static final String DEFAULT_PROJECT_SOURCE = "SQLite";
+    public static final String DEFAULT_PREFS_SOURCE = "Local";
+
+    // Managers
+    static HashMap<String, ProjectManager> projectManagers = new HashMap<>();
+    static HashMap<String, PreferencesManager> prefsManagers = new HashMap<>();
+
+    // ResourceSavers
+    private static HistorySaver historySaver = new HistorySaver(projectManagers.values());
+    private static PreferencesSaver prefsSaver = new PreferencesSaver(prefsManagers.values());
+
+    static {
+        loadSyncPrefs();
 
         // Registering the default
         try {
-            registerManager(new SQLiteManager());
+            Registrar.registerManager(new SQLiteManager());
+            Registrar.registerManager(new LocalPreferencesManager());
         } catch (DuplicateException e) {
-            System.out.println("SQLite Manager already exists: Nope, will never happen.");
+            Logger.severe(e.getMessage(), e);
         }
     }
 
     /**
      * Asynchronously saves the new state by invoking all the registered DataManagers.
      */
-    public void saveState(ComposerState newState) {
+    public static void saveState(ComposerState newState) {
+        String projectSource = syncPrefs.projectSource;
+
+        if (projectManagers.get(projectSource) == null) {
+            projectSource = DEFAULT_PROJECT_SOURCE;
+        }
+
         // Compares new state with the last added state from the primary fetch source
-        if (newState.equals(managers.get(Settings.fetchSource).getLastAdded()))
+        if (newState.equals(projectManagers.get(projectSource).getLastAdded()))
             return;
 
-        historySaver.newState = newState;
+        historySaver.setResource(newState);
         executor.execute(historySaver);
 
-        homeWindowController.addHistoryItem(newState);
+        if (Main.preferences.appearance.showHistoryRange > 0) {
+            try {
+                homeWindowController.addHistoryItem(newState);
+            } catch (NullPointerException e) {
+                Logger.warning("HomeWindowController not registered. SyncManager could add history item.", e);
+            }
+        }
     }
 
     /**
      * Retrieves the history from the configured source.
      *
-     * @return A list of all the requests
+     * @return a list of all the requests
      */
-    public List<ComposerState> getHistory() {
+    public static List<ComposerState> getHistory() {
+        String projectSource = syncPrefs.projectSource;
+
         List<ComposerState> history = null;
         try {
-            if (managers.get(Settings.fetchSource) == null) {
-                LoggingService.logSevere("No such source found: " + Settings.fetchSource, null, LocalDateTime.now());
-                history = managers.get("SQLite").getHistory();
-            } else {
-                history = managers.get(Settings.fetchSource).getHistory();
+            if (projectManagers.get(projectSource) == null) {
+                Logger.severe("No such source found: " + projectSource, null);
+                projectSource = DEFAULT_PROJECT_SOURCE;
             }
+
+            history = projectManagers.get(projectSource).getHistory();
         } catch (Exception e) {
-            LoggingService.logSevere("History could not be fetched.", e, LocalDateTime.now());
+            Logger.severe("History could not be fetched.", e);
         }
 
         return history;
     }
 
     /**
-     * Registers a new DataManager to be used for syncing Everest's data
-     * at various sources.
+     * Retrieves the user's preferences from the configured source.
+     *
+     * @return the user's preferences
      */
-    public void registerManager(DataManager newManager) throws DuplicateException {
-        if (managers.containsKey(newManager.getIdentifier()))
-            throw new DuplicateException(
-                    "Duplicate DataManager: Manager with identifier \'" + newManager.getIdentifier() + "\' already exists.");
-        else
-            managers.put(newManager.getIdentifier(), newManager);
+    public static Preferences loadPrefs() {
+        String prefsSource = syncPrefs.prefsSource;
+
+        if (prefsManagers.get(prefsSource) == null) {
+            Logger.severe("No such source found: " + prefsSource, null);
+            prefsSource = DEFAULT_PREFS_SOURCE;
+        }
+
+        Preferences prefs;
+
+        try {
+            prefs = prefsManagers.get(prefsSource).loadPrefs();
+            Logger.info("Preferences loaded.");
+        } catch (Exception e) {
+            Logger.info("Could not load preferences. Everest will use the default values.");
+            prefs = new Preferences();
+        }
+
+        return prefs;
     }
 
-    private static class HistorySaver implements Runnable {
-        private ComposerState newState;
+    /**
+     * Asynchronously saves the user's preferences by invoking all the registered PreferencesManagers.
+     */
+    public static void savePrefs(Preferences prefs) {
+        prefsSaver.setResource(prefs);
+        executor.execute(prefsSaver);
+    }
 
-        @Override
-        public void run() {
+    public static void setHomeWindowController(HomeWindowController controller) {
+        if (homeWindowController != null) {
+            Logger.info("HomeWindowController already registered with SyncManager.");
+            return;
+        }
+
+        homeWindowController = controller;
+    }
+
+    private static void loadSyncPrefs() {
+        if (!SYNC_PREFS_FILE.exists()) {
+            Logger.info("Sync preferences file not found. Everest will use the default values.");
+            syncPrefs = new SyncPrefs();
+        } else {
             try {
-                for (DataManager manager : managers.values())
-                    manager.saveState(newState);
-            } catch (Exception e) {
-                LoggingService.logSevere("Could not save history.", e, LocalDateTime.now());
+                syncPrefs = EverestUtilities.jsonMapper.readValue(SYNC_PREFS_FILE, SyncPrefs.class);
+            } catch (IOException e) {
+                Logger.info("Could not load sync preferences. Everest will use the default values.");
+                syncPrefs = new SyncPrefs();
             }
+        }
+
+        Logger.info("Sync preferences loaded.");
+    }
+
+    public static void saveSyncPrefs() {
+        try {
+            EverestUtilities.jsonMapper.writeValue(SYNC_PREFS_FILE, syncPrefs);
+            Logger.info("Sync preferences saved.");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

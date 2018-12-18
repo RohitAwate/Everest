@@ -16,20 +16,25 @@
 
 package com.rohitawate.everest.misc;
 
+import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
-import com.rohitawate.everest.logging.LoggingService;
-import com.rohitawate.everest.settings.Settings;
+import com.rohitawate.everest.logging.Logger;
 import javafx.scene.Parent;
 
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ThemeManager {
-    private static List<Parent> parentNodes = new ArrayList<>();
-    private static File themeFile = new File("Everest/themes/" + Settings.theme + ".css");
-    private static File syntaxThemeFile = new File("Everest/themes/syntax/" + Settings.syntaxTheme + ".css");
+    public static final String DEFAULT_THEME = "Adreana";
+    public static final String DEFAULT_SYNTAX_THEME = "Moondust";
+
+    private static String theme = Main.preferences.appearance.theme;
+    private static String syntaxTheme = Main.preferences.appearance.syntaxTheme;
+
+    private static final List<Parent> parentNodes = new ArrayList<>();
+    private static File themeFile = new File("Everest/themes/" + theme + ".css");
+    private static File syntaxThemeFile = new File("Everest/themes/syntax/" + syntaxTheme + ".css");
 
     /**
      * Refreshes the theme of all the registered parents by replacing
@@ -37,7 +42,7 @@ public class ThemeManager {
      * is always retained.
      */
     public static void refreshTheme() {
-        if (!Settings.theme.equals("Adreana")) {
+        if (!theme.equals(DEFAULT_THEME)) {
             if (themeFile.exists()) {
                 String themePath = themeFile.toURI().toString();
 
@@ -46,30 +51,33 @@ public class ThemeManager {
                     parent.getStylesheets().add(1, themePath);
                 }
 
-                LoggingService.logInfo("Theme changed to " + Settings.theme + ".", LocalDateTime.now());
+                Logger.info("Theme changed to " + theme + ".");
             } else {
-                LoggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
+                Logger.info(theme + ": No such theme file found.");
+                theme = DEFAULT_THEME;
             }
         }
     }
 
     public static void setTheme(Parent parent) {
-        if (!Settings.theme.equals("Adreana")) {
+        if (!theme.equals(DEFAULT_THEME)) {
             if (themeFile.exists()) {
                 parent.getStylesheets().add(themeFile.toURI().toString());
                 parentNodes.add(parent);
             } else {
-                LoggingService.logInfo(Settings.theme + ": No such theme file found.", LocalDateTime.now());
+                Logger.info(theme + ": No such theme file found.");
+                theme = DEFAULT_THEME;
             }
         }
     }
 
     public static void setSyntaxTheme(EverestCodeArea everestCodeArea) {
-        if (!Settings.syntaxTheme.equals("Moondust")) {
+        if (!syntaxTheme.equals(DEFAULT_SYNTAX_THEME)) {
             if (syntaxThemeFile.exists()) {
                 everestCodeArea.getStylesheets().add(syntaxThemeFile.toURI().toString());
             } else {
-                LoggingService.logInfo(Settings.syntaxTheme + ": No such theme file found.", LocalDateTime.now());
+                Logger.info(syntaxTheme + ": No such theme file found.");
+                syntaxTheme = DEFAULT_SYNTAX_THEME;
             }
         }
     }

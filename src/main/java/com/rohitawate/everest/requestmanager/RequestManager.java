@@ -20,7 +20,6 @@ import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.models.requests.*;
 import com.rohitawate.everest.models.responses.EverestResponse;
-import com.rohitawate.everest.settings.Settings;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -73,10 +72,10 @@ public class RequestManager extends Service<EverestResponse> {
         // Required for making PATCH requests through Jersey
         client.property(HttpUrlConnectorProvider.SET_METHOD_WORKAROUND, true);
 
-        if (Settings.connectionTimeOutEnable)
-            client.property(ClientProperties.CONNECT_TIMEOUT, Settings.connectionTimeOut);
-        if (Settings.connectionReadTimeOutEnable)
-            client.property(ClientProperties.READ_TIMEOUT, Settings.connectionReadTimeOut);
+        if (Main.preferences.request.enableConnectionTimeOut)
+            client.property(ClientProperties.CONNECT_TIMEOUT, Main.preferences.request.connectionTimeOut);
+        if (Main.preferences.request.enableConnectionReadTimeOut)
+            client.property(ClientProperties.READ_TIMEOUT, Main.preferences.request.connectionReadTimeOut);
     }
 
     private long initialTime;
@@ -132,14 +131,15 @@ public class RequestManager extends Service<EverestResponse> {
         return this.request;
     }
 
-    private void addAuthHeader() {
+    private void addAuthHeader() throws Exception {
         if (request.getAuthProvider() != null && request.getAuthProvider().isEnabled()) {
             requestBuilder.header("Authorization", request.getAuthProvider().getAuthHeader());
         }
     }
 
     private void appendHeaders() {
-        request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
+        if (request.getHeaders() != null)
+            request.getHeaders().forEach((key, value) -> requestBuilder.header(key, value));
         requestBuilder.header("User-Agent", Main.APP_NAME);
     }
 
@@ -151,7 +151,7 @@ public class RequestManager extends Service<EverestResponse> {
             throws NullResponseException, RedirectException {
         if (serverResponse == null) {
             throw new NullResponseException("The server did not respond.",
-                    "Like that crush from high school..");
+                    "Like that crush from high school.");
         } else if (serverResponse.getStatus() == 301 || serverResponse.getStatus() == 302) {
             throw new RedirectException(
                     serverResponse.getHeaderString("location"));

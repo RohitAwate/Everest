@@ -16,7 +16,8 @@
 package com.rohitawate.everest;
 
 import com.rohitawate.everest.misc.ThemeManager;
-import com.rohitawate.everest.settings.SettingsLoader;
+import com.rohitawate.everest.preferences.Preferences;
+import com.rohitawate.everest.sync.SyncManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -26,14 +27,15 @@ import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-
 public class Main extends Application {
     public static final String APP_NAME = "Everest";
+    public static final Image APP_ICON = new Image(Main.class.getResource("/assets/Logo.png").toExternalForm());
+    public static Preferences preferences;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        SettingsLoader settingsLoader = new SettingsLoader();
-        settingsLoader.settingsLoaderThread.join();
+        new SyncManager();
+        preferences = SyncManager.loadPrefs();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
         Parent homeWindow = loader.load();
@@ -44,9 +46,13 @@ public class Main extends Application {
         dashboardStage.setWidth(screenBounds.getWidth() * 0.83);
         dashboardStage.setHeight(screenBounds.getHeight() * 0.74);
 
-        dashboardStage.getIcons().add(new Image(getClass().getResource("/assets/Logo.png").toExternalForm()));
+        dashboardStage.getIcons().add(APP_ICON);
         dashboardStage.setScene(new Scene(homeWindow));
         dashboardStage.setTitle(APP_NAME);
+        dashboardStage.setOnHiding(e -> {
+            SyncManager.savePrefs(Main.preferences);
+            SyncManager.saveSyncPrefs();
+        });
         dashboardStage.show();
     }
 

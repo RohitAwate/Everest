@@ -22,7 +22,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<VBox fx:id="dashboard" alignment="CENTER" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.141"
+<VBox fx:id="dashboard" alignment="CENTER" stylesheets="@../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.111"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rohitawate.everest.controllers.DashboardController">
     <children>
         <HBox alignment="CENTER" maxHeight="70.0" minHeight="70.0" spacing="20.0" VBox.vgrow="ALWAYS">
@@ -53,7 +53,7 @@
                             </HBox.margin>
                             <children>
                                 <JFXButton fx:id="sendButton" defaultButton="true" graphicTextGap="10.0" minWidth="80.0"
-                                           onAction="#sendRequest" prefHeight="30.0" ripplerFill="WHITE" text="SEND"
+                                           onAction="#sendRequest" prefHeight="30.0" ripplerFill="ORANGERED" text="SEND"
                                            textAlignment="CENTER" textFill="WHITE">
                                     <padding>
                                         <Insets bottom="5.0" left="15.0" right="15.0" top="5.0"/>
@@ -84,11 +84,11 @@
         </HBox>
         <SplitPane dividerPositions="0.1" orientation="VERTICAL" VBox.vgrow="ALWAYS">
             <items>
-                <AnchorPane maxHeight="300.0">
+                <AnchorPane>
                     <children>
-                        <TabPane fx:id="requestOptionsTab" minHeight="190.0" tabClosingPolicy="UNAVAILABLE"
-                                 tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TabPane fx:id="requestOptionsTab" minHeight="190.0" styleClass="flat-tab-pane"
+                                 tabClosingPolicy="UNAVAILABLE" tabMinWidth="150.0" AnchorPane.bottomAnchor="0.0"
+                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <tabs>
                                 <Tab fx:id="paramsTab" text="PARAMS">
                                     <content>
@@ -256,14 +256,14 @@
                                                         <Image url="@../../assets/Explosion.png"/>
                                                     </image>
                                                 </ImageView>
-                                                <Label fx:id="errorTitle" text="Oops... That's embarrassing!"
+                                                <Label fx:id="errorTitle" text="Oops... Something went wrong!"
                                                        textFill="WHITE">
                                                     <font>
                                                         <Font name="System Bold" size="32.0"/>
                                                     </font>
                                                 </Label>
                                                 <Label fx:id="errorDetails"
-                                                       text="Something went wrong. Try to make another request.Restart Everest if that doesn't work."
+                                                       text="Try to make another request. Restart Everest if that doesn't work."
                                                        textAlignment="CENTER" textFill="#c3c3c3">
                                                     <font>
                                                         <Font size="22.0"/>

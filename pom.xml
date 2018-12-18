@@ -69,7 +69,7 @@
         <dependency>
             <groupId>com.jfoenix</groupId>
             <artifactId>jfoenix</artifactId>
-            <version>1.4.0</version>
+            <version>8.0.4</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
         <dependency>
@@ -128,6 +128,11 @@
             <artifactId>junit-jupiter-api</artifactId>
             <version>RELEASE</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.9.4</version>
         </dependency>
     </dependencies>
 </project>

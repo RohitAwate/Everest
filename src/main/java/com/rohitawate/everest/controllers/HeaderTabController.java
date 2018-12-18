@@ -16,7 +16,7 @@
 
 package com.rohitawate.everest.controllers;
 
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.state.FieldState;
 import javafx.beans.binding.Bindings;
@@ -30,7 +30,6 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -106,7 +105,7 @@ public class HeaderTabController implements Initializable {
             controller.setKeyHandler(keyEvent -> addHeader());
             headersBox.getChildren().add(headerField);
         } catch (IOException e) {
-            LoggingService.logSevere("Could not add string field.", e, LocalDateTime.now());
+            Logger.severe("Could not add string field.", e);
         }
     }
 

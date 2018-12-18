@@ -15,7 +15,7 @@
  */
 
 #dashboard {
-	-fx-background-color: #505050;
+    -fx-background-color: #505050;
 }
 
 #addressSection {
@@ -24,7 +24,7 @@
 
 #addressField {
     -fx-background-color: #707070;
-	-fx-text-fill: white;
+    -fx-text-fill: white;
 }
 
 .combo-box {
@@ -46,8 +46,8 @@
 
 .combo-box:showing .list-cell:hover,
 .combo-box:showing .list-cell:selected {
-	-fx-background-color: orangered;
-	-fx-text-fill: white;
+    -fx-background-color: orangered;
+    -fx-text-fill: white;
 }
 
 .combo-box .arrow-button .arrow {
@@ -97,15 +97,15 @@
 }
 
 /* Home window tab */
-#tabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
+.tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-close-button {
     -fx-background-color: white;
 }
 
-#tabPane:top .tab-header-area .headers-region .tab:hover:top {
+.tab-pane:top .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: orangered;
 }
 
-#tabPane:top .tab-header-area .headers-region .tab:selected:top {
+.tab-pane:top .tab-header-area .headers-region .tab:selected:top {
     -fx-background-color: #505050;
 }
 
@@ -123,6 +123,7 @@
 #headersBox,
 .scroll-pane,
 .scroll-pane .viewport,
+.combo-box .scroll-bar:vertical,
 .virtualized-scroll-pane .scroll-bar:vertical,
 .virtualized-scroll-pane .scroll-bar:horizontal,
 .scroll-pane .scroll-bar:vertical,
@@ -164,6 +165,19 @@
     -fx-background-color: #282828;
 }
 
+.flat-tab-pane {
+    -fx-tab-min-height: 1.4em;
+}
+
+.flat-tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
+    -fx-fill: white;
+    -fx-font-size: 0.9em;
+}
+
+#homeWindowTabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
+    -fx-font-size: 1em;
+}
+
 /* Request options (Headers, Authorization, etc) tab */
 #requestOptionsTab .tab-header-area .headers-region .tab:hover:top {
     -fx-background-color: #55a15c;
@@ -181,6 +195,11 @@
     -fx-background-color: #545454;
 }
 
+#oauth2TabPane:top .tab-header-area .tab-header-background,
+#oauth2TabPane:top .tab-header-area .headers-region .tab:top {
+    -fx-background-color: #4b4b4b;
+}
+
 #bodyTabPane .tab-content-area,
 #bodyTabPane .scroll-pane .viewport {
     -fx-background-color: #3d3d3d;
@@ -191,11 +210,16 @@
     -fx-background-color: #4e848f;
 }
 
+#oauth2TabPane:top .tab-header-area .headers-region .tab:hover:top {
+    -fx-background-color: crimson;
+}
+
 #authTabPane:top .tab-header-area .headers-region .tab:selected:top,
 #bodyTabPane:top .tab-header-area .headers-region .tab:selected:top {
     -fx-background-color: #3d3d3d;
 }
 
+.combo-box .scroll-bar:vertical .thumb,
 .virtualized-scroll-pane .scroll-bar .thumb,
 .scroll-pane .scroll-bar .thumb {
     -fx-background-color: #808080;
@@ -212,6 +236,11 @@
 
 .split-pane:horizontal .split-pane-divider {
     -fx-padding: 0px;
+}
+
+.material-text-field {
+    -fx-prompt-text-fill: #9a9a9a;
+    -fx-text-fill: #dadada;
 }
 
 .KVField {
@@ -336,20 +365,27 @@
 }
 
 #rawInputTypeBox,
-#responseTypeBox {
+#responseTypeBox,
+#captureMethodBox {
     -fx-background-color: #505050;
 }
 
 #rawInputTypeBox .list-cell,
-#responseTypeBox .list-cell {
+#responseTypeBox .list-cell,
+#captureMethodBox .list-cell {
     -fx-text-fill: azure;
     -fx-font-size: 13px;
     -fx-background-color: #505050;
 }
 
 #rawInputTypeBox .list-cell:hover,
-#responseTypeBox .list-cell:hover {
+#responseTypeBox .list-cell:hover,
+#captureMethodBox .list-cell:hover {
     -fx-background-color: cornflowerblue;
+}
+
+#captureMethodBox .list-cell {
+    -fx-font-size: 15px;
 }
 
 /* Response Headers Viewer */
@@ -410,6 +446,126 @@
     -fx-padding: 0;
 }
 
+/* Authorization Code */
+#accessTokenBox {
+    -fx-background-color: #282828;
+}
+
+/* MockServerDashboard */
+#serverDetails {
+    -fx-background-color: #282828;
+}
+
+#startButton {
+    -fx-padding: 0 10;
+}
+
+#endpointsBox {
+    -fx-background-color: #454545;
+}
+
+#endpointDetailsBox {
+    -fx-background-color: #353535;
+}
+
+#finalURLBox {
+    -fx-background-color: #202020;
+    -fx-padding: 10px 20px;
+}
+
+#portField, #serverAddressBox {
+    -fx-background-color: #505050;
+}
+
+#codeBox {
+    -fx-background-color: #282828;
+}
+
+.field-label {
+    -fx-text-fill: #ababab;
+}
+
+.transparent-list-view {
+    -fx-background-color: transparent;
+}
+
+.jfx-list-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-radius: 0;
+}
+
+.jfx-list-cell {
+    -fx-background-color: transparent;
+    -fx-spacing: 0px;
+    -fx-padding: 5px;
+    -fx-font-weight: 200;
+}
+
+.jfx-list-cell Label {
+    -fx-text-fill: #ababab;
+}
+
+#serversList .jfx-list-cell {
+    -fx-font-size: 20px;
+}
+
+#serversList .jfx-list-cell:selected {
+    -fx-background-color: #ff450060;
+}
+
+#endpointsList .jfx-list-cell {
+    -fx-font-size: 16px;
+}
+
+#endpointsList .jfx-list-cell:selected {
+    -fx-background-color: #ff450030;
+}
+
+#serversList .jfx-list-cell:selected Label,
+#endpointsList .jfx-list-cell:selected .endpoint-card-path {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.server-card .jfx-toggle-button {
+    -fx-text-fill: #ababab;
+    -fx-font-size: 20px;
+}
+
+.endpoint-card Label {
+    -fx-text-fill: #cacaca;
+}
+
+.endpoint-card-method {
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 2px 5px;
+    -fx-background-radius: 2px;
+}
+
+/* Service Adder */
+#serverDetailsHeaderBox {
+    -fx-background-color: #545454;
+}
+
+.server-details {
+    -fx-background-color: #282828;
+}
+
+#loggingEnableToggle {
+    -fx-padding: 0px 10px;
+}
+
+#cancelActionButton {
+    -fx-background-color: #747474;
+}
+
+#serverActionButton {
+    -fx-background-color: red;
+}
+
 /* Snackbar */
 .jfx-snackbar-content {
     -fx-background-color: black;
@@ -423,4 +579,9 @@
 .jfx-snackbar-action .text {
     -fx-fill: azure;
     -fx-font-weight: bold;
+}
+
+/* Auth Code Access Token Rippler */
+.jfx-rippler {
+    -jfx-rippler-fill: orangered;
 }

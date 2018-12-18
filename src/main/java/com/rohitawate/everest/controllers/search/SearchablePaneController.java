@@ -16,9 +16,9 @@
 
 package com.rohitawate.everest.controllers.search;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import com.jfoenix.controls.JFXButton;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
+import com.rohitawate.everest.misc.EverestUtilities;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -31,12 +31,10 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 
 public abstract class SearchablePaneController<T> implements Initializable {
     @FXML
@@ -118,15 +116,15 @@ public abstract class SearchablePaneController<T> implements Initializable {
                 for (T state : entries)
                     addHistoryItem(state);
             } catch (InterruptedException | ExecutionException E) {
-                LoggingService.logSevere("Task thread interrupted while populating HistoryTab.", E,
-                        LocalDateTime.now());
+                Logger.severe("Task thread interrupted while populating HistoryTab.", E
+                );
             }
         });
 
-        entryLoader.setOnFailed(e -> LoggingService.logWarning("Failed to load history.",
-                (Exception) entryLoader.getException(), LocalDateTime.now()));
+        entryLoader.setOnFailed(e -> Logger.warning("Failed to load history.",
+                (Exception) entryLoader.getException()));
 
-        MoreExecutors.directExecutor().execute(entryLoader);
+        EverestUtilities.newDaemonSingleThreadExecutor().execute(entryLoader);
     }
 
     private void addSearchItem(T state) {
@@ -151,7 +149,7 @@ public abstract class SearchablePaneController<T> implements Initializable {
 
             return searchEntry.getSearchable();
         } catch (IOException e) {
-            LoggingService.logSevere("Could not append HistoryItem to list.", e, LocalDateTime.now());
+            Logger.severe("Could not append HistoryItem to list.", e);
         }
 
         return null;

@@ -16,115 +16,83 @@
 
 package com.rohitawate.everest.logging;
 
-import java.io.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Scanner;
+import com.rohitawate.everest.http.HttpRequest;
+import com.rohitawate.everest.misc.EverestUtilities;
 
-class Logger {
-    private Level writerLevel;
-    private String logEntryTemplate;
-    private String logFilePath = "Everest/logs/" + LocalDate.now() + ".html";
+import java.time.LocalDateTime;
+import java.util.concurrent.ExecutorService;
 
-    Logger(Level writerLevel) {
-        this.writerLevel = writerLevel;
+public class Logger {
+    private static ExecutorService executor = EverestUtilities.newDaemonSingleThreadExecutor();
 
-        createLogsFile();
-        logEntryTemplate = readFile(getClass().getResourceAsStream("/templates/LogEntry.html"));
+    private static final LogWriter[] coreWriters;
+    private static final LogWriter[] serverWriters;
+
+    static {
+        Level loggerLevel = Level.INFO;
+
+        coreWriters = new LogWriter[2];
+        coreWriters[0] = new CoreHtmlLogWriter(loggerLevel);
+        coreWriters[1] = new CoreConsoleLogWriter(loggerLevel);
+
+        serverWriters = new LogWriter[2];
+        serverWriters[0] = new ServerFileLogWriter(loggerLevel);
+        serverWriters[1] = new ServerConsoleLogWriter(loggerLevel);
     }
 
-    /**
-     * Appends the log to the respective day's log file.
-     *
-     */
-    synchronized void log() {
-        if (LoggingService.log.level.equals(Level.INFO)) {
-            System.out.println(LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message);
-        } else {
-            System.err.println(LoggingService.log.level + " " + LoggingService.log.time + ": " + LoggingService.log.message);
-        }
+    private static final CoreLog CORE_LOG = new CoreLog();
+    private static final ServerLog SERVER_LOG = new ServerLog();
 
-        if (LoggingService.log.level.greaterThanEqualTo(this.writerLevel)) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath, true))) {
-                writer.flush();
-                writer.append(getLogEntry(LoggingService.log));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public static void severe(String message, Exception exception) {
+        core(message, exception, Level.SEVERE);
     }
 
-    /**
-     * Generates HTML with the log information.
-     * Different log levels are color-coded for improved readability.
-     * <p>
-     * Color codes:
-     * Red = Severe
-     * Yellow = Warning
-     * Green = Info
-     */
-    private String getLogEntry(Log log) {
-        String logEntry = this.logEntryTemplate;
-        logEntry = logEntry.replace("%% LogLevel %%", log.level.toString());
-        logEntry = logEntry.replace("%% Time %%", log.time);
-        logEntry = logEntry.replace("%% Message %%", log.message);
-        StringBuilder builder = new StringBuilder();
-
-        if (log.exception != null) {
-            StackTraceElement[] stackTrace = log.exception.getStackTrace();
-            builder.append(log.exception.toString());
-            builder.append("<br>\n");
-            if (stackTrace.length != 0) {
-                for (StackTraceElement element : log.exception.getStackTrace()) {
-                    builder.append(" -- ");
-                    builder.append(element.toString());
-                    builder.append("<br>\n");
-                }
-            } else {
-                builder.append("Stack trace unavailable.");
-            }
-        }
-
-        logEntry = logEntry.replace("%% StackTrace %%", builder.toString());
-
-        return logEntry;
+    public static void warning(String message, Exception exception) {
+        core(message, exception, Level.WARNING);
     }
 
-    private void createLogsFile() {
-        File logsDirectory = new File("Everest/logs/");
-        if (!logsDirectory.exists())
-            logsDirectory.mkdirs();
-
-        File logsFile = new File(logFilePath);
-
-        try {
-            if (logsFile.exists())
-                return;
-
-            logsFile.createNewFile();
-            BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath));
-            String logsFileTemplate = readFile(getClass().getResourceAsStream("/templates/LogsFile.html"));
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            logsFileTemplate = logsFileTemplate.replace("%% Date %%", dateTimeFormatter.format(LocalDate.now()));
-            logsFileTemplate = logsFileTemplate.replace("%% Date %%", dateTimeFormatter.format(LocalDate.now()));
-            writer.flush();
-            writer.write(logsFileTemplate);
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void info(String message) {
+        core(message, null, Level.INFO);
     }
 
-    private String readFile(InputStream stream) {
-        StringBuilder builder = new StringBuilder();
-        Scanner scanner = new Scanner(stream);
-
-        while (scanner.hasNext()) {
-            builder.append(scanner.nextLine());
-            builder.append("\n");
-        }
-        scanner.close();
-
-        return builder.toString();
+    public static void serverSevere(String serverName, int responseCode, HttpRequest request) {
+        server(serverName, responseCode, request, Level.SEVERE);
     }
+
+    public static void serverWarning(String serverName, int responseCode, HttpRequest request) {
+        server(serverName, responseCode, request, Level.WARNING);
+    }
+
+    public static void serverInfo(String serverName, int responseCode, HttpRequest request) {
+        server(serverName, responseCode, request, Level.INFO);
+    }
+
+    private static void core(String message, Exception exception, Level level) {
+        CORE_LOG.message = message;
+        CORE_LOG.exception = exception;
+        CORE_LOG.time = LocalDateTime.now();
+        CORE_LOG.level = level;
+        executor.execute(coreWriteThread);
+    }
+
+    private static Runnable coreWriteThread = () -> {
+        for (LogWriter writer : coreWriters) {
+            writer.append(CORE_LOG);
+        }
+    };
+
+    private static void server(String serverName, int responseCode, HttpRequest request, Level level) {
+        SERVER_LOG.serverName = serverName;
+        SERVER_LOG.responseCode = responseCode;
+        SERVER_LOG.request = request;
+        SERVER_LOG.level = level;
+        SERVER_LOG.time = LocalDateTime.now();
+        executor.execute(serverWriteThread);
+    }
+
+    private static Runnable serverWriteThread = () -> {
+        for (LogWriter writer : serverWriters) {
+            writer.append(SERVER_LOG);
+        }
+    };
 }

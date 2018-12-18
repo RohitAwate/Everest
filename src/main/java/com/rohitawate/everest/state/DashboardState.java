@@ -21,7 +21,7 @@ import com.rohitawate.everest.controllers.DashboardController.ResponseLayer;
 import com.rohitawate.everest.controllers.DashboardController.ResponseTab;
 import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.models.requests.DataRequest;
 import com.rohitawate.everest.models.requests.EverestRequest;
 import com.rohitawate.everest.models.responses.EverestResponse;
@@ -31,7 +31,6 @@ import javafx.event.Event;
 import javax.ws.rs.ProcessingException;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -107,7 +106,7 @@ public class DashboardState {
         this.visibleResponseLayer = ResponseLayer.ERROR;
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
-        LoggingService.logWarning(this.composer.httpMethod + " request could not be processed.", exception, LocalDateTime.now());
+        Logger.warning(this.composer.httpMethod + " request could not be processed.", exception);
 
         if (throwable.getClass() == NullResponseException.class) {
             NullResponseException URE = (NullResponseException) throwable;
@@ -127,11 +126,11 @@ public class DashboardState {
                 requestManager.restart();
                 return;
             } catch (MalformedURLException MURLE) {
-                LoggingService.logInfo("Invalid URL: " + this.composer.target, LocalDateTime.now());
+                Logger.info("Invalid URL: " + this.composer.target);
             }
         } else {
-            errorTitle = "Oops... That's embarrassing!";
-            errorDetails = "Something went wrong. Try to make another request.Restart Everest if that doesn't work.";
+            errorTitle = "Oops... Something went wrong!";
+            errorDetails = "Try to make another request. Restart Everest if that doesn't work.";
         }
 
         if (requestManager.getRequest().getClass().equals(DataRequest.class)) {

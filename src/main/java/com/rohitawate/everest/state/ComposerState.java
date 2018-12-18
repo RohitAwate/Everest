@@ -36,13 +36,7 @@ public class ComposerState {
     public String rawBody;
     public String rawBodyBoxValue;
 
-    public String basicUsername;
-    public String basicPassword;
-    public boolean basicEnabled;
-
-    public String digestUsername;
-    public String digestPassword;
-    public boolean digestEnabled;
+    public AuthState authState;
 
     // Tuples of URL-encoded requests
     public List<FieldState> urlStringTuples;
@@ -56,6 +50,7 @@ public class ComposerState {
 
     public ComposerState() {
         this.httpMethod = HTTPConstants.GET;
+        this.authState = new AuthState();
     }
 
     @Override
@@ -69,12 +64,7 @@ public class ComposerState {
         if (!authMethod.equals(state.authMethod)) return false;
         if (!params.equals(state.params)) return false;
         if (!headers.equals(state.headers)) return false;
-        if (!basicUsername.equals(state.basicUsername)) return false;
-        if (!basicPassword.equals(state.basicPassword)) return false;
-        if (basicEnabled != state.basicEnabled) return false;
-        if (!digestUsername.equals(state.digestUsername)) return false;
-        if (!digestPassword.equals(state.digestPassword)) return false;
-        if (digestEnabled != state.digestEnabled) return false;
+        if (!authState.equals(state.authState)) return false;
 
         if (state.httpMethod.equals(HTTPConstants.GET)
                 || state.httpMethod.equals(HTTPConstants.DELETE)) return true;

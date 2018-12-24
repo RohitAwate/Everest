@@ -27,7 +27,6 @@ import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeControlle
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
-import com.rohitawate.everest.state.auth.ProviderState;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -52,7 +51,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
     private void fetchAuthorizationGrant() throws Exception {
         if (this.state == null) {
-            return;
+            setState(controller.getState());
         }
 
         if (state.authGrant == null || state.authGrantUsed) {
@@ -86,7 +85,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     private void refreshAccessToken()
             throws AccessTokenDeniedException, UnknownAccessTokenTypeException, IOException {
         if (this.state == null) {
-            return;
+            setState(controller.getState());
         }
 
         URL tokenURL = new URL(state.accessTokenURL);
@@ -113,7 +112,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     private void fetchNewAccessToken()
             throws NoAuthorizationGrantException, IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
         if (this.state == null) {
-            return;
+            setState(controller.getState());
         }
 
         if (state.authGrant == null) {
@@ -145,15 +144,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     }
 
     @Override
-    public AccessToken getAccessToken(ProviderState providerState) throws Exception {
-        if (providerState == null) {
-            this.state = null;
-            return null;
-        }
-
-        setState(providerState);
-
-        AuthorizationCodeState state = (AuthorizationCodeState) providerState;
+    public AccessToken getAccessToken() throws Exception {
         if (state.accessToken.getRefreshToken().isEmpty()) {
             fetchAuthorizationGrant();
             fetchNewAccessToken();
@@ -170,8 +161,9 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     @Override
     public String getAuthHeader() throws Exception {
         if (this.state == null) {
-            return null;
+            setState(controller.getState());
         }
+
         /*
             Integrated WebView calls will already have been resolved in AuthorizationCodeController,
             hence, they are skipped here.
@@ -186,7 +178,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             }
 
             fetchAuthorizationGrant();
-            getAccessToken(state);
+            getAccessToken();
         }
 
         return state.headerPrefix + " " + state.accessToken.getAccessToken();
@@ -194,16 +186,20 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
     @Override
     public boolean isEnabled() {
+        if (this.state == null) {
+            setState(controller.getState());
+        }
+
         return state.enabled;
     }
 
-    private void setState(ProviderState providerState) {
-        if (providerState == null) {
+    private void setState(AuthorizationCodeState state) {
+        if (state == null) {
             this.state = null;
             return;
         }
 
-        this.state = (AuthorizationCodeState) providerState;
+        this.state = state;
 
         if (state.redirectURL.isEmpty() || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
             state.redirectURL = BrowserCapturer.LOCAL_SERVER_URL;

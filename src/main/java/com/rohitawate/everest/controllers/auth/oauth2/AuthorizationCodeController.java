@@ -193,7 +193,6 @@ public class AuthorizationCodeController implements Initializable {
 
     private void setExpiryLabel() {
         if (state.accessToken != null && state.accessToken.getTimeToExpiry() >= 0) {
-            System.out.println(state.accessToken.getTimeToExpiry());
             expiryLabel.setVisible(true);
 
             if (state.accessToken.getExpiresIn() == 0) {
@@ -296,15 +295,7 @@ public class AuthorizationCodeController implements Initializable {
     private class TokenFetcher extends Task<AccessToken> {
         @Override
         protected AccessToken call() throws Exception {
-            state.accessToken.setAccessToken(accessTokenField.getText());
-            state.accessToken.setRefreshToken(refreshTokenField.getText());
-
-            AuthorizationCodeState authCodeState = new AuthorizationCodeState(captureMethodBox.getValue(),
-                    authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
-                    clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                    headerPrefixField.getText(), state.accessToken, enabled.isSelected());
-
-            return provider.getAccessToken(authCodeState);
+            return provider.getAccessToken();
         }
 
         @Override

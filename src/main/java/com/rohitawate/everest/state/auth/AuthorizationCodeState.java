@@ -17,40 +17,8 @@
 package com.rohitawate.everest.state.auth;
 
 import com.rohitawate.everest.auth.oauth2.AccessToken;
-import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
 
-public class AuthorizationCodeState extends ProviderState {
-
-    public AuthorizationCodeState() {
-        String empty = "";
-        this.grantCaptureMethod = CaptureMethod.BROWSER;
-        this.authURL = empty;
-        this.accessTokenURL = empty;
-        this.redirectURL = empty;
-        this.clientID = empty;
-        this.clientSecret = empty;
-        this.scope = empty;
-        this.state = empty;
-        this.headerPrefix = empty;
-        this.accessToken = new AccessToken();
-    }
-
-    public AuthorizationCodeState(String grantCaptureMethod, String authURL, String accessTokenURL, String redirectURL, String clientID,
-                                  String clientSecret, String scope, String state, String headerPrefix,
-                                  AccessToken accessToken, boolean enabled) {
-        this.grantCaptureMethod = grantCaptureMethod;
-        this.authURL = authURL;
-        this.accessTokenURL = accessTokenURL;
-        this.redirectURL = redirectURL;
-        this.clientID = clientID;
-        this.clientSecret = clientSecret;
-        this.scope = scope;
-        this.state = state;
-        this.headerPrefix = headerPrefix;
-        this.accessToken = accessToken;
-        this.enabled = enabled;
-    }
-
+public class AuthorizationCodeState {
     public String grantCaptureMethod;
     public String authGrant;
     public boolean authGrantUsed;
@@ -77,7 +45,7 @@ public class AuthorizationCodeState extends ProviderState {
 
         AuthorizationCodeState that = (AuthorizationCodeState) o;
         if (!grantCaptureMethod.equals(that.grantCaptureMethod)) return false;
-        if (!authGrant.equals(that.authGrant)) return false;
+        if (authGrant != null && that.authGrant != null && !authGrant.equals(that.authGrant)) return false;
         if (authGrantUsed != that.authGrantUsed) return false;
         if (!authURL.equals(that.authURL)) return false;
         if (!accessTokenURL.equals(that.accessTokenURL)) return false;

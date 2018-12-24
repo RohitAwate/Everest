@@ -19,7 +19,7 @@ package com.rohitawate.everest.state.auth;
 import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
 
-public class AuthorizationCodeState {
+public class AuthorizationCodeState extends ProviderState {
 
     public AuthorizationCodeState() {
         String empty = "";
@@ -52,6 +52,8 @@ public class AuthorizationCodeState {
     }
 
     public String grantCaptureMethod;
+    public String authGrant;
+    public boolean authGrantUsed;
 
     public String authURL;
     public String accessTokenURL;
@@ -75,6 +77,8 @@ public class AuthorizationCodeState {
 
         AuthorizationCodeState that = (AuthorizationCodeState) o;
         if (!grantCaptureMethod.equals(that.grantCaptureMethod)) return false;
+        if (!authGrant.equals(that.authGrant)) return false;
+        if (authGrantUsed != that.authGrantUsed) return false;
         if (!authURL.equals(that.authURL)) return false;
         if (!accessTokenURL.equals(that.accessTokenURL)) return false;
         if (!redirectURL.equals(that.redirectURL)) return false;

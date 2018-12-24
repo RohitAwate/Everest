@@ -41,10 +41,13 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
 
     private String grant;
 
+    private static final String USER_AGENT_STRING = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
+
     WebViewCapturer(String authURL) {
         this.authURL = authURL;
         this.webView = new WebView();
         this.engine = webView.getEngine();
+        this.engine.setUserAgent(USER_AGENT_STRING);
     }
 
     @Override

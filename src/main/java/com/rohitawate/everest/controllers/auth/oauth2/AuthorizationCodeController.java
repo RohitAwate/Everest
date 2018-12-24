@@ -71,7 +71,7 @@ public class AuthorizationCodeController implements Initializable {
     private JFXRippler rippler;
 
     private static AuthorizationCodeProvider provider;
-    private AccessToken accessToken;
+    private AuthorizationCodeState state;
 
     public class CaptureMethod {
         public final static String WEB_VIEW = "Integrated WebView";
@@ -127,7 +127,7 @@ public class AuthorizationCodeController implements Initializable {
             service.submit(tokenFetcher);
         } else {
             try {
-                accessToken = tokenFetcher.call();
+                state.accessToken = tokenFetcher.call();
                 onRefreshSucceeded();
             } catch (Exception e) {
                 onRefreshFailed(e);
@@ -136,21 +136,39 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     public AuthorizationCodeState getState() {
-        if (this.accessToken != null) {
-            /*
-                Setting these values again before adding the AccessToken to the AuthCodeState
-                since they can be manually changed in the UI.
-             */
-            this.accessToken.setAccessToken(accessTokenField.getText());
-            this.accessToken.setRefreshToken(refreshTokenField.getText());
+        AccessToken accessToken = null;
+        if (state != null) {
+            accessToken = state.accessToken;
         }
 
-        return new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
-                clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                headerPrefixField.getText(), this.accessToken, enabled.isSelected());
+        state = new AuthorizationCodeState();
+
+        state.grantCaptureMethod = captureMethodBox.getValue();
+        state.authURL = authURLField.getText();
+        state.accessTokenURL = tokenURLField.getText();
+        state.redirectURL = redirectURLField.getText();
+        state.clientID = clientIDField.getText();
+        state.clientSecret = clientSecretField.getText();
+        state.scope = scopeField.getText();
+        state.state = stateField.getText();
+        state.headerPrefix = headerPrefixField.getText();
+        state.enabled = enabled.isSelected();
+        state.accessToken = accessToken;
+
+        if (state.accessToken == null) {
+            state.accessToken = new AccessToken();
+        }
+
+        // Setting these values again since they can be modified from the UI
+        state.accessToken.setAccessToken(accessTokenField.getText());
+        state.accessToken.setRefreshToken(refreshTokenField.getText());
+
+        return state;
     }
 
-    public void setState(AuthorizationCodeState state) {
+    public void setState(AuthorizationCodeState authCodeState) {
+        this.state = authCodeState;
+
         if (state != null) {
             captureMethodBox.setValue(state.grantCaptureMethod);
 
@@ -166,27 +184,22 @@ public class AuthorizationCodeController implements Initializable {
             headerPrefixField.setText(state.headerPrefix);
 
             if (state.accessToken != null) {
-                accessToken = state.accessToken;
-                accessTokenField.setText(state.accessToken.getAccessToken());
-                refreshTokenField.setText(state.accessToken.getRefreshToken());
-                setExpiryLabel();
-            } else {
-                accessToken = new AccessToken();
+                onRefreshSucceeded();
             }
 
             enabled.setSelected(state.enabled);
-            provider.setState(state);
         }
     }
 
     private void setExpiryLabel() {
-        if (accessToken != null) {
+        if (state.accessToken != null && state.accessToken.getTimeToExpiry() >= 0) {
+            System.out.println(state.accessToken.getTimeToExpiry());
             expiryLabel.setVisible(true);
 
-            if (accessToken.getExpiresIn() == 0) {
+            if (state.accessToken.getExpiresIn() == 0) {
                 expiryLabel.setText("Never expires.");
             } else {
-                long timeToExpiry = accessToken.getTimeToExpiry();
+                long timeToExpiry = state.accessToken.getTimeToExpiry();
                 if (timeToExpiry < 0) {
                     expiryLabel.setText("Token expired.");
                 } else {
@@ -223,12 +236,10 @@ public class AuthorizationCodeController implements Initializable {
         refreshTokenField.clear();
         expiryLabel.setVisible(false);
         enabled.setSelected(false);
-        provider.setState(null);
+        provider.reset();
     }
 
     public AuthProvider getAuthProvider() {
-        provider.setState(getState());
-
         /*
             Integrated WebView requests need to be processed on the JavaFX Application Thread.
             Hence, calling refreshToken() here itself if token is absent.
@@ -244,10 +255,10 @@ public class AuthorizationCodeController implements Initializable {
         accessTokenField.clear();
         refreshTokenField.clear();
 
-        accessTokenField.setText(accessToken.getAccessToken());
+        accessTokenField.setText(state.accessToken.getAccessToken());
 
-        if (accessToken.getRefreshToken() != null) {
-            refreshTokenField.setText(accessToken.getRefreshToken());
+        if (state.accessToken.getRefreshToken() != null) {
+            refreshTokenField.setText(state.accessToken.getRefreshToken());
         }
 
         setExpiryLabel();
@@ -274,7 +285,7 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     public void setAccessToken(AccessToken accessToken) {
-        this.accessToken = accessToken;
+        state.accessToken = accessToken;
         Platform.runLater(() -> {
             onRefreshSucceeded();
             accessTokenField.requestLayout();
@@ -285,21 +296,20 @@ public class AuthorizationCodeController implements Initializable {
     private class TokenFetcher extends Task<AccessToken> {
         @Override
         protected AccessToken call() throws Exception {
-            // TODO: Improve the API between Provider and Controller
-            accessToken.setAccessToken(accessTokenField.getText());
-            accessToken.setRefreshToken(refreshTokenField.getText());
+            state.accessToken.setAccessToken(accessTokenField.getText());
+            state.accessToken.setRefreshToken(refreshTokenField.getText());
 
-            AuthorizationCodeState state = new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
+            AuthorizationCodeState authCodeState = new AuthorizationCodeState(captureMethodBox.getValue(),
+                    authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
                     clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                    headerPrefixField.getText(), accessToken, enabled.isSelected());
+                    headerPrefixField.getText(), state.accessToken, enabled.isSelected());
 
-            provider.setState(state);
-            return provider.getAccessToken();
+            return provider.getAccessToken(authCodeState);
         }
 
         @Override
         protected void succeeded() {
-            accessToken = getValue();
+            state.accessToken = getValue();
             onRefreshSucceeded();
         }
 

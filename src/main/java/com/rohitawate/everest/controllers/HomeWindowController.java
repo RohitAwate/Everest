@@ -174,7 +174,7 @@ public class HomeWindowController implements Initializable {
             Further handling of the tab text is done by onTargetChanged().
           */
         String target = composerState.target;
-        if (target == null || target.equals(""))
+        if (target == null || target.isBlank())
             newTab.setText("New Tab");
         else
             newTab.setText(target);

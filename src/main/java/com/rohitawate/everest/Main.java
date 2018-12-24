@@ -39,21 +39,19 @@ public class Main extends Application {
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/HomeWindow.fxml"));
         Parent homeWindow = loader.load();
-        Stage dashboardStage = new Stage();
         ThemeManager.setTheme(homeWindow);
 
         Rectangle2D screenBounds = Screen.getPrimary().getBounds();
-        dashboardStage.setWidth(screenBounds.getWidth() * 0.83);
-        dashboardStage.setHeight(screenBounds.getHeight() * 0.74);
-
-        dashboardStage.getIcons().add(APP_ICON);
-        dashboardStage.setScene(new Scene(homeWindow));
-        dashboardStage.setTitle(APP_NAME);
-        dashboardStage.setOnHiding(e -> {
+        primaryStage.setWidth(screenBounds.getWidth() * 0.83);
+        primaryStage.setHeight(screenBounds.getHeight() * 0.74);
+        primaryStage.getIcons().add(APP_ICON);
+        primaryStage.setScene(new Scene(homeWindow));
+        primaryStage.setTitle(APP_NAME);
+        primaryStage.setOnHiding(e -> {
             SyncManager.savePrefs(Main.preferences);
             SyncManager.saveSyncPrefs();
         });
-        dashboardStage.show();
+        primaryStage.show();
     }
 
     public static void main(String args[]) {

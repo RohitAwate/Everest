@@ -37,6 +37,7 @@ import com.rohitawate.everest.models.requests.GETRequest;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.notifications.NotificationsManager;
+import com.rohitawate.everest.notifications.SnackbarChannel;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import com.rohitawate.everest.requestmanager.RequestManagersPool;
 import com.rohitawate.everest.state.ComposerState;
@@ -64,7 +65,6 @@ import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,6 +111,8 @@ public class DashboardController implements Initializable {
     private HashMap<Tab, DashboardState> tabStateMap;
     private TabPane tabPane;
 
+    public static final String CHANNEL_ID = "Dashboard";
+
     public enum ResponseLayer {
         PROMPT, LOADING, RESPONSE, ERROR
     }
@@ -151,7 +153,9 @@ public class DashboardController implements Initializable {
             Logger.severe("Could not load headers/body tabs.", e);
         }
 
-        NotificationsManager.registerChannel(new JFXSnackbar(dashboard));
+        if (!NotificationsManager.registerChannel(CHANNEL_ID, new SnackbarChannel(dashboard))) {
+            Logger.severe("Could not register dashboard notification channel.", null);
+        }
 
         showLayer(ResponseLayer.PROMPT);
         httpMethodBox.getItems().addAll(
@@ -184,7 +188,7 @@ public class DashboardController implements Initializable {
             responseArea.selectAll();
             responseArea.copy();
             responseArea.deselect();
-            NotificationsManager.push("Response body copied to clipboard.", 5000);
+            NotificationsManager.push(CHANNEL_ID, "Response body copied to clipboard.", 5000);
         });
 
         responseTypeBox.getItems().addAll(
@@ -232,7 +236,7 @@ public class DashboardController implements Initializable {
 
             if (address.isEmpty()) {
                 showLayer(ResponseLayer.PROMPT);
-                NotificationsManager.push("Please enter an address.", 3000);
+                NotificationsManager.push(CHANNEL_ID, "Please enter an address.", 3000);
                 return;
             }
 
@@ -306,7 +310,7 @@ public class DashboardController implements Initializable {
             SyncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
-            NotificationsManager.push("Invalid address. Please verify and try again.", 3000);
+            NotificationsManager.push(CHANNEL_ID, "Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
             Logger.severe("Request execution failed.", E);
             errorTitle.setText("Oops... Something went wrong!");
@@ -338,7 +342,7 @@ public class DashboardController implements Initializable {
         } else if (throwable.getClass() == RedirectException.class) {
             RedirectException redirect = (RedirectException) throwable;
             addressField.setText(redirect.getNewLocation());
-            NotificationsManager.push("Resource moved permanently. Redirecting...", 3000);
+            NotificationsManager.push(CHANNEL_ID, "Resource moved permanently. Redirecting...", 3000);
             requestManager = null;
             sendRequest();
             return;
@@ -468,16 +472,16 @@ public class DashboardController implements Initializable {
                         simplifiedContentType = HTTPConstants.HTML;
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                             JFXSnackbar snackbar = new JFXSnackbar(dashboard);
-                            snackbar.show("Open link in browser?", "YES", 5000, e -> {
-                                snackbar.close();
-                                new Thread(() -> {
-                                    try {
-                                        Desktop.getDesktop().browse(new URI(addressField.getText()));
-                                    } catch (Exception ex) {
-                                        Logger.warning("Invalid URL encountered while opening in browser.", ex);
-                                    }
-                                }).start();
-                            });
+//                            snackbar.push("Open link in browser?", "YES", 5000, e -> {
+//                                snackbar.close();
+//                                new Thread(() -> {
+//                                    try {
+//                                        Desktop.getDesktop().browse(new URI(addressField.getText()));
+//                                    } catch (Exception ex) {
+//                                        Logger.warning("Invalid URL encountered while opening in browser.", ex);
+//                                    }
+//                                }).start();
+//                            });
                         }
                         break;
                     default:
@@ -497,7 +501,7 @@ public class DashboardController implements Initializable {
             responseTypeBox.setValue(simplifiedContentType);
         } catch (Exception e) {
             String errorMessage = "Response could not be parsed.";
-            NotificationsManager.push(errorMessage, 5000);
+            NotificationsManager.push(CHANNEL_ID, errorMessage, 5000);
             Logger.severe(errorMessage, e);
             errorTitle.setText("Parsing Error");
             errorDetails.setText(errorMessage);
@@ -598,7 +602,7 @@ public class DashboardController implements Initializable {
                     For when the last field is loaded from setState.
                     This makes sure an extra blank field is always present.
                 */
-                if (!(key.equals("") && value.equals("")))
+                if (!(key.isBlank() && value.isBlank()))
                     addParamField();
 
                 return;

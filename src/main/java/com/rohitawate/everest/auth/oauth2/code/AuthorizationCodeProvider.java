@@ -68,6 +68,11 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     }
 
     public void setState(AuthorizationCodeState state) {
+        if (state == null) {
+            this.accessToken = null;
+            return;
+        }
+
         try {
             this.authURL = new URL(state.authURL);
             this.accessTokenURL = new URL(state.accessTokenURL);
@@ -311,10 +316,6 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                     tokenResponseBuilder.append(scanner.nextLine());
                 throw new AccessTokenDeniedException(tokenResponseBuilder.toString());
             }
-        }
-
-        AccessToken getAccessToken() {
-            return this.accessToken;
         }
     }
 }

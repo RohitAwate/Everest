@@ -129,9 +129,4 @@ class CoreHtmlLogWriter implements LogWriter {
             e.printStackTrace();
         }
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        writer.close();
-    }
 }

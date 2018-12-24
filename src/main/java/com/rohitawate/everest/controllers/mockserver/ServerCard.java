@@ -19,6 +19,7 @@ package com.rohitawate.everest.controllers.mockserver;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXToggleButton;
 import com.rohitawate.everest.logging.Logger;
+import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.server.mock.MockServer;
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
@@ -38,8 +39,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
-
-import static com.rohitawate.everest.controllers.mockserver.MockServerDashboardController.pushServerNotification;
 
 class ServerCard extends HBox {
     private Label name;
@@ -145,22 +144,22 @@ class ServerCard extends HBox {
                 server.start();
                 String msg = String.format("Mock server '%s' has started.", server.name);
                 Logger.info(msg);
-                pushServerNotification(msg, 7000);
+                NotificationsManager.push(MockServerDashboardController.CHANNEL_ID, msg, (long) 7000);
             } catch (IOException e) {
                 String error = String.format("Could not start mock server '%s'.", server.name);
                 Logger.severe(error, e);
-                pushServerNotification(error, 7000);
+                NotificationsManager.push(MockServerDashboardController.CHANNEL_ID, error, (long) 7000);
             }
         } else {
             try {
                 server.stop();
                 String msg = String.format("Mock server '%s' has stopped.", server.name);
                 Logger.info(msg);
-                pushServerNotification(msg, 7000);
+                NotificationsManager.push(MockServerDashboardController.CHANNEL_ID, msg, (long) 7000);
             } catch (IOException e) {
                 String error = String.format("Could not stop mock server '%s'.", server.name);
                 Logger.severe(error, e);
-                pushServerNotification(error, 7000);
+                NotificationsManager.push(MockServerDashboardController.CHANNEL_ID, error, (long) 7000);
             }
         }
     }

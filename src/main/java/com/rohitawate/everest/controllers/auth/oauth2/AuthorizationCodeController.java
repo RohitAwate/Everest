@@ -27,6 +27,7 @@ import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
+import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.notifications.NotificationsManager;
@@ -169,10 +170,12 @@ public class AuthorizationCodeController implements Initializable {
                 accessTokenField.setText(state.accessToken.getAccessToken());
                 refreshTokenField.setText(state.accessToken.getRefreshToken());
                 setExpiryLabel();
+            } else {
+                accessToken = new AccessToken();
             }
 
             enabled.setSelected(state.enabled);
-            provider.setState(getState());
+            provider.setState(state);
         }
     }
 
@@ -220,6 +223,7 @@ public class AuthorizationCodeController implements Initializable {
         refreshTokenField.clear();
         expiryLabel.setVisible(false);
         enabled.setSelected(false);
+        provider.setState(null);
     }
 
     public AuthProvider getAuthProvider() {
@@ -265,7 +269,7 @@ public class AuthorizationCodeController implements Initializable {
             errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
         }
 
-        NotificationsManager.push(errorMessage, 10000);
+        NotificationsManager.push(DashboardController.CHANNEL_ID, errorMessage, 10000);
         Logger.warning(errorMessage, (Exception) exception);
     }
 
@@ -281,6 +285,7 @@ public class AuthorizationCodeController implements Initializable {
     private class TokenFetcher extends Task<AccessToken> {
         @Override
         protected AccessToken call() throws Exception {
+            // TODO: Improve the API between Provider and Controller
             accessToken.setAccessToken(accessTokenField.getText());
             accessToken.setRefreshToken(refreshTokenField.getText());
 

@@ -171,11 +171,11 @@
 
 .flat-tab-pane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
     -fx-fill: white;
-    -fx-font-size: 0.9em;
+    -fx-font-size: 1.2em;
 }
 
 #homeWindowTabPane:top .tab-header-area .headers-region .tab:top .tab-container .tab-label .text {
-    -fx-font-size: 1em;
+    -fx-font-size: 1.2em;
 }
 
 /* Request options (Headers, Authorization, etc) tab */
@@ -239,6 +239,7 @@
 }
 
 .material-text-field {
+    -fx-font-size: 1.2em;
     -fx-prompt-text-fill: #9a9a9a;
     -fx-text-fill: #dadada;
 }
@@ -566,19 +567,16 @@
     -fx-background-color: red;
 }
 
-/* Snackbar */
+/* SnackbarChannel */
 .jfx-snackbar-content {
+    -fx-padding: 10 20px;
     -fx-background-color: black;
+    -fx-font-size: 1.2em;
 }
 
-.jfx-snackbar-toast {
+.snackbar-label {
     -fx-text-fill: white;
     -fx-alignment: center;
-}
-
-.jfx-snackbar-action .text {
-    -fx-fill: azure;
-    -fx-font-weight: bold;
 }
 
 /* Auth Code Access Token Rippler */

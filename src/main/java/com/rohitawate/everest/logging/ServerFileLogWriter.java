@@ -72,9 +72,4 @@ class ServerFileLogWriter implements LogWriter {
             }
         }
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        writer.close();
-    }
 }

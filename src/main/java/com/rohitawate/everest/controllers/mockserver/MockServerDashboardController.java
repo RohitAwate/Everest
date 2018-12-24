@@ -18,7 +18,6 @@ package com.rohitawate.everest.controllers.mockserver;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
-import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.controls.JFXTextField;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
@@ -28,6 +27,8 @@ import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
+import com.rohitawate.everest.notifications.NotificationsManager;
+import com.rohitawate.everest.notifications.SnackbarChannel;
 import com.rohitawate.everest.server.mock.Endpoint;
 import com.rohitawate.everest.server.mock.MockServer;
 import javafx.beans.Observable;
@@ -72,7 +73,6 @@ public class MockServerDashboardController implements Initializable {
     @FXML
     private JFXButton copyButton, openBrowserButton;
 
-    private static JFXSnackbar snackbar;
     private EverestCodeArea codeArea;
 
     private ServerCard selectedServerCard;
@@ -81,6 +81,8 @@ public class MockServerDashboardController implements Initializable {
 
     private Stage serviceDetailsStage;
     private ServerDetailsController serverDetailsController;
+
+    public static final String CHANNEL_ID = "MockServerDashboard";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -104,7 +106,7 @@ public class MockServerDashboardController implements Initializable {
 
         EverestResponse.statusCodeReasonPhrases.forEach((key, value) -> responseCodeBox.getItems().add(key + " (" + value + ")"));
 
-        snackbar = new JFXSnackbar(mockDashboardSP);
+        NotificationsManager.registerChannel(CHANNEL_ID, new SnackbarChannel(mockDashboardSP));
 
         codeArea = new EverestCodeArea();
         codeAreaScrollPane.setContent(new VirtualizedScrollPane<>(codeArea));
@@ -226,10 +228,6 @@ public class MockServerDashboardController implements Initializable {
 
     private void setResponseCode(int responseCode) {
         responseCodeBox.setValue(responseCode + " (" + EverestResponse.getReasonPhrase(responseCode) + ")");
-    }
-
-    static void pushServerNotification(String message, long duration) {
-        snackbar.show(message, duration);
     }
 
     private void checkDuplicateEndpoints() {

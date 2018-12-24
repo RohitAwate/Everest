@@ -16,7 +16,11 @@
 
 package com.rohitawate.everest.controllers.mockserver;
 
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.controls.JFXToggleButton;
+import com.rohitawate.everest.notifications.SnackbarChannel;
 import com.rohitawate.everest.server.mock.MockServer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -47,7 +51,7 @@ public class ServerDetailsController implements Initializable {
     static final String ADD_MODE = "ADD";
     static final String UPDATE_MODE = "UPDATE";
 
-    private JFXSnackbar snackbar;
+    private SnackbarChannel snackbar;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -55,7 +59,7 @@ public class ServerDetailsController implements Initializable {
         serverActionButton.setOnAction(this::onAction);
         cancelActionButton.setOnAction(e -> ((Stage) cancelActionButton.getScene().getWindow()).close());
 
-        snackbar = new JFXSnackbar(serverDetailsBox);
+        snackbar = new SnackbarChannel(serverDetailsBox);
 
         serverPortField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*")) {
@@ -79,12 +83,12 @@ public class ServerDetailsController implements Initializable {
     private void onAction(ActionEvent actionEvent) {
         if (serverNameField.getText().isEmpty() || serverNameField.getText().trim().equals("")) {
             serverNameField.clear();
-            snackbar.show("Name required.", 5000);
+            snackbar.push("Name required.", 5000);
             return;
         }
 
         if (serverPortField.getText().isEmpty()) {
-            snackbar.show("Port number required.", 5000);
+            snackbar.push("Port number required.", 5000);
             return;
         }
 
@@ -96,7 +100,7 @@ public class ServerDetailsController implements Initializable {
 
         if (attachPrefixCheckBox.isSelected()) {
             if (serverPrefixField.getText().trim().isEmpty()) {
-                snackbar.show("Prefix required.", 5000);
+                snackbar.push("Prefix required.", 5000);
                 return;
             } else {
                 if (serverPrefixField.getText().trim().startsWith("/")) {

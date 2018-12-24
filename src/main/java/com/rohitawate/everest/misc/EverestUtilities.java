@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.net.UrlEscapers;
+import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.notifications.NotificationsManager;
 
@@ -138,7 +139,7 @@ public class EverestUtilities {
 
             Logger.info("Opened " + url + " in system browser.");
         } else {
-            NotificationsManager.push("Couldn't find a web browser on your system.", 6000);
+            NotificationsManager.push(DashboardController.CHANNEL_ID, "Couldn't find a web browser on your system.", 6000);
         }
     }
 }

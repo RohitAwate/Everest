@@ -16,19 +16,33 @@
 
 package com.rohitawate.everest.notifications;
 
-import com.jfoenix.controls.JFXSnackbar;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class NotificationsManager {
-    private static ArrayList<JFXSnackbar> snackbars = new ArrayList<>();
+    private static HashMap<String, Channel> snackbars = new HashMap<>();
 
-    public static void registerChannel(JFXSnackbar snackbar) {
-        snackbars.add(snackbar);
+    public static boolean registerChannel(String channelID, Channel channel) {
+        if (snackbars.get(channelID) != null) {
+            return false;
+        }
+
+        snackbars.put(channelID, channel);
+        return true;
     }
 
-    public static void push(String message, long duration) {
-        for (JFXSnackbar snackbar : snackbars)
-            snackbar.show(message, duration);
+    public static void push(String channelID, String message, long duration) {
+        Channel channel = snackbars.get(channelID);
+
+        if (channel != null) {
+            channel.push(message, duration);
+        }
+    }
+
+    // TODO: Implement this method
+    public static void push(String channelID, String message, long duration, EventHandler<ActionEvent> handler) {
+
     }
 }

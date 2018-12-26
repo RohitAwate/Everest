@@ -104,6 +104,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
         byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
+        // Hold on to refresh token
         String refreshToken = state.accessToken.getRefreshToken();
         state.accessToken = tokenRequest.accessToken;
         state.accessToken.setRefreshToken(refreshToken);
@@ -145,6 +146,8 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
     @Override
     public AccessToken getAccessToken() throws Exception {
+        setState(controller.getState());
+
         if (state.accessToken.getRefreshToken().isEmpty()) {
             fetchAuthorizationGrant();
             fetchNewAccessToken();
@@ -168,27 +171,25 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             Integrated WebView calls will already have been resolved in AuthorizationCodeController,
             hence, they are skipped here.
          */
-        if (state.accessToken.getAccessToken().isEmpty()) {
+        if (state.accessToken.getAccessToken().isBlank()) {
             /*
                 Checking if refreshToken is available. If it is, we can still fetch a new AccessToken and complete
                 this request without re-authorizing. (which would require a WebView which cannot be invoked here)
              */
-            if (state.grantCaptureMethod.equals(CaptureMethod.WEB_VIEW) && !state.accessToken.getRefreshToken().isEmpty()) {
+            if (state.grantCaptureMethod.equals(CaptureMethod.WEB_VIEW) && state.accessToken.getRefreshToken().isEmpty()) {
                 throw new AuthWindowClosedException();
             }
 
-            fetchAuthorizationGrant();
             getAccessToken();
         }
 
-        return state.headerPrefix + " " + state.accessToken.getAccessToken();
+        return String.format("%s %s", state.headerPrefix, state.accessToken.getAccessToken());
     }
 
     @Override
     public boolean isEnabled() {
-        if (this.state == null) {
-            setState(controller.getState());
-        }
+        // Checking if there has been a change in the state of the enabled checkbox
+        setState(controller.getState());
 
         return state.enabled;
     }

@@ -17,7 +17,6 @@ package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
-import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.controllers.auth.AuthTabController;
@@ -471,7 +470,7 @@ public class DashboardController implements Initializable {
                     case "text/html":
                         simplifiedContentType = HTTPConstants.HTML;
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                            JFXSnackbar snackbar = new JFXSnackbar(dashboard);
+//                            JFXSnackbar snackbar = new JFXSnackbar(dashboard);
 //                            snackbar.push("Open link in browser?", "YES", 5000, e -> {
 //                                snackbar.close();
 //                                new Thread(() -> {
@@ -491,7 +490,7 @@ public class DashboardController implements Initializable {
                 simplifiedContentType = HTTPConstants.PLAIN_TEXT;
             }
 
-            if (body == null || body.equals(""))
+            if (body == null || body.isBlank())
                 body = "No body returned in the response.";
 
             responseArea.setText(body,

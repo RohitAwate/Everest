@@ -57,13 +57,8 @@ public class AccessToken {
 
     @Override
     public String toString() {
-        return "AccessToken{" +
-                "accessToken='" + accessToken + '\'' +
-                ", tokenType='" + tokenType + '\'' +
-                ", tokenExpiry=" + expiresIn +
-                ", refreshToken='" + refreshToken + '\'' +
-                ", scope='" + scope + '\'' +
-                '}';
+        return String.format("AccessToken {token: %s, type: %s, expiry: %d, refreshToken: %s, scope: %s}",
+                accessToken, tokenType, expiresIn, refreshToken, scope);
     }
 
     @Override
@@ -72,13 +67,7 @@ public class AccessToken {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         AccessToken that = (AccessToken) obj;
-        if (!this.accessToken.equals(that.accessToken)) return false;
-        if (!this.tokenType.equals(that.tokenType)) return false;
-        if (this.expiresIn != that.expiresIn) return false;
-        if (!this.refreshToken.equals(that.refreshToken)) return false;
-        if (!this.scope.equals(that.scope)) return false;
-
-        return true;
+        return toString().equals(that.toString());
     }
 
     public String getAccessToken() {

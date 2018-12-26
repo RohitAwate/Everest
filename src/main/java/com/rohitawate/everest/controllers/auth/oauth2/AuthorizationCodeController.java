@@ -240,8 +240,10 @@ public class AuthorizationCodeController implements Initializable {
 
     public AuthProvider getAuthProvider() {
         /*
-            Integrated WebView requests need to be processed on the JavaFX Application Thread.
-            Hence, calling refreshToken() here itself if token is absent.
+            This method is always called on the JavaFX application thread, which is also required for
+            creating and using the WebView. Hence, refreshToken() is called here itself if the token is absent,
+            so that when RequestManager invokes AuthCodeProvider's getAuthHeader() from a different thread,
+            the token is already present and hence the WebView wouldn't need to be opened.
          */
         if (accessTokenField.getText().isEmpty() && enabled.isSelected() && captureMethodBox.getValue().equals(CaptureMethod.WEB_VIEW)) {
             refreshToken(null);
@@ -268,7 +270,8 @@ public class AuthorizationCodeController implements Initializable {
     private void onRefreshFailed(Throwable exception) {
         String errorMessage;
         if (exception.getClass().equals(AuthWindowClosedException.class)) {
-            errorMessage = "Authorization window closed.";
+            // DashboardController already shows an error for this
+            return;
         } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
             errorMessage = "Grant denied by authorization endpoint.";
         } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {

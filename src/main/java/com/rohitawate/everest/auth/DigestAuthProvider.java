@@ -1,7 +1,23 @@
+/*
+ * Copyright 2018 Rohit Awate.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rohitawate.everest.auth;
 
 import com.rohitawate.everest.Main;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
@@ -9,7 +25,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,7 +97,7 @@ public class DigestAuthProvider implements AuthProvider {
             header.append(response);
             header.append("\"");
         } catch (IOException e) {
-            LoggingService.logSevere("Digest Authentication Error: Could not make initial request.", e, LocalDateTime.now());
+            Logger.severe("Digest Authentication Error: Could not make initial request.", e);
         }
 
         return header.toString();

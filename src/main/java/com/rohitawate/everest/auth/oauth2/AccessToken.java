@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Rohit Awate.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rohitawate.everest.auth.oauth2;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
@@ -41,13 +57,8 @@ public class AccessToken {
 
     @Override
     public String toString() {
-        return "AccessToken{" +
-                "accessToken='" + accessToken + '\'' +
-                ", tokenType='" + tokenType + '\'' +
-                ", tokenExpiry=" + expiresIn +
-                ", refreshToken='" + refreshToken + '\'' +
-                ", scope='" + scope + '\'' +
-                '}';
+        return String.format("AccessToken {token: %s, type: %s, expiry: %d, refreshToken: %s, scope: %s}",
+                accessToken, tokenType, expiresIn, refreshToken, scope);
     }
 
     @Override
@@ -56,13 +67,7 @@ public class AccessToken {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         AccessToken that = (AccessToken) obj;
-        if (!this.accessToken.equals(that.accessToken)) return false;
-        if (!this.tokenType.equals(that.tokenType)) return false;
-        if (this.expiresIn != that.expiresIn) return false;
-        if (!this.refreshToken.equals(that.refreshToken)) return false;
-        if (!this.scope.equals(that.scope)) return false;
-
-        return true;
+        return toString().equals(that.toString());
     }
 
     public String getAccessToken() {

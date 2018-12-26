@@ -17,7 +17,6 @@ package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
-import com.jfoenix.controls.JFXSnackbar;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.controllers.auth.AuthTabController;
@@ -28,7 +27,7 @@ import com.rohitawate.everest.controllers.visualizers.Visualizer;
 import com.rohitawate.everest.exceptions.NullResponseException;
 import com.rohitawate.everest.exceptions.RedirectException;
 import com.rohitawate.everest.format.FormatterFactory;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.DELETERequest;
@@ -37,6 +36,7 @@ import com.rohitawate.everest.models.requests.GETRequest;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.models.responses.EverestResponse;
 import com.rohitawate.everest.notifications.NotificationsManager;
+import com.rohitawate.everest.notifications.SnackbarChannel;
 import com.rohitawate.everest.requestmanager.RequestManager;
 import com.rohitawate.everest.requestmanager.RequestManagersPool;
 import com.rohitawate.everest.state.ComposerState;
@@ -64,9 +64,7 @@ import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,6 +110,8 @@ public class DashboardController implements Initializable {
     private HashMap<Tab, DashboardState> tabStateMap;
     private TabPane tabPane;
 
+    public static final String CHANNEL_ID = "Dashboard";
+
     public enum ResponseLayer {
         PROMPT, LOADING, RESPONSE, ERROR
     }
@@ -149,10 +149,12 @@ public class DashboardController implements Initializable {
             bodyTabController = bodyTabLoader.getController();
             bodyTab.setContent(bodyTabFXML);
         } catch (IOException e) {
-            LoggingService.logSevere("Could not load headers/body tabs.", e, LocalDateTime.now());
+            Logger.severe("Could not load headers/body tabs.", e);
         }
 
-        NotificationsManager.registerChannel(new JFXSnackbar(dashboard));
+        if (!NotificationsManager.registerChannel(CHANNEL_ID, new SnackbarChannel(dashboard))) {
+            Logger.severe("Could not register dashboard notification channel.", null);
+        }
 
         showLayer(ResponseLayer.PROMPT);
         httpMethodBox.getItems().addAll(
@@ -185,7 +187,7 @@ public class DashboardController implements Initializable {
             responseArea.selectAll();
             responseArea.copy();
             responseArea.deselect();
-            NotificationsManager.push("Response body copied to clipboard.", 5000);
+            NotificationsManager.push(CHANNEL_ID, "Response body copied to clipboard.", 5000);
         });
 
         responseTypeBox.getItems().addAll(
@@ -199,7 +201,7 @@ public class DashboardController implements Initializable {
 
             if (type.equals(HTTPConstants.JSON)) {
                 responseArea.setText(responseArea.getText(),
-                        FormatterFactory.getHighlighter(type),
+                        FormatterFactory.getFormatter(type),
                         HighlighterFactory.getHighlighter(type));
 
                 return;
@@ -233,7 +235,7 @@ public class DashboardController implements Initializable {
 
             if (address.isEmpty()) {
                 showLayer(ResponseLayer.PROMPT);
-                NotificationsManager.push("Please enter an address.", 3000);
+                NotificationsManager.push(CHANNEL_ID, "Please enter an address.", 3000);
                 return;
             }
 
@@ -307,9 +309,9 @@ public class DashboardController implements Initializable {
             SyncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
-            NotificationsManager.push("Invalid address. Please verify and try again.", 3000);
+            NotificationsManager.push(CHANNEL_ID, "Invalid address. Please verify and try again.", 3000);
         } catch (Exception E) {
-            LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
+            Logger.severe("Request execution failed.", E);
             errorTitle.setText("Oops... Something went wrong!");
             errorDetails.setText("Try to make another request. Restart Everest if that doesn't work.");
             showLayer(ResponseLayer.ERROR);
@@ -321,7 +323,7 @@ public class DashboardController implements Initializable {
         showLayer(ResponseLayer.ERROR);
         Throwable throwable = requestManager.getException();
         Exception exception = (Exception) throwable;
-        LoggingService.logWarning(httpMethodBox.getValue() + " request could not be processed.", exception, LocalDateTime.now());
+        Logger.warning(httpMethodBox.getValue() + " request could not be processed.", exception);
 
         if (throwable.getClass() == NullResponseException.class) {
             NullResponseException URE = (NullResponseException) throwable;
@@ -339,7 +341,7 @@ public class DashboardController implements Initializable {
         } else if (throwable.getClass() == RedirectException.class) {
             RedirectException redirect = (RedirectException) throwable;
             addressField.setText(redirect.getNewLocation());
-            NotificationsManager.push("Resource moved permanently. Redirecting...", 3000);
+            NotificationsManager.push(CHANNEL_ID, "Resource moved permanently. Redirecting...", 3000);
             requestManager = null;
             sendRequest();
             return;
@@ -468,17 +470,17 @@ public class DashboardController implements Initializable {
                     case "text/html":
                         simplifiedContentType = HTTPConstants.HTML;
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                            JFXSnackbar snackbar = new JFXSnackbar(dashboard);
-                            snackbar.show("Open link in browser?", "YES", 5000, e -> {
-                                snackbar.close();
-                                new Thread(() -> {
-                                    try {
-                                        Desktop.getDesktop().browse(new URI(addressField.getText()));
-                                    } catch (Exception ex) {
-                                        LoggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
-                                    }
-                                }).start();
-                            });
+//                            JFXSnackbar snackbar = new JFXSnackbar(dashboard);
+//                            snackbar.push("Open link in browser?", "YES", 5000, e -> {
+//                                snackbar.close();
+//                                new Thread(() -> {
+//                                    try {
+//                                        Desktop.getDesktop().browse(new URI(addressField.getText()));
+//                                    } catch (Exception ex) {
+//                                        Logger.warning("Invalid URL encountered while opening in browser.", ex);
+//                                    }
+//                                }).start();
+//                            });
                         }
                         break;
                     default:
@@ -488,18 +490,18 @@ public class DashboardController implements Initializable {
                 simplifiedContentType = HTTPConstants.PLAIN_TEXT;
             }
 
-            if (body == null || body.equals(""))
+            if (body == null || body.isBlank())
                 body = "No body returned in the response.";
 
             responseArea.setText(body,
-                    FormatterFactory.getHighlighter(simplifiedContentType),
+                    FormatterFactory.getFormatter(simplifiedContentType),
                     HighlighterFactory.getHighlighter(simplifiedContentType));
 
             responseTypeBox.setValue(simplifiedContentType);
         } catch (Exception e) {
             String errorMessage = "Response could not be parsed.";
-            NotificationsManager.push(errorMessage, 5000);
-            LoggingService.logSevere(errorMessage, e, LocalDateTime.now());
+            NotificationsManager.push(CHANNEL_ID, errorMessage, 5000);
+            Logger.severe(errorMessage, e);
             errorTitle.setText("Parsing Error");
             errorDetails.setText(errorMessage);
             showLayer(ResponseLayer.ERROR);
@@ -599,7 +601,7 @@ public class DashboardController implements Initializable {
                     For when the last field is loaded from setState.
                     This makes sure an extra blank field is always present.
                 */
-                if (!(key.equals("") && value.equals("")))
+                if (!(key.isBlank() && value.isBlank()))
                     addParamField();
 
                 return;
@@ -628,7 +630,7 @@ public class DashboardController implements Initializable {
             controller.getValueProperty().addListener(e -> appendParams());
             paramsBox.getChildren().add(headerField);
         } catch (IOException e) {
-            LoggingService.logSevere("Could not append params field.", e, LocalDateTime.now());
+            Logger.severe("Could not append params field.", e);
         }
     }
 
@@ -811,7 +813,7 @@ public class DashboardController implements Initializable {
         }
 
         if (!validMethod) {
-            LoggingService.logInfo("Application state file was tampered with. State could not be recovered.", LocalDateTime.now());
+            Logger.info("Application state file was tampered with. State could not be recovered.");
             return;
         }
 

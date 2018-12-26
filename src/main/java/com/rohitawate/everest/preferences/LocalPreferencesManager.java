@@ -16,12 +16,11 @@
 
 package com.rohitawate.everest.preferences;
 
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 /**
  * Loads up custom values into Preferences from a local JSON file.
@@ -32,7 +31,7 @@ public class LocalPreferencesManager implements PreferencesManager {
     @Override
     public Preferences loadPrefs() throws IOException {
         if (!PREFS_FILE.exists()) {
-            LoggingService.logInfo("Preferences file not found. Everest will use the default values.", LocalDateTime.now());
+            Logger.info("Preferences file not found. Everest will use the default values.");
             return new Preferences();
         }
 
@@ -42,7 +41,7 @@ public class LocalPreferencesManager implements PreferencesManager {
     public void savePrefs(Preferences prefs) {
         try {
             EverestUtilities.jsonMapper.writeValue(PREFS_FILE, prefs);
-            LoggingService.logInfo("Application preferences saved to local file.", LocalDateTime.now());
+            Logger.info("Application preferences saved to local file.");
         } catch (IOException e) {
             e.printStackTrace();
         }

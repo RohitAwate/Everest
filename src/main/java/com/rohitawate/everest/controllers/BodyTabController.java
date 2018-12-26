@@ -18,7 +18,7 @@ package com.rohitawate.everest.controllers;
 
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.ThemeManager;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.ComposerState;
@@ -39,7 +39,6 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
 /*
@@ -100,7 +99,7 @@ public class BodyTabController implements Initializable {
             urlTab.setContent(formTabContent);
             urlTabController = loader.getController();
         } catch (IOException e) {
-            LoggingService.logSevere("Could not load URL tab.", e, LocalDateTime.now());
+            Logger.severe("Could not load URL tab.", e);
         }
     }
 

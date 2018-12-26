@@ -20,11 +20,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.net.UrlEscapers;
+import com.rohitawate.everest.controllers.DashboardController;
+import com.rohitawate.everest.logging.Logger;
+import com.rohitawate.everest.notifications.NotificationsManager;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -120,5 +125,21 @@ public class EverestUtilities {
                 return thread;
             }
         });
+    }
+
+    public static void openLinkInBrowser(String url) {
+        if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            new Thread(() -> {
+                try {
+                    Desktop.getDesktop().browse(new URI(url));
+                } catch (Exception ex) {
+                    Logger.warning("Invalid URL encountered while opening link in browser.", ex);
+                }
+            }).start();
+
+            Logger.info("Opened " + url + " in system browser.");
+        } else {
+            NotificationsManager.push(DashboardController.CHANNEL_ID, "Couldn't find a web browser on your system.", 6000);
+        }
     }
 }

@@ -33,4 +33,5 @@ public class KeyMap {
     public final static KeyCombination focusHeaders = new KeyCodeCombination(KeyCode.H, KeyCombination.ALT_DOWN);
     public final static KeyCombination focusBody = new KeyCodeCombination(KeyCode.B, KeyCombination.ALT_DOWN);
     public final static KeyCombination refreshTheme = new KeyCodeCombination(KeyCode.T, KeyCombination.SHIFT_DOWN);
+    public final static KeyCombination showMockServerDashboard = new KeyCodeCombination(KeyCode.M, KeyCombination.SHIFT_DOWN);
 }

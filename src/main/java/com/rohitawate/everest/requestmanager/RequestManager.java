@@ -151,7 +151,7 @@ public class RequestManager extends Service<EverestResponse> {
             throws NullResponseException, RedirectException {
         if (serverResponse == null) {
             throw new NullResponseException("The server did not respond.",
-                    "Like that crush from high school..");
+                    "Like that crush from high school.");
         } else if (serverResponse.getStatus() == 301 || serverResponse.getStatus() == 302) {
             throw new RedirectException(
                     serverResponse.getHeaderString("location"));

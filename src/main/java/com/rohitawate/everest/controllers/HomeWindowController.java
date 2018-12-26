@@ -17,7 +17,9 @@
 package com.rohitawate.everest.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.Main;
+import com.rohitawate.everest.controllers.mockserver.MockServerDashboardController;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.misc.KeyMap;
 import com.rohitawate.everest.misc.ThemeManager;
@@ -43,7 +45,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -61,6 +62,9 @@ public class HomeWindowController implements Initializable {
     private HistoryPaneController historyController;
     private DashboardController dashboard;
     private StringProperty addressProperty;
+
+    private Stage mockServerDashboard;
+    private MockServerDashboardController mockServerDashboardController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -170,7 +174,7 @@ public class HomeWindowController implements Initializable {
             Further handling of the tab text is done by onTargetChanged().
           */
         String target = composerState.target;
-        if (target == null || target.equals(""))
+        if (target == null || target.isBlank())
             newTab.setText("New Tab");
         else
             newTab.setText(target);
@@ -229,9 +233,9 @@ public class HomeWindowController implements Initializable {
         try {
             File stateFile = new File("Everest/config/state.json");
             EverestUtilities.jsonMapper.writeValue(stateFile, composerStates);
-            LoggingService.logInfo("State saved.", LocalDateTime.now());
+            Logger.info("State saved.");
         } catch (IOException e) {
-            LoggingService.logSevere("Failed to save state.", e, LocalDateTime.now());
+            Logger.severe("Failed to save state.", e);
         }
     }
 
@@ -240,7 +244,7 @@ public class HomeWindowController implements Initializable {
             File stateFile = new File("Everest/config/state.json");
 
             if (!stateFile.exists()) {
-                LoggingService.logInfo("State file not found. Loading default state.", LocalDateTime.now());
+                Logger.info("State file not found. Loading default state.");
                 addTab();
                 return;
             }
@@ -258,10 +262,10 @@ public class HomeWindowController implements Initializable {
                 addTab();
             }
         } catch (IOException e) {
-            LoggingService.logWarning("State file is either corrupted or outdated. State recovery failed. Loading default state.", e, LocalDateTime.now());
+            Logger.warning("State file is either corrupted or outdated. State recovery failed. Loading default state.", e);
             addTab();
         } finally {
-            LoggingService.logInfo("Application loaded.", LocalDateTime.now());
+            Logger.info("Application loaded.");
         }
     }
 
@@ -313,6 +317,25 @@ public class HomeWindowController implements Initializable {
                     }
                 } else if (KeyMap.refreshTheme.match(e)) {
                     ThemeManager.refreshTheme();
+                } else if (KeyMap.showMockServerDashboard.match(e)) {
+                    if (mockServerDashboard == null) {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/mockserver/MockServerDashboard.fxml"));
+                            Parent mockDashboardFXML = loader.load();
+                            mockServerDashboardController = loader.getController();
+                            mockServerDashboard = new Stage();
+                            mockServerDashboard.setTitle("Mock Servers Dashboard - " + Main.APP_NAME);
+                            mockServerDashboard.getIcons().add(Main.APP_ICON);
+                            mockServerDashboard.setScene(new Scene(mockDashboardFXML));
+                            mockServerDashboard.setOnCloseRequest(event -> mockServerDashboard.hide());
+
+                            mockServerDashboard.show();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    mockServerDashboard.show();
                 }
             });
         }

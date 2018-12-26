@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Rohit Awate.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rohitawate.everest.controllers.auth.oauth2;
 
 import com.jfoenix.controls.JFXButton;
@@ -11,7 +27,8 @@ import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.controllers.DashboardController;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
@@ -32,7 +49,6 @@ import javafx.util.Duration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
@@ -55,7 +71,7 @@ public class AuthorizationCodeController implements Initializable {
     private JFXRippler rippler;
 
     private static AuthorizationCodeProvider provider;
-    private AccessToken accessToken;
+    private AuthorizationCodeState state;
 
     public class CaptureMethod {
         public final static String WEB_VIEW = "Integrated WebView";
@@ -111,7 +127,7 @@ public class AuthorizationCodeController implements Initializable {
             service.submit(tokenFetcher);
         } else {
             try {
-                accessToken = tokenFetcher.call();
+                state.accessToken = tokenFetcher.call();
                 onRefreshSucceeded();
             } catch (Exception e) {
                 onRefreshFailed(e);
@@ -120,21 +136,39 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     public AuthorizationCodeState getState() {
-        if (this.accessToken != null) {
-            /*
-                Setting these values again before adding the AccessToken to the AuthCodeState
-                since they can be manually changed in the UI.
-             */
-            this.accessToken.setAccessToken(accessTokenField.getText());
-            this.accessToken.setRefreshToken(refreshTokenField.getText());
+        AccessToken accessToken = null;
+        if (state != null) {
+            accessToken = state.accessToken;
         }
 
-        return new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
-                clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                headerPrefixField.getText(), this.accessToken, enabled.isSelected());
+        state = new AuthorizationCodeState();
+
+        state.grantCaptureMethod = captureMethodBox.getValue();
+        state.authURL = authURLField.getText();
+        state.accessTokenURL = tokenURLField.getText();
+        state.redirectURL = redirectURLField.getText();
+        state.clientID = clientIDField.getText();
+        state.clientSecret = clientSecretField.getText();
+        state.scope = scopeField.getText();
+        state.state = stateField.getText();
+        state.headerPrefix = headerPrefixField.getText();
+        state.enabled = enabled.isSelected();
+        state.accessToken = accessToken;
+
+        if (state.accessToken == null) {
+            state.accessToken = new AccessToken();
+        }
+
+        // Setting these values again since they can be modified from the UI
+        state.accessToken.setAccessToken(accessTokenField.getText());
+        state.accessToken.setRefreshToken(refreshTokenField.getText());
+
+        return state;
     }
 
-    public void setState(AuthorizationCodeState state) {
+    public void setState(AuthorizationCodeState authCodeState) {
+        this.state = authCodeState;
+
         if (state != null) {
             captureMethodBox.setValue(state.grantCaptureMethod);
 
@@ -150,25 +184,21 @@ public class AuthorizationCodeController implements Initializable {
             headerPrefixField.setText(state.headerPrefix);
 
             if (state.accessToken != null) {
-                accessToken = state.accessToken;
-                accessTokenField.setText(state.accessToken.getAccessToken());
-                refreshTokenField.setText(state.accessToken.getRefreshToken());
-                setExpiryLabel();
+                onRefreshSucceeded();
             }
 
             enabled.setSelected(state.enabled);
-            provider.setState(getState());
         }
     }
 
     private void setExpiryLabel() {
-        if (accessToken != null) {
+        if (state.accessToken != null && state.accessToken.getTimeToExpiry() >= 0) {
             expiryLabel.setVisible(true);
 
-            if (accessToken.getExpiresIn() == 0) {
+            if (state.accessToken.getExpiresIn() == 0) {
                 expiryLabel.setText("Never expires.");
             } else {
-                long timeToExpiry = accessToken.getTimeToExpiry();
+                long timeToExpiry = state.accessToken.getTimeToExpiry();
                 if (timeToExpiry < 0) {
                     expiryLabel.setText("Token expired.");
                 } else {
@@ -205,14 +235,15 @@ public class AuthorizationCodeController implements Initializable {
         refreshTokenField.clear();
         expiryLabel.setVisible(false);
         enabled.setSelected(false);
+        provider.reset();
     }
 
     public AuthProvider getAuthProvider() {
-        provider.setState(getState());
-
         /*
-            Integrated WebView requests need to be processed on the JavaFX Application Thread.
-            Hence, calling refreshToken() here itself if token is absent.
+            This method is always called on the JavaFX application thread, which is also required for
+            creating and using the WebView. Hence, refreshToken() is called here itself if the token is absent,
+            so that when RequestManager invokes AuthCodeProvider's getAuthHeader() from a different thread,
+            the token is already present and hence the WebView wouldn't need to be opened.
          */
         if (accessTokenField.getText().isEmpty() && enabled.isSelected() && captureMethodBox.getValue().equals(CaptureMethod.WEB_VIEW)) {
             refreshToken(null);
@@ -225,10 +256,10 @@ public class AuthorizationCodeController implements Initializable {
         accessTokenField.clear();
         refreshTokenField.clear();
 
-        accessTokenField.setText(accessToken.getAccessToken());
+        accessTokenField.setText(state.accessToken.getAccessToken());
 
-        if (accessToken.getRefreshToken() != null) {
-            refreshTokenField.setText(accessToken.getRefreshToken());
+        if (state.accessToken.getRefreshToken() != null) {
+            refreshTokenField.setText(state.accessToken.getRefreshToken());
         }
 
         setExpiryLabel();
@@ -239,7 +270,8 @@ public class AuthorizationCodeController implements Initializable {
     private void onRefreshFailed(Throwable exception) {
         String errorMessage;
         if (exception.getClass().equals(AuthWindowClosedException.class)) {
-            errorMessage = "Authorization window closed.";
+            // DashboardController already shows an error for this
+            return;
         } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
             errorMessage = "Grant denied by authorization endpoint.";
         } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
@@ -250,12 +282,12 @@ public class AuthorizationCodeController implements Initializable {
             errorMessage = "Could not refresh OAuth 2.0 Authorization Code tokens.";
         }
 
-        NotificationsManager.push(errorMessage, 10000);
-        LoggingService.logWarning(errorMessage, (Exception) exception, LocalDateTime.now());
+        NotificationsManager.push(DashboardController.CHANNEL_ID, errorMessage, 10000);
+        Logger.warning(errorMessage, (Exception) exception);
     }
 
     public void setAccessToken(AccessToken accessToken) {
-        this.accessToken = accessToken;
+        state.accessToken = accessToken;
         Platform.runLater(() -> {
             onRefreshSucceeded();
             accessTokenField.requestLayout();
@@ -266,20 +298,12 @@ public class AuthorizationCodeController implements Initializable {
     private class TokenFetcher extends Task<AccessToken> {
         @Override
         protected AccessToken call() throws Exception {
-            accessToken.setAccessToken(accessTokenField.getText());
-            accessToken.setRefreshToken(refreshTokenField.getText());
-
-            AuthorizationCodeState state = new AuthorizationCodeState(captureMethodBox.getValue(), authURLField.getText(), tokenURLField.getText(), redirectURLField.getText(),
-                    clientIDField.getText(), clientSecretField.getText(), scopeField.getText(), stateField.getText(),
-                    headerPrefixField.getText(), accessToken, enabled.isSelected());
-
-            provider.setState(state);
             return provider.getAccessToken();
         }
 
         @Override
         protected void succeeded() {
-            accessToken = getValue();
+            state.accessToken = getValue();
             onRefreshSucceeded();
         }
 

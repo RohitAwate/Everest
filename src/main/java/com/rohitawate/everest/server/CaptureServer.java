@@ -1,21 +1,33 @@
+/*
+ * Copyright 2018 Rohit Awate.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rohitawate.everest.server;
 
-import com.rohitawate.everest.http.HttpRequestParser;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.http.HttpRequest;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
-import com.rohitawate.everest.notifications.NotificationsManager;
 
-import java.awt.*;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class CaptureServer {
@@ -31,13 +43,13 @@ public class CaptureServer {
         if (server == null) {
             try {
                 server = new ServerSocket(PORT);
-                LoggingService.logInfo("Authorization grant capturing server has started on port " + PORT + ".", LocalDateTime.now());
+                Logger.info("Authorization grant capturing server has started on port " + PORT + ".");
             } catch (IOException e) {
-                LoggingService.logSevere("Could not start capture server on port " + PORT + ".", e, LocalDateTime.now());
+                Logger.severe("Could not start capture server on port " + PORT + ".", e);
             }
         }
 
-        openLinkInBrowser(authURL);
+        EverestUtilities.openLinkInBrowser(authURL);
         return listen();
     }
 
@@ -47,17 +59,17 @@ public class CaptureServer {
         PrintWriter headerWriter;
         DataOutputStream bodyStream;
         try (Socket client = server.accept()) {
-            HttpRequestParser requestParser = new HttpRequestParser(client.getInputStream(), false);
+            HttpRequest request = HttpRequest.parse(client.getInputStream(), false);
             headerWriter = new PrintWriter(client.getOutputStream());
             bodyStream = new DataOutputStream(client.getOutputStream());
 
-            if (requestParser.getMethod().equals(HTTPConstants.GET)) {
+            if (request.getMethod().equals(HTTPConstants.GET)) {
                 StringBuilder headers = new StringBuilder("HTTP/1.1 ");
                 byte[] body;
 
-                if (requestParser.getPath().startsWith("/granted")) {
+                if (request.getPath().startsWith("/granted")) {
                     headers.append("200 OK");
-                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL("http://localhost:52849" + requestParser.getPath()));
+                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL("http://localhost:52849" + request.getPath()));
 
                     String error = null;
                     if (params != null) {
@@ -81,10 +93,10 @@ public class CaptureServer {
                     headers.append("\nContent-Type: text/html");
                 } else {
                     try {
-                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + requestParser.getPath()));
+                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + request.getPath()));
                         headers.append("200 OK");
                         headers.append("\nContent-Type: ");
-                        headers.append(getMimeType(requestParser.getPath()));
+                        headers.append(getMimeType(request.getPath()));
                     } catch (FileNotFoundException e) {
                         body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + NOT_FOUND));
                         headers.append("404 Not Found");
@@ -107,22 +119,6 @@ public class CaptureServer {
         }
 
         return grant;
-    }
-
-    private static void openLinkInBrowser(String url) {
-        if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            new Thread(() -> {
-                try {
-                    Desktop.getDesktop().browse(new URI(url));
-                } catch (Exception ex) {
-                    LoggingService.logWarning("Invalid URL encountered while opening link in browser.", ex, LocalDateTime.now());
-                }
-            }).start();
-
-            LoggingService.logInfo("Opened authorization grant page in system browser.", LocalDateTime.now());
-        } else {
-            NotificationsManager.push("Couldn't find a web browser on your system.", 6000);
-        }
     }
 
     private static String getMimeType(String file) {

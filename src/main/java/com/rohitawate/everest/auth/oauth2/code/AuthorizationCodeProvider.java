@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Rohit Awate.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rohitawate.everest.auth.oauth2.code;
 
 import com.rohitawate.everest.auth.oauth2.AccessToken;
@@ -8,7 +24,6 @@ import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantEx
 import com.rohitawate.everest.auth.oauth2.code.exceptions.UnknownAccessTokenTypeException;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
-import com.rohitawate.everest.logging.LoggingService;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
@@ -16,10 +31,8 @@ import com.rohitawate.everest.state.auth.AuthorizationCodeState;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -29,84 +42,33 @@ import java.util.Scanner;
  * either the final 'Authorization' header or an AccessToken object.
  */
 public class AuthorizationCodeProvider implements OAuth2Provider {
-    private URL authURL;
-    private URL accessTokenURL;
-
-    private String authGrant;
-    private boolean authGrantUsed;
-
-    private String clientID;
-    private String clientSecret;
-    private URL redirectURL;
-    private String scope;
-    private String state;
-    private String headerPrefix;
-    private boolean enabled;
-
-    private String captureMethod;
-    private AccessToken accessToken;
     private AuthorizationCodeController controller;
+    private AuthorizationCodeState state;
 
     public AuthorizationCodeProvider(AuthorizationCodeController controller) {
         this.controller = controller;
-        this.authGrantUsed = true;
-    }
-
-    public void setState(AuthorizationCodeState state) {
-        try {
-            this.authURL = new URL(state.authURL);
-            this.accessTokenURL = new URL(state.accessTokenURL);
-        } catch (MalformedURLException e) {
-            if (!state.authURL.isEmpty() || !state.accessTokenURL.isEmpty()) {
-                LoggingService.logWarning("Invalid URL: " + e.getMessage(), e, LocalDateTime.now());
-            }
-        }
-
-        this.clientID = state.clientID;
-        this.clientSecret = state.clientSecret;
-        this.captureMethod = state.grantCaptureMethod;
-
-        try {
-            if (state.redirectURL.isEmpty() || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
-                this.redirectURL = new URL(BrowserCapturer.LOCAL_SERVER_URL);
-            } else {
-                this.redirectURL = new URL(state.redirectURL);
-            }
-        } catch (MalformedURLException e) {
-            if (!state.redirectURL.isEmpty()) {
-                LoggingService.logWarning("Invalid URL: " + e.getMessage(), e, LocalDateTime.now());
-            }
-        }
-
-        this.scope = state.scope;
-        this.state = state.state;
-
-        if (state.headerPrefix == null || state.headerPrefix.isEmpty()) {
-            this.headerPrefix = "Bearer";
-        } else {
-            this.headerPrefix = state.headerPrefix;
-        }
-
-        this.accessToken = state.accessToken;
-        this.enabled = state.enabled;
     }
 
     private void fetchAuthorizationGrant() throws Exception {
-        if (accessToken.getRefreshToken().isEmpty() && authGrantUsed) {
-            StringBuilder grantURLBuilder = new StringBuilder(authURL.toString());
+        if (this.state == null) {
+            setState(controller.getState());
+        }
+
+        if (state.authGrant == null || state.authGrantUsed) {
+            StringBuilder grantURLBuilder = new StringBuilder(state.authURL);
             grantURLBuilder.append("?response_type=code");
             grantURLBuilder.append("&client_id=");
-            grantURLBuilder.append(clientID);
+            grantURLBuilder.append(state.clientID);
             grantURLBuilder.append("&redirect_uri=");
-            grantURLBuilder.append(redirectURL.toString());
+            grantURLBuilder.append(state.redirectURL);
 
-            if (scope == null || !scope.isEmpty()) {
+            if (state.scope == null || !state.scope.isEmpty()) {
                 grantURLBuilder.append("&scope=");
-                grantURLBuilder.append(scope);
+                grantURLBuilder.append(state.scope);
             }
 
             AuthorizationGrantCapturer capturer;
-            switch (captureMethod) {
+            switch (state.grantCaptureMethod) {
                 // TODO: Re-use capturers
                 case CaptureMethod.WEB_VIEW:
                     capturer = new WebViewCapturer(grantURLBuilder.toString());
@@ -115,105 +77,142 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                     capturer = new BrowserCapturer(grantURLBuilder.toString());
             }
 
-            authGrant = capturer.getAuthorizationGrant();
-            authGrantUsed = false;
+            state.authGrant = capturer.getAuthorizationGrant();
+            state.authGrantUsed = false;
         }
     }
 
     private void refreshAccessToken()
             throws AccessTokenDeniedException, UnknownAccessTokenTypeException, IOException {
-        URL tokenURL = new URL(accessTokenURL.toString());
+        if (this.state == null) {
+            setState(controller.getState());
+        }
+
+        URL tokenURL = new URL(state.accessTokenURL);
         StringBuilder tokenURLBuilder = new StringBuilder();
         tokenURLBuilder.append("client_id=");
-        tokenURLBuilder.append(clientID);
+        tokenURLBuilder.append(state.clientID);
         tokenURLBuilder.append("&client_secret=");
-        tokenURLBuilder.append(clientSecret);
+        tokenURLBuilder.append(state.clientSecret);
         tokenURLBuilder.append("&grant_type=refresh_token");
         tokenURLBuilder.append("&refresh_token=");
-        tokenURLBuilder.append(accessToken.getRefreshToken());
-        if (scope != null && !scope.isEmpty()) {
+        tokenURLBuilder.append(state.accessToken.getRefreshToken());
+        if (state.scope != null && !state.scope.isEmpty()) {
             tokenURLBuilder.append("&scope=");
-            tokenURLBuilder.append(scope);
+            tokenURLBuilder.append(state.scope);
         }
 
         byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
-        String refreshToken = accessToken.getRefreshToken();
-        accessToken = tokenRequest.accessToken;
-        accessToken.setRefreshToken(refreshToken);
+        // Hold on to refresh token
+        String refreshToken = state.accessToken.getRefreshToken();
+        state.accessToken = tokenRequest.accessToken;
+        state.accessToken.setRefreshToken(refreshToken);
     }
 
     private void fetchNewAccessToken()
             throws NoAuthorizationGrantException, IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
-        if (authGrant == null) {
+        if (this.state == null) {
+            setState(controller.getState());
+        }
+
+        if (state.authGrant == null) {
             throw new NoAuthorizationGrantException(
                     "OAuth 2.0 Authorization Code: Authorization grant not found. Aborting access token fetch."
             );
         }
 
-        URL tokenURL = new URL(accessTokenURL.toString());
+        URL tokenURL = new URL(state.accessTokenURL);
         StringBuilder tokenURLBuilder = new StringBuilder();
         tokenURLBuilder.append("client_id=");
-        tokenURLBuilder.append(clientID);
+        tokenURLBuilder.append(state.clientID);
         tokenURLBuilder.append("&client_secret=");
-        tokenURLBuilder.append(clientSecret);
+        tokenURLBuilder.append(state.clientSecret);
         tokenURLBuilder.append("&grant_type=authorization_code");
         tokenURLBuilder.append("&code=");
-        tokenURLBuilder.append(authGrant);
+        tokenURLBuilder.append(state.authGrant);
         tokenURLBuilder.append("&redirect_uri=");
-        tokenURLBuilder.append(redirectURL);
-        if (scope != null && !scope.isEmpty()) {
+        tokenURLBuilder.append(state.redirectURL);
+        if (state.scope != null && !state.scope.isEmpty()) {
             tokenURLBuilder.append("&scope=");
-            tokenURLBuilder.append(scope);
+            tokenURLBuilder.append(state.scope);
         }
 
         byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
-        accessToken = tokenRequest.accessToken;
-        authGrantUsed = true;
+        state.accessToken = tokenRequest.accessToken;
+        state.authGrantUsed = true;
     }
 
     @Override
     public AccessToken getAccessToken() throws Exception {
-        fetchAuthorizationGrant();
+        setState(controller.getState());
 
-        if (accessToken.getRefreshToken().isEmpty()) {
+        if (state.accessToken.getRefreshToken().isEmpty()) {
+            fetchAuthorizationGrant();
             fetchNewAccessToken();
         } else {
             refreshAccessToken();
         }
 
         // This will display the new AccessToken in the UI
-        controller.setAccessToken(accessToken);
+        controller.setAccessToken(state.accessToken);
 
-        return accessToken;
+        return state.accessToken;
     }
 
     @Override
     public String getAuthHeader() throws Exception {
+        if (this.state == null) {
+            setState(controller.getState());
+        }
+
         /*
             Integrated WebView calls will already have been resolved in AuthorizationCodeController,
             hence, they are skipped here.
          */
-        if (accessToken.getAccessToken().isEmpty()) {
+        if (state.accessToken.getAccessToken().isBlank()) {
             /*
                 Checking if refreshToken is available. If it is, we can still fetch a new AccessToken and complete
                 this request without re-authorizing. (which would require a WebView which cannot be invoked here)
              */
-            if (captureMethod.equals(CaptureMethod.WEB_VIEW) && !accessToken.getRefreshToken().isEmpty()) {
+            if (state.grantCaptureMethod.equals(CaptureMethod.WEB_VIEW) && state.accessToken.getRefreshToken().isEmpty()) {
                 throw new AuthWindowClosedException();
             }
 
-            fetchAuthorizationGrant();
             getAccessToken();
         }
 
-        return headerPrefix + " " + accessToken.getAccessToken();
+        return String.format("%s %s", state.headerPrefix, state.accessToken.getAccessToken());
     }
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        // Checking if there has been a change in the state of the enabled checkbox
+        setState(controller.getState());
+
+        return state.enabled;
+    }
+
+    private void setState(AuthorizationCodeState state) {
+        if (state == null) {
+            this.state = null;
+            return;
+        }
+
+        this.state = state;
+
+        if (state.redirectURL.isEmpty() || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
+            state.redirectURL = BrowserCapturer.LOCAL_SERVER_URL;
+        }
+
+        if (state.headerPrefix == null || state.headerPrefix.isEmpty()) {
+            state.headerPrefix = "Bearer";
+        }
+    }
+
+    public void reset() {
+        this.state = null;
     }
 
     /**
@@ -296,10 +295,6 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                     tokenResponseBuilder.append(scanner.nextLine());
                 throw new AccessTokenDeniedException(tokenResponseBuilder.toString());
             }
-        }
-
-        AccessToken getAccessToken() {
-            return this.accessToken;
         }
     }
 }

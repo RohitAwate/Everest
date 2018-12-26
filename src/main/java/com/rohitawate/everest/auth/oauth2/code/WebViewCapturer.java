@@ -1,7 +1,23 @@
+/*
+ * Copyright 2018 Rohit Awate.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rohitawate.everest.auth.oauth2.code;
 
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
-import com.rohitawate.everest.logging.LoggingService;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
@@ -10,7 +26,6 @@ import javafx.stage.Stage;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -26,10 +41,13 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
 
     private String grant;
 
+    private static final String USER_AGENT_STRING = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
+
     WebViewCapturer(String authURL) {
         this.authURL = authURL;
         this.webView = new WebView();
         this.engine = webView.getEngine();
+        this.engine.setUserAgent(USER_AGENT_STRING);
     }
 
     @Override
@@ -42,7 +60,7 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
                     authStage.close();
                 }
             } catch (MalformedURLException e) {
-                LoggingService.logWarning("Invalid URL while authorizing application.", e, LocalDateTime.now());
+                Logger.warning("Invalid URL while authorizing application.", e);
             }
         });
 

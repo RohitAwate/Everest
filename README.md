@@ -96,8 +96,8 @@ Everest is under active development and you can get the latest alpha build from 
 Everest uses Maven, so building from the source code is very simple. You need to have a minimum of JDK 8 (9 should also work) installed, along with Maven and Git. If you're using OpenJDK, you will need to install OpenJFX separately. Once you have everything set up, follow these simple steps:
 1. Clone the repository: `git clone https://github.com/RohitAwate/Everest.git`
 2. Enter the repository: `cd Everest`
-3. Build a binary: `mvn package`
-4. Run the binary: `mvn exec:java`
+3. Build a binary: `./mvnw package`
+4. Run the binary: `./mvnw exec:java`
 
 **For JDK  10 and above:** JavaFX has been decoupled from the JDK and will need to be installed separately.
 

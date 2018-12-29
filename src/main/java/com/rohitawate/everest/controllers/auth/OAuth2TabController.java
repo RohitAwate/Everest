@@ -18,7 +18,7 @@ package com.rohitawate.everest.controllers.auth;
 
 import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
-import com.rohitawate.everest.state.auth.OAuth2State;
+import com.rohitawate.everest.state.auth.OAuth2ControllerState;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -50,11 +50,11 @@ public class OAuth2TabController implements Initializable {
         }
     }
 
-    public OAuth2State getState() {
-        return new OAuth2State(codeController.getState());
+    public OAuth2ControllerState getState() {
+        return new OAuth2ControllerState(codeController.getState());
     }
 
-    public void setState(OAuth2State state) {
+    public void setState(OAuth2ControllerState state) {
         if (state != null) {
             codeController.setState(state.codeState);
         }

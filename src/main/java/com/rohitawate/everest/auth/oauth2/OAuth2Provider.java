@@ -17,6 +17,8 @@
 package com.rohitawate.everest.auth.oauth2;
 
 import com.rohitawate.everest.auth.AuthProvider;
+import com.rohitawate.everest.auth.oauth2.tokens.OAuth2Token;
+import com.rohitawate.everest.state.auth.OAuth2FlowState;
 
 /**
  * Adds OAuth 2.0-specific functionality to AuthProvider.
@@ -25,5 +27,11 @@ public interface OAuth2Provider extends AuthProvider {
     /**
      * Returns the access token for the respective API.
      */
-    AccessToken getAccessToken() throws Exception;
+    OAuth2Token getAccessToken() throws Exception;
+
+    /**
+     * Accepts the state of the corresponding controller
+     * to work with.
+     */
+    void setState(OAuth2FlowState state);
 }

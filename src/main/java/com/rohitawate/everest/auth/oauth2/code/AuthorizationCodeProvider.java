@@ -16,17 +16,21 @@
 
 package com.rohitawate.everest.auth.oauth2.code;
 
-import com.rohitawate.everest.auth.oauth2.AccessToken;
+import com.rohitawate.everest.auth.captors.AuthorizationGrantCaptor;
+import com.rohitawate.everest.auth.captors.BrowserCaptor;
+import com.rohitawate.everest.auth.captors.WebViewCaptor;
 import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.UnknownAccessTokenTypeException;
+import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
+import com.rohitawate.everest.state.auth.OAuth2FlowState;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -39,7 +43,7 @@ import java.util.Scanner;
 /**
  * Authorization provider for OAuth 2.0's Authorization Code flow.
  * Makes requests to authorization and access token endpoints and returns
- * either the final 'Authorization' header or an AccessToken object.
+ * either the final 'Authorization' header or an AuthCodeToken object.
  */
 public class AuthorizationCodeProvider implements OAuth2Provider {
     private AuthorizationCodeController controller;
@@ -60,24 +64,25 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             grantURLBuilder.append("&client_id=");
             grantURLBuilder.append(state.clientID);
             grantURLBuilder.append("&redirect_uri=");
-            grantURLBuilder.append(state.redirectURL);
+            grantURLBuilder.append(EverestUtilities.encodeURL(state.redirectURL));
 
-            if (state.scope == null || !state.scope.isEmpty()) {
+            if (state.scope != null && !state.scope.isEmpty()) {
                 grantURLBuilder.append("&scope=");
                 grantURLBuilder.append(state.scope);
             }
 
-            AuthorizationGrantCapturer capturer;
-            switch (state.grantCaptureMethod) {
-                // TODO: Re-use capturers
+            AuthorizationGrantCaptor captor;
+            String captureKey = "code";
+            switch (state.captureMethod) {
+                // TODO: Re-use captors
                 case CaptureMethod.WEB_VIEW:
-                    capturer = new WebViewCapturer(grantURLBuilder.toString());
+                    captor = new WebViewCaptor(grantURLBuilder.toString(), captureKey);
                     break;
                 default:
-                    capturer = new BrowserCapturer(grantURLBuilder.toString());
+                    captor = new BrowserCaptor(grantURLBuilder.toString(), captureKey);
             }
 
-            state.authGrant = capturer.getAuthorizationGrant();
+            state.authGrant = captor.getAuthorizationGrant();
             state.authGrantUsed = false;
         }
     }
@@ -97,6 +102,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         tokenURLBuilder.append("&grant_type=refresh_token");
         tokenURLBuilder.append("&refresh_token=");
         tokenURLBuilder.append(state.accessToken.getRefreshToken());
+
         if (state.scope != null && !state.scope.isEmpty()) {
             tokenURLBuilder.append("&scope=");
             tokenURLBuilder.append(state.scope);
@@ -106,7 +112,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
         // Hold on to refresh token
         String refreshToken = state.accessToken.getRefreshToken();
-        state.accessToken = tokenRequest.accessToken;
+        state.accessToken = tokenRequest.authCodeToken;
         state.accessToken.setRefreshToken(refreshToken);
     }
 
@@ -140,12 +146,12 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
         byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
-        state.accessToken = tokenRequest.accessToken;
+        state.accessToken = tokenRequest.authCodeToken;
         state.authGrantUsed = true;
     }
 
     @Override
-    public AccessToken getAccessToken() throws Exception {
+    public AuthCodeToken getAccessToken() throws Exception {
         setState(controller.getState());
 
         if (state.accessToken.getRefreshToken().isEmpty()) {
@@ -155,7 +161,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
             refreshAccessToken();
         }
 
-        // This will display the new AccessToken in the UI
+        // This will display the new AuthCodeToken in the UI
         controller.setAccessToken(state.accessToken);
 
         return state.accessToken;
@@ -173,10 +179,10 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
          */
         if (state.accessToken.getAccessToken().isBlank()) {
             /*
-                Checking if refreshToken is available. If it is, we can still fetch a new AccessToken and complete
+                Checking if refreshToken is available. If it is, we can still fetch a new AuthCodeToken and complete
                 this request without re-authorizing. (which would require a WebView which cannot be invoked here)
              */
-            if (state.grantCaptureMethod.equals(CaptureMethod.WEB_VIEW) && state.accessToken.getRefreshToken().isEmpty()) {
+            if (state.captureMethod.equals(CaptureMethod.WEB_VIEW) && state.accessToken.getRefreshToken().isEmpty()) {
                 throw new AuthWindowClosedException();
             }
 
@@ -190,20 +196,20 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     public boolean isEnabled() {
         // Checking if there has been a change in the state of the enabled checkbox
         setState(controller.getState());
-
         return state.enabled;
     }
 
-    private void setState(AuthorizationCodeState state) {
+    @Override
+    public void setState(OAuth2FlowState state) {
         if (state == null) {
             this.state = null;
             return;
         }
 
-        this.state = state;
+        this.state = (AuthorizationCodeState) state;
 
-        if (state.redirectURL.isEmpty() || state.grantCaptureMethod.equals(CaptureMethod.BROWSER)) {
-            state.redirectURL = BrowserCapturer.LOCAL_SERVER_URL;
+        if (this.state.redirectURL.isEmpty() || this.state.captureMethod.equals(CaptureMethod.BROWSER)) {
+            this.state.redirectURL = BrowserCaptor.LOCAL_SERVER_URL;
         }
 
         if (state.headerPrefix == null || state.headerPrefix.isEmpty()) {
@@ -211,15 +217,11 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         }
     }
 
-    public void reset() {
-        this.state = null;
-    }
-
     /**
-     * Makes a request to the access token endpoint, parses the response into an AccessToken object.
+     * Makes a request to the access token endpoint, parses the response into an AuthCodeToken object.
      */
     private static class AccessTokenRequest {
-        private AccessToken accessToken;
+        private AuthCodeToken authCodeToken;
         private URL tokenURL;
         private byte[] body;
         private HttpURLConnection connection;
@@ -258,29 +260,29 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
                 switch (contentType) {
                     case MediaType.APPLICATION_JSON:
-                        accessToken = EverestUtilities.jsonMapper.readValue(tokenResponseBuilder.toString(), AccessToken.class);
+                        authCodeToken = EverestUtilities.jsonMapper.readValue(tokenResponseBuilder.toString(), AuthCodeToken.class);
                         break;
                     case MediaType.APPLICATION_FORM_URLENCODED:
-                        accessToken = new AccessToken();
+                        authCodeToken = new AuthCodeToken();
                         HashMap<String, String> params =
                                 EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()));
                         if (params != null) {
                             params.forEach((key, value) -> {
                                 switch (key) {
                                     case "access_token":
-                                        accessToken.setAccessToken(value);
+                                        authCodeToken.setAccessToken(value);
                                         break;
                                     case "token_type":
-                                        accessToken.setTokenType(value);
+                                        authCodeToken.setTokenType(value);
                                         break;
                                     case "expires_in":
-                                        accessToken.setExpiresIn(Integer.parseInt(value));
+                                        authCodeToken.setExpiresIn(Integer.parseInt(value));
                                         break;
                                     case "refresh_token":
-                                        accessToken.setRefreshToken(value);
+                                        authCodeToken.setRefreshToken(value);
                                         break;
                                     case "scope":
-                                        accessToken.setScope(value);
+                                        authCodeToken.setScope(value);
                                         break;
                                 }
                             });

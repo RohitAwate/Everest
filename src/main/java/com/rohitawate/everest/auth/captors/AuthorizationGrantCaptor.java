@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.auth.oauth2.code;
+package com.rohitawate.everest.auth.captors;
 
 /**
  * Provides a way to display the authorization request screen
  * to the user and retrieve the Authorization Grant for further use.
  */
-public interface AuthorizationGrantCapturer {
+public interface AuthorizationGrantCaptor {
     /**
      * Presents the Authorization screen and returns the Authorization
      * Grant if the user authorizes the application; null otherwise.
      */
     String getAuthorizationGrant() throws Exception;
+
+    /**
+     * Returns the final URL that the Captor was redirected to.
+     */
+    String getRedirectedURL();
 }

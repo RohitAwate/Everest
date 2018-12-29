@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.auth.oauth2.code;
+package com.rohitawate.everest.auth.captors;
 
 import com.rohitawate.everest.server.CaptureServer;
 
@@ -23,17 +23,27 @@ import com.rohitawate.everest.server.CaptureServer;
  * and captures the authorization grant by forcing redirects to a
  * local server.
  */
-public class BrowserCapturer implements AuthorizationGrantCapturer {
+public class BrowserCaptor implements AuthorizationGrantCaptor {
     private String authURL;
+    private String captureKey;
+    private String redirectURL;
 
-    static final String LOCAL_SERVER_URL = "http://localhost:52849/granted";
+    public static final String LOCAL_SERVER_URL = "http://localhost:52849/granted";
 
-    BrowserCapturer(String authURL) {
+    public BrowserCaptor(String authURL, String captureKey) {
         this.authURL = authURL;
+        this.captureKey = captureKey;
     }
 
     @Override
     public String getAuthorizationGrant() throws Exception {
-        return CaptureServer.capture(authURL);
+        String grant = CaptureServer.capture(authURL, captureKey);
+        redirectURL = CaptureServer.getRedirectURL();
+        return grant;
+    }
+
+    @Override
+    public String getRedirectedURL() {
+        return redirectURL;
     }
 }

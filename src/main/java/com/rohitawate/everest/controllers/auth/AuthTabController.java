@@ -107,14 +107,14 @@ public class AuthTabController implements Initializable {
         AuthState authState = new AuthState();
         authState.basicAuthState = basicController.getState();
         authState.digestAuthState = digestController.getState();
-        authState.oAuth2State = oAuth2Controller.getState();
+        authState.oAuth2ControllerState = oAuth2Controller.getState();
         return authState;
     }
 
     public void setState(ComposerState state) {
         basicController.setState(state.authState.basicAuthState);
         digestController.setState(state.authState.digestAuthState);
-        oAuth2Controller.setState(state.authState.oAuth2State);
+        oAuth2Controller.setState(state.authState.oAuth2ControllerState);
 
         if (state.authMethod == null) {
             authTabPane.getSelectionModel().select(0);

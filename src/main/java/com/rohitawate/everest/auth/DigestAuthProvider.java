@@ -29,7 +29,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DigestAuthProvider implements AuthProvider {
-
     private String url;
     private final String method;
     private String username;

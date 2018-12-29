@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.auth.oauth2.code;
+package com.rohitawate.everest.auth.captors;
 
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.logging.Logger;
@@ -32,8 +32,10 @@ import java.util.HashMap;
  * Opens the OAuth 2.0 authorization window in a JavaFX WebView
  * and captures the authorization grant by detecting redirects.
  */
-public class WebViewCapturer implements AuthorizationGrantCapturer {
+public class WebViewCaptor implements AuthorizationGrantCaptor {
     private String authURL;
+    private String captureKey;
+    private String redirectURL;
 
     private Stage authStage;
     private WebView webView;
@@ -43,8 +45,9 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
 
     private static final String USER_AGENT_STRING = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
 
-    WebViewCapturer(String authURL) {
+    public WebViewCaptor(String authURL, String captureKey) {
         this.authURL = authURL;
+        this.captureKey = captureKey;
         this.webView = new WebView();
         this.engine = webView.getEngine();
         this.engine.setUserAgent(USER_AGENT_STRING);
@@ -55,9 +58,10 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
         engine.locationProperty().addListener((obs, oldVal, newVal) -> {
             try {
                 HashMap<String, String> urlParams = EverestUtilities.parseParameters(new URL(newVal));
-                if (urlParams != null && urlParams.containsKey("code")) {
-                    grant = urlParams.get("code");
+                if (urlParams != null && urlParams.containsKey(captureKey)) {
+                    grant = urlParams.get(captureKey);
                     authStage.close();
+                    redirectURL = engine.getLocation();
                 }
             } catch (MalformedURLException e) {
                 Logger.warning("Invalid URL while authorizing application.", e);
@@ -74,5 +78,10 @@ public class WebViewCapturer implements AuthorizationGrantCapturer {
             throw new AuthWindowClosedException();
 
         return grant;
+    }
+
+    @Override
+    public String getRedirectedURL() {
+        return redirectURL;
     }
 }

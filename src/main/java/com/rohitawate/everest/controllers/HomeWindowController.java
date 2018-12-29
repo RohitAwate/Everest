@@ -117,7 +117,7 @@ public class HomeWindowController implements Initializable {
         if (activeTab == null)
             return;
 
-        if (newValue.equals(""))
+        if (newValue.isBlank())
             activeTab.setText("New Tab");
         else
             activeTab.setText(newValue);

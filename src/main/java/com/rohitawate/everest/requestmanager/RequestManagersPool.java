@@ -27,7 +27,7 @@ import java.util.ArrayList;
  * a new one will be created, added to the pool, and returned.
  */
 public class RequestManagersPool {
-    private static ArrayList<RequestManager> pool = new ArrayList<>();
+    private static final ArrayList<RequestManager> pool = new ArrayList<>();
 
     public static RequestManager manager() {
         for (RequestManager manager: pool) {

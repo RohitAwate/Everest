@@ -16,10 +16,10 @@
 
 package com.rohitawate.everest.state.auth;
 
-import com.rohitawate.everest.auth.oauth2.AccessToken;
+import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
 
-public class AuthorizationCodeState {
-    public String grantCaptureMethod;
+public class AuthorizationCodeState extends OAuth2FlowState {
+    public String captureMethod;
     public String authGrant;
     public boolean authGrantUsed;
 
@@ -27,36 +27,26 @@ public class AuthorizationCodeState {
     public String accessTokenURL;
     public String redirectURL;
 
-    public String clientID;
     public String clientSecret;
-
-    public String scope;
     public String state;
-    public String headerPrefix;
 
-    public AccessToken accessToken;
-
-    public boolean enabled;
+    public AuthCodeToken accessToken;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
         AuthorizationCodeState that = (AuthorizationCodeState) o;
-        if (!grantCaptureMethod.equals(that.grantCaptureMethod)) return false;
         if (authGrant != null && that.authGrant != null && !authGrant.equals(that.authGrant)) return false;
         if (authGrantUsed != that.authGrantUsed) return false;
         if (!authURL.equals(that.authURL)) return false;
         if (!accessTokenURL.equals(that.accessTokenURL)) return false;
         if (!redirectURL.equals(that.redirectURL)) return false;
-        if (!clientID.equals(that.clientID)) return false;
         if (!clientSecret.equals(that.clientSecret)) return false;
-        if (!scope.equals(that.scope)) return false;
-        if (!state.equals(that.state)) return false;
-        if (!headerPrefix.equals(that.headerPrefix)) return false;
         if (!accessToken.equals(that.accessToken)) return false;
-        if (enabled != that.enabled) return false;
+        if (!state.equals(that.state)) return false;
 
         return true;
     }

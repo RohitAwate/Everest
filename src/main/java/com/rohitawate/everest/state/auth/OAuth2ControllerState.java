@@ -16,13 +16,13 @@
 
 package com.rohitawate.everest.state.auth;
 
-public class OAuth2State {
+public class OAuth2ControllerState {
     public AuthorizationCodeState codeState;
 
-    public OAuth2State() {
+    public OAuth2ControllerState() {
     }
 
-    public OAuth2State(AuthorizationCodeState codeState) {
+    public OAuth2ControllerState(AuthorizationCodeState codeState) {
         this.codeState = codeState;
     }
 
@@ -31,7 +31,7 @@ public class OAuth2State {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        OAuth2State that = (OAuth2State) o;
+        OAuth2ControllerState that = (OAuth2ControllerState) o;
         if (!codeState.equals(that.codeState)) return false;
 
         return true;

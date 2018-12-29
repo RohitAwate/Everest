@@ -39,7 +39,9 @@ public class CaptureServer {
     private static final String DENIED = "/AuthorizationDenied.html";
     private static final String NOT_FOUND = "/404.html";
 
-    public static String capture(String authURL) throws Exception {
+    private static String redirectURL;
+
+    public static String capture(String authURL, String captureKey) throws Exception {
         if (server == null) {
             try {
                 server = new ServerSocket(PORT);
@@ -50,10 +52,11 @@ public class CaptureServer {
         }
 
         EverestUtilities.openLinkInBrowser(authURL);
-        return listen();
+        redirectURL = null;
+        return listen(captureKey);
     }
 
-    private static String listen() throws IOException {
+    private static String listen(String captureKey) throws IOException {
         String grant = null;
 
         PrintWriter headerWriter;
@@ -69,11 +72,12 @@ public class CaptureServer {
 
                 if (request.getPath().startsWith("/granted")) {
                     headers.append("200 OK");
-                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL("http://localhost:52849" + request.getPath()));
+                    redirectURL = "http://localhost:52849" + request.getPath();
+                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL(redirectURL));
 
                     String error = null;
                     if (params != null) {
-                        grant = params.get("code");
+                        grant = params.get(captureKey);
                         error = params.get("error");
                     }
 
@@ -139,5 +143,9 @@ public class CaptureServer {
         } else {
             return "text/plain";
         }
+    }
+
+    public static String getRedirectURL() {
+        return redirectURL;
     }
 }

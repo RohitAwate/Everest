@@ -18,13 +18,13 @@ package com.rohitawate.everest.project;
 
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthMethod;
-import com.rohitawate.everest.auth.oauth2.AccessToken;
+import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.FieldState;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
-import com.rohitawate.everest.state.auth.OAuth2State;
+import com.rohitawate.everest.state.auth.OAuth2ControllerState;
 import com.rohitawate.everest.state.auth.SimpleAuthState;
 import javafx.util.Pair;
 
@@ -47,7 +47,7 @@ public class SQLiteManager implements ProjectManager {
                 "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS SimpleAuthCredentials(RequestID INTEGER, Type TEXT NOT NULL, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS AuthCodeCredentials(RequestID INTEGER, CaptureMethod TEXT NOT NULL CHECK (CaptureMethod IN ('System Browser', 'Integrated WebView')), AuthURL TEXT NOT NULL, AccessTokenURL TEXT NOT NULL, RedirectURL TEXT NOT NULL, ClientID TEXT NOT NULL, ClientSecret TEXT NOT NULL, Scope TEXT, State TEXT, HeaderPrefix TEXT, Enabled INTEGER CHECK(Enabled IN (0, 1)))",
-                "CREATE TABLE IF NOT EXISTS OAuth2AccessTokens(RequestID INTEGER, AccessToken TEXT, RefreshToken TEXT, TokenType TEXT, TokenExpiry NUMBER, Scope TEXT, FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
+                "CREATE TABLE IF NOT EXISTS OAuth2AccessTokens(RequestID INTEGER, AuthCodeToken TEXT, RefreshToken TEXT, TokenType TEXT, TokenExpiry NUMBER, Scope TEXT, FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
         };
 
         private static final String SAVE_REQUEST = "INSERT INTO Requests(Type, Target, AuthMethod, Date) VALUES(?, ?, ?, ?)";
@@ -129,7 +129,7 @@ public class SQLiteManager implements ProjectManager {
         saveSimpleAuthCredentials(requestID, AuthMethod.DIGEST, newState.authState.digestAuthState.username,
                 newState.authState.digestAuthState.password, newState.authState.digestAuthState.enabled);
 
-        saveOAuth2Credentials(requestID, newState.authState.oAuth2State);
+        saveOAuth2Credentials(requestID, newState.authState.oAuth2ControllerState);
 
         if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
             // Maps the request to its ContentType for faster retrieval
@@ -155,23 +155,23 @@ public class SQLiteManager implements ProjectManager {
         }
     }
 
-    private void saveOAuth2Credentials(int requestID, OAuth2State oAuth2State) throws SQLException {
-        saveAuthCodeCredentials(requestID, oAuth2State.codeState);
-        saveOAuth2AccessToken(requestID, oAuth2State.codeState.accessToken);
+    private void saveOAuth2Credentials(int requestID, OAuth2ControllerState oAuth2ControllerState) throws SQLException {
+        saveAuthCodeCredentials(requestID, oAuth2ControllerState.codeState);
+        saveOAuth2AccessToken(requestID, oAuth2ControllerState.codeState.accessToken);
     }
 
-    private void saveOAuth2AccessToken(int requestID, AccessToken accessToken) throws SQLException {
-        if (accessToken == null) {
+    private void saveOAuth2AccessToken(int requestID, AuthCodeToken authCodeToken) throws SQLException {
+        if (authCodeToken == null) {
             return;
         }
 
         statement = conn.prepareStatement(Queries.SAVE_OAUTH2_ACCESS_TOKEN);
         statement.setInt(1, requestID);
-        statement.setString(2, accessToken.getAccessToken());
-        statement.setString(3, accessToken.getRefreshToken());
-        statement.setString(4, accessToken.getTokenType());
-        statement.setInt(5, accessToken.getExpiresIn());
-        statement.setString(6, accessToken.getScope());
+        statement.setString(2, authCodeToken.getAccessToken());
+        statement.setString(3, authCodeToken.getRefreshToken());
+        statement.setString(4, authCodeToken.getTokenType());
+        statement.setInt(5, authCodeToken.getExpiresIn());
+        statement.setString(6, authCodeToken.getScope());
 
         statement.executeUpdate();
     }
@@ -185,7 +185,7 @@ public class SQLiteManager implements ProjectManager {
 
         statement = conn.prepareStatement(Queries.SAVE_AUTH_CODE_CREDENTIALS);
         statement.setInt(1, requestID);
-        statement.setString(2, state.grantCaptureMethod);
+        statement.setString(2, state.captureMethod);
         statement.setString(3, state.authURL);
         statement.setString(4, state.accessTokenURL);
         statement.setString(5, state.redirectURL);
@@ -244,7 +244,7 @@ public class SQLiteManager implements ProjectManager {
 
             state.authState.basicAuthState = getSimpleAuthCredentials(requestID, AuthMethod.BASIC);
             state.authState.digestAuthState = getSimpleAuthCredentials(requestID, AuthMethod.DIGEST);
-            state.authState.oAuth2State = getOAuth2State(requestID);
+            state.authState.oAuth2ControllerState = getOAuth2State(requestID);
 
             if (!(state.httpMethod.equals(HTTPConstants.GET) || state.httpMethod.equals(HTTPConstants.DELETE))) {
                 // Retrieves request body ContentType for querying corresponding table
@@ -302,32 +302,31 @@ public class SQLiteManager implements ProjectManager {
         return state;
     }
 
-    private OAuth2State getOAuth2State(int requestID) throws SQLException {
-        OAuth2State state = new OAuth2State();
+    private OAuth2ControllerState getOAuth2State(int requestID) throws SQLException {
+        OAuth2ControllerState state = new OAuth2ControllerState();
         state.codeState = getAuthCodeCredentials(requestID);
         state.codeState.accessToken = getOAuth2AccessToken(requestID);
 
         return state;
     }
 
-    private AccessToken getOAuth2AccessToken(int requestID) throws SQLException {
+    private AuthCodeToken getOAuth2AccessToken(int requestID) throws SQLException {
         statement = conn.prepareStatement(Queries.SELECT_OAUTH2_ACCESS_TOKEN);
         statement.setInt(1, requestID);
 
         ResultSet resultSet = statement.executeQuery();
 
-        AccessToken accessToken = null;
+        AuthCodeToken authCodeToken = null;
         if (resultSet.next()) {
-            accessToken = new AccessToken(
-                    resultSet.getString("AccessToken"),
-                    resultSet.getString("TokenType"),
-                    resultSet.getInt("TokenExpiry"),
-                    resultSet.getString("RefreshToken"),
-                    resultSet.getString("Scope")
-            );
+            authCodeToken = new AuthCodeToken();
+            authCodeToken.setAccessToken(resultSet.getString("AuthCodeToken"));
+            authCodeToken.setTokenType(resultSet.getString("TokenType"));
+            authCodeToken.setExpiresIn(resultSet.getInt("TokenExpiry"));
+            authCodeToken.setRefreshToken(resultSet.getString("RefreshToken"));
+            authCodeToken.setScope(resultSet.getString("Scope"));
         }
 
-        return accessToken;
+        return authCodeToken;
     }
 
     private AuthorizationCodeState getAuthCodeCredentials(int requestID) throws SQLException {
@@ -339,7 +338,7 @@ public class SQLiteManager implements ProjectManager {
         AuthorizationCodeState state = new AuthorizationCodeState();
         if (resultSet.next()) {
             state.authURL = resultSet.getString("AuthURL");
-            state.grantCaptureMethod = resultSet.getString("CaptureMethod");
+            state.captureMethod = resultSet.getString("CaptureMethod");
             state.accessTokenURL = resultSet.getString("AccessTokenURL");
             state.redirectURL = resultSet.getString("RedirectURL");
             state.clientID = resultSet.getString("ClientID");
@@ -414,7 +413,7 @@ public class SQLiteManager implements ProjectManager {
 
             lastRequest.authState.basicAuthState = getSimpleAuthCredentials(requestID, AuthMethod.BASIC);
             lastRequest.authState.digestAuthState = getSimpleAuthCredentials(requestID, AuthMethod.DIGEST);
-            lastRequest.authState.oAuth2State = getOAuth2State(requestID);
+            lastRequest.authState.oAuth2ControllerState = getOAuth2State(requestID);
 
             lastRequest.headers = getTuples(requestID, HEADER);
             lastRequest.params = getTuples(requestID, PARAM);

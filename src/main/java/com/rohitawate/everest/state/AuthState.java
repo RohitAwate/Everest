@@ -16,13 +16,13 @@
 
 package com.rohitawate.everest.state;
 
-import com.rohitawate.everest.state.auth.OAuth2State;
+import com.rohitawate.everest.state.auth.OAuth2ControllerState;
 import com.rohitawate.everest.state.auth.SimpleAuthState;
 
 public class AuthState {
     public SimpleAuthState basicAuthState;
     public SimpleAuthState digestAuthState;
-    public OAuth2State oAuth2State;
+    public OAuth2ControllerState oAuth2ControllerState;
 
     @Override
     public boolean equals(Object o) {
@@ -32,7 +32,7 @@ public class AuthState {
 
         if (!basicAuthState.equals(state.basicAuthState)) return false;
         if (!digestAuthState.equals(state.digestAuthState)) return false;
-        if (!oAuth2State.equals(state.oAuth2State)) return false;
+        if (!oAuth2ControllerState.equals(state.oAuth2ControllerState)) return false;
 
         return true;
     }

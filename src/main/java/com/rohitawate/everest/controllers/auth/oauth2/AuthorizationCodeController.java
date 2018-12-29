@@ -22,11 +22,11 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthProvider;
-import com.rohitawate.everest.auth.oauth2.AccessToken;
 import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
+import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
 import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
@@ -70,7 +70,6 @@ public class AuthorizationCodeController implements Initializable {
 
     private JFXRippler rippler;
 
-    private static AuthorizationCodeProvider provider;
     private AuthorizationCodeState state;
 
     public class CaptureMethod {
@@ -80,7 +79,6 @@ public class AuthorizationCodeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        provider = new AuthorizationCodeProvider(this);
         captureMethodBox.getItems().addAll(CaptureMethod.BROWSER, CaptureMethod.WEB_VIEW);
         captureMethodBox.setValue(CaptureMethod.BROWSER);
         refreshTokenButton.setOnAction(this::refreshToken);
@@ -136,14 +134,12 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     public AuthorizationCodeState getState() {
-        AccessToken accessToken = null;
-        if (state != null) {
-            accessToken = state.accessToken;
+        if (state == null) {
+            state = new AuthorizationCodeState();
+            return state;
         }
 
-        state = new AuthorizationCodeState();
-
-        state.grantCaptureMethod = captureMethodBox.getValue();
+        state.captureMethod = captureMethodBox.getValue();
         state.authURL = authURLField.getText();
         state.accessTokenURL = tokenURLField.getText();
         state.redirectURL = redirectURLField.getText();
@@ -153,15 +149,12 @@ public class AuthorizationCodeController implements Initializable {
         state.state = stateField.getText();
         state.headerPrefix = headerPrefixField.getText();
         state.enabled = enabled.isSelected();
-        state.accessToken = accessToken;
 
-        if (state.accessToken == null) {
-            state.accessToken = new AccessToken();
+        if (state.accessToken != null) {
+            // Setting these values again since they can be modified from the UI
+            state.accessToken.setAccessToken(accessTokenField.getText());
+            state.accessToken.setRefreshToken(refreshTokenField.getText());
         }
-
-        // Setting these values again since they can be modified from the UI
-        state.accessToken.setAccessToken(accessTokenField.getText());
-        state.accessToken.setRefreshToken(refreshTokenField.getText());
 
         return state;
     }
@@ -169,8 +162,8 @@ public class AuthorizationCodeController implements Initializable {
     public void setState(AuthorizationCodeState authCodeState) {
         this.state = authCodeState;
 
-        if (state != null) {
-            captureMethodBox.setValue(state.grantCaptureMethod);
+        if (authCodeState != null) {
+            captureMethodBox.setValue(state.captureMethod);
 
             authURLField.setText(state.authURL);
             tokenURLField.setText(state.accessTokenURL);
@@ -182,12 +175,11 @@ public class AuthorizationCodeController implements Initializable {
             scopeField.setText(state.scope);
             stateField.setText(state.state);
             headerPrefixField.setText(state.headerPrefix);
+            enabled.setSelected(state.enabled);
 
             if (state.accessToken != null) {
                 onRefreshSucceeded();
             }
-
-            enabled.setSelected(state.enabled);
         }
     }
 
@@ -235,7 +227,7 @@ public class AuthorizationCodeController implements Initializable {
         refreshTokenField.clear();
         expiryLabel.setVisible(false);
         enabled.setSelected(false);
-        provider.reset();
+        state = null;
     }
 
     public AuthProvider getAuthProvider() {
@@ -249,7 +241,7 @@ public class AuthorizationCodeController implements Initializable {
             refreshToken(null);
         }
 
-        return provider;
+        return new AuthorizationCodeProvider(this);
     }
 
     private void onRefreshSucceeded() {
@@ -286,7 +278,7 @@ public class AuthorizationCodeController implements Initializable {
         Logger.warning(errorMessage, (Exception) exception);
     }
 
-    public void setAccessToken(AccessToken accessToken) {
+    public void setAccessToken(AuthCodeToken accessToken) {
         state.accessToken = accessToken;
         Platform.runLater(() -> {
             onRefreshSucceeded();
@@ -295,9 +287,10 @@ public class AuthorizationCodeController implements Initializable {
         });
     }
 
-    private class TokenFetcher extends Task<AccessToken> {
+    private class TokenFetcher extends Task<AuthCodeToken> {
         @Override
-        protected AccessToken call() throws Exception {
+        protected AuthCodeToken call() throws Exception {
+            AuthorizationCodeProvider provider = new AuthorizationCodeProvider(AuthorizationCodeController.this);
             return provider.getAccessToken();
         }
 

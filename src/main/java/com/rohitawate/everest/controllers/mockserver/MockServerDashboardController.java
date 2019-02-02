@@ -144,7 +144,7 @@ public class MockServerDashboardController implements Initializable {
                 serviceDetailsStage.setTitle("Add new mock server - " + Main.APP_NAME);
                 serviceDetailsStage.setResizable(false);
                 serviceDetailsStage.initModality(Modality.APPLICATION_MODAL);
-                serviceDetailsStage.getIcons().add(Main.APP_ICON);
+                serviceDetailsStage.getIcons().add(Main.getAppIcon());
             } catch (IOException e) {
                 e.printStackTrace();
             }

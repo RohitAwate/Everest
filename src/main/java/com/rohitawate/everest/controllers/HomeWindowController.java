@@ -325,7 +325,7 @@ public class HomeWindowController implements Initializable {
                             mockServerDashboardController = loader.getController();
                             mockServerDashboard = new Stage();
                             mockServerDashboard.setTitle("Mock Servers Dashboard - " + Main.APP_NAME);
-                            mockServerDashboard.getIcons().add(Main.APP_ICON);
+                            mockServerDashboard.getIcons().add(Main.getAppIcon());
                             mockServerDashboard.setScene(new Scene(mockDashboardFXML));
                             mockServerDashboard.setOnCloseRequest(event -> mockServerDashboard.hide());
 

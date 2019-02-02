@@ -29,7 +29,6 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     public static final String APP_NAME = "Everest";
-    public static final Image APP_ICON = new Image(Main.class.getResource("/assets/Logo.png").toExternalForm());
     public static Preferences preferences;
 
     @Override
@@ -44,7 +43,7 @@ public class Main extends Application {
         Rectangle2D screenBounds = Screen.getPrimary().getBounds();
         primaryStage.setWidth(screenBounds.getWidth() * 0.83);
         primaryStage.setHeight(screenBounds.getHeight() * 0.74);
-        primaryStage.getIcons().add(APP_ICON);
+        primaryStage.getIcons().add(getAppIcon());
         primaryStage.setScene(new Scene(homeWindow));
         primaryStage.setTitle(APP_NAME);
         primaryStage.setOnHiding(e -> {
@@ -52,6 +51,10 @@ public class Main extends Application {
             SyncManager.saveSyncPrefs();
         });
         primaryStage.show();
+    }
+
+    public static Image getAppIcon() {
+        return new Image(Main.class.getResource("/assets/Logo.png").toExternalForm());
     }
 
     public static void main(String args[]) {

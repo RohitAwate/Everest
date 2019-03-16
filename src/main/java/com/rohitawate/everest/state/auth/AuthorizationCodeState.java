@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,10 @@ public class AuthorizationCodeState extends OAuth2FlowState {
     public String state;
 
     public AuthCodeToken accessToken;
+
+    public AuthorizationCodeState() {
+        accessToken = new AuthCodeToken();
+    }
 
     @Override
     public boolean equals(Object o) {

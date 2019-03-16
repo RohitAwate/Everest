@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package com.rohitawate.everest.state.auth;
 
 public class OAuth2ControllerState {
     public AuthorizationCodeState codeState;
+    public ImplicitState implicitState;
 
     public OAuth2ControllerState() {
     }
 
-    public OAuth2ControllerState(AuthorizationCodeState codeState) {
+    public OAuth2ControllerState(AuthorizationCodeState codeState, ImplicitState implicitState) {
         this.codeState = codeState;
+        this.implicitState = implicitState;
     }
 
     @Override
@@ -33,6 +35,7 @@ public class OAuth2ControllerState {
 
         OAuth2ControllerState that = (OAuth2ControllerState) o;
         if (!codeState.equals(that.codeState)) return false;
+        if (!implicitState.equals(that.implicitState)) return false;
 
         return true;
     }

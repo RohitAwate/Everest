@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class SQLiteManager implements ProjectManager {
                 "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS SimpleAuthCredentials(RequestID INTEGER, Type TEXT NOT NULL, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS AuthCodeCredentials(RequestID INTEGER, CaptureMethod TEXT NOT NULL CHECK (CaptureMethod IN ('System Browser', 'Integrated WebView')), AuthURL TEXT NOT NULL, AccessTokenURL TEXT NOT NULL, RedirectURL TEXT NOT NULL, ClientID TEXT NOT NULL, ClientSecret TEXT NOT NULL, Scope TEXT, State TEXT, HeaderPrefix TEXT, Enabled INTEGER CHECK(Enabled IN (0, 1)))",
-                "CREATE TABLE IF NOT EXISTS OAuth2AccessTokens(RequestID INTEGER, AuthCodeToken TEXT, RefreshToken TEXT, TokenType TEXT, TokenExpiry NUMBER, Scope TEXT, FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
+                "CREATE TABLE IF NOT EXISTS OAuth2AccessTokens(RequestID INTEGER, AccessToken TEXT, RefreshToken TEXT, TokenType TEXT, TokenExpiry NUMBER, Scope TEXT, FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
         };
 
         private static final String SAVE_REQUEST = "INSERT INTO Requests(Type, Target, AuthMethod, Date) VALUES(?, ?, ?, ?)";
@@ -319,7 +319,7 @@ public class SQLiteManager implements ProjectManager {
         AuthCodeToken authCodeToken = null;
         if (resultSet.next()) {
             authCodeToken = new AuthCodeToken();
-            authCodeToken.setAccessToken(resultSet.getString("AuthCodeToken"));
+            authCodeToken.setAccessToken(resultSet.getString("AccessToken"));
             authCodeToken.setTokenType(resultSet.getString("TokenType"));
             authCodeToken.setExpiresIn(resultSet.getInt("TokenExpiry"));
             authCodeToken.setRefreshToken(resultSet.getString("RefreshToken"));

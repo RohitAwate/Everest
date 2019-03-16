@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.rohitawate.everest.controllers.auth;
 
 import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
+import com.rohitawate.everest.controllers.auth.oauth2.ImplicitController;
 import com.rohitawate.everest.state.auth.OAuth2ControllerState;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -37,37 +38,50 @@ public class OAuth2TabController implements Initializable {
     private Tab codeTab, implicitTab, ropcTab, clientCredentialsTab;
 
     private AuthorizationCodeController codeController;
+    private ImplicitController implicitController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/oauth2/AuthorizationCode.fxml"));
-            Parent codeFXML = loader.load();
+            FXMLLoader codeLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/oauth2/AuthorizationCode.fxml"));
+            Parent codeFXML = codeLoader.load();
             codeTab.setContent(codeFXML);
-            codeController = loader.getController();
+            codeController = codeLoader.getController();
+
+            FXMLLoader implicitLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/oauth2/Implicit.fxml"));
+            Parent implicitFXML = implicitLoader.load();
+            implicitTab.setContent(implicitFXML);
+            implicitController = implicitLoader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public OAuth2ControllerState getState() {
-        return new OAuth2ControllerState(codeController.getState());
+        return new OAuth2ControllerState(
+                codeController.getState(),
+                implicitController.getState()
+        );
     }
 
     public void setState(OAuth2ControllerState state) {
         if (state != null) {
             codeController.setState(state.codeState);
+            implicitController.setState(state.implicitState);
         }
     }
 
     public void reset() {
         codeController.reset();
+        implicitController.reset();
     }
 
     AuthProvider getAuthProvider() {
         switch (oauth2TabPane.getSelectionModel().getSelectedIndex()) {
             case 0:
                 return codeController.getAuthProvider();
+            case 1:
+                return implicitController.getAuthProvider();
             default:
                 return null;
         }

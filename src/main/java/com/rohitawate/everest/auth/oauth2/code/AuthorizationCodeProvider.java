@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package com.rohitawate.everest.auth.oauth2.code;
 
 import com.rohitawate.everest.auth.captors.AuthorizationGrantCaptor;
 import com.rohitawate.everest.auth.captors.BrowserCaptor;
+import com.rohitawate.everest.auth.captors.CaptureMethod;
 import com.rohitawate.everest.auth.captors.WebViewCaptor;
+import com.rohitawate.everest.auth.oauth2.Flow;
 import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
@@ -26,7 +28,6 @@ import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantEx
 import com.rohitawate.everest.auth.oauth2.code.exceptions.UnknownAccessTokenTypeException;
 import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
-import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
@@ -68,7 +69,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
             if (state.scope != null && !state.scope.isEmpty()) {
                 grantURLBuilder.append("&scope=");
-                grantURLBuilder.append(state.scope);
+                grantURLBuilder.append(EverestUtilities.encodeURL(state.scope));
             }
 
             AuthorizationGrantCaptor captor;
@@ -79,7 +80,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                     captor = new WebViewCaptor(grantURLBuilder.toString(), captureKey);
                     break;
                 default:
-                    captor = new BrowserCaptor(grantURLBuilder.toString(), captureKey);
+                    captor = new BrowserCaptor(grantURLBuilder.toString(), captureKey, Flow.AUTH_CODE);
             }
 
             state.authGrant = captor.getAuthorizationGrant();
@@ -110,6 +111,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
         byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
+
         // Hold on to refresh token
         String refreshToken = state.accessToken.getRefreshToken();
         state.accessToken = tokenRequest.authCodeToken;
@@ -186,6 +188,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                 throw new AuthWindowClosedException();
             }
 
+            // Resolving System Browser calls
             getAccessToken();
         }
 
@@ -265,7 +268,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                     case MediaType.APPLICATION_FORM_URLENCODED:
                         authCodeToken = new AuthCodeToken();
                         HashMap<String, String> params =
-                                EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()));
+                                EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()), "\\?");
                         if (params != null) {
                             params.forEach((key, value) -> {
                                 switch (key) {

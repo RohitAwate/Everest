@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class WebViewCaptor implements AuthorizationGrantCaptor {
     public String getAuthorizationGrant() throws AuthWindowClosedException {
         engine.locationProperty().addListener((obs, oldVal, newVal) -> {
             try {
-                HashMap<String, String> urlParams = EverestUtilities.parseParameters(new URL(newVal));
+                HashMap<String, String> urlParams = EverestUtilities.parseParameters(new URL(newVal), "\\?");
                 if (urlParams != null && urlParams.containsKey(captureKey)) {
                     grant = urlParams.get(captureKey);
                     authStage.close();

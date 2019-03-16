@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.server;
 
+import com.rohitawate.everest.auth.oauth2.Flow;
 import com.rohitawate.everest.http.HttpRequest;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
@@ -41,7 +42,7 @@ public class CaptureServer {
 
     private static String redirectURL;
 
-    public static String capture(String authURL, String captureKey) throws Exception {
+    public static String capture(String authURL, String captureKey, Flow flow) throws Exception {
         if (server == null) {
             try {
                 server = new ServerSocket(PORT);
@@ -53,10 +54,10 @@ public class CaptureServer {
 
         EverestUtilities.openLinkInBrowser(authURL);
         redirectURL = null;
-        return listen(captureKey);
+        return listen(captureKey, flow);
     }
 
-    private static String listen(String captureKey) throws IOException {
+    private static String listen(String captureKey, Flow flow) throws IOException {
         String grant = null;
 
         PrintWriter headerWriter;
@@ -73,7 +74,17 @@ public class CaptureServer {
                 if (request.getPath().startsWith("/granted")) {
                     headers.append("200 OK");
                     redirectURL = "http://localhost:52849" + request.getPath();
-                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL(redirectURL));
+
+                    String separator;
+                    switch (flow) {
+                        case IMPLICIT:
+                            separator = "#";
+                            break;
+                        default:
+                            separator = "\\?";
+                    }
+
+                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL(redirectURL), separator);
 
                     String error = null;
                     if (params != null) {

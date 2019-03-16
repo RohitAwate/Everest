@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.auth.captors;
 
+import com.rohitawate.everest.auth.oauth2.Flow;
 import com.rohitawate.everest.server.CaptureServer;
 
 /**
@@ -26,18 +27,21 @@ import com.rohitawate.everest.server.CaptureServer;
 public class BrowserCaptor implements AuthorizationGrantCaptor {
     private String authURL;
     private String captureKey;
+    private Flow flow;
+
     private String redirectURL;
 
     public static final String LOCAL_SERVER_URL = "http://localhost:52849/granted";
 
-    public BrowserCaptor(String authURL, String captureKey) {
+    public BrowserCaptor(String authURL, String captureKey, Flow flow) {
         this.authURL = authURL;
         this.captureKey = captureKey;
+        this.flow = flow;
     }
 
     @Override
     public String getAuthorizationGrant() throws Exception {
-        String grant = CaptureServer.capture(authURL, captureKey);
+        String grant = CaptureServer.capture(authURL, captureKey, flow);
         redirectURL = CaptureServer.getRedirectURL();
         return grant;
     }

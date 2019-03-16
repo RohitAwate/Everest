@@ -1,11 +1,29 @@
+/*
+ * Copyright 2019 Rohit Awate.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rohitawate.everest.auth.oauth2.implicit;
 
 import com.rohitawate.everest.auth.captors.AuthorizationGrantCaptor;
 import com.rohitawate.everest.auth.captors.BrowserCaptor;
+import com.rohitawate.everest.auth.captors.CaptureMethod;
 import com.rohitawate.everest.auth.captors.WebViewCaptor;
+import com.rohitawate.everest.auth.oauth2.Flow;
 import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
+import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
-import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController.CaptureMethod;
 import com.rohitawate.everest.controllers.auth.oauth2.ImplicitController;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.state.auth.ImplicitState;
@@ -34,12 +52,12 @@ public class ImplicitProvider implements OAuth2Provider {
 
         if (state.scope != null && !state.scope.isBlank()) {
             builder.append("&scope=");
-            builder.append(state.scope);
+            builder.append(EverestUtilities.encodeURL(state.scope));
         }
 
         if (state.state != null && !state.state.isBlank()) {
             builder.append("&state=");
-            builder.append(state.state);
+            builder.append(EverestUtilities.encodeURL(state.state));
         }
 
         AuthorizationGrantCaptor captor;
@@ -49,9 +67,10 @@ public class ImplicitProvider implements OAuth2Provider {
                 captor = new WebViewCaptor(builder.toString(), captureKey);
                 break;
             default:
-                captor = new BrowserCaptor(builder.toString(), captureKey);
+                captor = new BrowserCaptor(builder.toString(), captureKey, Flow.IMPLICIT);
         }
 
+        captor.getAuthorizationGrant();
         state.accessToken = parseToken(captor.getRedirectedURL());
 
         // This will display the new AuthCodeToken in the UI
@@ -97,7 +116,29 @@ public class ImplicitProvider implements OAuth2Provider {
 
     @Override
     public String getAuthHeader() throws Exception {
-        return null;
+        if (state == null) {
+            setState(controller.getState());
+        }
+
+        /*
+            Integrated WebView calls will already have been resolved in AuthorizationCodeController,
+            hence, they are skipped here.
+         */
+        if (state.accessToken.getAccessToken().isBlank()) {
+            /*
+                If there is no AccessToken despite being a WebView request, it means the view would
+                already have opened through ImplicitController, but the user denied authorization or
+                closed the window before receiving a token.
+             */
+            if (state.captureMethod.equals(CaptureMethod.WEB_VIEW)) {
+                throw new AuthWindowClosedException();
+            }
+
+            // Resolving System Browser calls
+            getAccessToken();
+        }
+
+        return String.format("%s %s", state.headerPrefix, state.accessToken.getAccessToken());
     }
 
     @Override
@@ -109,7 +150,7 @@ public class ImplicitProvider implements OAuth2Provider {
 
         this.state = (ImplicitState) state;
 
-        if (this.state.redirectURL.isEmpty() || this.state.captureMethod.equals(CaptureMethod.BROWSER)) {
+        if (this.state.redirectURL == null || this.state.redirectURL.isEmpty() || this.state.captureMethod.equals(CaptureMethod.BROWSER)) {
             this.state.redirectURL = BrowserCaptor.LOCAL_SERVER_URL;
         }
 

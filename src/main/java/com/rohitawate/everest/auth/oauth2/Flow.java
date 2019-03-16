@@ -16,22 +16,30 @@
 
 package com.rohitawate.everest.auth.oauth2;
 
-import com.rohitawate.everest.auth.AuthProvider;
-import com.rohitawate.everest.auth.oauth2.tokens.OAuth2Token;
-import com.rohitawate.everest.state.auth.OAuth2FlowState;
-
 /**
- * Adds OAuth 2.0-specific functionality to AuthProvider.
+ * Represents the flows described in the OAuth 2.0 specification.
+ * Refer RFC 6749 for details.
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a>
  */
-public interface OAuth2Provider extends AuthProvider {
+public enum Flow {
     /**
-     * Returns the access token for the respective API.
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-1.3.1"></a>
      */
-    OAuth2Token getAccessToken() throws Exception;
+    AUTH_CODE,
 
     /**
-     * Accepts the state of the corresponding controller
-     * to work with.
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-1.3.2"></a>
      */
-    void setState(OAuth2FlowState state);
+    IMPLICIT,
+
+    /**
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-1.3.3"></a>
+     */
+    RESOURCE_OWNER_PASSWORD_CREDS,
+
+    /**
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-1.3.4"></a>
+     */
+    CLIENT_CREDS
 }

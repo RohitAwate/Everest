@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +92,8 @@ public class EverestUtilities {
         return outStream.toByteArray();
     }
 
-    public static HashMap<String, String> parseParameters(URL url) {
-        String pair[] = url.toString().split("\\?");
+    public static HashMap<String, String> parseParameters(URL url, String separator) {
+        String pair[] = url.toString().split(separator);
 
         if (pair.length != 2) {
             return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rohit Awate.
+ * Copyright 2019 Rohit Awate.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthProvider;
+import com.rohitawate.everest.auth.captors.CaptureMethod;
 import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
@@ -71,11 +72,6 @@ public class AuthorizationCodeController implements Initializable {
     private JFXRippler rippler;
 
     private AuthorizationCodeState state;
-
-    public class CaptureMethod {
-        public final static String WEB_VIEW = "Integrated WebView";
-        public final static String BROWSER = "System Browser";
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -150,11 +146,9 @@ public class AuthorizationCodeController implements Initializable {
         state.headerPrefix = headerPrefixField.getText();
         state.enabled = enabled.isSelected();
 
-        if (state.accessToken != null) {
-            // Setting these values again since they can be modified from the UI
-            state.accessToken.setAccessToken(accessTokenField.getText());
-            state.accessToken.setRefreshToken(refreshTokenField.getText());
-        }
+        // Setting these values again since they can be modified from the UI
+        state.accessToken.setAccessToken(accessTokenField.getText());
+        state.accessToken.setRefreshToken(refreshTokenField.getText());
 
         return state;
     }
@@ -184,7 +178,7 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     private void setExpiryLabel() {
-        if (state.accessToken != null && state.accessToken.getTimeToExpiry() >= 0) {
+        if (state != null && state.accessToken.getTimeToExpiry() >= 0) {
             expiryLabel.setVisible(true);
 
             if (state.accessToken.getExpiresIn() == 0) {
@@ -237,7 +231,9 @@ public class AuthorizationCodeController implements Initializable {
             so that when RequestManager invokes AuthCodeProvider's getAuthHeader() from a different thread,
             the token is already present and hence the WebView wouldn't need to be opened.
          */
-        if (accessTokenField.getText().isEmpty() && enabled.isSelected() && captureMethodBox.getValue().equals(CaptureMethod.WEB_VIEW)) {
+        String token = accessTokenField.getText();
+        if (token != null && token.isEmpty() &&
+                enabled.isSelected() && captureMethodBox.getValue().equals(CaptureMethod.WEB_VIEW)) {
             refreshToken(null);
         }
 

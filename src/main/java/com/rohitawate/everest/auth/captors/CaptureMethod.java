@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.logging;
+package com.rohitawate.everest.auth.captors;
 
-import java.time.LocalDateTime;
-
-class Log {
-    Level level;
-    LocalDateTime time;
+public interface CaptureMethod {
+    String WEB_VIEW = "Integrated WebView";
+    String BROWSER = "System Browser";
 }

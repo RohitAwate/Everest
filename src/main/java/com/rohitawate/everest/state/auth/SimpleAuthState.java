@@ -16,8 +16,6 @@
 
 package com.rohitawate.everest.state.auth;
 
-import java.util.Objects;
-
 public class SimpleAuthState {
     public SimpleAuthState() {
     }
@@ -38,8 +36,15 @@ public class SimpleAuthState {
         if (o == null || getClass() != o.getClass()) return false;
 
         SimpleAuthState that = (SimpleAuthState) o;
-        return enabled == that.enabled &&
-                Objects.equals(username, that.username) &&
-                Objects.equals(password, that.password);
+        return toString().equals(that.toString());
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleAuthState{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", enabled=" + enabled +
+                '}';
     }
 }

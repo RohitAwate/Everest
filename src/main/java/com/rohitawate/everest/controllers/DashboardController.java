@@ -224,7 +224,7 @@ public class DashboardController implements Initializable {
 
     @FXML
     void sendRequest() {
-        if (requestManager != null) {
+        if (requestManager != null && !requestManager.isInBackground()) {
             while (requestManager.isRunning())
                 requestManager.cancel();
             requestManager.reset();
@@ -241,7 +241,12 @@ public class DashboardController implements Initializable {
 
             // Prepends "https://" to the address if not already done.
             if (!(address.startsWith("https://") || address.startsWith("http://"))) {
-                address = "https://" + address;
+                if (address.startsWith("localhost") || address.startsWith("127.0.0.1")) {
+                    address = "http://" + address;
+                } else {
+                    address = "https://" + address;
+                }
+
                 responseArea.requestFocus();
             }
 
@@ -712,7 +717,6 @@ public class DashboardController implements Initializable {
                 break;
             case LOADING:
                 dashboardState.handOverRequest(requestManager);
-                requestManager = null;
                 break;
         }
 
@@ -779,6 +783,7 @@ public class DashboardController implements Initializable {
                         The handlers affect the Dashboard directly rather than the DashboardState.
                      */
                     requestManager = state.getRequestManager();
+                    requestManager.setInBackground(false);
                     requestManager.removeHandlers();
                     requestManager.addHandlers(this::whileRunning, this::onSucceeded, this::onFailed, this::onCancelled);
                     showLayer(ResponseLayer.LOADING);

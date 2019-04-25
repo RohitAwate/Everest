@@ -142,4 +142,8 @@ public class EverestUtilities {
             NotificationsManager.push(DashboardController.CHANNEL_ID, "Couldn't find a web browser on your system.", 6000);
         }
     }
+
+    public static boolean notNullAndEmpty(final String str) {
+        return str != null && str.isEmpty();
+    }
 }

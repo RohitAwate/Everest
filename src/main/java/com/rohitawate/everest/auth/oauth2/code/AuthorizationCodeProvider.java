@@ -211,7 +211,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
         this.state = (AuthorizationCodeState) state;
 
-        if (this.state.redirectURL.isEmpty() || this.state.captureMethod.equals(CaptureMethod.BROWSER)) {
+        if (EverestUtilities.notNullAndEmpty(this.state.redirectURL) || this.state.captureMethod.equals(CaptureMethod.BROWSER)) {
             this.state.redirectURL = BrowserCaptor.LOCAL_SERVER_URL;
         }
 

@@ -29,14 +29,10 @@ public class OAuth2ControllerState {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        OAuth2ControllerState that = (OAuth2ControllerState) o;
-        if (!codeState.equals(that.codeState)) return false;
-        if (!implicitState.equals(that.implicitState)) return false;
-
-        return true;
+    public String toString() {
+        return "OAuth2ControllerState{" +
+                "codeState=" + codeState +
+                ", implicitState=" + implicitState +
+                '}';
     }
 }

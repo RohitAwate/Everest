@@ -69,11 +69,13 @@ public class DashboardState {
      */
     public void handOverRequest(RequestManager requestManager) {
         this.requestManager = requestManager;
-        this.requestManager.removeHandlers();
 
-        this.requestManager.setOnFailed(this::onRequestFailed);
-        this.requestManager.setOnSucceeded(this::onRequestSucceeded);
-        this.requestManager.setOnCancelled(this::onRequestCancelled);
+        requestManager.removeHandlers();
+        requestManager.setInBackground(true);
+
+        requestManager.setOnFailed(this::onRequestFailed);
+        requestManager.setOnSucceeded(this::onRequestSucceeded);
+        requestManager.setOnCancelled(this::onRequestCancelled);
     }
 
     private void onRequestCancelled(Event event) {

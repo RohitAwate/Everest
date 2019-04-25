@@ -37,21 +37,21 @@ public class AuthorizationCodeState extends OAuth2FlowState {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        AuthorizationCodeState that = (AuthorizationCodeState) o;
-        if (authGrant != null && that.authGrant != null && !authGrant.equals(that.authGrant)) return false;
-        if (authGrantUsed != that.authGrantUsed) return false;
-        if (!authURL.equals(that.authURL)) return false;
-        if (!accessTokenURL.equals(that.accessTokenURL)) return false;
-        if (!redirectURL.equals(that.redirectURL)) return false;
-        if (!clientSecret.equals(that.clientSecret)) return false;
-        if (!accessToken.equals(that.accessToken)) return false;
-        if (!state.equals(that.state)) return false;
-
-        return true;
+    public String toString() {
+        return "AuthorizationCodeState{" +
+                "captureMethod='" + captureMethod + '\'' +
+                ", authGrant='" + authGrant + '\'' +
+                ", authGrantUsed=" + authGrantUsed +
+                ", authURL='" + authURL + '\'' +
+                ", accessTokenURL='" + accessTokenURL + '\'' +
+                ", redirectURL='" + redirectURL + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
+                ", state='" + state + '\'' +
+                ", accessToken=" + accessToken +
+                ", clientID='" + clientID + '\'' +
+                ", enabled=" + enabled +
+                ", scope='" + scope + '\'' +
+                ", headerPrefix='" + headerPrefix + '\'' +
+                '}';
     }
 }

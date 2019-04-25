@@ -20,6 +20,7 @@ import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthMethod;
 import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
 import com.rohitawate.everest.logging.Logger;
+import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.FieldState;
@@ -46,7 +47,7 @@ public class SQLiteManager implements ProjectManager {
                 "CREATE TABLE IF NOT EXISTS FilePaths(RequestID INTEGER, Path TEXT NOT NULL, FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS Tuples(RequestID INTEGER, Type TEXT NOT NULL CHECK(Type IN ('Header', 'Param', 'URLString', 'FormString', 'File')), Key TEXT NOT NULL, Value TEXT NOT NULL, Checked INTEGER CHECK (Checked IN (0, 1)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
                 "CREATE TABLE IF NOT EXISTS SimpleAuthCredentials(RequestID INTEGER, Type TEXT NOT NULL, Username TEXT NOT NULL, Password TEXT NOT NULL, Enabled INTEGER CHECK (Enabled IN (1, 0)), FOREIGN KEY(RequestID) REFERENCES Requests(ID))",
-                "CREATE TABLE IF NOT EXISTS AuthCodeCredentials(RequestID INTEGER, CaptureMethod TEXT NOT NULL CHECK (CaptureMethod IN ('System Browser', 'Integrated WebView')), AuthURL TEXT NOT NULL, AccessTokenURL TEXT NOT NULL, RedirectURL TEXT NOT NULL, ClientID TEXT NOT NULL, ClientSecret TEXT NOT NULL, Scope TEXT, State TEXT, HeaderPrefix TEXT, Enabled INTEGER CHECK(Enabled IN (0, 1)))",
+                "CREATE TABLE IF NOT EXISTS AuthCodeCredentials(RequestID INTEGER, CaptureMethod TEXT NOT NULL CHECK (CaptureMethod IN ('System Browser', 'Integrated WebView')), AuthURL TEXT NOT NULL, AccessTokenURL TEXT NOT NULL, RedirectURL TEXT NOT NULL, ClientID TEXT NOT NULL, ClientSecret TEXT NOT NULL, Scope TEXT, State TEXT, HeaderPrefix TEXT, Enabled INTEGER CHECK(Enabled IN (0, 1)), FOREIGN KEY (RequestID) REFERENCES Requests(RequestID))",
                 "CREATE TABLE IF NOT EXISTS OAuth2AccessTokens(RequestID INTEGER, AccessToken TEXT, RefreshToken TEXT, TokenType TEXT, TokenExpiry NUMBER, Scope TEXT, FOREIGN KEY(RequestID) REFERENCES Requests(ID))"
         };
 
@@ -63,6 +64,7 @@ public class SQLiteManager implements ProjectManager {
         private static final String SELECT_REQUEST_CONTENT_TYPE = "SELECT ContentType FROM RequestContentMap WHERE RequestID == ?";
         private static final String SELECT_REQUEST_BODY = "SELECT Body, Type FROM Bodies WHERE RequestID == ?";
         private static final String SELECT_FILE_PATH = "SELECT Path FROM FilePaths WHERE RequestID == ?";
+
         private static final String SELECT_SIMPLE_AUTH_CREDENTIALS = "SELECT * FROM SimpleAuthCredentials WHERE RequestID == ? AND Type == ?";
         private static final String SELECT_AUTH_CODE_CREDENTIALS = "SELECT * FROM AuthCodeCredentials WHERE RequestID == ?";
         private static final String SELECT_OAUTH2_ACCESS_TOKEN = "SELECT * FROM OAuth2AccessTokens WHERE RequestID == ?";
@@ -105,6 +107,33 @@ public class SQLiteManager implements ProjectManager {
      */
     @Override
     public synchronized void saveState(ComposerState newState) throws SQLException {
+        int requestID = saveRequest(newState);
+
+        saveTuple(newState.headers, HEADER, requestID);
+        saveTuple(newState.params, PARAM, requestID);
+
+        saveSimpleAuthCredentials(requestID, AuthMethod.BASIC, newState.authState.basicAuthState);
+        saveSimpleAuthCredentials(requestID, AuthMethod.DIGEST, newState.authState.digestAuthState);
+
+        saveOAuth2Credentials(requestID, newState.authState.oAuth2ControllerState);
+
+        if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
+            saveRequestContentPair(newState, requestID);    // Maps the request to its ContentType for faster retrieval
+            saveBody(newState, requestID);
+            saveFilePath(newState, requestID);
+            saveTuple(newState.urlStringTuples, URL_STRING, requestID);
+            saveTuple(newState.formStringTuples, FORM_STRING, requestID);
+            saveTuple(newState.formFileTuples, FILE, requestID);
+        }
+    }
+
+    /**
+     * Saves the ComposerState associated with the request and returns its
+     * ID in the database.
+     *
+     * @return the ID of the request in the database
+     */
+    private int saveRequest(ComposerState newState) throws SQLException {
         statement = conn.prepareStatement(Queries.SAVE_REQUEST);
 
         statement.setString(1, newState.httpMethod);
@@ -120,39 +149,46 @@ public class SQLiteManager implements ProjectManager {
         int requestID = -1;
         if (RS.next())
             requestID = RS.getInt("MaxID");
+        return requestID;
+    }
 
-        saveTuple(newState.headers, HEADER, requestID);
-        saveTuple(newState.params, PARAM, requestID);
 
-        saveSimpleAuthCredentials(requestID, AuthMethod.BASIC, newState.authState.basicAuthState.username,
-                newState.authState.basicAuthState.password, newState.authState.basicAuthState.enabled);
-        saveSimpleAuthCredentials(requestID, AuthMethod.DIGEST, newState.authState.digestAuthState.username,
-                newState.authState.digestAuthState.password, newState.authState.digestAuthState.enabled);
+    private void saveRequestContentPair(ComposerState newState, int requestID) throws SQLException {
+        statement = conn.prepareStatement(Queries.SAVE_REQUEST_CONTENT_PAIR);
+        statement.setInt(1, requestID);
+        statement.setString(2, newState.contentType);
+        statement.executeUpdate();
+    }
 
-        saveOAuth2Credentials(requestID, newState.authState.oAuth2ControllerState);
+    private void saveBody(ComposerState newState, int requestID) throws SQLException {
+        statement = conn.prepareStatement(Queries.SAVE_BODY);
+        statement.setInt(1, requestID);
+        statement.setString(2, newState.rawBody);
+        statement.setString(3, newState.rawBodyBoxValue);
+        statement.executeUpdate();
+    }
 
-        if (!(newState.httpMethod.equals(HTTPConstants.GET) || newState.httpMethod.equals(HTTPConstants.DELETE))) {
-            // Maps the request to its ContentType for faster retrieval
-            statement = conn.prepareStatement(Queries.SAVE_REQUEST_CONTENT_PAIR);
-            statement.setInt(1, requestID);
-            statement.setString(2, newState.contentType);
-            statement.executeUpdate();
+    private void saveFilePath(ComposerState newState, int requestID) throws SQLException {
+        statement = conn.prepareStatement(Queries.SAVE_FILE_PATH);
+        statement.setInt(1, requestID);
+        statement.setString(2, newState.binaryFilePath);
+        statement.executeUpdate();
+    }
 
-            statement = conn.prepareStatement(Queries.SAVE_BODY);
-            statement.setInt(1, requestID);
-            statement.setString(2, newState.rawBody);
-            statement.setString(3, newState.rawBodyBoxValue);
-            statement.executeUpdate();
+    private void saveSimpleAuthCredentials(final int requestID,
+                                           final String type,
+                                           final SimpleAuthState authState) throws SQLException {
+        if (EverestUtilities.notNullAndEmpty(authState.username) && EverestUtilities.notNullAndEmpty(authState.password))
+            return;
 
-            statement = conn.prepareStatement(Queries.SAVE_FILE_PATH);
-            statement.setInt(1, requestID);
-            statement.setString(2, newState.binaryFilePath);
-            statement.executeUpdate();
+        statement = conn.prepareStatement(Queries.SAVE_SIMPLE_AUTH_CREDENTIALS);
+        statement.setInt(1, requestID);
+        statement.setString(2, type);
+        statement.setString(3, authState.username);
+        statement.setString(4, authState.password);
+        statement.setInt(5, authState.enabled ? 1 : 0);
 
-            saveTuple(newState.urlStringTuples, URL_STRING, requestID);
-            saveTuple(newState.formStringTuples, FORM_STRING, requestID);
-            saveTuple(newState.formFileTuples, FILE, requestID);
-        }
+        statement.executeUpdate();
     }
 
     private void saveOAuth2Credentials(int requestID, OAuth2ControllerState oAuth2ControllerState) throws SQLException {
@@ -160,26 +196,11 @@ public class SQLiteManager implements ProjectManager {
         saveOAuth2AccessToken(requestID, oAuth2ControllerState.codeState.accessToken);
     }
 
-    private void saveOAuth2AccessToken(int requestID, AuthCodeToken authCodeToken) throws SQLException {
-        if (authCodeToken == null) {
-            return;
-        }
-
-        statement = conn.prepareStatement(Queries.SAVE_OAUTH2_ACCESS_TOKEN);
-        statement.setInt(1, requestID);
-        statement.setString(2, authCodeToken.getAccessToken());
-        statement.setString(3, authCodeToken.getRefreshToken());
-        statement.setString(4, authCodeToken.getTokenType());
-        statement.setInt(5, authCodeToken.getExpiresIn());
-        statement.setString(6, authCodeToken.getScope());
-
-        statement.executeUpdate();
-    }
-
     private void saveAuthCodeCredentials(int requestID, AuthorizationCodeState state) throws SQLException {
-        // TODO: Check if these checks are enough
-        if (state.authURL.isEmpty() && state.accessTokenURL.isEmpty()
-                && state.clientID.isEmpty() && state.clientSecret.isEmpty()) {
+        if (EverestUtilities.notNullAndEmpty(state.authURL) &&
+                EverestUtilities.notNullAndEmpty(state.accessTokenURL) &&
+                EverestUtilities.notNullAndEmpty(state.clientID) &&
+                EverestUtilities.notNullAndEmpty(state.clientSecret)) {
             return;
         }
 
@@ -199,20 +220,17 @@ public class SQLiteManager implements ProjectManager {
         statement.executeUpdate();
     }
 
-    private void saveSimpleAuthCredentials(int requestID,
-                                           String type,
-                                           String username,
-                                           String password,
-                                           boolean enabled) throws SQLException {
-        if (username == null || username.isEmpty() || password == null || password.isEmpty())
+    private void saveOAuth2AccessToken(int requestID, AuthCodeToken authCodeToken) throws SQLException {
+        if (authCodeToken == null)
             return;
 
-        statement = conn.prepareStatement(Queries.SAVE_SIMPLE_AUTH_CREDENTIALS);
+        statement = conn.prepareStatement(Queries.SAVE_OAUTH2_ACCESS_TOKEN);
         statement.setInt(1, requestID);
-        statement.setString(2, type);
-        statement.setString(3, username);
-        statement.setString(4, password);
-        statement.setInt(5, enabled ? 1 : 0);
+        statement.setString(2, authCodeToken.getAccessToken());
+        statement.setString(3, authCodeToken.getRefreshToken());
+        statement.setString(4, authCodeToken.getTokenType());
+        statement.setInt(5, authCodeToken.getExpiresIn());
+        statement.setString(6, authCodeToken.getScope());
 
         statement.executeUpdate();
     }
@@ -316,9 +334,8 @@ public class SQLiteManager implements ProjectManager {
 
         ResultSet resultSet = statement.executeQuery();
 
-        AuthCodeToken authCodeToken = null;
+        AuthCodeToken authCodeToken = new AuthCodeToken();
         if (resultSet.next()) {
-            authCodeToken = new AuthCodeToken();
             authCodeToken.setAccessToken(resultSet.getString("AccessToken"));
             authCodeToken.setTokenType(resultSet.getString("TokenType"));
             authCodeToken.setExpiresIn(resultSet.getInt("TokenExpiry"));

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2018 Rohit Awate.
+  ~ Copyright 2019 Rohit Awate.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.fxmisc.richtext</groupId>
             <artifactId>richtextfx</artifactId>
-            <version>0.9.2</version>
+            <version>0.10.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

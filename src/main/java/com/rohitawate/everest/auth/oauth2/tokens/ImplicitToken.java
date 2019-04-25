@@ -31,18 +31,8 @@ public class ImplicitToken extends OAuth2Token {
 
     @Override
     public String toString() {
-        return String.format("ImplicitToken {token: %s, type: %s, expiry: %d, scope: %s, state: %s}",
+        return String.format("ImplicitToken{token: %s, type: %s, expiry: %d, scope: %s, state: %s}",
                 accessToken, tokenType, expiresIn, scope, state);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        ImplicitToken that = (ImplicitToken) o;
-        return toString().equals(that.toString());
     }
 
     public String getScope() {

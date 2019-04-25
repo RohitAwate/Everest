@@ -58,25 +58,26 @@ public class ComposerState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ComposerState state = (ComposerState) o;
-        if (!target.equals(state.target)) return false;
-        if (!httpMethod.equals(state.httpMethod)) return false;
-        if (!authMethod.equals(state.authMethod)) return false;
-        if (!params.equals(state.params)) return false;
-        if (!headers.equals(state.headers)) return false;
-        if (!authState.equals(state.authState)) return false;
+        ComposerState that = (ComposerState) o;
+        return toString().equals(that.toString());
+    }
 
-        if (state.httpMethod.equals(HTTPConstants.GET)
-                || state.httpMethod.equals(HTTPConstants.DELETE)) return true;
-
-        if (!contentType.equals(state.contentType)) return false;
-        if (!rawBody.equals(state.rawBody)) return false;
-        if (!rawBodyBoxValue.equals(state.rawBodyBoxValue)) return false;
-        if (!binaryFilePath.equals(state.binaryFilePath)) return false;
-        if (!urlStringTuples.equals(state.urlStringTuples)) return false;
-        if (!formStringTuples.equals(state.formStringTuples)) return false;
-        if (!formFileTuples.equals(state.formFileTuples)) return false;
-
-        return true;
+    @Override
+    public String toString() {
+        return "ComposerState{" +
+                "target='" + target + '\'' +
+                ", httpMethod='" + httpMethod + '\'' +
+                ", authMethod='" + authMethod + '\'' +
+                ", params=" + params +
+                ", headers=" + headers +
+                ", contentType='" + contentType + '\'' +
+                ", rawBody='" + rawBody + '\'' +
+                ", rawBodyBoxValue='" + rawBodyBoxValue + '\'' +
+                ", authState=" + authState +
+                ", urlStringTuples=" + urlStringTuples +
+                ", formStringTuples=" + formStringTuples +
+                ", formFileTuples=" + formFileTuples +
+                ", binaryFilePath='" + binaryFilePath + '\'' +
+                '}';
     }
 }

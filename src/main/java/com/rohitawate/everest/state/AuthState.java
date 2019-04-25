@@ -25,15 +25,11 @@ public class AuthState {
     public OAuth2ControllerState oAuth2ControllerState;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AuthState state = (AuthState) o;
-
-        if (!basicAuthState.equals(state.basicAuthState)) return false;
-        if (!digestAuthState.equals(state.digestAuthState)) return false;
-        if (!oAuth2ControllerState.equals(state.oAuth2ControllerState)) return false;
-
-        return true;
+    public String toString() {
+        return "AuthState{" +
+                "basicAuthState=" + basicAuthState +
+                ", digestAuthState=" + digestAuthState +
+                ", oAuth2ControllerState=" + oAuth2ControllerState +
+                '}';
     }
 }

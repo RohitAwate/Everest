@@ -78,6 +78,12 @@ public class RequestManager extends Service<EverestResponse> {
             client.property(ClientProperties.READ_TIMEOUT, Main.preferences.request.connectionReadTimeOut);
     }
 
+    /**
+     * Indicates if a RequestManager belongs to the currently focused tab
+     * or to an unfocused tab thereby running in the background.
+     */
+    private boolean inBackground;
+
     private long initialTime;
     private long finalTime;
 
@@ -316,5 +322,13 @@ public class RequestManager extends Service<EverestResponse> {
                 break;
         }
         return invocation;
+    }
+
+    public boolean isInBackground() {
+        return inBackground;
+    }
+
+    public void setInBackground(boolean inBackground) {
+        this.inBackground = inBackground;
     }
 }

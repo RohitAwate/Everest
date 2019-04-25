@@ -27,12 +27,17 @@ public class OAuth2FlowState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        AuthorizationCodeState that = (AuthorizationCodeState) o;
-        if (enabled != that.enabled) return false;
-        if (!clientID.equals(that.clientID)) return false;
-        if (!scope.equals(that.scope)) return false;
-        if (!headerPrefix.equals(that.headerPrefix)) return false;
+        OAuth2FlowState that = (OAuth2FlowState) o;
+        return toString().equals(that.toString());
+    }
 
-        return true;
+    @Override
+    public String toString() {
+        return "OAuth2FlowState {" +
+                "clientID='" + clientID + '\'' +
+                ", enabled=" + enabled +
+                ", scope='" + scope + '\'' +
+                ", headerPrefix='" + headerPrefix + '\'' +
+                '}';
     }
 }

@@ -30,18 +30,17 @@ public class ImplicitState extends OAuth2FlowState {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        ImplicitState that = (ImplicitState) o;
-        if (!captureMethod.equals(that.captureMethod)) return false;
-        if (!authURL.equals(that.authURL)) return false;
-        if (!redirectURL.equals(that.redirectURL)) return false;
-        if (!state.equals(that.state)) return false;
-        if (!accessToken.equals(that.accessToken)) return false;
-
-        return true;
+    public String toString() {
+        return "ImplicitState{" +
+                "captureMethod='" + captureMethod + '\'' +
+                ", authURL='" + authURL + '\'' +
+                ", redirectURL='" + redirectURL + '\'' +
+                ", state='" + state + '\'' +
+                ", accessToken=" + accessToken +
+                ", clientID='" + clientID + '\'' +
+                ", enabled=" + enabled +
+                ", scope='" + scope + '\'' +
+                ", headerPrefix='" + headerPrefix + '\'' +
+                '}';
     }
 }

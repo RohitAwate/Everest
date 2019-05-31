@@ -16,11 +16,10 @@
 
 package com.rohitawate.everest.auth.oauth2.code;
 
-import com.rohitawate.everest.auth.captors.AuthorizationGrantCaptor;
 import com.rohitawate.everest.auth.captors.BrowserCaptor;
 import com.rohitawate.everest.auth.captors.CaptureMethod;
+import com.rohitawate.everest.auth.captors.UserAgentCaptor;
 import com.rohitawate.everest.auth.captors.WebViewCaptor;
-import com.rohitawate.everest.auth.oauth2.Flow;
 import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
@@ -72,15 +71,14 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                 grantURLBuilder.append(EverestUtilities.encodeURL(state.scope));
             }
 
-            AuthorizationGrantCaptor captor;
-            String captureKey = "code";
+            UserAgentCaptor captor;
             switch (state.captureMethod) {
                 // TODO: Re-use captors
                 case CaptureMethod.WEB_VIEW:
-                    captor = new WebViewCaptor(grantURLBuilder.toString(), captureKey);
+                    captor = new WebViewCaptor(grantURLBuilder.toString());
                     break;
                 default:
-                    captor = new BrowserCaptor(grantURLBuilder.toString(), captureKey, Flow.AUTH_CODE);
+                    captor = new BrowserCaptor(grantURLBuilder.toString());
             }
 
             state.authGrant = captor.getAuthorizationGrant();

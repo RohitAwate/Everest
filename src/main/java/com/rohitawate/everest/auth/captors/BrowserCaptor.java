@@ -16,7 +16,6 @@
 
 package com.rohitawate.everest.auth.captors;
 
-import com.rohitawate.everest.auth.oauth2.Flow;
 import com.rohitawate.everest.server.CaptureServer;
 
 /**
@@ -24,30 +23,17 @@ import com.rohitawate.everest.server.CaptureServer;
  * and captures the authorization grant by forcing redirects to a
  * local server.
  */
-public class BrowserCaptor implements AuthorizationGrantCaptor {
+public class BrowserCaptor implements UserAgentCaptor {
     private String authURL;
-    private String captureKey;
-    private Flow flow;
-
-    private String redirectURL;
 
     public static final String LOCAL_SERVER_URL = "http://localhost:52849/granted";
 
-    public BrowserCaptor(String authURL, String captureKey, Flow flow) {
+    public BrowserCaptor(String authURL) {
         this.authURL = authURL;
-        this.captureKey = captureKey;
-        this.flow = flow;
     }
 
     @Override
     public String getAuthorizationGrant() throws Exception {
-        String grant = CaptureServer.capture(authURL, captureKey, flow);
-        redirectURL = CaptureServer.getRedirectURL();
-        return grant;
-    }
-
-    @Override
-    public String getRedirectedURL() {
-        return redirectURL;
+        return CaptureServer.captureAuthorizationCode(authURL);
     }
 }

@@ -20,15 +20,10 @@ package com.rohitawate.everest.auth.captors;
  * Provides a way to display the authorization request screen
  * to the user and retrieve the Authorization Grant for further use.
  */
-public interface AuthorizationGrantCaptor {
+public interface UserAgentCaptor {
     /**
-     * Presents the Authorization screen and returns the Authorization
+     * Presents the authorization screen and returns the Authorization
      * Grant if the user authorizes the application; null otherwise.
      */
     String getAuthorizationGrant() throws Exception;
-
-    /**
-     * Returns the final URL that the Captor was redirected to.
-     */
-    String getRedirectedURL();
 }

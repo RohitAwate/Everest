@@ -16,16 +16,14 @@
 
 package com.rohitawate.everest.server;
 
-import com.rohitawate.everest.auth.oauth2.Flow;
 import com.rohitawate.everest.http.HttpRequest;
+import com.rohitawate.everest.http.HttpResponse;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 
-import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -42,98 +40,102 @@ public class CaptureServer {
 
     private static String redirectURL;
 
-    public static String capture(String authURL, String captureKey, Flow flow) throws Exception {
+    public static String captureAuthorizationCode(String authURL) throws Exception {
+        startServer();
+
+        EverestUtilities.openLinkInBrowser(authURL);
+        redirectURL = null;
+        return listenForGrant();
+    }
+
+    private static void startServer() {
         if (server == null) {
             try {
                 server = new ServerSocket(PORT);
-                Logger.info("Authorization grant capturing server has started on port " + PORT + ".");
+                Logger.info("Capture server has started on port " + PORT + ".");
             } catch (IOException e) {
                 Logger.severe("Could not start capture server on port " + PORT + ".", e);
             }
         }
-
-        EverestUtilities.openLinkInBrowser(authURL);
-        redirectURL = null;
-        return listen(captureKey, flow);
     }
 
-    private static String listen(String captureKey, Flow flow) throws IOException {
+    /**
+     * Starts listening for connection requests for the Authorization Code
+     * flow of OAuth 2.0. It expects the authorization code grant in the URL.
+     *
+     * @return The authorization code grant issued by the server.
+     * @throws IOException - If any error is encountered while running the server.
+     */
+    private static String listenForGrant() throws IOException {
+        Socket client = server.accept();
+
         String grant = null;
+        int status;
+        byte[] body;
+        String contentType;
 
-        PrintWriter headerWriter;
-        DataOutputStream bodyStream;
-        try (Socket client = server.accept()) {
-            HttpRequest request = HttpRequest.parse(client.getInputStream(), false);
-            headerWriter = new PrintWriter(client.getOutputStream());
-            bodyStream = new DataOutputStream(client.getOutputStream());
+        HttpRequest request = HttpRequest.parse(client.getInputStream(), false);
+        if (request.getMethod().equals(HTTPConstants.GET)) {
+            if (!request.getPath().startsWith("/granted")) {
+                handleStatic(client, request);
+                return null;
+            }
 
-            if (request.getMethod().equals(HTTPConstants.GET)) {
-                StringBuilder headers = new StringBuilder("HTTP/1.1 ");
-                byte[] body;
+            redirectURL = "http://localhost:52849" + request.getPath();
+            HashMap<String, String> params = EverestUtilities.parseParameters(new URL(redirectURL), "\\?");
 
-                if (request.getPath().startsWith("/granted")) {
-                    headers.append("200 OK");
-                    redirectURL = "http://localhost:52849" + request.getPath();
+            String error = null;
+            if (params != null) {
+                grant = params.get("code");
+                error = params.get("error");
+            }
 
-                    String separator;
-                    switch (flow) {
-                        case IMPLICIT:
-                            separator = "#";
-                            break;
-                        default:
-                            separator = "\\?";
-                    }
-
-                    HashMap<String, String> params = EverestUtilities.parseParameters(new URL(redirectURL), separator);
-
-                    String error = null;
-                    if (params != null) {
-                        grant = params.get(captureKey);
-                        error = params.get("error");
-                    }
-
-                    if (grant == null) {
-                        String deniedHTML = EverestUtilities.readFile(CaptureServer.class.getResourceAsStream(WEB_ROOT + DENIED));
-                        if (error != null) {
-                            deniedHTML = deniedHTML.replace("{% Error %}", error);
-                        } else {
-                            deniedHTML = deniedHTML.replace("{% Error %}", "Not provided.");
-                        }
-
-                        body = deniedHTML.getBytes();
-                    } else {
-                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + GRANTED));
-                    }
-
-                    headers.append("\nContent-Type: text/html");
+            if (grant == null) {
+                String denied = EverestUtilities.readFile(CaptureServer.class.getResourceAsStream(WEB_ROOT + DENIED));
+                if (error != null) {
+                    denied = denied.replace("{% Error %}", error);
                 } else {
-                    try {
-                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + request.getPath()));
-                        headers.append("200 OK");
-                        headers.append("\nContent-Type: ");
-                        headers.append(getMimeType(request.getPath()));
-                    } catch (FileNotFoundException e) {
-                        body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + NOT_FOUND));
-                        headers.append("404 Not Found");
-                        headers.append("\nContent-Type: text/html");
-                    }
+                    denied = denied.replace("{% Error %}", "Not provided.");
                 }
 
-                headers.append("\nContent-Length: ");
-                headers.append(body.length);
-                headers.append("\n");
-
-                headerWriter.println(headers.toString());
-                headerWriter.flush();
-
-                bodyStream.write(body, 0, body.length);
-                bodyStream.flush();
+                body = denied.getBytes();
             } else {
-                System.out.println("Not supported.");
+                body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + GRANTED));
             }
+
+            status = 200;
+            contentType = "text/html";
+        } else {
+            body = "Method not allowed".getBytes();
+            status = 405;
+            contentType = "text/plain";
         }
 
+        HttpResponse response = new HttpResponse(status, body, contentType);
+        response.write(client);
+        client.close();
+
         return grant;
+    }
+
+    private static void handleStatic(Socket client, HttpRequest request) throws IOException {
+        int status;
+        byte[] body;
+        String contentType;
+
+        try {
+            body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + request.getPath()));
+            status = 200;
+            contentType = getMimeType(request.getPath());
+        } catch (FileNotFoundException e) {
+            body = EverestUtilities.readBytes(CaptureServer.class.getResourceAsStream(WEB_ROOT + NOT_FOUND));
+            status = 404;
+            contentType = "text/html";
+        }
+
+        HttpResponse response = new HttpResponse(status, body, contentType);
+        response.write(client);
+        client.close();
     }
 
     private static String getMimeType(String file) {
@@ -154,9 +156,5 @@ public class CaptureServer {
         } else {
             return "text/plain";
         }
-    }
-
-    public static String getRedirectURL() {
-        return redirectURL;
     }
 }

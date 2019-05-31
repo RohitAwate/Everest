@@ -19,7 +19,6 @@ package com.rohitawate.everest.state.auth;
 import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
 
 public class ImplicitState extends OAuth2FlowState {
-    public String captureMethod;
     public String authURL;
     public String redirectURL;
     public String state;
@@ -32,7 +31,6 @@ public class ImplicitState extends OAuth2FlowState {
     @Override
     public String toString() {
         return "ImplicitState{" +
-                "captureMethod='" + captureMethod + '\'' +
                 ", authURL='" + authURL + '\'' +
                 ", redirectURL='" + redirectURL + '\'' +
                 ", state='" + state + '\'' +

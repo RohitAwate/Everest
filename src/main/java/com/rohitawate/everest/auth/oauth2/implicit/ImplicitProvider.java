@@ -16,11 +16,7 @@
 
 package com.rohitawate.everest.auth.oauth2.implicit;
 
-import com.rohitawate.everest.auth.captors.AuthorizationGrantCaptor;
-import com.rohitawate.everest.auth.captors.BrowserCaptor;
-import com.rohitawate.everest.auth.captors.CaptureMethod;
 import com.rohitawate.everest.auth.captors.WebViewCaptor;
-import com.rohitawate.everest.auth.oauth2.Flow;
 import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
@@ -29,6 +25,12 @@ import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.state.auth.ImplicitState;
 import com.rohitawate.everest.state.auth.OAuth2FlowState;
 
+/*
+ * Please refer the comment above the class declaration for:
+ * com.rohitawate.everest.controllers.auth.oauth2.ImplicitController
+ *
+ * Due to the reasons mentioned there, the BrowserCaptor is not used here.
+ */
 public class ImplicitProvider implements OAuth2Provider {
     private ImplicitController controller;
     private ImplicitState state;
@@ -38,7 +40,7 @@ public class ImplicitProvider implements OAuth2Provider {
     }
 
     @Override
-    public ImplicitToken getAccessToken() throws Exception {
+    public ImplicitToken getAccessToken() throws AuthWindowClosedException {
         if (this.state == null) {
             setState(controller.getState());
         }
@@ -60,58 +62,13 @@ public class ImplicitProvider implements OAuth2Provider {
             builder.append(EverestUtilities.encodeURL(state.state));
         }
 
-        AuthorizationGrantCaptor captor;
-        String captureKey = "access_token";
-        switch (state.captureMethod) {
-            case CaptureMethod.WEB_VIEW:
-                captor = new WebViewCaptor(builder.toString(), captureKey);
-                break;
-            default:
-                captor = new BrowserCaptor(builder.toString(), captureKey, Flow.IMPLICIT);
-        }
-
-        captor.getAuthorizationGrant();
-        state.accessToken = parseToken(captor.getRedirectedURL());
+        WebViewCaptor captor = new WebViewCaptor(builder.toString());
+        state.accessToken = captor.getImplicitToken();
 
         // This will display the new AuthCodeToken in the UI
         controller.setAccessToken(state.accessToken);
 
         return state.accessToken;
-    }
-
-    private static ImplicitToken parseToken(String redirectURL) {
-        String pair[] = redirectURL.split("#");
-
-        if (pair.length != 2) {
-            return null;
-        }
-
-        ImplicitToken token = new ImplicitToken();
-        String paramPairs[] = pair[1].split("&");
-        for (String paramPair : paramPairs) {
-            pair = paramPair.split("=");
-            if (pair.length == 2) {
-                switch (pair[0]) {
-                    case "access_token":
-                        token.setAccessToken(pair[1]);
-                        break;
-                    case "token_type":
-                        token.setTokenType(pair[1]);
-                        break;
-                    case "expires_in":
-                        token.setExpiresIn(Integer.parseInt(pair[1]));
-                        break;
-                    case "state":
-                        token.setState(pair[1]);
-                        break;
-                    case "scope":
-                        token.setScope(pair[1]);
-                        break;
-                }
-            }
-        }
-
-        return token;
     }
 
     @Override
@@ -126,16 +83,11 @@ public class ImplicitProvider implements OAuth2Provider {
          */
         if (state.accessToken.getAccessToken().isBlank()) {
             /*
-                If there is no AccessToken despite being a WebView request, it means the view would
-                already have opened through ImplicitController, but the user denied authorization or
-                closed the window before receiving a token.
+                If there is no AccessToken, it means the view would already have
+                opened through ImplicitController, but the user denied
+                authorization or closed the window before receiving a token.
              */
-            if (state.captureMethod.equals(CaptureMethod.WEB_VIEW)) {
-                throw new AuthWindowClosedException();
-            }
-
-            // Resolving System Browser calls
-            getAccessToken();
+            throw new AuthWindowClosedException();
         }
 
         return String.format("%s %s", state.headerPrefix, state.accessToken.getAccessToken());
@@ -149,10 +101,6 @@ public class ImplicitProvider implements OAuth2Provider {
         }
 
         this.state = (ImplicitState) state;
-
-        if (this.state.redirectURL == null || this.state.redirectURL.isEmpty() || this.state.captureMethod.equals(CaptureMethod.BROWSER)) {
-            this.state.redirectURL = BrowserCaptor.LOCAL_SERVER_URL;
-        }
 
         if (state.headerPrefix == null || state.headerPrefix.isEmpty()) {
             state.headerPrefix = "Bearer";

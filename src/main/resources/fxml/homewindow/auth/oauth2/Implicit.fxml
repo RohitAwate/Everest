@@ -46,7 +46,12 @@
                                             </tooltip>
                                         </Label>
                                         <ComboBox fx:id="captureMethodBox" maxHeight="30.0" minWidth="30.0"
-                                                  prefWidth="150.0"/>
+                                                  prefWidth="150.0">
+                                            <tooltip>
+                                                <Tooltip text="Implicit Grant flow can only use the integrated WebView."
+                                                         textAlignment="CENTER" wrapText="true"/>
+                                            </tooltip>
+                                        </ComboBox>
                                     </children>
                                 </HBox>
                             </children>

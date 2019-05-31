@@ -17,6 +17,7 @@
 package com.rohitawate.everest.auth.captors;
 
 import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import javafx.scene.Scene;
@@ -32,22 +33,20 @@ import java.util.HashMap;
  * Opens the OAuth 2.0 authorization window in a JavaFX WebView
  * and captures the authorization grant by detecting redirects.
  */
-public class WebViewCaptor implements AuthorizationGrantCaptor {
+public class WebViewCaptor implements UserAgentCaptor {
     private String authURL;
-    private String captureKey;
-    private String redirectURL;
 
     private Stage authStage;
     private WebView webView;
     private WebEngine engine;
 
     private String grant;
+    private ImplicitToken token;
 
     private static final String USER_AGENT_STRING = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36";
 
-    public WebViewCaptor(String authURL, String captureKey) {
+    public WebViewCaptor(String authURL) {
         this.authURL = authURL;
-        this.captureKey = captureKey;
         this.webView = new WebView();
         this.engine = webView.getEngine();
         this.engine.setUserAgent(USER_AGENT_STRING);
@@ -56,12 +55,12 @@ public class WebViewCaptor implements AuthorizationGrantCaptor {
     @Override
     public String getAuthorizationGrant() throws AuthWindowClosedException {
         engine.locationProperty().addListener((obs, oldVal, newVal) -> {
+            String captureKey = "code";
             try {
                 HashMap<String, String> urlParams = EverestUtilities.parseParameters(new URL(newVal), "\\?");
                 if (urlParams != null && urlParams.containsKey(captureKey)) {
                     grant = urlParams.get(captureKey);
                     authStage.close();
-                    redirectURL = engine.getLocation();
                 }
             } catch (MalformedURLException e) {
                 Logger.warning("Invalid URL while authorizing application.", e);
@@ -80,8 +79,34 @@ public class WebViewCaptor implements AuthorizationGrantCaptor {
         return grant;
     }
 
-    @Override
-    public String getRedirectedURL() {
-        return redirectURL;
+    public ImplicitToken getImplicitToken() throws AuthWindowClosedException {
+        engine.locationProperty().addListener((obs, oldVal, newVal) -> {
+            try {
+                HashMap<String, String> urlParams = EverestUtilities.parseParameters(new URL(newVal), "#");
+                if (urlParams != null && urlParams.containsKey("access_token")) {
+                    token = new ImplicitToken();
+                    token.setAccessToken(urlParams.get("access_token"));
+                    token.setExpiresIn(Integer.parseInt(urlParams.get("expires_in")));
+                    token.setTokenType(urlParams.get("token_type"));
+                    token.setState(urlParams.get("state"));
+                    token.setScope(urlParams.get("scope"));
+
+                    authStage.close();
+                }
+            } catch (MalformedURLException e) {
+                Logger.warning("Invalid URL while authorizing application.", e);
+            }
+        });
+
+        authStage = new Stage();
+        authStage.setScene(new Scene(webView));
+        authStage.titleProperty().bind(engine.titleProperty());
+        engine.load(authURL);
+        authStage.showAndWait();
+
+        if (token == null)
+            throw new AuthWindowClosedException();
+
+        return token;
     }
 }

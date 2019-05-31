@@ -29,7 +29,6 @@ import com.rohitawate.everest.auth.oauth2.implicit.ImplicitProvider;
 import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
 import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.logging.Logger;
-import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.state.auth.ImplicitState;
 import javafx.animation.KeyFrame;
@@ -50,8 +49,17 @@ import javafx.util.Duration;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
 
+/*
+ * The Implicit Grant flow can only use the WebView and not the system browser.
+ * This is because it uses a URL fragment (https://en.wikipedia.org/wiki/Fragment_identifier)
+ * for transferring the access token, as opposed to query parameters or the response body.
+ * URL fragments are not a part of HTTP requests and are only accessible within the browser.
+ * As such, Everest's CaptureServer cannot capture them via requests.
+ *
+ * Hence, the System Browser option has been removed and the combo-box disabled
+ * for this flow.
+ */
 public class ImplicitController implements Initializable {
     @FXML
     private VBox implicitBox, accessTokenBox;
@@ -74,8 +82,8 @@ public class ImplicitController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        captureMethodBox.getItems().addAll(CaptureMethod.BROWSER, CaptureMethod.WEB_VIEW);
-        captureMethodBox.setValue(CaptureMethod.BROWSER);
+        captureMethodBox.getItems().add(CaptureMethod.WEB_VIEW);
+        captureMethodBox.setValue(CaptureMethod.WEB_VIEW);
         refreshTokenButton.setOnAction(this::refreshToken);
         expiryLabel.setVisible(false);
 
@@ -107,7 +115,7 @@ public class ImplicitController implements Initializable {
     }
 
     private void setExpiryLabel() {
-        if (state != null && state.accessToken.getTimeToExpiry() >= 0) {
+        if (state != null && state.accessToken != null && state.accessToken.getTimeToExpiry() >= 0) {
             expiryLabel.setVisible(true);
 
             if (state.accessToken.getExpiresIn() == 0) {
@@ -138,24 +146,12 @@ public class ImplicitController implements Initializable {
     }
 
     private void refreshToken(ActionEvent actionEvent) {
-        /*
-            Opening a system browser window need not be done on the JavaFX Application Thread.
-            Hence, this is performed on a separate thread.
-
-            However, a WebView can only be opened on the JavaFX Application Thread hence it is
-            NOT performed on some other thread.
-         */
         TokenFetcher tokenFetcher = new TokenFetcher();
-        if (captureMethodBox.getValue().equals(CaptureMethod.BROWSER)) {
-            ExecutorService service = EverestUtilities.newDaemonSingleThreadExecutor();
-            service.submit(tokenFetcher);
-        } else {
-            try {
-                state.accessToken = tokenFetcher.call();
-                onRefreshSucceeded();
-            } catch (Exception e) {
-                onRefreshFailed(e);
-            }
+        try {
+            state.accessToken = tokenFetcher.call();
+            onRefreshSucceeded();
+        } catch (Exception e) {
+            onRefreshFailed(e);
         }
     }
 
@@ -163,7 +159,6 @@ public class ImplicitController implements Initializable {
         this.state = implicitState;
 
         if (implicitState != null) {
-            captureMethodBox.setValue(state.captureMethod);
             authURLField.setText(state.authURL);
             redirectURLField.setText(state.redirectURL);
             clientIDField.setText(state.clientID);
@@ -197,7 +192,6 @@ public class ImplicitController implements Initializable {
             return state;
         }
 
-        state.captureMethod = captureMethodBox.getValue();
         state.authURL = authURLField.getText();
         state.redirectURL = redirectURLField.getText();
         state.clientID = clientIDField.getText();
@@ -221,7 +215,7 @@ public class ImplicitController implements Initializable {
             so that when RequestManager invokes AuthCodeProvider's getAuthHeader() from a different thread,
             the token is already present and hence the WebView wouldn't need to be opened.
          */
-        if (accessTokenField.getText().isEmpty() && enabled.isSelected() && captureMethodBox.getValue().equals(CaptureMethod.WEB_VIEW)) {
+        if (accessTokenField.getText().isEmpty() && enabled.isSelected()) {
             refreshToken(null);
         }
 

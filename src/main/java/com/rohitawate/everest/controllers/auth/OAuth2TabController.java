@@ -52,6 +52,10 @@ public class OAuth2TabController implements Initializable {
             Parent implicitFXML = implicitLoader.load();
             implicitTab.setContent(implicitFXML);
             implicitController = implicitLoader.getController();
+
+            FXMLLoader ropcLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/oauth2/ROPC.fxml"));
+            Parent ropcFXML = ropcLoader.load();
+            ropcTab.setContent(ropcFXML);
         } catch (IOException e) {
             e.printStackTrace();
         }

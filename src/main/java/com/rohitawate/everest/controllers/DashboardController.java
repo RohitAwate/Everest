@@ -42,7 +42,6 @@ import com.rohitawate.everest.requestmanager.RequestManagersPool;
 import com.rohitawate.everest.state.ComposerState;
 import com.rohitawate.everest.state.DashboardState;
 import com.rohitawate.everest.state.FieldState;
-import com.rohitawate.everest.sync.SyncManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -311,7 +310,7 @@ public class DashboardController implements Initializable {
             cancelButton.setOnAction(e -> requestManager.cancel());
             requestManager.addHandlers(this::whileRunning, this::onSucceeded, this::onFailed, this::onCancelled);
             requestManager.start();
-            SyncManager.saveState(getState().composer);
+//            SyncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
             NotificationsManager.push(CHANNEL_ID, "Invalid address. Please verify and try again.", 3000);

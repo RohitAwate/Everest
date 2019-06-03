@@ -18,36 +18,41 @@ package com.rohitawate.everest.auth.oauth2.tokens;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
-public class ImplicitToken extends OAuth2Token {
+public class ROPCToken extends OAuth2Token {
+    @JsonAlias("refresh_token")
+    private String refreshToken;
+
     @JsonAlias("scope")
     private String scope;
 
-    @JsonAlias("state")
-    private String state;
-
-    public ImplicitToken() {
+    public ROPCToken() {
         super();
     }
 
     @Override
     public String toString() {
-        return String.format("ImplicitToken{accessToken: %s, type: %s, expiry: %d, scope: %s, state: %s}",
-                accessToken, tokenType, expiresIn, scope, state);
+        return "ROPCToken{" +
+                "refreshToken='" + refreshToken + '\'' +
+                ", scope='" + scope + '\'' +
+                ", accessToken='" + accessToken + '\'' +
+                ", tokenType='" + tokenType + '\'' +
+                ", expiresIn=" + expiresIn +
+                '}';
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
     public String getScope() {
         return scope;
     }
 
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
     public void setScope(String scope) {
         this.scope = scope;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
     }
 }

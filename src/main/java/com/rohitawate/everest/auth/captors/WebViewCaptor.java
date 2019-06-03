@@ -16,7 +16,7 @@
 
 package com.rohitawate.everest.auth.captors;
 
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;

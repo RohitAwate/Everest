@@ -17,8 +17,8 @@ package com.rohitawate.everest.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
+import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.controllers.auth.AuthTabController;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.auth.oauth2.code;
+package com.rohitawate.everest.auth.oauth2;
 
 import com.rohitawate.everest.auth.captors.BrowserCaptor;
 import com.rohitawate.everest.auth.captors.CaptureMethod;
 import com.rohitawate.everest.auth.captors.UserAgentCaptor;
 import com.rohitawate.everest.auth.captors.WebViewCaptor;
-import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.UnknownAccessTokenTypeException;
+import com.rohitawate.everest.auth.oauth2.exceptions.AccessTokenDeniedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.NoAuthorizationGrantException;
+import com.rohitawate.everest.auth.oauth2.exceptions.UnknownAccessTokenTypeException;
 import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
 import com.rohitawate.everest.misc.EverestUtilities;
@@ -42,7 +41,7 @@ import java.util.Scanner;
 
 /**
  * Authorization provider for OAuth 2.0's Authorization Code flow.
- * Makes requests to authorization and access token endpoints and returns
+ * Makes requests to authorization and access accessToken endpoints and returns
  * either the final 'Authorization' header or an AuthCodeToken object.
  */
 public class AuthorizationCodeProvider implements OAuth2Provider {
@@ -110,7 +109,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         byte[] body = tokenURLBuilder.toString().getBytes(StandardCharsets.UTF_8);
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
 
-        // Hold on to refresh token
+        // Hold on to refresh accessToken
         String refreshToken = state.accessToken.getRefreshToken();
         state.accessToken = tokenRequest.authCodeToken;
         state.accessToken.setRefreshToken(refreshToken);
@@ -124,7 +123,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
         if (state.authGrant == null) {
             throw new NoAuthorizationGrantException(
-                    "OAuth 2.0 Authorization Code: Authorization grant not found. Aborting access token fetch."
+                    "OAuth 2.0 Authorization Code: Authorization grant not found. Aborting access accessToken fetch."
             );
         }
 
@@ -219,7 +218,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     }
 
     /**
-     * Makes a request to the access token endpoint, parses the response into an AuthCodeToken object.
+     * Makes a request to the access accessToken endpoint, parses the response into an AuthCodeToken object.
      */
     private static class AccessTokenRequest {
         private AuthCodeToken authCodeToken;
@@ -228,7 +227,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         private HttpURLConnection connection;
 
         /**
-         * @param tokenURL The access token endpoint
+         * @param tokenURL The access accessToken endpoint
          * @param body     The application/x-www-form-urlencoded request body
          */
         AccessTokenRequest(URL tokenURL, byte[] body)
@@ -290,7 +289,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                         }
                         break;
                     default:
-                        throw new UnknownAccessTokenTypeException("Unknown access token type: " + contentType + "\nBody: " + tokenResponseBuilder.toString());
+                        throw new UnknownAccessTokenTypeException("Unknown access accessToken type: " + contentType + "\nBody: " + tokenResponseBuilder.toString());
                 }
             } else {
                 Scanner scanner = new Scanner(connection.getErrorStream());

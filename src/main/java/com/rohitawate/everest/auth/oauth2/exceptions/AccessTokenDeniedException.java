@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.auth.oauth2.code.exceptions;
+package com.rohitawate.everest.auth.oauth2.exceptions;
 
-public class NoAuthorizationGrantException extends Exception {
-    public NoAuthorizationGrantException(String message) {
+public class AccessTokenDeniedException extends Exception {
+    public AccessTokenDeniedException(String message) {
         super(message);
     }
 }

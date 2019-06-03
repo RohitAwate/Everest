@@ -31,7 +31,7 @@ public class AuthCodeToken extends OAuth2Token {
 
     @Override
     public String toString() {
-        return String.format("AuthCodeToken{token: %s, type: %s, expiry: %d, refreshToken: %s, scope: %s}",
+        return String.format("AuthCodeToken{accessToken: %s, type: %s, expiry: %d, refreshToken: %s, scope: %s}",
                 accessToken, tokenType, expiresIn, refreshToken, scope);
     }
 

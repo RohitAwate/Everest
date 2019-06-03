@@ -31,7 +31,7 @@
     <children>
         <ScrollPane fitToHeight="true" fitToWidth="true">
             <content>
-                <VBox fx:id="implicitBox" alignment="CENTER" spacing="10.0">
+                <VBox fx:id="ropcBox" alignment="CENTER" spacing="10.0">
                     <children>
                         <HBox alignment="CENTER" spacing="50.0">
                             <children>

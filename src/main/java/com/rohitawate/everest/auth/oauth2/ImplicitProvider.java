@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.auth.oauth2.implicit;
+package com.rohitawate.everest.auth.oauth2;
 
 import com.rohitawate.everest.auth.captors.WebViewCaptor;
-import com.rohitawate.everest.auth.oauth2.OAuth2Provider;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
 import com.rohitawate.everest.controllers.auth.oauth2.ImplicitController;
 import com.rohitawate.everest.misc.EverestUtilities;
@@ -46,7 +45,7 @@ public class ImplicitProvider implements OAuth2Provider {
         }
 
         StringBuilder builder = new StringBuilder(state.authURL);
-        builder.append("?response_type=token");
+        builder.append("?response_type=accessToken");
         builder.append("&client_id=");
         builder.append(state.clientID);
         builder.append("&redirect_uri=");
@@ -85,7 +84,7 @@ public class ImplicitProvider implements OAuth2Provider {
             /*
                 If there is no AccessToken, it means the view would already have
                 opened through ImplicitController, but the user denied
-                authorization or closed the window before receiving a token.
+                authorization or closed the window before receiving a accessToken.
              */
             throw new AuthWindowClosedException();
         }

@@ -23,10 +23,10 @@ import com.jfoenix.controls.JFXTextField;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.auth.captors.CaptureMethod;
-import com.rohitawate.everest.auth.oauth2.code.AuthorizationCodeProvider;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
+import com.rohitawate.everest.auth.oauth2.AuthorizationCodeProvider;
+import com.rohitawate.everest.auth.oauth2.exceptions.AccessTokenDeniedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
 import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.logging.Logger;
@@ -227,9 +227,9 @@ public class AuthorizationCodeController implements Initializable {
     public AuthProvider getAuthProvider() {
         /*
             This method is always called on the JavaFX application thread, which is also required for
-            creating and using the WebView. Hence, refreshToken() is called here itself if the token is absent,
+            creating and using the WebView. Hence, refreshToken() is called here itself if the accessToken is absent,
             so that when RequestManager invokes AuthCodeProvider's getAuthHeader() from a different thread,
-            the token is already present and hence the WebView wouldn't need to be opened.
+            the accessToken is already present and hence the WebView wouldn't need to be opened.
          */
         String token = accessTokenField.getText();
         if (token != null && token.isEmpty() &&
@@ -263,7 +263,7 @@ public class AuthorizationCodeController implements Initializable {
         } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
             errorMessage = "Grant denied by authorization endpoint.";
         } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
-            errorMessage = "Access token denied by token endpoint.";
+            errorMessage = "Access accessToken denied by accessToken endpoint.";
         } else if (exception.getClass().equals(MalformedURLException.class)) {
             errorMessage = "Invalid URL(s).";
         } else {

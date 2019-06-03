@@ -22,10 +22,10 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import com.rohitawate.everest.Main;
 import com.rohitawate.everest.auth.captors.CaptureMethod;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AccessTokenDeniedException;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.AuthWindowClosedException;
-import com.rohitawate.everest.auth.oauth2.code.exceptions.NoAuthorizationGrantException;
-import com.rohitawate.everest.auth.oauth2.implicit.ImplicitProvider;
+import com.rohitawate.everest.auth.oauth2.ImplicitProvider;
+import com.rohitawate.everest.auth.oauth2.exceptions.AccessTokenDeniedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
 import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.logging.Logger;
@@ -53,7 +53,7 @@ import java.util.ResourceBundle;
 /*
  * The Implicit Grant flow can only use the WebView and not the system browser.
  * This is because it uses a URL fragment (https://en.wikipedia.org/wiki/Fragment_identifier)
- * for transferring the access token, as opposed to query parameters or the response body.
+ * for transferring the access accessToken, as opposed to query parameters or the response body.
  * URL fragments are not a part of HTTP requests and are only accessible within the browser.
  * As such, Everest's CaptureServer cannot capture them via requests.
  *
@@ -211,9 +211,9 @@ public class ImplicitController implements Initializable {
     public ImplicitProvider getAuthProvider() {
         /*
             This method is always called on the JavaFX application thread, which is also required for
-            creating and using the WebView. Hence, refreshToken() is called here itself if the token is absent,
+            creating and using the WebView. Hence, refreshToken() is called here itself if the accessToken is absent,
             so that when RequestManager invokes AuthCodeProvider's getAuthHeader() from a different thread,
-            the token is already present and hence the WebView wouldn't need to be opened.
+            the accessToken is already present and hence the WebView wouldn't need to be opened.
          */
         if (accessTokenField.getText().isEmpty() && enabled.isSelected()) {
             refreshToken(null);
@@ -237,7 +237,7 @@ public class ImplicitController implements Initializable {
         } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
             errorMessage = "Grant denied by authorization endpoint.";
         } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
-            errorMessage = "Access token denied by token endpoint.";
+            errorMessage = "Access accessToken denied by accessToken endpoint.";
         } else if (exception.getClass().equals(MalformedURLException.class)) {
             errorMessage = "Invalid URL(s).";
         } else {

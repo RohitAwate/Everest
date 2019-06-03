@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.rohitawate.everest.auth.oauth2.code.exceptions;
+package com.rohitawate.everest.auth.oauth2.exceptions;
 
-public class AuthWindowClosedException extends Exception {
-    public AuthWindowClosedException() {
-        super();
+public class UnknownAccessTokenTypeException extends Exception {
+    public UnknownAccessTokenTypeException(String message) {
+        super(message);
     }
 }

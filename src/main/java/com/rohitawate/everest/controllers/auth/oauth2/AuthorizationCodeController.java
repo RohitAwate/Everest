@@ -108,18 +108,20 @@ public class AuthorizationCodeController implements Initializable {
     }
 
     private void refreshToken(ActionEvent actionEvent) {
+        TokenFetcher tokenFetcher = new TokenFetcher();
+
         /*
             Opening a system browser window need not be done on the JavaFX Application Thread.
             Hence, this is performed on a separate thread.
-
-            However, a WebView can only be opened on the JavaFX Application Thread hence it is
-            NOT performed on some other thread.
          */
-        TokenFetcher tokenFetcher = new TokenFetcher();
         if (captureMethodBox.getValue().equals(CaptureMethod.BROWSER)) {
             ExecutorService service = EverestUtilities.newDaemonSingleThreadExecutor();
             service.submit(tokenFetcher);
         } else {
+            /*
+                However, a WebView can only be opened on the JavaFX Application Thread hence it is
+                NOT performed on some other thread.
+             */
             try {
                 state.accessToken = tokenFetcher.call();
                 onRefreshSucceeded();
@@ -232,8 +234,8 @@ public class AuthorizationCodeController implements Initializable {
             the accessToken is already present and hence the WebView wouldn't need to be opened.
          */
         String token = accessTokenField.getText();
-        if (token != null && token.isEmpty() &&
-                enabled.isSelected() && captureMethodBox.getValue().equals(CaptureMethod.WEB_VIEW)) {
+        if (token != null && token.isEmpty() && enabled.isSelected() &&
+                captureMethodBox.getValue().equals(CaptureMethod.WEB_VIEW)) {
             refreshToken(null);
         }
 
@@ -263,7 +265,7 @@ public class AuthorizationCodeController implements Initializable {
         } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
             errorMessage = "Grant denied by authorization endpoint.";
         } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
-            errorMessage = "Access accessToken denied by accessToken endpoint.";
+            errorMessage = "Access token denied by token endpoint.";
         } else if (exception.getClass().equals(MalformedURLException.class)) {
             errorMessage = "Invalid URL(s).";
         } else {

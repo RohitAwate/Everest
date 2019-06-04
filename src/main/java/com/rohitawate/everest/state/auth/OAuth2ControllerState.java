@@ -19,13 +19,15 @@ package com.rohitawate.everest.state.auth;
 public class OAuth2ControllerState {
     public AuthorizationCodeState codeState;
     public ImplicitState implicitState;
+    public ROPCState ropcState;
 
     public OAuth2ControllerState() {
     }
 
-    public OAuth2ControllerState(AuthorizationCodeState codeState, ImplicitState implicitState) {
+    public OAuth2ControllerState(AuthorizationCodeState codeState, ImplicitState implicitState, ROPCState ropcState) {
         this.codeState = codeState;
         this.implicitState = implicitState;
+        this.ropcState = ropcState;
     }
 
     @Override
@@ -33,6 +35,7 @@ public class OAuth2ControllerState {
         return "OAuth2ControllerState{" +
                 "codeState=" + codeState +
                 ", implicitState=" + implicitState +
+                ", ropcState=" + ropcState +
                 '}';
     }
 }

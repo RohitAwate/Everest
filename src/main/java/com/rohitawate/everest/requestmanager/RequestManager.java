@@ -150,17 +150,15 @@ public class RequestManager extends Service<EverestResponse> {
     }
 
     /**
-     * Takes a ServerResponse and extracts all the headers, the body, the response time and other details
-     * into a EverestResponse.
+     * Takes a ServerResponse and extracts all the headers, the body,
+     * the response time and other details into an EverestResponse.
      */
     private void processServerResponse(Response serverResponse)
             throws NullResponseException, RedirectException {
         if (serverResponse == null) {
-            throw new NullResponseException("The server did not respond.",
-                    "Like that crush from high school.");
+            throw new NullResponseException("The server did not respond.", "Like that crush from high school.");
         } else if (serverResponse.getStatus() == 301 || serverResponse.getStatus() == 302) {
-            throw new RedirectException(
-                    serverResponse.getHeaderString("location"));
+            throw new RedirectException(serverResponse.getHeaderString("location"));
         }
 
         String responseBody = serverResponse.readEntity(String.class);

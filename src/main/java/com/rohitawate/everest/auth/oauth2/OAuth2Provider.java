@@ -25,7 +25,7 @@ import com.rohitawate.everest.state.auth.OAuth2FlowState;
  */
 public interface OAuth2Provider extends AuthProvider {
     /**
-     * Returns the access accessToken for the respective API.
+     * Returns the access token for the respective API.
      */
     OAuth2Token getAccessToken() throws Exception;
 

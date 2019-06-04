@@ -19,6 +19,7 @@ package com.rohitawate.everest.controllers.auth;
 import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
 import com.rohitawate.everest.controllers.auth.oauth2.ImplicitController;
+import com.rohitawate.everest.controllers.auth.oauth2.ROPCController;
 import com.rohitawate.everest.state.auth.OAuth2ControllerState;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,6 +40,7 @@ public class OAuth2TabController implements Initializable {
 
     private AuthorizationCodeController codeController;
     private ImplicitController implicitController;
+    private ROPCController ropcController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -56,6 +58,7 @@ public class OAuth2TabController implements Initializable {
             FXMLLoader ropcLoader = new FXMLLoader(getClass().getResource("/fxml/homewindow/auth/oauth2/ROPC.fxml"));
             Parent ropcFXML = ropcLoader.load();
             ropcTab.setContent(ropcFXML);
+            ropcController = ropcLoader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -64,7 +67,8 @@ public class OAuth2TabController implements Initializable {
     public OAuth2ControllerState getState() {
         return new OAuth2ControllerState(
                 codeController.getState(),
-                implicitController.getState()
+                implicitController.getState(),
+                ropcController.getState()
         );
     }
 
@@ -72,12 +76,14 @@ public class OAuth2TabController implements Initializable {
         if (state != null) {
             codeController.setState(state.codeState);
             implicitController.setState(state.implicitState);
+            ropcController.setState(state.ropcState);
         }
     }
 
     public void reset() {
         codeController.reset();
         implicitController.reset();
+        ropcController.reset();
     }
 
     AuthProvider getAuthProvider() {
@@ -86,6 +92,8 @@ public class OAuth2TabController implements Initializable {
                 return codeController.getAuthProvider();
             case 1:
                 return implicitController.getAuthProvider();
+            case 2:
+                return ropcController.getAuthProvider();
             default:
                 return null;
         }

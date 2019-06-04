@@ -24,7 +24,6 @@ public class ROPCState extends OAuth2FlowState {
     public String clientSecret;
 
     public String accessTokenURL;
-    public String redirectURL;
 
     public ROPCToken accessToken;
 
@@ -39,7 +38,6 @@ public class ROPCState extends OAuth2FlowState {
                 ", password='" + password + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +
                 ", accessTokenURL='" + accessTokenURL + '\'' +
-                ", redirectURL='" + redirectURL + '\'' +
                 ", accessToken=" + accessToken +
                 ", clientID='" + clientID + '\'' +
                 ", enabled=" + enabled +

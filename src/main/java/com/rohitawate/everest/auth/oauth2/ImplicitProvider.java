@@ -45,7 +45,7 @@ public class ImplicitProvider implements OAuth2Provider {
         }
 
         StringBuilder builder = new StringBuilder(state.authURL);
-        builder.append("?response_type=accessToken");
+        builder.append("?response_type=token");
         builder.append("&client_id=");
         builder.append(state.clientID);
         builder.append("&redirect_uri=");

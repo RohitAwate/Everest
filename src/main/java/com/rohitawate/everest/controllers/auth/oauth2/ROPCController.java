@@ -18,10 +18,19 @@ package com.rohitawate.everest.controllers.auth.oauth2;
 
 import com.jfoenix.controls.*;
 import com.rohitawate.everest.Main;
+import com.rohitawate.everest.auth.oauth2.ROPCProvider;
+import com.rohitawate.everest.auth.oauth2.exceptions.AccessTokenDeniedException;
+import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.tokens.ROPCToken;
+import com.rohitawate.everest.controllers.DashboardController;
+import com.rohitawate.everest.logging.Logger;
+import com.rohitawate.everest.misc.EverestUtilities;
+import com.rohitawate.everest.notifications.NotificationsManager;
 import com.rohitawate.everest.state.auth.ROPCState;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -32,8 +41,10 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 
 public class ROPCController implements Initializable {
     @FXML
@@ -42,8 +53,8 @@ public class ROPCController implements Initializable {
     private JFXCheckBox enabled;
     @FXML
     private JFXTextField tokenURLField, usernameField, clientIDField,
-            clientSecretField, redirectURLField, scopeField,
-            headerPrefixField, accessTokenField, refreshTokenField;
+            clientSecretField, scopeField, headerPrefixField,
+            accessTokenField, refreshTokenField;
     @FXML
     private JFXPasswordField passwordField;
     @FXML
@@ -54,6 +65,7 @@ public class ROPCController implements Initializable {
     private JFXRippler rippler;
 
     private ROPCState state;
+    private ROPCProvider provider;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -87,8 +99,34 @@ public class ROPCController implements Initializable {
         });
     }
 
+    @FXML
     private void refreshToken(ActionEvent actionEvent) {
+        if (provider == null) {
+            provider = new ROPCProvider(this);
+        }
 
+        if (actionEvent == null) {
+            try {
+                provider.getAccessToken();
+                onRefreshSucceeded();
+            } catch (Exception e) {
+                onRefreshFailed(e);
+            }
+        } else {
+            ExecutorService service = EverestUtilities.newDaemonSingleThreadExecutor();
+            service.submit(new TokenFetcher());
+        }
+    }
+
+    public ROPCProvider getAuthProvider() {
+        String token = accessTokenField.getText();
+        if (enabled.isSelected() && token.isBlank()) {
+            refreshToken(null);
+        } else {
+            provider = new ROPCProvider(this);
+        }
+
+        return provider;
     }
 
     private void setExpiryLabel() {
@@ -123,10 +161,118 @@ public class ROPCController implements Initializable {
     }
 
     public ROPCState getState() {
+        if (state == null) {
+            state = new ROPCState();
+        }
+
+        state.enabled = enabled.isSelected();
+        state.accessTokenURL = tokenURLField.getText();
+
+        state.clientID = clientIDField.getText();
+        state.clientSecret = clientSecretField.getText();
+        state.username = usernameField.getText();
+        state.password = passwordField.getText();
+
+        state.headerPrefix = headerPrefixField.getText();
+        state.scope = scopeField.getText();
+
+        // Setting these values again since they can be modified from the UI
+        if (state.accessToken != null) {
+            state.accessToken.setAccessToken(accessTokenField.getText());
+            state.accessToken.setRefreshToken(refreshTokenField.getText());
+        }
+
         return this.state;
     }
 
     public void setState(ROPCState state) {
+        if (state == null) {
+            return;
+        }
 
+        this.state = state;
+
+        enabled.setSelected(state.enabled);
+        tokenURLField.setText(state.accessTokenURL);
+
+        clientIDField.setText(state.clientID);
+        clientSecretField.setText(state.clientSecret);
+        usernameField.setText(state.username);
+        passwordField.setText(state.password);
+
+        headerPrefixField.setText(state.headerPrefix);
+        scopeField.setText(state.scope);
+
+        if (state.accessToken != null) {
+            onRefreshSucceeded();
+        }
+    }
+
+    public void reset() {
+        this.state = null;
+
+        enabled.setSelected(false);
+        tokenURLField.clear();
+        clientIDField.clear();
+        clientSecretField.clear();
+        usernameField.clear();
+        passwordField.clear();
+        headerPrefixField.clear();
+        scopeField.clear();
+        accessTokenField.clear();
+        refreshTokenField.clear();
+        expiryLabel.setVisible(false);
+    }
+
+    private void onRefreshSucceeded() {
+        accessTokenField.clear();
+        refreshTokenField.clear();
+
+        accessTokenField.setText(state.accessToken.getAccessToken());
+
+        if (state.accessToken.getRefreshToken() != null) {
+            refreshTokenField.setText(state.accessToken.getRefreshToken());
+        }
+
+        setExpiryLabel();
+
+        rippler.createManualRipple().run();
+    }
+
+    private void onRefreshFailed(Throwable exception) {
+        String errorMessage;
+        if (exception.getClass().equals(AuthWindowClosedException.class)) {
+            // DashboardController already shows an error for this
+            return;
+        } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
+            errorMessage = "Access token denied by token endpoint.";
+        } else if (exception.getClass().equals(MalformedURLException.class)) {
+            errorMessage = "Invalid URL(s).";
+        } else {
+            errorMessage = "Could not refresh OAuth 2.0 ROPC tokens.";
+        }
+
+        NotificationsManager.push(DashboardController.CHANNEL_ID, errorMessage, 10000);
+        Logger.warning(errorMessage, (Exception) exception);
+    }
+
+    private class TokenFetcher extends Task<ROPCToken> {
+        @Override
+        protected ROPCToken call() throws Exception {
+            ROPCProvider provider = new ROPCProvider(ROPCController.this);
+            return provider.getAccessToken();
+        }
+
+        @Override
+        protected void succeeded() {
+            state.accessToken = getValue();
+            onRefreshSucceeded();
+        }
+
+        @Override
+        protected void failed() {
+            Throwable exception = getException();
+            onRefreshFailed(exception);
+        }
     }
 }

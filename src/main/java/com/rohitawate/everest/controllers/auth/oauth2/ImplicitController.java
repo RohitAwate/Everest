@@ -53,7 +53,7 @@ import java.util.ResourceBundle;
 /*
  * The Implicit Grant flow can only use the WebView and not the system browser.
  * This is because it uses a URL fragment (https://en.wikipedia.org/wiki/Fragment_identifier)
- * for transferring the access accessToken, as opposed to query parameters or the response body.
+ * for transferring the access token, as opposed to query parameters or the response body.
  * URL fragments are not a part of HTTP requests and are only accessible within the browser.
  * As such, Everest's CaptureServer cannot capture them via requests.
  *
@@ -237,7 +237,7 @@ public class ImplicitController implements Initializable {
         } else if (exception.getClass().equals(NoAuthorizationGrantException.class)) {
             errorMessage = "Grant denied by authorization endpoint.";
         } else if (exception.getClass().equals(AccessTokenDeniedException.class)) {
-            errorMessage = "Access accessToken denied by accessToken endpoint.";
+            errorMessage = "Access token denied by token endpoint.";
         } else if (exception.getClass().equals(MalformedURLException.class)) {
             errorMessage = "Invalid URL(s).";
         } else {

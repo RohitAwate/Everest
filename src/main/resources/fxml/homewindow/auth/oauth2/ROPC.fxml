@@ -27,7 +27,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <StackPane stylesheets="@../../../../css/Adreana.css" xmlns="http://javafx.com/javafx/8.0.171"
-           xmlns:fx="http://javafx.com/fxml/1">
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.rohitawate.everest.controllers.auth.oauth2.ROPCController">
     <children>
         <ScrollPane fitToHeight="true" fitToWidth="true">
             <content>
@@ -44,14 +45,11 @@
                         </HBox>
                         <HBox alignment="CENTER">
                             <children>
-                                <VBox alignment="CENTER" spacing="30.0" HBox.hgrow="ALWAYS">
+                                <VBox alignment="TOP_CENTER" spacing="30.0" HBox.hgrow="ALWAYS">
                                     <padding>
                                         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                                     </padding>
                                     <children>
-                                        <JFXTextField fx:id="tokenURLField" focusColor="ORANGERED" labelFloat="true"
-                                                      promptText="ACCESS TOKEN URL" styleClass="material-text-field"
-                                                      unFocusColor="#747474" VBox.vgrow="ALWAYS"/>
                                         <JFXTextField fx:id="usernameField" focusColor="ORANGERED" labelFloat="true"
                                                       layoutX="20.0" layoutY="59.0" promptText="USERNAME"
                                                       styleClass="material-text-field" unFocusColor="#747474"
@@ -67,6 +65,9 @@
                                         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                                     </padding>
                                     <children>
+                                        <JFXTextField fx:id="tokenURLField" focusColor="ORANGERED" labelFloat="true"
+                                                      promptText="ACCESS TOKEN URL" styleClass="material-text-field"
+                                                      unFocusColor="#747474" VBox.vgrow="ALWAYS"/>
                                         <JFXTextField fx:id="clientIDField" focusColor="ORANGERED" labelFloat="true"
                                                       promptText="CLIENT ID" styleClass="material-text-field"
                                                       unFocusColor="#747474" VBox.vgrow="ALWAYS"/>
@@ -75,15 +76,12 @@
                                                       styleClass="material-text-field" unFocusColor="#747474"/>
                                     </children>
                                 </VBox>
-                                <VBox alignment="CENTER" layoutX="484.0" layoutY="10.0" spacing="30.0"
+                                <VBox alignment="TOP_CENTER" layoutX="484.0" layoutY="10.0" spacing="30.0"
                                       HBox.hgrow="ALWAYS">
                                     <padding>
                                         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                                     </padding>
                                     <children>
-                                        <JFXTextField fx:id="redirectURLField" focusColor="ORANGERED" labelFloat="true"
-                                                      promptText="REDIRECT URL" styleClass="material-text-field"
-                                                      unFocusColor="#747474"/>
                                         <JFXTextField fx:id="scopeField" focusColor="ORANGERED" labelFloat="true"
                                                       promptText="SCOPE" styleClass="material-text-field"
                                                       unFocusColor="#747474" VBox.vgrow="ALWAYS"/>
@@ -111,8 +109,9 @@
                                                       layoutX="169.0" layoutY="10.0" promptText="REFRESH TOKEN"
                                                       styleClass="material-text-field" unFocusColor="#747474"
                                                       HBox.hgrow="ALWAYS"/>
-                                        <JFXButton fx:id="refreshTokenButton" graphicTextGap="10.0" ripplerFill="WHITE"
-                                                   text="REFRESH" textFill="#9a9a9a" HBox.hgrow="ALWAYS">
+                                        <JFXButton fx:id="refreshTokenButton" graphicTextGap="10.0"
+                                                   onAction="#refreshToken" ripplerFill="WHITE" text="REFRESH"
+                                                   textFill="#9a9a9a" HBox.hgrow="ALWAYS">
                                             <graphic>
                                                 <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true"
                                                            preserveRatio="true">

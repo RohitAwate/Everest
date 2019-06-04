@@ -41,7 +41,7 @@ import java.util.Scanner;
 
 /**
  * Authorization provider for OAuth 2.0's Authorization Code flow.
- * Makes requests to authorization and access accessToken endpoints and returns
+ * Makes requests to authorization and access token endpoints and returns
  * either the final 'Authorization' header or an AuthCodeToken object.
  */
 public class AuthorizationCodeProvider implements OAuth2Provider {
@@ -95,8 +95,6 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         StringBuilder tokenURLBuilder = new StringBuilder();
         tokenURLBuilder.append("client_id=");
         tokenURLBuilder.append(state.clientID);
-        tokenURLBuilder.append("&client_secret=");
-        tokenURLBuilder.append(state.clientSecret);
         tokenURLBuilder.append("&grant_type=refresh_token");
         tokenURLBuilder.append("&refresh_token=");
         tokenURLBuilder.append(state.accessToken.getRefreshToken());
@@ -123,17 +121,15 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
 
         if (state.authGrant == null) {
             throw new NoAuthorizationGrantException(
-                    "OAuth 2.0 Authorization Code: Authorization grant not found. Aborting access accessToken fetch."
+                    "OAuth 2.0 Authorization Code: Authorization grant not found. Aborting access token fetch."
             );
         }
 
         URL tokenURL = new URL(state.accessTokenURL);
         StringBuilder tokenURLBuilder = new StringBuilder();
+        tokenURLBuilder.append("&grant_type=authorization_code");
         tokenURLBuilder.append("client_id=");
         tokenURLBuilder.append(state.clientID);
-        tokenURLBuilder.append("&client_secret=");
-        tokenURLBuilder.append(state.clientSecret);
-        tokenURLBuilder.append("&grant_type=authorization_code");
         tokenURLBuilder.append("&code=");
         tokenURLBuilder.append(state.authGrant);
         tokenURLBuilder.append("&redirect_uri=");
@@ -153,7 +149,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     public AuthCodeToken getAccessToken() throws Exception {
         setState(controller.getState());
 
-        if (state.accessToken.getRefreshToken().isEmpty()) {
+        if (state.accessToken.getRefreshToken().isBlank()) {
             fetchAuthorizationGrant();
             fetchNewAccessToken();
         } else {
@@ -218,7 +214,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     }
 
     /**
-     * Makes a request to the access accessToken endpoint, parses the response into an AuthCodeToken object.
+     * Makes a request to the access token endpoint, parses the response into an AuthCodeToken object.
      */
     private static class AccessTokenRequest {
         private AuthCodeToken authCodeToken;
@@ -227,7 +223,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         private HttpURLConnection connection;
 
         /**
-         * @param tokenURL The access accessToken endpoint
+         * @param tokenURL The access token endpoint
          * @param body     The application/x-www-form-urlencoded request body
          */
         AccessTokenRequest(URL tokenURL, byte[] body)
@@ -255,41 +251,38 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                 Scanner scanner = new Scanner(connection.getInputStream());
                 while (scanner.hasNext())
                     tokenResponseBuilder.append(scanner.nextLine());
-                // Removes the "charset" part
-                String contentType = connection.getContentType().split(";")[0];
 
-                switch (contentType) {
-                    case MediaType.APPLICATION_JSON:
-                        authCodeToken = EverestUtilities.jsonMapper.readValue(tokenResponseBuilder.toString(), AuthCodeToken.class);
-                        break;
-                    case MediaType.APPLICATION_FORM_URLENCODED:
-                        authCodeToken = new AuthCodeToken();
-                        HashMap<String, String> params =
-                                EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()), "\\?");
-                        if (params != null) {
-                            params.forEach((key, value) -> {
-                                switch (key) {
-                                    case "access_token":
-                                        authCodeToken.setAccessToken(value);
-                                        break;
-                                    case "token_type":
-                                        authCodeToken.setTokenType(value);
-                                        break;
-                                    case "expires_in":
-                                        authCodeToken.setExpiresIn(Integer.parseInt(value));
-                                        break;
-                                    case "refresh_token":
-                                        authCodeToken.setRefreshToken(value);
-                                        break;
-                                    case "scope":
-                                        authCodeToken.setScope(value);
-                                        break;
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        throw new UnknownAccessTokenTypeException("Unknown access accessToken type: " + contentType + "\nBody: " + tokenResponseBuilder.toString());
+                String contentType = connection.getContentType();
+                if (contentType.startsWith(MediaType.APPLICATION_JSON)) {
+                    authCodeToken = EverestUtilities.jsonMapper.readValue(tokenResponseBuilder.toString(), AuthCodeToken.class);
+                } else if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
+                    authCodeToken = new AuthCodeToken();
+                    HashMap<String, String> params =
+                            EverestUtilities.parseParameters(new URL(tokenURL + "?" + tokenResponseBuilder.toString()), "\\?");
+                    if (params != null) {
+                        params.forEach((key, value) -> {
+                            switch (key) {
+                                case "access_token":
+                                    authCodeToken.setAccessToken(value);
+                                    break;
+                                case "token_type":
+                                    authCodeToken.setTokenType(value);
+                                    break;
+                                case "expires_in":
+                                    authCodeToken.setExpiresIn(Integer.parseInt(value));
+                                    break;
+                                case "refresh_token":
+                                    authCodeToken.setRefreshToken(value);
+                                    break;
+                                case "scope":
+                                    authCodeToken.setScope(value);
+                                    break;
+                            }
+                        });
+                    }
+
+                } else {
+                    throw new UnknownAccessTokenTypeException("Unknown access token type: " + contentType + "\nBody: " + tokenResponseBuilder.toString());
                 }
             } else {
                 Scanner scanner = new Scanner(connection.getErrorStream());

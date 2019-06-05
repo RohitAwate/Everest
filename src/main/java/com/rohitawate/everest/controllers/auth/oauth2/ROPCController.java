@@ -105,24 +105,12 @@ public class ROPCController implements Initializable {
             provider = new ROPCProvider(this);
         }
 
-        if (actionEvent == null) {
-            try {
-                provider.getAccessToken();
-                onRefreshSucceeded();
-            } catch (Exception e) {
-                onRefreshFailed(e);
-            }
-        } else {
-            ExecutorService service = EverestUtilities.newDaemonSingleThreadExecutor();
-            service.submit(new TokenFetcher());
-        }
+        ExecutorService service = EverestUtilities.newDaemonSingleThreadExecutor();
+        service.submit(new TokenFetcher());
     }
 
     public ROPCProvider getAuthProvider() {
-        String token = accessTokenField.getText();
-        if (enabled.isSelected() && token.isBlank()) {
-            refreshToken(null);
-        } else {
+        if (provider == null) {
             provider = new ROPCProvider(this);
         }
 
@@ -130,7 +118,7 @@ public class ROPCController implements Initializable {
     }
 
     private void setExpiryLabel() {
-        if (state != null && state.accessToken.getTimeToExpiry() >= 0) {
+        if (state != null && state.accessToken != null && state.accessToken.getTimeToExpiry() >= 0) {
             expiryLabel.setVisible(true);
 
             if (state.accessToken.getExpiresIn() == 0) {
@@ -178,8 +166,15 @@ public class ROPCController implements Initializable {
 
         // Setting these values again since they can be modified from the UI
         if (state.accessToken != null) {
-            state.accessToken.setAccessToken(accessTokenField.getText());
-            state.accessToken.setRefreshToken(refreshTokenField.getText());
+            String accessToken = accessTokenField.getText();
+            String refreshToken = refreshTokenField.getText();
+
+            if (accessToken.isBlank() && refreshToken.isBlank()) {
+                state.accessToken = null;
+            } else {
+                state.accessToken.setAccessToken(accessToken);
+                state.accessToken.setRefreshToken(refreshToken);
+            }
         }
 
         return this.state;
@@ -224,6 +219,15 @@ public class ROPCController implements Initializable {
         expiryLabel.setVisible(false);
     }
 
+    public void setAccessToken(ROPCToken accessToken) {
+        state.accessToken = accessToken;
+        Platform.runLater(() -> {
+            onRefreshSucceeded();
+            accessTokenField.requestLayout();
+            refreshTokenField.requestLayout();
+        });
+    }
+
     private void onRefreshSucceeded() {
         accessTokenField.clear();
         refreshTokenField.clear();
@@ -259,7 +263,7 @@ public class ROPCController implements Initializable {
     private class TokenFetcher extends Task<ROPCToken> {
         @Override
         protected ROPCToken call() throws Exception {
-            ROPCProvider provider = new ROPCProvider(ROPCController.this);
+            ROPCProvider provider = ROPCController.this.provider;
             return provider.getAccessToken();
         }
 

@@ -16,9 +16,11 @@
 
 package com.rohitawate.everest.auth.oauth2;
 
+import com.rohitawate.everest.auth.oauth2.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.exceptions.UnknownAccessTokenTypeException;
 import com.rohitawate.everest.auth.oauth2.tokens.ROPCToken;
 import com.rohitawate.everest.controllers.auth.oauth2.ROPCController;
+import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.state.auth.OAuth2FlowState;
 import com.rohitawate.everest.state.auth.ROPCState;
@@ -52,14 +54,19 @@ public class ROPCProvider implements OAuth2Provider {
                 .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED)
                 .POST(HttpRequest.BodyPublishers.ofString(generateRequestBody(type)))
                 .build();
+
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
         ROPCState state = controller.getState();
 
-        String contentType = response.headers().firstValue("Content-Type").orElse("");
-        try {
-            state.accessToken = parseTokenResponse(response.body(), contentType);
-        } catch (UnknownAccessTokenTypeException | IOException e) {
-            e.printStackTrace();
+        if (response.statusCode() == 200) {
+            String contentType = response.headers().firstValue("Content-Type").orElse("");
+            try {
+                state.accessToken = parseTokenResponse(response.body(), contentType);
+            } catch (UnknownAccessTokenTypeException | IOException e) {
+                Logger.severe("Could not parse ROPC token: " + response.body(), e);
+            }
+        } else {
+            throw new AccessTokenDeniedException(response.body());
         }
     }
 
@@ -131,7 +138,7 @@ public class ROPCProvider implements OAuth2Provider {
     public ROPCToken getAccessToken() throws Exception {
         ROPCState state = controller.getState();
 
-        if (state.accessToken.getRefreshToken().isBlank()) {
+        if (state.accessToken == null || state.accessToken.getRefreshToken().isBlank()) {
             fetchAccessToken(RequestType.NEW_TOKEN);
         } else {
             fetchAccessToken(RequestType.REFRESH_TOKEN);
@@ -153,8 +160,9 @@ public class ROPCProvider implements OAuth2Provider {
     @Override
     public String getAuthHeader() throws Exception {
         ROPCState state = controller.getState();
-        if (state.accessToken.getAccessToken().isBlank()) {
+        if (state.accessToken == null || state.accessToken.getAccessToken().isBlank()) {
             getAccessToken();
+            controller.setAccessToken(state.accessToken);
         }
 
         String headerPrefix;

@@ -16,6 +16,7 @@
 
 package com.rohitawate.everest.misc;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -43,6 +44,7 @@ public class EverestUtilities {
     static {
         jsonMapper = new ObjectMapper();
         jsonMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        jsonMapper.configure(MapperFeature.USE_BASE_TYPE_AS_DEFAULT_IMPL, true);
         jsonMapper.registerModule(new JavaTimeModule());
     }
 

@@ -16,11 +16,15 @@
 
 package com.rohitawate.everest.state.auth;
 
+import com.rohitawate.everest.auth.oauth2.tokens.OAuth2Token;
+
 public class OAuth2FlowState {
     public String clientID;
     public boolean enabled;
     public String scope;
     public String headerPrefix;
+
+    public OAuth2Token accessToken;
 
     @Override
     public boolean equals(Object o) {

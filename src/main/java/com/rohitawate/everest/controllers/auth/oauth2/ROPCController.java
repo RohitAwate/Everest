@@ -17,36 +17,31 @@
 package com.rohitawate.everest.controllers.auth.oauth2;
 
 import com.jfoenix.controls.*;
-import com.rohitawate.everest.Main;
-import com.rohitawate.everest.auth.oauth2.ROPCProvider;
+import com.rohitawate.everest.auth.oauth2.Flow;
+import com.rohitawate.everest.auth.oauth2.OAuth2FlowProvider;
+import com.rohitawate.everest.auth.oauth2.ROPCFlowProvider;
 import com.rohitawate.everest.auth.oauth2.exceptions.AccessTokenDeniedException;
 import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
+import com.rohitawate.everest.auth.oauth2.tokens.OAuth2Token;
 import com.rohitawate.everest.auth.oauth2.tokens.ROPCToken;
 import com.rohitawate.everest.controllers.DashboardController;
 import com.rohitawate.everest.logging.Logger;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.notifications.NotificationsManager;
+import com.rohitawate.everest.state.auth.OAuth2FlowState;
 import com.rohitawate.everest.state.auth.ROPCState;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.Cursor;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
-import javafx.util.Duration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
-public class ROPCController implements Initializable {
+public class ROPCController extends OAuth2FlowController {
     @FXML
     private VBox ropcBox, accessTokenBox;
     @FXML
@@ -59,13 +54,10 @@ public class ROPCController implements Initializable {
     private JFXPasswordField passwordField;
     @FXML
     private JFXButton refreshTokenButton;
-    @FXML
-    private Label expiryLabel;
 
     private JFXRippler rippler;
 
-    private ROPCState state;
-    private ROPCProvider provider;
+    private ROPCFlowProvider provider;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -76,133 +68,97 @@ public class ROPCController implements Initializable {
         rippler.setPrefSize(ropcBox.getPrefWidth(), ropcBox.getPrefHeight());
         ropcBox.getChildren().add(rippler);
 
-        Platform.runLater(() -> {
-            if (Main.preferences.auth.enableAccessTokenExpiryTimer) {
-                Timeline timeline = new Timeline();
-                timeline.setCycleCount(Timeline.INDEFINITE);
-                timeline.getKeyFrames().add(
-                        new KeyFrame(Duration.seconds(1),
-                                new EventHandler<ActionEvent>() {
-                                    @Override
-                                    public void handle(ActionEvent event) {
-                                        setExpiryLabel();
-                                    }
-                                })
-                );
-
-                timeline.play();
-            } else {
-                expiryLabel.setOnMouseClicked(e -> setExpiryLabel());
-                expiryLabel.setTooltip(new Tooltip("Click to update expiry status"));
-                expiryLabel.setCursor(Cursor.HAND);
-            }
-        });
+        initExpiryCountdown();
     }
 
-    @FXML
-    private void refreshToken(ActionEvent actionEvent) {
+    @Override
+    void refreshToken(ActionEvent actionEvent) {
         if (provider == null) {
-            provider = new ROPCProvider(this);
+            provider = (ROPCFlowProvider) OAuth2FlowProvider.getProvider(
+                    Flow.RESOURCE_OWNER_PASSWORD_CREDS, this);
         }
 
         ExecutorService service = EverestUtilities.newDaemonSingleThreadExecutor();
         service.submit(new TokenFetcher());
     }
 
-    public ROPCProvider getAuthProvider() {
+    @Override
+    public ROPCFlowProvider getAuthProvider() {
         if (provider == null) {
-            provider = new ROPCProvider(this);
+            provider = (ROPCFlowProvider) OAuth2FlowProvider.getProvider(
+                    Flow.RESOURCE_OWNER_PASSWORD_CREDS, this);
         }
 
         return provider;
     }
 
-    private void setExpiryLabel() {
-        if (state != null && state.accessToken != null && state.accessToken.getTimeToExpiry() >= 0) {
-            expiryLabel.setVisible(true);
-
-            if (state.accessToken.getExpiresIn() == 0) {
-                expiryLabel.setText("Never expires.");
-            } else {
-                long timeToExpiry = state.accessToken.getTimeToExpiry();
-                if (timeToExpiry < 0) {
-                    expiryLabel.setText("Token expired.");
-                } else {
-                    int hours, minutes, seconds;
-                    hours = (int) (timeToExpiry / 3600);
-                    timeToExpiry %= 3600;
-                    minutes = (int) timeToExpiry / 60;
-                    seconds = (int) timeToExpiry % 60;
-
-                    Platform.runLater(() -> {
-                        if (hours == 0 && minutes != 0) {
-                            expiryLabel.setText(String.format("Expires in %dm %ds", minutes, seconds));
-                        } else if (hours == 0 && minutes == 0) {
-                            expiryLabel.setText(String.format("Expires in %ds", seconds));
-                        } else {
-                            expiryLabel.setText(String.format("Expires in %dh %dm %ds", hours, minutes, seconds));
-                        }
-                    });
-                }
-            }
-        }
-    }
-
-    public ROPCState getState() {
+    @Override
+    public OAuth2FlowState getState() {
         if (state == null) {
             state = new ROPCState();
         }
 
-        state.enabled = enabled.isSelected();
-        state.accessTokenURL = tokenURLField.getText();
+        ROPCState ropcState = (ROPCState) state;
 
-        state.clientID = clientIDField.getText();
-        state.clientSecret = clientSecretField.getText();
-        state.username = usernameField.getText();
-        state.password = passwordField.getText();
+        ropcState.enabled = enabled.isSelected();
+        ropcState.accessTokenURL = tokenURLField.getText();
 
-        state.headerPrefix = headerPrefixField.getText();
-        state.scope = scopeField.getText();
+        ropcState.clientID = clientIDField.getText();
+        ropcState.clientSecret = clientSecretField.getText();
+        ropcState.username = usernameField.getText();
+        ropcState.password = passwordField.getText();
+
+        ropcState.headerPrefix = headerPrefixField.getText();
+        ropcState.scope = scopeField.getText();
 
         // Setting these values again since they can be modified from the UI
-        if (state.accessToken != null) {
+        if (ropcState.accessToken != null) {
             String accessToken = accessTokenField.getText();
             String refreshToken = refreshTokenField.getText();
 
             if (accessToken.isBlank() && refreshToken.isBlank()) {
-                state.accessToken = null;
+                ropcState.accessToken = null;
             } else {
-                state.accessToken.setAccessToken(accessToken);
-                state.accessToken.setRefreshToken(refreshToken);
+                if (ropcState.accessToken == null) {
+                    ropcState.accessToken = new ROPCToken();
+                }
+
+                ROPCToken token = (ROPCToken) ropcState.accessToken;
+                token.setAccessToken(accessToken);
+                token.setRefreshToken(refreshToken);
             }
         }
 
-        return this.state;
+        return ropcState;
     }
 
-    public void setState(ROPCState state) {
+    @Override
+    public void setState(OAuth2FlowState state) {
         if (state == null) {
             return;
         }
 
         this.state = state;
 
-        enabled.setSelected(state.enabled);
-        tokenURLField.setText(state.accessTokenURL);
+        ROPCState ropcState = (ROPCState) state;
 
-        clientIDField.setText(state.clientID);
-        clientSecretField.setText(state.clientSecret);
-        usernameField.setText(state.username);
-        passwordField.setText(state.password);
+        enabled.setSelected(ropcState.enabled);
+        tokenURLField.setText(ropcState.accessTokenURL);
 
-        headerPrefixField.setText(state.headerPrefix);
-        scopeField.setText(state.scope);
+        clientIDField.setText(ropcState.clientID);
+        clientSecretField.setText(ropcState.clientSecret);
+        usernameField.setText(ropcState.username);
+        passwordField.setText(ropcState.password);
 
-        if (state.accessToken != null) {
+        headerPrefixField.setText(ropcState.headerPrefix);
+        scopeField.setText(ropcState.scope);
+
+        if (ropcState.accessToken != null) {
             onRefreshSucceeded();
         }
     }
 
+    @Override
     public void reset() {
         this.state = null;
 
@@ -219,7 +175,8 @@ public class ROPCController implements Initializable {
         expiryLabel.setVisible(false);
     }
 
-    public void setAccessToken(ROPCToken accessToken) {
+    @Override
+    public void setAccessToken(OAuth2Token accessToken) {
         state.accessToken = accessToken;
         Platform.runLater(() -> {
             onRefreshSucceeded();
@@ -228,22 +185,26 @@ public class ROPCController implements Initializable {
         });
     }
 
-    private void onRefreshSucceeded() {
+    @Override
+    void onRefreshSucceeded() {
         accessTokenField.clear();
         refreshTokenField.clear();
 
-        accessTokenField.setText(state.accessToken.getAccessToken());
+        if (state == null || state.accessToken == null) return;
 
-        if (state.accessToken.getRefreshToken() != null) {
-            refreshTokenField.setText(state.accessToken.getRefreshToken());
+        ROPCToken token = (ROPCToken) state.accessToken;
+        accessTokenField.setText(token.getAccessToken());
+
+        if (token.getRefreshToken() != null) {
+            refreshTokenField.setText(token.getRefreshToken());
         }
 
         setExpiryLabel();
-
         rippler.createManualRipple().run();
     }
 
-    private void onRefreshFailed(Throwable exception) {
+    @Override
+    void onRefreshFailed(Throwable exception) {
         String errorMessage;
         if (exception.getClass().equals(AuthWindowClosedException.class)) {
             // DashboardController already shows an error for this
@@ -260,10 +221,10 @@ public class ROPCController implements Initializable {
         Logger.warning(errorMessage, (Exception) exception);
     }
 
-    private class TokenFetcher extends Task<ROPCToken> {
+    private class TokenFetcher extends Task<OAuth2Token> {
         @Override
-        protected ROPCToken call() throws Exception {
-            ROPCProvider provider = ROPCController.this.provider;
+        protected OAuth2Token call() throws Exception {
+            ROPCFlowProvider provider = ROPCController.this.provider;
             return provider.getAccessToken();
         }
 

@@ -16,13 +16,18 @@
 
 package com.rohitawate.everest.auth.oauth2.tokens;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = AuthCodeToken.class, name = "AuthCodeToken"),
+        @JsonSubTypes.Type(value = ImplicitToken.class, name = "ImplicitToken"),
+        @JsonSubTypes.Type(value = ROPCToken.class, name = "ROPCToken"),
+})
 public abstract class OAuth2Token {
     @JsonAlias("access_token")
     String accessToken;

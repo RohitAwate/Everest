@@ -25,7 +25,9 @@ import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
 import com.rohitawate.everest.auth.oauth2.exceptions.NoAuthorizationGrantException;
 import com.rohitawate.everest.auth.oauth2.exceptions.UnknownAccessTokenTypeException;
 import com.rohitawate.everest.auth.oauth2.tokens.AuthCodeToken;
+import com.rohitawate.everest.auth.oauth2.tokens.OAuth2Token;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
+import com.rohitawate.everest.controllers.auth.oauth2.OAuth2FlowController;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.models.requests.HTTPConstants;
 import com.rohitawate.everest.state.auth.AuthorizationCodeState;
@@ -44,17 +46,18 @@ import java.util.Scanner;
  * Makes requests to authorization and access token endpoints and returns
  * either the final 'Authorization' header or an AuthCodeToken object.
  */
-public class AuthorizationCodeProvider implements OAuth2Provider {
-    private AuthorizationCodeController controller;
+public class AuthorizationCodeFlowProvider extends OAuth2FlowProvider {
+    private AuthorizationCodeController codeController;
     private AuthorizationCodeState state;
 
-    public AuthorizationCodeProvider(AuthorizationCodeController controller) {
-        this.controller = controller;
+    public AuthorizationCodeFlowProvider(OAuth2FlowController controller) {
+        super(controller);
+        this.codeController = (AuthorizationCodeController) controller;
     }
 
     private void fetchAuthorizationGrant() throws Exception {
         if (this.state == null) {
-            setState(controller.getState());
+            setState(codeController.getState());
         }
 
         if (state.authGrant == null || state.authGrantUsed) {
@@ -88,16 +91,17 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     private void refreshAccessToken()
             throws AccessTokenDeniedException, UnknownAccessTokenTypeException, IOException {
         if (this.state == null) {
-            setState(controller.getState());
+            setState(codeController.getState());
         }
 
+        AuthCodeToken token = (AuthCodeToken) state.accessToken;
         URL tokenURL = new URL(state.accessTokenURL);
         StringBuilder tokenURLBuilder = new StringBuilder();
         tokenURLBuilder.append("client_id=");
         tokenURLBuilder.append(state.clientID);
         tokenURLBuilder.append("&grant_type=refresh_token");
         tokenURLBuilder.append("&refresh_token=");
-        tokenURLBuilder.append(state.accessToken.getRefreshToken());
+        tokenURLBuilder.append(token.getRefreshToken());
 
         if (state.scope != null && !state.scope.isEmpty()) {
             tokenURLBuilder.append("&scope=");
@@ -108,15 +112,15 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         AccessTokenRequest tokenRequest = new AccessTokenRequest(tokenURL, body);
 
         // Hold on to refresh accessToken
-        String refreshToken = state.accessToken.getRefreshToken();
-        state.accessToken = tokenRequest.authCodeToken;
-        state.accessToken.setRefreshToken(refreshToken);
+        String refreshToken = token.getRefreshToken();
+        token = tokenRequest.authCodeToken;
+        token.setRefreshToken(refreshToken);
     }
 
     private void fetchNewAccessToken()
             throws NoAuthorizationGrantException, IOException, UnknownAccessTokenTypeException, AccessTokenDeniedException {
         if (this.state == null) {
-            setState(controller.getState());
+            setState(codeController.getState());
         }
 
         if (state.authGrant == null) {
@@ -146,10 +150,11 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     }
 
     @Override
-    public AuthCodeToken getAccessToken() throws Exception {
-        setState(controller.getState());
+    public OAuth2Token getAccessToken() throws Exception {
+        setState(codeController.getState());
 
-        if (state.accessToken.getRefreshToken().isBlank()) {
+        AuthCodeToken token = (AuthCodeToken) state.accessToken;
+        if (token.getRefreshToken().isBlank()) {
             fetchAuthorizationGrant();
             fetchNewAccessToken();
         } else {
@@ -157,7 +162,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
         }
 
         // This will display the new AuthCodeToken in the UI
-        controller.setAccessToken(state.accessToken);
+        codeController.setAccessToken(state.accessToken);
 
         return state.accessToken;
     }
@@ -165,7 +170,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     @Override
     public String getAuthHeader() throws Exception {
         if (this.state == null) {
-            setState(controller.getState());
+            setState(codeController.getState());
         }
 
         /*
@@ -177,7 +182,8 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
                 Checking if refreshToken is available. If it is, we can still fetch a new AuthCodeToken and complete
                 this request without re-authorizing. (which would require a WebView which cannot be invoked here)
              */
-            if (state.captureMethod.equals(CaptureMethod.WEB_VIEW) && state.accessToken.getRefreshToken().isEmpty()) {
+            AuthCodeToken token = (AuthCodeToken) state.accessToken;
+            if (state.captureMethod.equals(CaptureMethod.WEB_VIEW) && token.getRefreshToken().isEmpty()) {
                 throw new AuthWindowClosedException();
             }
 
@@ -191,7 +197,7 @@ public class AuthorizationCodeProvider implements OAuth2Provider {
     @Override
     public boolean isEnabled() {
         // Checking if there has been a change in the state of the enabled checkbox
-        setState(controller.getState());
+        setState(codeController.getState());
         return state.enabled;
     }
 

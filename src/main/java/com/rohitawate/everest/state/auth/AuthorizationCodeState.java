@@ -30,8 +30,6 @@ public class AuthorizationCodeState extends OAuth2FlowState {
     public String clientSecret;
     public String state;
 
-    public AuthCodeToken accessToken;
-
     public AuthorizationCodeState() {
         accessToken = new AuthCodeToken();
     }

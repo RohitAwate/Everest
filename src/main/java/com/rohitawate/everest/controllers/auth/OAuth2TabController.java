@@ -20,7 +20,10 @@ import com.rohitawate.everest.auth.AuthProvider;
 import com.rohitawate.everest.controllers.auth.oauth2.AuthorizationCodeController;
 import com.rohitawate.everest.controllers.auth.oauth2.ImplicitController;
 import com.rohitawate.everest.controllers.auth.oauth2.ROPCController;
+import com.rohitawate.everest.state.auth.AuthorizationCodeState;
+import com.rohitawate.everest.state.auth.ImplicitState;
 import com.rohitawate.everest.state.auth.OAuth2ControllerState;
+import com.rohitawate.everest.state.auth.ROPCState;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -66,9 +69,9 @@ public class OAuth2TabController implements Initializable {
 
     public OAuth2ControllerState getState() {
         return new OAuth2ControllerState(
-                codeController.getState(),
-                implicitController.getState(),
-                ropcController.getState()
+                (AuthorizationCodeState) codeController.getState(),
+                (ImplicitState) implicitController.getState(),
+                (ROPCState) ropcController.getState()
         );
     }
 

@@ -25,8 +25,6 @@ public class ROPCState extends OAuth2FlowState {
 
     public String accessTokenURL;
 
-    public ROPCToken accessToken;
-
     public ROPCState() {
         this.accessToken = new ROPCToken();
     }

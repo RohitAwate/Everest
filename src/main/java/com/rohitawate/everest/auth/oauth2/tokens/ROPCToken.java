@@ -17,6 +17,9 @@
 package com.rohitawate.everest.auth.oauth2.tokens;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonTypeId;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class ROPCToken extends OAuth2Token {
     @JsonAlias("refresh_token")

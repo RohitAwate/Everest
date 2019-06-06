@@ -110,7 +110,7 @@
                                                       styleClass="material-text-field" unFocusColor="#747474"
                                                       HBox.hgrow="ALWAYS"/>
                                         <JFXButton fx:id="refreshTokenButton" graphicTextGap="10.0"
-                                                   onAction="#refreshToken" ripplerFill="WHITE" text="REFRESH"
+                                                   ripplerFill="WHITE" text="REFRESH"
                                                    textFill="#9a9a9a" HBox.hgrow="ALWAYS">
                                             <graphic>
                                                 <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true"

@@ -18,8 +18,9 @@ package com.rohitawate.everest.auth.oauth2;
 
 import com.rohitawate.everest.auth.captors.WebViewCaptor;
 import com.rohitawate.everest.auth.oauth2.exceptions.AuthWindowClosedException;
-import com.rohitawate.everest.auth.oauth2.tokens.ImplicitToken;
+import com.rohitawate.everest.auth.oauth2.tokens.OAuth2Token;
 import com.rohitawate.everest.controllers.auth.oauth2.ImplicitController;
+import com.rohitawate.everest.controllers.auth.oauth2.OAuth2FlowController;
 import com.rohitawate.everest.misc.EverestUtilities;
 import com.rohitawate.everest.state.auth.ImplicitState;
 import com.rohitawate.everest.state.auth.OAuth2FlowState;
@@ -30,18 +31,19 @@ import com.rohitawate.everest.state.auth.OAuth2FlowState;
  *
  * Due to the reasons mentioned there, the BrowserCaptor is not used here.
  */
-public class ImplicitProvider implements OAuth2Provider {
-    private ImplicitController controller;
+public class ImplicitFlowProvider extends OAuth2FlowProvider {
+    private ImplicitController implicitController;
     private ImplicitState state;
 
-    public ImplicitProvider(ImplicitController controller) {
-        this.controller = controller;
+    public ImplicitFlowProvider(OAuth2FlowController controller) {
+        super(controller);
+        this.implicitController = (ImplicitController) controller;
     }
 
     @Override
-    public ImplicitToken getAccessToken() throws AuthWindowClosedException {
+    public OAuth2Token getAccessToken() throws AuthWindowClosedException {
         if (this.state == null) {
-            setState(controller.getState());
+            setState(implicitController.getState());
         }
 
         StringBuilder builder = new StringBuilder(state.authURL);
@@ -65,7 +67,7 @@ public class ImplicitProvider implements OAuth2Provider {
         state.accessToken = captor.getImplicitToken();
 
         // This will display the new AuthCodeToken in the UI
-        controller.setAccessToken(state.accessToken);
+        implicitController.setAccessToken(state.accessToken);
 
         return state.accessToken;
     }
@@ -73,7 +75,7 @@ public class ImplicitProvider implements OAuth2Provider {
     @Override
     public String getAuthHeader() throws Exception {
         if (state == null) {
-            setState(controller.getState());
+            setState(implicitController.getState());
         }
 
         /*
@@ -109,11 +111,7 @@ public class ImplicitProvider implements OAuth2Provider {
     @Override
     public boolean isEnabled() {
         // Checking if there has been a change in the state of the enabled checkbox
-        setState(controller.getState());
+        setState(implicitController.getState());
         return state.enabled;
-    }
-
-    public void setController(ImplicitController controller) {
-        this.controller = controller;
     }
 }

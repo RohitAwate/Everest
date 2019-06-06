@@ -22,7 +22,6 @@ public class ImplicitState extends OAuth2FlowState {
     public String authURL;
     public String redirectURL;
     public String state;
-    public ImplicitToken accessToken;
 
     public ImplicitState() {
         accessToken = new ImplicitToken();

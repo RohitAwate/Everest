@@ -193,7 +193,7 @@ public class SQLiteManager implements ProjectManager {
 
     private void saveOAuth2Credentials(int requestID, OAuth2ControllerState oAuth2ControllerState) throws SQLException {
         saveAuthCodeCredentials(requestID, oAuth2ControllerState.codeState);
-        saveOAuth2AccessToken(requestID, oAuth2ControllerState.codeState.accessToken);
+//        saveOAuth2AccessToken(requestID, oAuth2ControllerState.codeState.accessToken);
     }
 
     private void saveAuthCodeCredentials(int requestID, AuthorizationCodeState state) throws SQLException {

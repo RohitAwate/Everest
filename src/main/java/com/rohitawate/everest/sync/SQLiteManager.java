@@ -64,7 +64,7 @@ class SQLiteManager implements DataManager {
             String configPath = "Everest/config/";
             File configFolder = new File(configPath);
             if (!configFolder.exists()) {
-                if (configFolder.mkdirs())
+                if (!configFolder.mkdirs())
                     LoggingService.logSevere("Unable to create directory: " + configPath, null, LocalDateTime.now());
             }
 

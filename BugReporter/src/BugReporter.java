@@ -34,7 +34,7 @@ public class BugReporter {
         generateReportFile(generateReport(userMessage));
         generateZipFile();
 
-        System.out.println("\nYour report was submitted successfully reported and will be evaluated soon.");
+        System.out.println("\nYour report was submitted successfully and will be evaluated soon.");
         System.out.println("Thank you! :)");
     }
 

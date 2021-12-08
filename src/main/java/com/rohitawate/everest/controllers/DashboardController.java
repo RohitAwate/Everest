@@ -18,6 +18,7 @@ package com.rohitawate.everest.controllers;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
 import com.jfoenix.controls.JFXSnackbar;
+import com.jfoenix.controls.JFXSnackbarLayout;
 import com.rohitawate.everest.controllers.auth.AuthTabController;
 import com.rohitawate.everest.controllers.codearea.EverestCodeArea;
 import com.rohitawate.everest.controllers.codearea.highlighters.HighlighterFactory;
@@ -68,6 +69,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.util.Duration;
 
 public class DashboardController implements Initializable {
     @FXML
@@ -184,7 +186,8 @@ public class DashboardController implements Initializable {
             responseArea.selectAll();
             responseArea.copy();
             responseArea.deselect();
-            snackbar.show("Response body copied to clipboard.", 5000);
+            snackbar.enqueue(new JFXSnackbar.SnackbarEvent(new Label("Response body copied to clipboard."),
+                    Duration.seconds(5), null));
         });
 
         responseTypeBox.getItems().addAll(
@@ -232,7 +235,8 @@ public class DashboardController implements Initializable {
 
             if (address.equals("")) {
                 showLayer(ResponseLayer.PROMPT);
-                snackbar.show("Please enter an address.", 3000);
+                snackbar.enqueue(new JFXSnackbar.SnackbarEvent(new Label("Please enter an address."),
+                        Duration.seconds(3), null));
                 return;
             }
 
@@ -306,7 +310,8 @@ public class DashboardController implements Initializable {
             syncManager.saveState(getState().composer);
         } catch (MalformedURLException MURLE) {
             showLayer(ResponseLayer.PROMPT);
-            snackbar.show("Invalid address. Please verify and try again.", 3000);
+            snackbar.enqueue(new JFXSnackbar.SnackbarEvent(new Label("Invalid address. Please verify and try again."),
+                    Duration.seconds(3), null));
         } catch (Exception E) {
             LoggingService.logSevere("Request execution failed.", E, LocalDateTime.now());
             errorTitle.setText("Oops... That's embarrassing!");
@@ -332,7 +337,8 @@ public class DashboardController implements Initializable {
         } else if (throwable.getClass() == RedirectException.class) {
             RedirectException redirect = (RedirectException) throwable;
             addressField.setText(redirect.getNewLocation());
-            snackbar.show("Resource moved permanently. Redirecting...", 3000);
+            snackbar.enqueue(new JFXSnackbar.SnackbarEvent(new Label("Resource moved permanently. Redirecting..."),
+                    Duration.seconds(3), null));
             requestManager = null;
             sendRequest();
             return;
@@ -461,16 +467,17 @@ public class DashboardController implements Initializable {
                     case "text/html":
                         simplifiedContentType = HTTPConstants.HTML;
                         if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                            snackbar.show("Open link in browser?", "YES", 5000, e -> {
-                                snackbar.close();
-                                new Thread(() -> {
-                                    try {
-                                        Desktop.getDesktop().browse(new URI(addressField.getText()));
-                                    } catch (Exception ex) {
-                                        LoggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
-                                    }
-                                }).start();
-                            });
+                            snackbar.enqueue(new JFXSnackbar.SnackbarEvent(new JFXSnackbarLayout("Open link in browser?", "YES",
+                                    e -> {
+                                        snackbar.close();
+                                        new Thread(() -> {
+                                            try {
+                                                Desktop.getDesktop().browse(new URI(addressField.getText()));
+                                            } catch (Exception ex) {
+                                                LoggingService.logWarning("Invalid URL encountered while opening in browser.", ex, LocalDateTime.now());
+                                            }
+                                        }).start();
+                                    }), Duration.seconds(5), null));
                         }
                         break;
                     default:
@@ -490,7 +497,8 @@ public class DashboardController implements Initializable {
             responseTypeBox.setValue(simplifiedContentType);
         } catch (Exception e) {
             String errorMessage = "Response could not be parsed.";
-            snackbar.show(errorMessage, 5000);
+            snackbar.enqueue(new JFXSnackbar.SnackbarEvent(new Label(errorMessage),
+                    Duration.seconds(5), null));
             LoggingService.logSevere(errorMessage, e, LocalDateTime.now());
             errorTitle.setText("Parsing Error");
             errorDetails.setText(errorMessage);
